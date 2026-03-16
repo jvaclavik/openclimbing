@@ -40,7 +40,7 @@ export default {
   'homepage.about_osmapp': `Cette application se veut être une interface pratique pour un usage au quotidien d’<i>OpenStreetMap</i>
      comprenant des fonctions de modifications. <br/>Elle propose actuellement plusieurs couches de carte, un moteur de recherche basique ainsi que des fonctions de modification.
      Des fonctions telles que la navigation ou les favoris sont prévues.`,
-  'homepage.github_link': `Vous pouvez proposer de nouvelles fonctionnalités sur <a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a>.`,
+  'homepage.github_link': `Vous pouvez proposer de nouvelles fonctionnalités sur <a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a>.`,
   'homepage.special_thanks_heading': `Remerciements à`,
   'homepage.for_images': 'pour les images 🖼',
   'homepage.for_osm': 'pour être la meilleure carte au monde 🌎',

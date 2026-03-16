@@ -31,7 +31,7 @@ export default {
   'homepage.about_osmapp': `የዚህ አፕሊኬሽን ገፅታ እለት ተእለት በ<i>OpenStreetMap</i> የምንጠቀመውን እርማቶች ማድረግን ጨምሮ ግልጋሎቱን ቀላል ያደርገዋል።
      <br/>በዚህ እትም የተለያዩ የካርታ ክፍሎችን፣ እንዲሁም ተፈላጊ የቦታ ነጥቦችን, ማሻሻልና ማረምን ጨምሮ መሰረታዊ የመፈለጊያ አገልግሎት አካትቷል።
      እንደ ጉዞ ጠቋሚ እና የምወዳቸው ቦታዎች የሚሉ አገልግሎቶች በቀጣዩ የአፕሊኬሽን ማሻሻያ ውስጥ ይካተታሉ`,
-  'homepage.github_link': `አዳዲስ እና ተጨማሪ መገልገያዎችን በ <a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a> ተጠቅመው ጥቆማ መስጠት ይችላሉ።`,
+  'homepage.github_link': `አዳዲስ እና ተጨማሪ መገልገያዎችን በ <a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a> ተጠቅመው ጥቆማ መስጠት ይችላሉ።`,
   'homepage.special_thanks_heading': `ልዩ ምስጋና ለ`,
   'homepage.for_images': 'for images 🖼',
   'homepage.for_osm': 'የዓለማችን ምርጡ ካርታ 🌎',

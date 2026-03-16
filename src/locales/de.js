@@ -75,7 +75,7 @@ export default {
   'homepage.about_osmapp': `Diese App soll eine komfortable Oberfläche für die tägliche Nutzung von <i>OpenStreetMap</i>,
      samt Bearbeitungsfunktionen, bieten. <br/> Derzeit umfasst sie verschiedene Kartenebenen, POI-Bearbeitung, das Speichern von Favoriten und eine einfache Suchmaschine.
      Funktionen wie Navigation sind in Planung.`,
-  'homepage.github_link': `OsmAPP ist Open-Source-Software. Du kannst neue Features auf <a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a> vorschlagen.`,
+  'homepage.github_link': `OsmAPP ist Open-Source-Software. Du kannst neue Features auf <a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a> vorschlagen.`,
   'homepage.special_thanks_heading': `Danke an`,
   'homepage.for_images': 'für die Bilder 🖼',
   'homepage.for_osm': 'für die beste Weltkarte 🌎',

@@ -70,7 +70,7 @@ export default {
   'homepage.about_osmapp': `Tato aplikace by měla nabídnout pohodlné rozhraní pro každodenní využití <i>OpenStreetMap</i>
     včetně možnosti editace. <br/>Nyní už obsahuje rozličné mapové vrstvy, editaci POI a základní vyhledávač.
     V plánu jsou funkce jako navigace či oblíbená místa.`,
-  'homepage.github_link': `Repozitář je open-source. Další nápady na vylepšení aplikace můžete přidat na <a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a>.`,
+  'homepage.github_link': `Repozitář je open-source. Další nápady na vylepšení aplikace můžete přidat na <a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a>.`,
   'homepage.special_thanks_heading': `Specialní díky`,
   'homepage.for_images': 'za obrázky 🖼',
   'homepage.for_osm': 'za nejlepší mapu Země 🌎',
