@@ -101,7 +101,7 @@ export default {
   'homepage.about_osmapp': `本应用旨在为 <i>OpenStreetMap</i> 的日常使用
      提供一个便捷的界面，包括编辑功能。<br/>目前它包含多种地图图层、兴趣点编辑和一个基础搜索引擎。
      导航或收藏地点等功能正在计划中。`,
-  'homepage.github_link': `代码仓库是开源的。您可以在 <a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a> 上提出新功能建议。`,
+  'homepage.github_link': `代码仓库是开源的。您可以在 <a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a> 上提出新功能建议。`,
   'homepage.special_thanks_heading': `特别鸣谢`,
   'homepage.for_images': '提供图片 🖼',
   'homepage.for_osm': '提供最棒的世界地图 🌎',

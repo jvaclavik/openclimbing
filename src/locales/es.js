@@ -33,7 +33,7 @@ export default {
   'homepage.about_osmapp': `Esta aplicación debería ofrecer una interfaz conveniente para usar <i>OpenStreetMap</i>
      incluyendo opciones para editar. <br/>Actualmente incluye varias capas del mapa, Puntos de Interés y un buscador básico.
      Funciones como navegación o lugares favoritos están planificadas.`,
-  'homepage.github_link': `Puedes sugerir nuevas funcionalidades en el <a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a>.`,
+  'homepage.github_link': `Puedes sugerir nuevas funcionalidades en el <a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a>.`,
   'homepage.special_thanks_heading': `Gracias en especial a:`,
   'homepage.for_images': 'por las imágenes 🖼',
   'homepage.for_osm': 'por el mejor mapa del mundo 🌎',

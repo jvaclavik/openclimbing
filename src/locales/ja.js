@@ -73,7 +73,7 @@ export default {
   'homepage.heading_about_osmapp': 'OsmAPP について',
   'homepage.about_osmapp': `このアプリは、編集機能を含め、<i>OpenStreetMap</i> を日常的に使用するための快適なインターフェイスを提供することを目的としています。<br/>現在、さまざまなマップ レイヤー、POI 編集、および基本的な検索エンジンが含まれています。
 ナビやお気に入りの場所などの機能が計画されています。`,
-  'homepage.github_link': `<a href="https://github.com/zbycz/osmapp" target='_blank'>GitHub</a> で新機能を提案できます。`,
+  'homepage.github_link': `<a href="https://github.com/jvaclavik/openclimbing" target='_blank'>GitHub</a> で新機能を提案できます。`,
   'homepage.special_thanks_heading': `提供の感謝`,
   'homepage.for_images': '画像🖼',
   'homepage.for_osm': '最高の世界地図🌎',
