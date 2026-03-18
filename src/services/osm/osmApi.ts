@@ -22,6 +22,35 @@ import { getItemsMap, getMemberFeatures } from './helpers';
 import { getFullFeatureWithMemberFeatures } from './getFullFeatureWithMemberFeatures';
 import { OsmElement, OsmResponse } from './types';
 import { fetchOverpass } from '../overpass/fetchOverpass';
+import { getPoiClass } from '../getPoiClass';
+
+const fetchClimbingTilesFeature = async (
+  apiId: OsmId,
+): Promise<Feature | null> => {
+  try {
+    const data = await fetchJson(
+      `/api/climbing-tiles/feature?osmType=${apiId.type}&osmId=${apiId.id}`,
+    );
+
+    const { tags = {}, center, geometry, members } = data;
+    await fetchSchemaTranslations();
+
+    const feature: Feature = {
+      type: 'Feature',
+      osmMeta: data.osmMeta,
+      tags,
+      center,
+      geometry,
+      members,
+      imageDefs: getImageDefs(tags, apiId.type, center),
+      properties: { ...getPoiClass(tags) },
+    };
+
+    return addSchemaToFeature(feature);
+  } catch {
+    return null;
+  }
+};
 
 export const getLastBeforeDeleted = async (
   e: FetchError,
@@ -239,6 +268,11 @@ export const fetchFeature = async (apiId: OsmId): Promise<Feature> => {
       await fetchSchemaTranslations();
       const osmApiTestItems = await import('./offlineItems');
       return osmApiTestItems.TEST_NODE;
+    }
+
+    const cachedFeature = await fetchClimbingTilesFeature(apiId);
+    if (cachedFeature) {
+      return cachedFeature;
     }
 
     const feature = await fetchFeatureWithCenter(apiId);

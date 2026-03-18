@@ -15,6 +15,7 @@ export type ClimbingFeaturesRow = {
   gradeTxt?: string;
   line?: string; // JSON of type: number[][]
   histogramCode?: string;
+  feature?: string; // full GeoJSON Feature as JSON
 };
 
 export type ClimbingStatsRow = {
