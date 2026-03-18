@@ -32,6 +32,10 @@ const fetchClimbingTilesFeature = async (
       `/api/climbing-tiles/feature?osmType=${apiId.type}&osmId=${apiId.id}`,
     );
 
+    if (!data?.osmMeta) {
+      return null;
+    }
+
     const { tags = {}, center, geometry, members } = data;
     await fetchSchemaTranslations();
 

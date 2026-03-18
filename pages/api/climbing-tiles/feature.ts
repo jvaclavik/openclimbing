@@ -15,7 +15,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       throw new Error('osmType and osmId must be provided as single values');
     }
 
-    const feature = getClimbingFeature(osmType, Number(osmId));
+    const osmIdNum = Number(osmId);
+    if (!Number.isFinite(osmIdNum)) {
+      throw new Error('osmId must be a valid number');
+    }
+
+    const feature = getClimbingFeature(osmType, osmIdNum);
 
     if (!feature) {
       res.status(404).send('Feature not found');
