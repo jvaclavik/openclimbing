@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import React, { useEffect, useState } from 'react';
+import { toInsertIndexAfterRemove } from '../FeaturePanel/Climbing/utils/array';
 
 export const HighlightedDropzoneVertical = styled.div<{ $isActive: boolean }>`
   position: absolute;
@@ -35,6 +36,65 @@ type UseDragItemsProps<T> = {
   initialItems: T[];
   moveItems: (oldIndex: number, newIndex: number) => void;
   direction?: 'horizontal' | 'vertical';
+};
+
+const getDragOverInsertIndex = (
+  direction: 'horizontal' | 'vertical',
+  index: number,
+  itemsLength: number,
+  targetRect: DOMRect,
+  clientY: number,
+) => {
+  if (direction === 'horizontal') {
+    const offsetY = clientY - targetRect.top;
+    const midY = targetRect.height / 2;
+    if (offsetY < midY) return index;
+    if (index === itemsLength - 1) return itemsLength;
+    return index + 1;
+  }
+  const offsetY = clientY - targetRect.top;
+  if (offsetY < targetRect.width / 2) return index;
+  if (index === itemsLength - 1 && offsetY > targetRect.width / 2) {
+    return itemsLength;
+  }
+  return index;
+};
+
+const DragDropIndicator = ({
+  direction,
+  draggedOverIndex,
+  index,
+  activeAt,
+}: {
+  direction: 'horizontal' | 'vertical';
+  draggedOverIndex: number | null;
+  index: number;
+  activeAt?: number;
+}) => {
+  const matchIndex = activeAt ?? index;
+  if (direction === 'horizontal')
+    return (
+      <HighlightedDropzoneHorizontal
+        $isActive={draggedOverIndex === matchIndex}
+      />
+    );
+  return (
+    <HighlightedDropzoneVertical $isActive={draggedOverIndex === matchIndex} />
+  );
+};
+
+const reorderItemsAfterDrop = <T,>(
+  items: Item<T>[],
+  draggedItem: Item<T>,
+  draggedOverIndex: number,
+): { newItems: Item<T>[]; oldIndex: number; newIndex: number } => {
+  const newItems = [...items];
+  const oldIndex = items.findIndex((item) => item.id === draggedItem.id);
+  newItems.splice(oldIndex, 1);
+
+  const insertAt = toInsertIndexAfterRemove(oldIndex, draggedOverIndex);
+  newItems.splice(insertAt, 0, draggedItem);
+  return { newItems, oldIndex, newIndex: insertAt };
 };
 
 // TODO refactor this - extract member functions
@@ -74,16 +134,13 @@ export const useDragItems = <T,>({
 
     if (draggedItem) {
       const target = e.target as HTMLDivElement;
-      const targetRect = target.getBoundingClientRect();
-      const offsetY = e.clientY - targetRect.top;
-
-      if (offsetY < targetRect.width / 2) {
-        newIndex = index; // up
-      } else if (index === items.length - 1 && offsetY > targetRect.width / 2) {
-        newIndex = items.length; // last
-      } else {
-        newIndex = index; // down
-      }
+      newIndex = getDragOverInsertIndex(
+        direction,
+        index,
+        items.length,
+        target.getBoundingClientRect(),
+        e.clientY,
+      );
     }
 
     if (newIndex !== draggedOverIndex) {
@@ -93,19 +150,11 @@ export const useDragItems = <T,>({
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     if (draggedOverIndex !== null && draggedItem) {
-      const newItems = [...items];
-      const oldIndex = items.findIndex((item) => item.id === draggedItem.id);
-      newItems.splice(oldIndex, 1);
-
-      let newIndex = draggedOverIndex;
-      if (
-        draggedOverIndex === items.length ||
-        draggedOverIndex === items.length - 1
-      ) {
-        newIndex = items.length;
-      }
-
-      newItems.splice(newIndex, 0, draggedItem);
+      const { newItems, oldIndex, newIndex } = reorderItemsAfterDrop(
+        items,
+        draggedItem,
+        draggedOverIndex,
+      );
       setItems(newItems);
       moveItems(oldIndex, newIndex);
     }
@@ -113,15 +162,20 @@ export const useDragItems = <T,>({
     setDraggedOverIndex(null);
   };
 
-  const HighlightedDropzone = ({ index }: { index: number }) => {
-    if (direction === 'horizontal')
-      return (
-        <HighlightedDropzoneHorizontal $isActive={draggedOverIndex === index} />
-      );
-    return (
-      <HighlightedDropzoneVertical $isActive={draggedOverIndex === index} />
-    );
-  };
+  const HighlightedDropzone = ({
+    index,
+    activeAt,
+  }: {
+    index: number;
+    activeAt?: number;
+  }) => (
+    <DragDropIndicator
+      direction={direction}
+      draggedOverIndex={draggedOverIndex}
+      index={index}
+      activeAt={activeAt}
+    />
+  );
 
   return {
     handleDragStart,
