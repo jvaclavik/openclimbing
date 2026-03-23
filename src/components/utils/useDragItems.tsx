@@ -1,26 +1,51 @@
 import styled from '@emotion/styled';
 import React, { useEffect, useState } from 'react';
+import { alpha } from '@mui/material/styles';
 import { toInsertIndexAfterRemove } from '../FeaturePanel/Climbing/utils/array';
 
-export const HighlightedDropzoneVertical = styled.div<{ $isActive: boolean }>`
+export const HighlightedDropzoneVertical = styled.div<{
+  $isActive: boolean;
+  $isDragging?: boolean;
+}>`
   position: absolute;
   height: 100%;
   margin-left: -2px;
   width: 4px;
   top: 0;
-  background: ${({ $isActive, theme }) =>
-    $isActive ? theme.palette.climbing.active : 'transparent'};
+  background: ${({ $isActive, $isDragging, theme }) => {
+    if (!$isDragging) {
+      return 'transparent';
+    }
+    const c = theme.palette.climbing.active;
+    if ($isActive) {
+      return c;
+    }
+    return alpha(c, 0.28);
+  }};
   z-index: 1000000;
+  transition: background-color 0.12s ease-out;
 `;
 
-export const HighlightedDropzoneHorizontal = styled.div<{ $isActive: boolean }>`
+export const HighlightedDropzoneHorizontal = styled.div<{
+  $isActive: boolean;
+  $isDragging?: boolean;
+}>`
   position: absolute;
   width: 100%;
   margin-top: -2px;
   height: 4px;
-  background: ${({ $isActive, theme }) =>
-    $isActive ? theme.palette.climbing.active : 'transparent'};
+  background: ${({ $isActive, $isDragging, theme }) => {
+    if (!$isDragging) {
+      return 'transparent';
+    }
+    const c = theme.palette.climbing.active;
+    if ($isActive) {
+      return c;
+    }
+    return alpha(c, 0.28);
+  }};
   z-index: 1000000;
+  transition: background-color 0.12s ease-out;
 `;
 
 const ItemContainer = styled.div`
@@ -65,21 +90,28 @@ const DragDropIndicator = ({
   draggedOverIndex,
   index,
   activeAt,
+  isDragging,
 }: {
   direction: 'horizontal' | 'vertical';
   draggedOverIndex: number | null;
   index: number;
   activeAt?: number;
+  isDragging: boolean;
 }) => {
   const matchIndex = activeAt ?? index;
+  const isActive = draggedOverIndex === matchIndex;
   if (direction === 'horizontal')
     return (
       <HighlightedDropzoneHorizontal
-        $isActive={draggedOverIndex === matchIndex}
+        $isActive={isActive}
+        $isDragging={isDragging}
       />
     );
   return (
-    <HighlightedDropzoneVertical $isActive={draggedOverIndex === matchIndex} />
+    <HighlightedDropzoneVertical
+      $isActive={isActive}
+      $isDragging={isDragging}
+    />
   );
 };
 
@@ -162,6 +194,8 @@ export const useDragItems = <T,>({
     setDraggedOverIndex(null);
   };
 
+  const isDragging = draggedItem !== null;
+
   const HighlightedDropzone = ({
     index,
     activeAt,
@@ -174,6 +208,7 @@ export const useDragItems = <T,>({
       draggedOverIndex={draggedOverIndex}
       index={index}
       activeAt={activeAt}
+      isDragging={isDragging}
     />
   );
 

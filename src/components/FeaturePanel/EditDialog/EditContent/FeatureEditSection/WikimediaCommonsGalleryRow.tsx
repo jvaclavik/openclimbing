@@ -51,7 +51,13 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
           <WikimediaCommonsThumb value={value} />
         </Stack>
 
-        <Box flex={1} minWidth={0} sx={{ alignSelf: { xs: 'stretch' } }}>
+        <Box
+          flex={1}
+          minWidth={0}
+          sx={{
+            alignSelf: { xs: 'stretch', sm: 'auto' },
+          }}
+        >
           <TextFieldWithCharacterCount
             label={label}
             errorText={
@@ -65,6 +71,8 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
             placeholder="File:Photo example.jpg (or paste URL)"
             onChange={(e) => onValueChange(fileKey, e.target.value)}
             value={value}
+            margin="none"
+            multiline={false}
           />
         </Box>
 
