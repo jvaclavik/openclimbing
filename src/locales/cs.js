@@ -275,6 +275,7 @@ export default {
   'tags.climbing_grade': 'Lezecká obtížnost',
   'tags.climbing_length': 'Délka',
   'tags.wikimedia_commons_photo': 'Wikimedia Commons fotka',
+  'tags.photo': 'Fotka',
 
   'coordinates.geo_uri': 'GeoURI (mapová appka v telefonu)',
 

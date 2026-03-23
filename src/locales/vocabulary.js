@@ -316,6 +316,7 @@ export default {
   'tags.climbing_grade': 'Climbing grade',
   'tags.climbing_length': 'Length',
   'tags.wikimedia_commons_photo': 'Wikimedia Commons photo',
+  'tags.photo': 'Photo',
 
   'coordinates.geo_uri': 'GeoURI (phone map app)',
 

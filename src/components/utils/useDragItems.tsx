@@ -87,30 +87,27 @@ const getDragOverInsertIndex = (
 
 const DragDropIndicator = ({
   direction,
-  draggedOverIndex,
-  index,
-  activeAt,
+  isActive,
   isDragging,
+  isDropAllowed,
 }: {
   direction: 'horizontal' | 'vertical';
-  draggedOverIndex: number | null;
-  index: number;
-  activeAt?: number;
+  isActive: boolean;
   isDragging: boolean;
+  isDropAllowed: boolean;
 }) => {
-  const matchIndex = activeAt ?? index;
-  const isActive = draggedOverIndex === matchIndex;
+  const shouldShow = isDragging && isDropAllowed;
   if (direction === 'horizontal')
     return (
       <HighlightedDropzoneHorizontal
         $isActive={isActive}
-        $isDragging={isDragging}
+        $isDragging={shouldShow}
       />
     );
   return (
     <HighlightedDropzoneVertical
       $isActive={isActive}
-      $isDragging={isDragging}
+      $isDragging={shouldShow}
     />
   );
 };
@@ -162,17 +159,25 @@ export const useDragItems = <T,>({
     index: number,
   ) => {
     e.preventDefault();
-    let newIndex = index;
+    let newIndex: number | null = index;
 
     if (draggedItem) {
       const target = e.target as HTMLDivElement;
-      newIndex = getDragOverInsertIndex(
+      const rawInsertIndex = getDragOverInsertIndex(
         direction,
         index,
         items.length,
         target.getBoundingClientRect(),
         e.clientY,
       );
+
+      const oldIndex = items.findIndex((item) => item.id === draggedItem.id);
+      const insertAt = toInsertIndexAfterRemove(oldIndex, rawInsertIndex);
+      if (insertAt === oldIndex) {
+        newIndex = null;
+      } else {
+        newIndex = rawInsertIndex;
+      }
     }
 
     if (newIndex !== draggedOverIndex) {
@@ -195,6 +200,9 @@ export const useDragItems = <T,>({
   };
 
   const isDragging = draggedItem !== null;
+  const draggedIndex = isDragging
+    ? items.findIndex((item) => item.id === draggedItem.id)
+    : null;
 
   const HighlightedDropzone = ({
     index,
@@ -202,15 +210,20 @@ export const useDragItems = <T,>({
   }: {
     index: number;
     activeAt?: number;
-  }) => (
-    <DragDropIndicator
-      direction={direction}
-      draggedOverIndex={draggedOverIndex}
-      index={index}
-      activeAt={activeAt}
-      isDragging={isDragging}
-    />
-  );
+  }) => {
+    const rawInsertIndex = activeAt ?? index;
+    const isDropAllowed =
+      draggedIndex !== null &&
+      toInsertIndexAfterRemove(draggedIndex, rawInsertIndex) !== draggedIndex;
+    return (
+      <DragDropIndicator
+        direction={direction}
+        isActive={draggedOverIndex === rawInsertIndex}
+        isDragging={isDragging}
+        isDropAllowed={isDropAllowed}
+      />
+    );
+  };
 
   return {
     handleDragStart,

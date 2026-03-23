@@ -29,7 +29,8 @@ const getData = (numberOfWikimediaItems: number, tags: FeatureTags) => {
     .fill('')
     .reduce((acc, _, index) => {
       const key = getWikimediaCommonsKey(index);
-      const value = `${t('tags.wikimedia_commons_photo')} (${index})`;
+      const value =
+        index > 0 ? `${t('tags.photo')} (${index + 1})` : t('tags.photo');
       return { ...acc, [key]: value };
     }, {});
 
