@@ -1,6 +1,5 @@
 import { overpassToGeojsons } from './overpass/overpassToGeojsons';
-import { encodeUrl } from '../../helpers/utils';
-import { fetchJson } from '../../services/fetch';
+import { fetchOverpass } from '../../services/overpass/fetchOverpass';
 import { getDb } from '../db/db';
 import { addStats, queryTileStats } from './utils';
 import { readFileSync } from 'fs';
@@ -21,14 +20,7 @@ const fetchFromOverpass = async () => {
 
   // takes about 42 secs, 25MB; in May25 = 25MB - 217k items->55k records
   const query = `[out:json][timeout:100];(nwr["climbing"];nwr["sport"="climbing"];);(._;>>;);out qt;`;
-  const data = await fetchJson<OsmResponse>(
-    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
-    {
-      body: encodeUrl`data=${query}`,
-      method: 'POST',
-      nocache: true,
-    },
-  );
+  const data = await fetchOverpass(query, { nocache: true });
 
   if (data.elements.length < 1000) {
     throw new Error(

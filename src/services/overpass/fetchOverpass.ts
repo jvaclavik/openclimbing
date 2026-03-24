@@ -22,7 +22,14 @@ const isRetryableError = (e: FetchError) => {
   );
 };
 
-export const fetchOverpass = async (query: string) => {
+interface FetchOverpassOpts {
+  nocache?: boolean;
+}
+
+export const fetchOverpass = async (
+  query: string,
+  opts?: FetchOverpassOpts,
+) => {
   const LAST_INDEX = OVERPASS_HOSTS.length - 1;
 
   for (let i = 0; i < OVERPASS_HOSTS.length; i++) {
@@ -30,7 +37,9 @@ export const fetchOverpass = async (query: string) => {
 
     try {
       const url = `https://${host}/api/interpreter?data=${encodeURIComponent(query)}`;
-      const response = await fetchJson(url);
+      const response = await fetchJson(url, {
+        ...(opts?.nocache && { nocache: true }),
+      });
 
       return response;
     } catch (e) {
