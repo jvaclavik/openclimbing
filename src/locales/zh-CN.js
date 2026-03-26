@@ -461,7 +461,7 @@ export default {
 
   weather: '天气',
 
-  'climbing_tiles.stats': `刷新：每晚1次<br />上次刷新：__lastRefresh__<br />OSM 时间戳：__osmTime__<br/>CDN 缓存：1小时`,
+  'climbing_tiles.stats': `刷新：每月1次 (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">until overpass issues are resolved</a>)<br />上次刷新：__lastRefresh__<br />OSM 时间戳：__osmTime__<br/>CDN 缓存：1小时`,
   'climbing.type.ferrata': '铁索栈道',
   'climbing.forum': '社区论坛',
 
