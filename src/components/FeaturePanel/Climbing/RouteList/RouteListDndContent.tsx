@@ -192,7 +192,9 @@ export const RouteListDndContent = ({ isEditable }) => {
                 </RowContent>
               </MaxWidthContainer>
             </RowWithDragHandler>
-            {draggedItem?.id <= index && <HighlightedDropzone index={index} />}
+            {draggedItem?.id <= index && (
+              <HighlightedDropzone index={index} activeAt={index + 1} />
+            )}
           </Row>
         );
       })}

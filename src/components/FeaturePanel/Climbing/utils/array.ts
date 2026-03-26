@@ -13,6 +13,13 @@ export const removeElementOnIndex = (array: Array<any>, index: number) => {
   return array.slice(0, index).concat(array.slice(index + 1));
 };
 
+/** `rawInsertIndex` is where to insert in the array *before* removing `removeIndex`. */
+export const toInsertIndexAfterRemove = (
+  removeIndex: number,
+  rawInsertIndex: number,
+): number =>
+  removeIndex < rawInsertIndex ? rawInsertIndex - 1 : rawInsertIndex;
+
 export const moveElementToIndex = <T>(
   array: Array<T>,
   elementIndex: number,

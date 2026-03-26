@@ -7,6 +7,30 @@ import { naturalSort } from './array';
 export const getWikimediaCommonsKey = (index: number) =>
   `wikimedia_commons${index === 0 ? '' : `:${index + 1}`}`;
 
+export const isWikimediaCommonsFileSlotKey = (key: string) =>
+  /^wikimedia_commons(:\d+)?$/.test(key);
+
+export const wikimediaCommonsFileKeyToIndex = (key: string): number => {
+  if (key === 'wikimedia_commons') return 0;
+  const m = key.match(/^wikimedia_commons:(\d+)$/);
+  return m ? parseInt(m[1], 10) - 1 : -1;
+};
+
+export const getWikimediaCommonsPathKeyForPhotoIndex = (
+  index: number,
+): string =>
+  index === 0
+    ? 'wikimedia_commons:path'
+    : `wikimedia_commons:${index + 1}:path`;
+
+export const pathKeyForWikimediaCommonsFileKey = (fileKey: string): string => {
+  const index = wikimediaCommonsFileKeyToIndex(fileKey);
+  if (index < 0) {
+    return 'wikimedia_commons:path';
+  }
+  return getWikimediaCommonsPathKeyForPhotoIndex(index);
+};
+
 export const addFilePrefix = (name: string) => `File:${name}`;
 
 export const removeFilePrefix = (name: string) => name?.replace(/^File:/, '');

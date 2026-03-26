@@ -16,7 +16,7 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import { getLabel } from '../../../helpers/featureLabel';
 import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
 import { useDragItems } from '../../utils/useDragItems';
-import { moveElementToIndex } from './utils/array';
+import { moveElementToIndex, toInsertIndexAfterRemove } from './utils/array';
 import { t } from '../../../services/intl';
 import { usePhotoChange } from './utils/usePhotoChange';
 
@@ -126,7 +126,10 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
                               const newArray = moveElementToIndex(
                                 photoPaths,
                                 draggedItem.id,
-                                draggedOverIndex,
+                                toInsertIndexAfterRemove(
+                                  draggedItem.id,
+                                  draggedOverIndex,
+                                ),
                               );
 
                               setPhotoPaths(newArray);

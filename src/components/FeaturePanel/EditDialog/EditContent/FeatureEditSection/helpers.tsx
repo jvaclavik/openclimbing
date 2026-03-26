@@ -21,6 +21,9 @@ type TextFieldProps = {
   error?: boolean;
   helperText?: string;
   errorText?: string;
+  margin?: 'none' | 'dense' | 'normal';
+  multiline?: boolean;
+  size?: 'small' | 'medium';
 };
 
 export const TextFieldWithCharacterCount = ({
@@ -33,11 +36,15 @@ export const TextFieldWithCharacterCount = ({
   onChange,
   value,
   placeholder,
+  margin = 'normal',
+  multiline: multilineProp,
+  size = 'medium',
 }: TextFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isValidationReadyToCheck, setIsValidationReadyToCheck] =
     useState(false);
   const inputType = getInputTypeForKey(k);
+  const multiline = multilineProp ?? inputType === 'text';
 
   return (
     <InputContainer>
@@ -45,11 +52,12 @@ export const TextFieldWithCharacterCount = ({
         error={isValidationReadyToCheck && error}
         label={label}
         type={inputType}
-        multiline={inputType === 'text'}
+        multiline={multiline}
         value={value}
         InputLabelProps={{ shrink: true }}
         variant="outlined"
-        margin="normal"
+        margin={margin}
+        size={size}
         name={k}
         onChange={onChange}
         fullWidth

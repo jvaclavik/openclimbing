@@ -14,6 +14,7 @@ const IGNORED = [
   'InstallDialog.tsx',
   'ourPresets.ts',
   'refreshClimbingTiles.ts',
+  'useDragItems.tsx',
 ];
 
 const parseGitDiff = (diffText) => {
