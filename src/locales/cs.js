@@ -413,7 +413,7 @@ export default {
 
   weather: 'Počasí',
 
-  'climbing_tiles.stats': `Obnovuje se: 1× / noc<br />Naposledy: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 hodina`,
+  'climbing_tiles.stats': `Obnovuje se: cca 1× / měsíc (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">dokud nejsou vyřešeny problémy s Overpass</a>)<br />Naposledy: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 hodina`,
   'climbing.type.ferrata': 'Via Ferrata',
   'climbing.forum': 'Diskusní fórum',
 
