@@ -461,7 +461,7 @@ export default {
 
   weather: '天氣',
 
-  'climbing_tiles.stats': `刷新：約每月1次 (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">until overpass issues are resolved</a>)<br />上次刷新：__lastRefresh__<br />OSM 時間戳：__osmTime__<br/>CDN 快取：1 小時`,
+  'climbing_tiles.stats': `刷新：約每月1次 (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">直到 Overpass 問題解決為止</a>)<br />上次刷新：__lastRefresh__<br />OSM 時間戳：__osmTime__<br/>CDN 快取：1 小時`,
   'climbing.type.ferrata': '鐵索攀岩徑',
   'climbing.forum': '討論區',
 
