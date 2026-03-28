@@ -2,7 +2,7 @@ import { overpassToGeojsons } from './overpass/overpassToGeojsons';
 import { fetchOverpass } from '../../services/overpass/fetchOverpass';
 import { getDb } from '../db/db';
 import { addStats, queryTileStats } from './utils';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import {
   buildLogFactory,
   centerGeometry,
@@ -13,13 +13,13 @@ import { OsmResponse } from './overpass/types';
 import { ClimbingFeaturesRow } from '../db/types';
 
 const fetchFromOverpass = async () => {
-  if (process.env.NODE_ENV === 'development') {
+  if (existsSync('../overpass.json')) {
     console.log('fetchFromOverpass: Using cache in ../overpass.json'); //eslint-disable-line no-console
     return JSON.parse(readFileSync('../overpass.json', 'utf8'));
   }
 
   // takes about 42 secs, 25MB; in May25 = 25MB - 217k items->55k records
-  const query = `[out:json][timeout:100];(nwr["climbing"];nwr["sport"="climbing"];);(._;>>;);out qt;`;
+  const query = `[out:json][timeout:100];(nwr["climbing"];nwr["sport"="climbing"];);(._;>>;);out qt;`; // TODO add + test speed: nwr["sport"="via_ferrata"];nwr[~"^climbing"~".*"];
   const data = await fetchOverpass(query, { nocache: true });
 
   if (data.elements.length < 1000) {
