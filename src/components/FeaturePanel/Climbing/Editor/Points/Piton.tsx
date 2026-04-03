@@ -10,10 +10,12 @@ export const Piton = ({
   isPointSelected,
   pointerEvents,
   pointIndex,
+  onMarkClick,
 }: PointProps) => {
   const config = useConfig();
   const { photoZoom } = useClimbingContext();
-  const onClick = usePointClickHandler(pointIndex);
+  const routePointClick = usePointClickHandler(pointIndex);
+  const onClick = onMarkClick ?? routePointClick;
 
   const foregroundColor = isPointSelected
     ? config.anchorColorSelected

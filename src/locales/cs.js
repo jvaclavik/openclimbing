@@ -354,6 +354,11 @@ export default {
   'climbingpanel.show_route_detail': 'Zobrazit detail cesty',
   'climbingpanel.add_tick': 'Přidat přelez',
   'climbingpanel.edit_route': 'Upravit cestu',
+  'climbingpanel.protection_points_mode': 'Jištění na fotce',
+  'climbingpanel.protection_points_hint':
+    'Klikáním do obrázku přidáte body jištění. Typ zvolte v liště. Při zakreslování cest se nové body přichytí k těmto bodům a převezmou jejich typ.',
+  'climbingpanel.protection_points_tooltip': 'Nejdřív umístěte borháky a další jištění na fotku; při kreslení cesty se na ně body přichytí.',
+  'climbingpanel.delete_protection_point': 'Smazat bod jištění',
 
   'runway.information': 'Runway information',
   'runway.runway': 'Runway',

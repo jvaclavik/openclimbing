@@ -8,6 +8,7 @@ export type State =
   | 'extendRoute'
   | 'init'
   | 'pointMenu'
+  | 'protectionPointMenu'
   | 'routeSelected';
 
 export type StateAction =
@@ -26,6 +27,7 @@ export type StateAction =
   | 'finishRoute'
   | 'routeSelect'
   | 'showPointMenu'
+  | 'showProtectionPointMenu'
   | 'undoPoint';
 
 export type ActionWithCallback = {
@@ -54,6 +56,11 @@ export const useStateMachine = ({
   photoZoom,
   photoPath,
   setIsPanningDisabled,
+  protectionPointSelectedIndex,
+  setProtectionPointSelectedIndex,
+  setProtectionPointTypeAtIndex,
+  removeProtectionPointAtIndex,
+  setIsPlacingProtectionPoints,
 }) => {
   const [currentState, setCurrentState] = useState<State>('init');
   const { showToast } = useSnackbar();
@@ -61,11 +68,14 @@ export const useStateMachine = ({
   const routeSelect = ({ routeNumber }) => {
     setRouteSelectedIndex(routeNumber);
     setPointSelectedIndex(null);
+    setProtectionPointSelectedIndex(null);
   };
 
   const cancelRouteSelection = () => {
     setRouteSelectedIndex(null);
     setPointSelectedIndex(null);
+    setProtectionPointSelectedIndex(null);
+    setIsPlacingProtectionPoints(false);
   };
 
   const deletePoint = () => {
@@ -81,6 +91,7 @@ export const useStateMachine = ({
   const editRoute = ({ routeNumber }) => {
     setRouteSelectedIndex(routeNumber);
     setPointSelectedIndex(null);
+    setProtectionPointSelectedIndex(null);
   };
 
   const extendRoute = (props: { routeNumber?: number }) => {
@@ -89,6 +100,7 @@ export const useStateMachine = ({
       setPointSelectedIndex(null);
     }
     setRouteIndexHovered(null);
+    setIsPlacingProtectionPoints(false);
   };
 
   const finishRoute = () => {
@@ -100,6 +112,7 @@ export const useStateMachine = ({
     const newIndex = routes.length;
     setRouteSelectedIndex(newIndex);
     setPointSelectedIndex(null);
+    setProtectionPointSelectedIndex(null);
     setRoutes([...routes, getEmptyRoute()]);
   };
 
@@ -107,6 +120,7 @@ export const useStateMachine = ({
     updateRouteOnIndex(routeNumber || routeSelectedIndex);
     setRouteSelectedIndex(null);
     setPointSelectedIndex(null);
+    setProtectionPointSelectedIndex(null);
   };
 
   const undoPoint = () => {
@@ -117,15 +131,31 @@ export const useStateMachine = ({
     setIsPanningDisabled(false);
   };
 
+  const showProtectionPointMenu = () => {
+    setIsPanningDisabled(false);
+  };
+
   const dragPoint = () => {};
 
   const changePointType = ({ type }) => {
     updatePathOnRouteIndex(routeSelectedIndex, (path) =>
-      updateElementOnIndex(path, pointSelectedIndex, (point) => ({
-        ...point,
-        type,
-      })),
+      updateElementOnIndex(path, pointSelectedIndex, (point) => {
+        const next = { ...point };
+        if (type == null) {
+          delete next.type;
+        } else {
+          next.type = type;
+        }
+        return next;
+      }),
     );
+  };
+
+  const changeProtectionPointType = ({ type }) => {
+    if (protectionPointSelectedIndex === null) {
+      return;
+    }
+    setProtectionPointTypeAtIndex(protectionPointSelectedIndex, type);
   };
 
   const changeLineType = ({ previousLineType }) => {
@@ -137,6 +167,17 @@ export const useStateMachine = ({
     );
   };
 
+  const deleteProtectionPoint = () => {
+    if (protectionPointSelectedIndex === null) {
+      return;
+    }
+    removeProtectionPointAtIndex(protectionPointSelectedIndex);
+  };
+
+  const cancelProtectionPointMenu = () => {
+    setProtectionPointSelectedIndex(null);
+  };
+
   const isMaximumNumberOfPoints = () => {
     const currentLength = routes[routeSelectedIndex].paths?.[photoPath]?.length;
     if (currentLength >= 19) {
@@ -145,13 +186,19 @@ export const useStateMachine = ({
     }
   };
 
-  const addPointInBetween = ({ hoveredPosition, hoveredSegmentIndex }) => {
+  const addPointInBetween = ({
+    hoveredPosition,
+    hoveredSegmentIndex,
+    disableSnap,
+  }) => {
     if (isMaximumNumberOfPoints()) return;
 
     const position = getPercentagePosition(hoveredPosition);
+    const closestPoint = findCloserPoint(position, { disableSnap });
+    const inserted = closestPoint ? { ...closestPoint } : position;
     updatePathOnRouteIndex(routeSelectedIndex, (path) => [
       ...path.slice(0, hoveredSegmentIndex + 1),
-      position,
+      inserted,
       ...path.slice(hoveredSegmentIndex + 1),
     ]);
   };
@@ -166,12 +213,14 @@ export const useStateMachine = ({
     );
 
     const newCoordinate = getPercentagePosition(positionInImage);
-    const closestPoint = findCloserPoint(newCoordinate);
-    updatePathOnRouteIndex(routeSelectedIndex, (path) => [
-      ...path,
-      closestPoint ?? newCoordinate,
-    ]);
+    const closestPoint = findCloserPoint(newCoordinate, {
+      disableSnap: event.altKey,
+    });
+    const nextPoint = closestPoint ? { ...closestPoint } : newCoordinate;
+    updatePathOnRouteIndex(routeSelectedIndex, (path) => [...path, nextPoint]);
   };
+
+  const noopLineOnProtection = () => {};
 
   const commonActions: Partial<Record<StateAction, ActionWithCallback>> = {
     createRoute: { nextState: 'editRoute', callback: createRoute },
@@ -183,6 +232,10 @@ export const useStateMachine = ({
       ...commonActions,
       extendRoute: { nextState: 'extendRoute', callback: extendRoute },
       routeSelect: { nextState: 'routeSelected', callback: routeSelect },
+      showProtectionPointMenu: {
+        nextState: 'protectionPointMenu',
+        callback: showProtectionPointMenu,
+      },
     },
     editRoute: {
       ...commonActions,
@@ -197,6 +250,10 @@ export const useStateMachine = ({
         callback: addPointInBetween,
       },
       showPointMenu: { nextState: 'pointMenu', callback: showPointMenu },
+      showProtectionPointMenu: {
+        nextState: 'protectionPointMenu',
+        callback: showProtectionPointMenu,
+      },
       finishRoute: { nextState: 'editRoute', callback: finishRoute },
       extendRoute: { nextState: 'extendRoute', callback: extendRoute },
       routeSelect: { nextState: 'routeSelected', callback: routeSelect },
@@ -227,6 +284,29 @@ export const useStateMachine = ({
       extendRoute: { nextState: 'extendRoute', callback: extendRoute },
       dragPoint: { nextState: 'editRoute', callback: dragPoint },
     },
+    protectionPointMenu: {
+      ...commonActions,
+      changePointType: {
+        nextState: 'editRoute',
+        callback: changeProtectionPointType,
+      },
+      changeLineType: {
+        nextState: 'protectionPointMenu',
+        callback: noopLineOnProtection,
+      },
+      deletePoint: { nextState: 'editRoute', callback: deleteProtectionPoint },
+      cancelPointMenu: {
+        nextState: 'editRoute',
+        callback: cancelProtectionPointMenu,
+      },
+      finishRoute: { nextState: 'editRoute', callback: finishRoute },
+      extendRoute: { nextState: 'extendRoute', callback: extendRoute },
+      dragPoint: { nextState: 'protectionPointMenu', callback: dragPoint },
+      showProtectionPointMenu: {
+        nextState: 'protectionPointMenu',
+        callback: showProtectionPointMenu,
+      },
+    },
     routeSelected: {
       ...commonActions,
       routeSelect: { nextState: 'routeSelected', callback: routeSelect },
@@ -235,6 +315,10 @@ export const useStateMachine = ({
         callback: cancelRouteSelection,
       },
       extendRoute: { nextState: 'extendRoute', callback: extendRoute },
+      showProtectionPointMenu: {
+        nextState: 'protectionPointMenu',
+        callback: showProtectionPointMenu,
+      },
     },
   };
 

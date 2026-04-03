@@ -81,6 +81,7 @@ export const InteractivePath = ({ routeIndex, allowHoverMidpoint }: Props) => {
       machine.execute('addPointInBetween', {
         hoveredPosition: getPositionInImageFromMouse(svgRef, e, photoZoom),
         hoveredSegmentIndex: segmentIndex,
+        disableSnap: e.altKey,
       });
       e.stopPropagation();
       return;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PathWithBorder } from './PathWithBorder';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PositionPx } from '../types';
@@ -18,8 +18,26 @@ export const MouseTrackingLine = ({ routeIndex }: Props) => {
     getPathForRoute,
   } = useClimbingContext();
 
+  const [isAltDown, setIsAltDown] = useState(false);
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') setIsAltDown(true);
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') setIsAltDown(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
   const closerMousePositionPoint = mousePosition
-    ? findCloserPoint(getPercentagePosition(mousePosition))
+    ? findCloserPoint(getPercentagePosition(mousePosition), {
+        disableSnap: isAltDown,
+      })
     : null;
   const mousePositionSticked = closerMousePositionPoint
     ? getPixelPosition(closerMousePositionPoint)

@@ -10,9 +10,11 @@ export const Bolt = ({
   isPointSelected,
   pointerEvents,
   pointIndex,
+  onMarkClick,
 }: PointProps) => {
   const { isEditMode, photoZoom } = useClimbingContext();
-  const onClick = usePointClickHandler(pointIndex);
+  const routePointClick = usePointClickHandler(pointIndex);
+  const onClick = onMarkClick ?? routePointClick;
 
   const config = useConfig();
   const size = 14;

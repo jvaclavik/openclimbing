@@ -408,6 +408,11 @@ export default {
   'climbingpanel.show_route_detail': 'Show route detail',
   'climbingpanel.add_tick': 'Add tick',
   'climbingpanel.edit_route': 'Edit route',
+  'climbingpanel.protection_points_mode': 'Gear placements',
+  'climbingpanel.protection_points_hint':
+    'Click the photo to add protection points. Pick a type in the bar. When you draw routes, new nodes snap to them and inherit the type.',
+  'climbingpanel.protection_points_tooltip': 'Place bolts and other gear on the photo before drawing routes; route points snap to them.',
+  'climbingpanel.delete_protection_point': 'Delete gear point',
 
   'runway.information': 'Runway information',
   'runway.runway': 'Runway',

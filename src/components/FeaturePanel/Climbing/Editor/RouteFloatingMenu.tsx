@@ -1,30 +1,31 @@
-import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
-import CheckIcon from '@mui/icons-material/Check';
 import AddLocationIcon from '@mui/icons-material/AddLocation';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckIcon from '@mui/icons-material/Check';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { useCallback, useState } from 'react';
 
+import UndoIcon from '@mui/icons-material/Undo';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
   Button,
   ButtonGroup,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   Tooltip,
 } from '@mui/material';
-import { useClimbingContext } from '../contexts/ClimbingContext';
-import UndoIcon from '@mui/icons-material/Undo';
 import { t } from '../../../../services/intl';
-import { useFloatingMenuShortcuts } from './useFloatingMenuShortcuts';
-import { PointTypeButtons } from './PointTypeButtons';
+import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PointType } from '../types';
-import { addShortcutUnderline } from './utils';
 import { LineTypeButtons } from './LineTypeButtons';
+import { PointTypeButtons } from './PointTypeButtons';
+import { useFloatingMenuShortcuts } from './useFloatingMenuShortcuts';
+import { addShortcutUnderline } from './utils';
 
 const Container = styled.div<{ $isEditMode: boolean }>`
   position: absolute;
@@ -53,6 +54,8 @@ export const RouteFloatingMenu = () => {
     setIsRoutesLayerVisible,
     isRoutesLayerVisible,
     isEditMode,
+    isPlacingProtectionPoints,
+    setIsPlacingProtectionPoints,
   } = useClimbingContext();
   const path = getCurrentPath();
 
@@ -60,7 +63,7 @@ export const RouteFloatingMenu = () => {
     (machine.currentStateName === 'pointMenu' &&
       routes[routeSelectedIndex] &&
       pointSelectedIndex === getCurrentPath().length - 1) ||
-    machine.currentStateName === 'editRoute';
+    (machine.currentStateName === 'editRoute' && routeSelectedIndex !== null);
   const isDoneVisible = machine.currentStateName === 'extendRoute';
   const isUndoVisible =
     machine.currentStateName === 'extendRoute' && path.length !== 0;
@@ -69,8 +72,9 @@ export const RouteFloatingMenu = () => {
     machine.execute('finishRoute');
   }, [machine]);
   const onContinueClimbingRouteClick = useCallback(() => {
+    if (routeSelectedIndex === null) return;
     machine.execute('extendRoute');
-  }, [machine]);
+  }, [machine, routeSelectedIndex]);
   const onDeletePoint = () => {
     machine.execute('deletePoint');
     setIsDeletePointDialogVisible(false);
@@ -81,13 +85,27 @@ export const RouteFloatingMenu = () => {
   };
 
   const onPointTypeChange = useCallback(
-    (type: PointType) => {
+    (type: PointType | null) => {
       machine.execute('changePointType', { type });
 
       setShowPointTypeMenu(false);
     },
     [machine],
   );
+
+  const toggleProtectionPlacement = useCallback(() => {
+    const next = !isPlacingProtectionPoints;
+    if (next) {
+      machine.execute('finishRoute');
+    } else if (machine.currentStateName === 'protectionPointMenu') {
+      machine.execute('cancelPointMenu');
+    }
+    setIsPlacingProtectionPoints(next);
+  }, [isPlacingProtectionPoints, machine, setIsPlacingProtectionPoints]);
+
+  const isPointMenuLike =
+    machine.currentStateName === 'pointMenu' ||
+    machine.currentStateName === 'protectionPointMenu';
 
   const onMouseEnter = () => {
     setRouteIndexHovered(routeSelectedIndex);
@@ -107,11 +125,16 @@ export const RouteFloatingMenu = () => {
   useFloatingMenuShortcuts(
     onPointTypeChange,
     onContinueClimbingRouteClick,
+    toggleProtectionPlacement,
     isUndoVisible,
     handleUndo,
     isDoneVisible,
     onFinishClimbingRouteClick,
   );
+
+  if (!isEditMode) {
+    return null;
+  }
 
   return (
     <>
@@ -179,7 +202,21 @@ export const RouteFloatingMenu = () => {
                     : t('climbingpanel.start')}
                 </Button>
               )}
-              {machine.currentStateName === 'pointMenu' && (
+              {isEditMode && (
+                <Tooltip
+                  title={t('climbingpanel.protection_points_tooltip')}
+                  arrow
+                >
+                  <IconButton
+                    color={isPlacingProtectionPoints ? 'secondary' : 'primary'}
+                    size="small"
+                    onClick={toggleProtectionPlacement}
+                  >
+                    <RadioButtonUncheckedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {isPointMenuLike && (
                 <>
                   <Button
                     onClick={() => {
@@ -188,13 +225,15 @@ export const RouteFloatingMenu = () => {
                   >
                     {t('climbingpanel.type')}
                   </Button>
-                  <Button
-                    onClick={() => {
-                      setShowLineTypeMenu(true);
-                    }}
-                  >
-                    {t('climbingpanel.line')}
-                  </Button>
+                  {machine.currentStateName === 'pointMenu' && (
+                    <Button
+                      onClick={() => {
+                        setShowLineTypeMenu(true);
+                      }}
+                    >
+                      {t('climbingpanel.line')}
+                    </Button>
+                  )}
                 </>
               )}
 
@@ -208,7 +247,7 @@ export const RouteFloatingMenu = () => {
                   {t('climbingpanel.undo')}
                 </Button>
               )}
-              {machine.currentStateName === 'pointMenu' && (
+              {isPointMenuLike && (
                 <Button
                   onClick={toggleDeletePointDialog}
                   startIcon={<DeleteIcon />}

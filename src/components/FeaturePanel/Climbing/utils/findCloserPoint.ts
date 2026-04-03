@@ -1,21 +1,16 @@
 import { ClimbingRoute, PathPoint, PathPoints, Position } from '../types';
 
-const getCloserPoint = ({
-  to,
-  point1,
-  point2,
-}: {
-  to: Position;
-  point1: PathPoint;
-  point2: PathPoint;
-}) => {
-  const distanceTo1 = Math.sqrt(point1.x - to.x ** 2 + point1.y - to.y ** 2);
-  const distanceTo2 = Math.sqrt(point2.x - to.x ** 2 + point2.y - to.y ** 2);
+const distSq = (a: Position, b: PathPoint) =>
+  (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
-  if (distanceTo1 < distanceTo2) {
-    return point1;
-  }
-  return point2;
+export const getStickyThreshold = () =>
+  'ontouchstart' in window ? 0.03 : 0.015;
+
+export type FindCloserPointOptions = {
+  /** When dragging a protection point, exclude it so snap does not lock to itself. */
+  excludeProtectionIndex?: number | null;
+  /** When true, disables snap/sticking and returns no closer point. */
+  disableSnap?: boolean;
 };
 
 export const findCloserPointFactory =
@@ -23,43 +18,54 @@ export const findCloserPointFactory =
     routeSelectedIndex,
     routes,
     getPathForRoute,
+    getProtectionPoints,
   }: {
-    routeSelectedIndex: number;
+    routeSelectedIndex: number | null;
     routes: Array<ClimbingRoute>;
     getPathForRoute: (route: ClimbingRoute) => PathPoints;
+    getProtectionPoints?: () => PathPoints;
   }) =>
-  (checkedPosition: Position) => {
-    const isTouchDevice = 'ontouchstart' in window;
-    const STICKY_THRESHOLD = isTouchDevice ? 0.03 : 0.015;
+  (
+    checkedPosition: Position,
+    options?: FindCloserPointOptions | null,
+  ): PathPoint | null => {
+    const STICKY_THRESHOLD = getStickyThreshold();
+    const thresholdSq = STICKY_THRESHOLD ** 2;
 
-    if (routeSelectedIndex === null || !checkedPosition.x || !checkedPosition.y)
+    if (options?.disableSnap) return null;
+
+    if (
+      !Number.isFinite(checkedPosition.x) ||
+      !Number.isFinite(checkedPosition.y)
+    )
       return null;
 
-    return routes
-      .map((route, index) => {
-        const isCurrentRoute = index === routeSelectedIndex;
-        if (isCurrentRoute) return [];
-        return getPathForRoute(route);
-      })
-      .flat()
-      .reduce<PathPoint | null>((closestPoint, point) => {
-        if (!point) return closestPoint;
-        const isPointNearby =
-          checkedPosition.x - STICKY_THRESHOLD < point.x &&
-          checkedPosition.x + STICKY_THRESHOLD > point.x &&
-          checkedPosition.y - STICKY_THRESHOLD < point.y &&
-          checkedPosition.y + STICKY_THRESHOLD > point.y;
+    const protectionRaw = getProtectionPoints?.() ?? [];
+    const protection =
+      options?.excludeProtectionIndex != null
+        ? protectionRaw.filter((_, i) => i !== options.excludeProtectionIndex)
+        : protectionRaw;
 
-        if (isPointNearby) {
-          if (closestPoint) {
-            return getCloserPoint({
-              to: checkedPosition,
-              point1: closestPoint,
-              point2: point,
-            });
-          }
-          return point;
-        }
-        return closestPoint;
-      }, null);
+    const otherRoutePoints =
+      routeSelectedIndex === null
+        ? routes.flatMap((r) => getPathForRoute(r))
+        : routes.flatMap((route, index) =>
+            index === routeSelectedIndex ? [] : getPathForRoute(route),
+          );
+
+    const candidates = [...protection, ...otherRoutePoints];
+
+    let best: PathPoint | null = null;
+    let bestD = thresholdSq;
+
+    for (const point of candidates) {
+      if (!point) continue;
+      const d = distSq(checkedPosition, point);
+      if (d <= thresholdSq && d < bestD) {
+        bestD = d;
+        best = point;
+      }
+    }
+
+    return best;
   };

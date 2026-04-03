@@ -55,6 +55,7 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
   const {
     setPointSelectedIndex,
     setIsPointClicked,
+    setIsProtectionPointClicked,
     setRouteIndexHovered,
     photoZoom,
     getCurrentPath,
@@ -90,6 +91,7 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
 
   const onPointMouseDown = (e) => {
     setIsPanningDisabled(true);
+    setIsProtectionPointClicked(false);
     setPointSelectedIndex(index);
     setIsPointClicked(true);
     e.stopPropagation();
