@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { usePhotoChange } from './usePhotoChange';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { confirmDiscardUnsavedClimbingEdits } from './confirmDiscardUnsavedClimbingEdits';
 
 export const useClimbingViewShortcuts = () => {
   const {
@@ -11,6 +12,8 @@ export const useClimbingViewShortcuts = () => {
     photoPath,
     photoPaths,
     isEditMode,
+    discardEdits,
+    hasUnsavedEdits,
   } = useClimbingContext();
   const onPhotoChange = usePhotoChange();
   const { userSettings, setUserSetting } = useUserSettingsContext();
@@ -34,6 +37,12 @@ export const useClimbingViewShortcuts = () => {
         }
       }
       if (e.key === 'Escape') {
+        if (isEditMode) {
+          if (!confirmDiscardUnsavedClimbingEdits(hasUnsavedEdits)) {
+            return;
+          }
+          discardEdits();
+        }
         setIsEditMode(false);
       }
       if (e.ctrlKey && e.key === 'd') {
@@ -62,6 +71,8 @@ export const useClimbingViewShortcuts = () => {
     photoPath,
     onPhotoChange,
     isEditMode,
+    discardEdits,
+    hasUnsavedEdits,
     setUserSetting,
     userSettings,
   ]);
