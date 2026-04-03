@@ -1,4 +1,4 @@
-import { TableCell, TableRow } from '@mui/material';
+import { Stack, TableCell, TableRow } from '@mui/material';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import React from 'react';
@@ -10,6 +10,8 @@ import { getDifficulties } from '../../services/tagging/climbing/routeGrade';
 import { TickStyleBadge } from '../../services/my-ticks/TickStyleBadge';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { TickMoreButton } from '../FeaturePanel/Climbing/TickMoreButton';
+import { getPartnersText } from '../../services/my-ticks/tickPairing';
+import { PartnersMentionsText } from '../FeaturePanel/Climbing/PartnersMentionsText';
 
 export const MyTicksRow = ({
   fetchedTick,
@@ -19,11 +21,17 @@ export const MyTicksRow = ({
   const routeDifficulties = getDifficulties(fetchedTick.tags);
   const { view } = useMapStateContext();
   const { name, style, date, apiId } = fetchedTick;
+  const partners = getPartnersText(fetchedTick.tick);
 
   return (
     <TableRow>
       <TableCell>
-        <Link href={`/${getUrlOsmId(apiId)}#${view.join('/')}`}>{name}</Link>
+        <Stack spacing={0.25} alignItems="flex-start">
+          <Link href={`/${getUrlOsmId(apiId)}#${view.join('/')}`}>{name}</Link>
+          {partners.trim() ? (
+            <PartnersMentionsText text={partners} variant="caption" />
+          ) : null}
+        </Stack>
       </TableCell>
       <TableCell>
         <ConvertedRouteDifficultyBadge routeDifficulties={routeDifficulties} />

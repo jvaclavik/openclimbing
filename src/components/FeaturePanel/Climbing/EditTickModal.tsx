@@ -19,6 +19,13 @@ import { ClimbingTick } from '../../../types';
 import { clone } from 'lodash';
 import { TickStyle } from './types';
 import { useTicksContext } from '../../utils/TicksContext';
+import { PartnersTextField } from './PartnersTextField';
+import {
+  collectPartnerSuggestionsFromTicks,
+  getPartnersText,
+  setPartnersOnPairing,
+} from '../../../services/my-ticks/tickPairing';
+import { t } from '../../../services/intl';
 
 type EditTickModalProps = {
   tickId: number;
@@ -53,12 +60,14 @@ const EditTickHeader = (props: { onClose: () => void }) => (
 const TickFields = ({
   tempTick,
   updateTempTick,
+  partnerSuggestions,
 }: {
   tempTick: ClimbingTick;
   updateTempTick: <T extends keyof ClimbingTick>(
     key: T,
     value: ClimbingTick[T],
   ) => void;
+  partnerSuggestions: string[];
 }) => (
   <>
     <TickStyleSelect
@@ -86,6 +95,20 @@ const TickFields = ({
       InputLabelProps={{
         shrink: true,
       }}
+    />
+
+    <PartnersTextField
+      label={t('tick.partners_label')}
+      helperText={t('tick.partners_helper')}
+      placeholder={t('tick.partners_placeholder')}
+      value={getPartnersText(tempTick)}
+      onChange={(partners) =>
+        updateTempTick(
+          'pairing',
+          setPartnersOnPairing(tempTick.pairing, partners),
+        )
+      }
+      suggestions={partnerSuggestions}
     />
 
     <TextField
@@ -124,7 +147,7 @@ const useTempTick = () => {
 };
 
 export const EditTickModal = () => {
-  const { updateTick, editedTickId, setEditedTickId } = useTicksContext();
+  const { updateTick, editedTickId, setEditedTickId, ticks } = useTicksContext();
   const { showToast } = useSnackbar();
   const { tempTick, updateTempTick } = useTempTick();
   const [loading, setLoading] = useState<boolean>(false);
@@ -151,7 +174,11 @@ export const EditTickModal = () => {
       <DialogContent dividers>
         {tempTick ? (
           <Stack spacing={2}>
-            <TickFields tempTick={tempTick} updateTempTick={updateTempTick} />
+            <TickFields
+              tempTick={tempTick}
+              updateTempTick={updateTempTick}
+              partnerSuggestions={collectPartnerSuggestionsFromTicks(ticks ?? [])}
+            />
             <Button onClick={handleSave} loading={loading}>
               Save
             </Button>

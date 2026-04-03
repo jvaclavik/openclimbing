@@ -54,6 +54,13 @@ export default {
   'tick.style_description_TR': 'Climbing the route with a rope already anchored at the top.',
   'tick.style_description_FS': 'Climbing the route without any protective gear or ropes.',
 
+  'tick.partners_label': 'Partners',
+  'tick.partners_helper':
+    'Use @nickname for OpenStreetMap usernames. Suggestions come from nicknames you used before.',
+  'tick.partners_placeholder': 'e.g. with @alice',
+  'tick.partners_no_suggestions':
+    'No saved @nicknames yet — type an OSM username after @.',
+
   'climbing_renderer.climbing_grade_single': 'climbing grade',
   'climbing_renderer.climbing_grade_average': 'average climbing grade',
   'climbing_renderer.climbing_grade_minimum': 'minimum climbing grade',

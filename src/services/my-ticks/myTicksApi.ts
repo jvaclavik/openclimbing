@@ -2,6 +2,7 @@ import { ClimbingTick, ClimbingTickDb } from '../../types';
 import { fetchJson, fetchText } from '../fetch';
 import { getApiId, getShortId } from '../helpers';
 import { OsmType } from '../types';
+import { parsePairing } from './tickPairing';
 
 const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
   const { shortId, ...rest } = tick;
@@ -15,7 +16,7 @@ const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
 };
 
 const convertFromDb = (dbRow: ClimbingTickDb): ClimbingTick => {
-  const { osmType, osmId, ...rest } = dbRow;
+  const { osmType, osmId, pairing, ...rest } = dbRow;
   const shortId =
     osmType && osmId
       ? getShortId({ type: osmType as OsmType, id: osmId })
@@ -23,6 +24,7 @@ const convertFromDb = (dbRow: ClimbingTickDb): ClimbingTick => {
 
   return {
     ...rest,
+    pairing: parsePairing(pairing),
     shortId,
   };
 };

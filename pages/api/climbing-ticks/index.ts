@@ -2,13 +2,17 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getDb } from '../../../src/server/db/db';
 import { serverFetchOsmUser } from '../../../src/server/osmApiAuthServer';
 import { OSM_TOKEN_COOKIE } from '../../../src/services/osm/consts';
+import {
+  normalizePairingForDb,
+  parsePairing,
+} from '../../../src/services/my-ticks/tickPairing';
 import { ClimbingTickDb } from '../../../src/types';
 
 const addTickToDB = async (req: NextApiRequest) => {
   const user = await serverFetchOsmUser(req.cookies[OSM_TOKEN_COOKIE]);
   const { pairing, style, myGrade, osmType, osmId, note, timestamp } = req.body;
 
-  const newTick: Omit<ClimbingTickDb, 'id'> = {
+  const newTick = {
     osmUserId: user.id,
     osmType,
     osmId,
@@ -16,8 +20,8 @@ const addTickToDB = async (req: NextApiRequest) => {
     style,
     myGrade,
     note,
-    pairing,
-  };
+    pairing: normalizePairingForDb(pairing),
+  } as unknown as Omit<ClimbingTickDb, 'id'>;
 
   const columns = Object.keys(newTick);
   const columnNames = columns.map((c) => `"${c}"`).join(', ');
@@ -37,7 +41,11 @@ const getAllTicks = async (req: NextApiRequest) => {
   const statement = getDb().prepare<[number], ClimbingTickDb>(
     'SELECT * FROM climbing_ticks WHERE "osmUserId" = ?',
   );
-  return statement.all(user.id);
+  const rows = statement.all(user.id);
+  return rows.map((row) => ({
+    ...row,
+    pairing: parsePairing(row.pairing),
+  }));
 };
 
 const performGetOrPost = async (req: NextApiRequest) => {

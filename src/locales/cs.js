@@ -11,6 +11,13 @@ export default {
 
   'climbing.photos': 'Fotky',
 
+  'tick.partners_label': 'Spolulezci',
+  'tick.partners_helper':
+    'Za @ zadej uživatelské jméno z OpenStreetMap. Návrhy se berou z přezdívek, které už máš u jiných zápisů.',
+  'tick.partners_placeholder': 'např. s @pepa',
+  'tick.partners_no_suggestions':
+    'Zatím žádné uložené @přezdívky — napiš celé OSM jméno za znakem @.',
+
   'user.login_register': 'Přihlásit se / Registrovat',
   'user.logout': 'Odhlásit se',
   'user.my_ticks': 'Moje přelezy',

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { serverFetchOsmUser } from '../../../src/server/osmApiAuthServer';
 import { OSM_TOKEN_COOKIE } from '../../../src/services/osm/consts';
+import { normalizePairingForDb, parsePairing } from '../../../src/services/my-ticks/tickPairing';
 import { ClimbingTickDb } from '../../../src/types';
 import { getDb } from '../../../src/server/db/db';
 
@@ -54,13 +55,17 @@ const getSafeUpdates = (req: NextApiRequest) => {
     (field) => [field, req.body[field]] as [string, string | number],
   );
   const filtered = entries.filter(([k, v]) => v !== undefined); // careful - empty string or a zero are valid values!!
-  return Object.fromEntries(filtered);
+  const updates = Object.fromEntries(filtered) as Record<string, unknown>;
+  if (updates.pairing !== undefined) {
+    updates.pairing = normalizePairingForDb(updates.pairing);
+  }
+  return updates;
 };
 
 const updateTick = async (req: NextApiRequest) => {
   const tickId = await validateRequestAndGetTick(req);
   const updates = getSafeUpdates(req);
-  if (updates.length === 0) {
+  if (Object.keys(updates).length === 0) {
     return;
   }
 
@@ -68,11 +73,16 @@ const updateTick = async (req: NextApiRequest) => {
     .map((k) => `"${k}" = @${k}`)
     .join(', ');
 
-  return getDb()
+  const row = getDb()
     .prepare(
       `UPDATE climbing_ticks SET ${setClause} WHERE id = @tickId RETURNING *`,
     )
-    .get({ ...updates, tickId });
+    .get({ ...updates, tickId }) as ClimbingTickDb | undefined;
+
+  if (!row) {
+    return;
+  }
+  return { ...row, pairing: parsePairing(row.pairing) };
 };
 
 const performPutOrDelete = async (req: NextApiRequest) => {

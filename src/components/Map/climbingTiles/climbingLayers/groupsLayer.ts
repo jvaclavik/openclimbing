@@ -1,4 +1,9 @@
 import {
+  LayerSpecification,
+  SymbolLayerSpecification,
+} from '@maplibre/maplibre-gl-style-spec';
+import { AREA, CLIMBING_TILES_SOURCE, CRAG, GYM, VIA_FERRATA } from '../consts';
+import {
   byHasImages,
   hover,
   ifCrag,
@@ -6,11 +11,6 @@ import {
   linearByRouteCount,
   sortKey,
 } from './helpers';
-import {
-  LayerSpecification,
-  SymbolLayerSpecification,
-} from '@maplibre/maplibre-gl-style-spec';
-import { AREA, CLIMBING_TILES_SOURCE, CRAG, GYM, VIA_FERRATA } from '../consts';
 
 const areaSize = linearByRouteCount(0, 0.4, 400, 1);
 const cragSize = linearByRouteCount(0, 0.4, 50, 0.7);
@@ -36,15 +36,15 @@ const GROUPS_LAYOUT: SymbolLayerSpecification['layout'] = {
   ),
   'text-offset': [0, 0.6],
   'icon-optional': false,
-  'icon-ignore-placement': false,
-  'icon-allow-overlap': ['step', ['zoom'], true, 4, false, 15, true],
+  'icon-ignore-placement': true,
+  'icon-allow-overlap': true,
   'text-field': ['step', ['zoom'], '', 4, ['get', 'label']],
   'text-padding': 2,
   'text-font': ['Noto Sans Bold'],
   'text-anchor': 'top',
   'text-max-width': 9,
-  'text-ignore-placement': false,
-  'text-allow-overlap': false,
+  'text-ignore-placement': true,
+  'text-allow-overlap': true,
   'text-optional': true,
   'symbol-sort-key': sortKey,
 };
