@@ -18,6 +18,7 @@ import { useSaveCragFactory } from './useSaveCragFactory';
 import { getWikimediaCommonsPhotoKeys, removeFilePrefix } from './utils/photo';
 import { ClimbingEditorHelperText } from './ClimbingEditorHelperText';
 import { t } from '../../../services/intl';
+import { confirmDiscardUnsavedClimbingEdits } from './utils/confirmDiscardUnsavedClimbingEdits';
 
 const Flex = styled.div`
   display: flex;
@@ -56,6 +57,8 @@ export const ClimbingCragDialog = ({
     photoPath,
     photoPaths,
     loadPhotoRelatedData,
+    discardEdits,
+    hasUnsavedEdits,
   } = useClimbingContext();
   const { feature } = useFeatureContext();
   const saveCrag = useSaveCragFactory(setIsEditMode);
@@ -116,6 +119,10 @@ export const ClimbingCragDialog = ({
     Router.push(`${getOsmappLink(feature)}${window.location.hash}`);
   };
   const handleCancel = () => {
+    if (!confirmDiscardUnsavedClimbingEdits(hasUnsavedEdits)) {
+      return;
+    }
+    discardEdits();
     // Reset UI/machine state so "cancel" leaves editor in a consistent non-edit mode.
     setIsPlacingProtectionPoints(false);
     if (machine.currentStateName === 'extendRoute') {

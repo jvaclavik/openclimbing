@@ -159,6 +159,8 @@ type ClimbingContextType = {
     nextCoords: Position,
     snappedFrom?: PathPoint | null,
   ) => void;
+  discardEdits: () => void;
+  hasUnsavedEdits: boolean;
 };
 
 // @TODO generate?
@@ -233,6 +235,69 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     useState(false);
   const [protectionPointSelectedIndex, setProtectionPointSelectedIndex] =
     useState<number | null>(null);
+
+  const [editSnapshot, setEditSnapshot] = useState<{
+    routes: Array<ClimbingRoute>;
+    protectionPointsByPhoto: Record<string, PathPoints>;
+  } | null>(null);
+
+  const editSnapshotRef = useRef<{
+    routes: Array<ClimbingRoute>;
+    protectionPointsByPhoto: Record<string, PathPoints>;
+  } | null>(null);
+
+  const clone = <T,>(value: T): T => {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(value);
+    }
+    return JSON.parse(JSON.stringify(value)) as T;
+  };
+
+  const stableStringify = (value: unknown): string => {
+    const seen = new WeakSet<object>();
+    const normalize = (v: any): any => {
+      if (v === null || typeof v !== 'object') return v;
+      if (seen.has(v)) return '[Circular]';
+      seen.add(v);
+      if (Array.isArray(v)) return v.map(normalize);
+      const out: Record<string, any> = {};
+      for (const key of Object.keys(v).sort()) {
+        out[key] = normalize(v[key]);
+      }
+      return out;
+    };
+    return JSON.stringify(normalize(value));
+  };
+
+  useEffect(() => {
+    if (!isEditMode) return;
+    const snapshot = {
+      routes: clone(routes),
+      protectionPointsByPhoto: clone(protectionPointsByPhoto),
+    };
+    editSnapshotRef.current = snapshot;
+    setEditSnapshot(snapshot);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode]);
+
+  const discardEdits = useCallback(() => {
+    const snapshot = editSnapshotRef.current;
+    if (snapshot) {
+      setRoutes(snapshot.routes);
+      setProtectionPointsByPhoto(snapshot.protectionPointsByPhoto);
+      return;
+    }
+    // Fallback (should be rare): reset from original feature tags.
+    setRoutes(osmToClimbingRoutes(feature));
+    setProtectionPointsByPhoto(parseProtectionPointsByPhoto(feature.tags));
+  }, [feature]);
+
+  const hasUnsavedEdits =
+    isEditMode &&
+    editSnapshot !== null &&
+    (stableStringify(editSnapshot.routes) !== stableStringify(routes) ||
+      stableStringify(editSnapshot.protectionPointsByPhoto) !==
+        stableStringify(protectionPointsByPhoto));
 
   const [pointElement, setPointElement] = useState<null | HTMLElement>(null);
   const [routeListTopOffsets, setRouteListTopOffsets] = useState<Array<number>>(
@@ -546,6 +611,8 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     removeProtectionPointAtIndex,
     setProtectionPointTypeAtIndex,
     updateProtectionPointPositionAtIndex,
+    discardEdits,
+    hasUnsavedEdits,
   };
 
   return (
