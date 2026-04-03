@@ -3,6 +3,7 @@ import React, {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -10,13 +11,17 @@ import {
   ClimbingRoute,
   PathPoint,
   PathPoints,
+  PointType,
   Position,
   PositionPx,
   Size,
   ZoomState,
 } from '../types';
 import { updateElementOnIndex } from '../utils/array';
-import { findCloserPointFactory } from '../utils/findCloserPoint';
+import {
+  findCloserPointFactory,
+  FindCloserPointOptions,
+} from '../utils/findCloserPoint';
 import {
   ActionWithCallback,
   State,
@@ -29,6 +34,7 @@ import { osmToClimbingRoutes } from './osmToClimbingRoutes';
 import { publishDbgObject } from '../../../../utils';
 import { getContainedSizeImage } from '../utils/image';
 import { Setter } from '../../../../types';
+import { parseProtectionPointsByPhoto } from '../utils/protectionPathTags';
 
 type LoadedPhotos = Record<string, Record<number, boolean>>;
 type ImageSize = {
@@ -91,7 +97,10 @@ type ClimbingContextType = {
   };
   scrollOffset: PositionPx;
   setScrollOffset: Setter<PositionPx>;
-  findCloserPoint: (position: Position) => PathPoint | null;
+  findCloserPoint: (
+    position: Position,
+    options?: FindCloserPointOptions | null,
+  ) => PathPoint | null;
   photoZoom: ZoomState;
   setPhotoZoom: Setter<ZoomState>;
   areRoutesLoading: boolean;
@@ -128,6 +137,27 @@ type ClimbingContextType = {
   setRouteListTopOffset: (
     routeIndex: number,
     routeListTopOffset: number,
+  ) => void;
+  protectionPointsByPhoto: Record<string, PathPoints>;
+  isPlacingProtectionPoints: boolean;
+  setIsPlacingProtectionPoints: Setter<boolean>;
+  protectionPointSelectedIndex: number | null;
+  setProtectionPointSelectedIndex: Setter<number | null>;
+  getProtectionPointsForCurrentPhoto: () => PathPoints;
+  addProtectionPoint: (point: PathPoint) => void;
+  removeProtectionPointAtIndex: (index: number) => void;
+  setProtectionPointTypeAtIndex: (
+    index: number,
+    type: PointType | null | undefined,
+  ) => void;
+  isProtectionPointClicked: boolean;
+  setIsProtectionPointClicked: Setter<boolean>;
+  isProtectionPointMoving: boolean;
+  setIsProtectionPointMoving: Setter<boolean>;
+  updateProtectionPointPositionAtIndex: (
+    index: number,
+    nextCoords: Position,
+    snappedFrom?: PathPoint | null,
   ) => void;
 };
 
@@ -168,6 +198,10 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
   const [isPointMoving, setIsPointMoving] = useState<boolean>(false);
   const [isPanningDisabled, setIsPanningDisabled] = useState<boolean>(false);
   const [isPointClicked, setIsPointClicked] = useState<boolean>(false);
+  const [isProtectionPointClicked, setIsProtectionPointClicked] =
+    useState<boolean>(false);
+  const [isProtectionPointMoving, setIsProtectionPointMoving] =
+    useState<boolean>(false);
   const [areRoutesLoading, setAreRoutesLoading] = useState<boolean>(true);
   const [arePointerEventsDisabled, setArePointerEventsDisabled] =
     useState<boolean>(false);
@@ -192,6 +226,13 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
   });
   const [routeSelectedIndex, setRouteSelectedIndex] = useState<number>(null);
   const [pointSelectedIndex, setPointSelectedIndex] = useState<number>(null);
+  const [protectionPointsByPhoto, setProtectionPointsByPhoto] = useState<
+    Record<string, PathPoints>
+  >(() => parseProtectionPointsByPhoto(feature.tags));
+  const [isPlacingProtectionPoints, setIsPlacingProtectionPoints] =
+    useState(false);
+  const [protectionPointSelectedIndex, setProtectionPointSelectedIndex] =
+    useState<number | null>(null);
 
   const [pointElement, setPointElement] = useState<null | HTMLElement>(null);
   const [routeListTopOffsets, setRouteListTopOffsets] = useState<Array<number>>(
@@ -205,6 +246,89 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
       return newPositions;
     });
   }, []);
+
+  useEffect(() => {
+    setProtectionPointSelectedIndex(null);
+    setIsProtectionPointClicked(false);
+    setIsProtectionPointMoving(false);
+  }, [photoPath]);
+
+  const getProtectionPointsForCurrentPhoto = useCallback(
+    () => protectionPointsByPhoto[photoPath] ?? [],
+    [protectionPointsByPhoto, photoPath],
+  );
+
+  const addProtectionPoint = useCallback(
+    (point: PathPoint) => {
+      setProtectionPointsByPhoto((prev) => {
+        const current = prev[photoPath] ?? [];
+        return {
+          ...prev,
+          [photoPath]: [...current, { ...point, units: 'percentage' as const }],
+        };
+      });
+    },
+    [photoPath],
+  );
+
+  const removeProtectionPointAtIndex = useCallback(
+    (index: number) => {
+      setProtectionPointsByPhoto((prev) => {
+        const current = prev[photoPath] ?? [];
+        return {
+          ...prev,
+          [photoPath]: current.filter((_, i) => i !== index),
+        };
+      });
+      setProtectionPointSelectedIndex((prev) => (prev === index ? null : prev));
+    },
+    [photoPath],
+  );
+
+  const setProtectionPointTypeAtIndex = useCallback(
+    (index: number, type: PointType | null | undefined) => {
+      setProtectionPointsByPhoto((prev) => {
+        const current = prev[photoPath] ?? [];
+        return {
+          ...prev,
+          [photoPath]: updateElementOnIndex(current, index, (p) => {
+            const next = { ...p };
+            if (type == null) {
+              delete next.type;
+            } else {
+              next.type = type;
+            }
+            return next;
+          }),
+        };
+      });
+    },
+    [photoPath],
+  );
+
+  const updateProtectionPointPositionAtIndex = useCallback(
+    (index: number, nextCoords: Position, snappedFrom?: PathPoint | null) => {
+      setProtectionPointsByPhoto((prev) => {
+        const current = prev[photoPath] ?? [];
+        return {
+          ...prev,
+          [photoPath]: updateElementOnIndex(current, index, (p) => {
+            const next: PathPoint = {
+              ...p,
+              x: nextCoords.x,
+              y: nextCoords.y,
+              units: 'percentage',
+            };
+            if (snappedFrom?.type) {
+              next.type = snappedFrom.type;
+            }
+            return next;
+          }),
+        };
+      });
+    },
+    [photoPath],
+  );
 
   const getPathOnIndex = (index: number) =>
     routes[index]?.paths?.[photoPath] || [];
@@ -257,6 +381,7 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     routeSelectedIndex,
     routes,
     getPathForRoute,
+    getProtectionPoints: getProtectionPointsForCurrentPhoto,
   });
 
   const { getPixelPosition, getPercentagePosition, addZoom } =
@@ -284,6 +409,11 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     photoZoom,
     setIsPanningDisabled,
     photoPath,
+    protectionPointSelectedIndex,
+    setProtectionPointSelectedIndex,
+    setProtectionPointTypeAtIndex,
+    removeProtectionPointAtIndex,
+    setIsPlacingProtectionPoints,
   });
 
   const isRouteSelected = (index: number) => routeSelectedIndex === index;
@@ -349,6 +479,10 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     setEditorPosition,
     setImageSize,
     setIsPointClicked,
+    isProtectionPointClicked,
+    setIsProtectionPointClicked,
+    isProtectionPointMoving,
+    setIsProtectionPointMoving,
     setIsPointMoving,
     setPointSelectedIndex,
     setRoutes,
@@ -402,6 +536,16 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     setLoadedPhotos,
     routeListTopOffsets,
     setRouteListTopOffset,
+    protectionPointsByPhoto,
+    isPlacingProtectionPoints,
+    setIsPlacingProtectionPoints,
+    protectionPointSelectedIndex,
+    setProtectionPointSelectedIndex,
+    getProtectionPointsForCurrentPhoto,
+    addProtectionPoint,
+    removeProtectionPointAtIndex,
+    setProtectionPointTypeAtIndex,
+    updateProtectionPointPositionAtIndex,
   };
 
   return (

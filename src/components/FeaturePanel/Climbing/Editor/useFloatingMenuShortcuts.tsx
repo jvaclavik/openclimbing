@@ -3,8 +3,9 @@ import { PointType } from '../types';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 
 export const useFloatingMenuShortcuts = (
-  onPointTypeChange: (type: PointType) => void,
+  onPointTypeChange: (type: PointType | null) => void,
   onContinueClimbingRouteClick: () => void,
+  onToggleProtectionPoints: () => void,
   isUndoVisible: boolean,
   handleUndo: (e) => void,
   isDoneVisible: boolean,
@@ -36,6 +37,9 @@ export const useFloatingMenuShortcuts = (
         if (e.key === 'e') {
           onContinueClimbingRouteClick();
         }
+        if (e.key === 'm') {
+          onToggleProtectionPoints();
+        }
         if (isUndoVisible && e.key === 'z' && e.metaKey) {
           handleUndo(e);
         }
@@ -57,6 +61,7 @@ export const useFloatingMenuShortcuts = (
     isUndoVisible,
     onContinueClimbingRouteClick,
     onFinishClimbingRouteClick,
+    onToggleProtectionPoints,
     onPointTypeChange,
   ]);
 };

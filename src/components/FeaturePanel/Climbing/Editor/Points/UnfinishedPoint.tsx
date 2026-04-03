@@ -10,9 +10,11 @@ export const UnfinishedPoint = ({
   isPointSelected,
   pointIndex,
   pointerEvents,
+  onMarkClick,
 }: PointProps) => {
   const { isEditMode, photoZoom } = useClimbingContext();
-  const onClick = usePointClickHandler(pointIndex);
+  const routePointClick = usePointClickHandler(pointIndex);
+  const onClick = onMarkClick ?? routePointClick;
   const config = useConfig();
 
   const strokeWidth = 1;

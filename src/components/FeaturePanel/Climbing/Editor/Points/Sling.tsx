@@ -10,10 +10,12 @@ export const Sling = ({
   isPointSelected,
   pointIndex,
   pointerEvents,
+  onMarkClick,
 }: PointProps) => {
   const config = useConfig();
   const { photoZoom } = useClimbingContext();
-  const onClick = usePointClickHandler(pointIndex);
+  const routePointClick = usePointClickHandler(pointIndex);
+  const onClick = onMarkClick ?? routePointClick;
 
   const foregroundColor = isPointSelected
     ? config.anchorColorSelected

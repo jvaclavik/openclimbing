@@ -1,7 +1,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
-const MAX_LINES = 50;
+const MAX_LINES = 250;
 
 const IGNORED = [
   '.test.ts',

@@ -19,6 +19,31 @@ export const addShortcutUnderline = (message: string, shortcut: string) => {
   return message;
 };
 
+export const useProtectionPointClickHandler = () => {
+  const {
+    machine,
+    isPointMoving,
+    isProtectionPointMoving,
+    setIsProtectionPointClicked,
+    setIsProtectionPointMoving,
+  } = useClimbingContext();
+
+  return (e: React.SyntheticEvent) => {
+    if (isPointMoving) {
+      return;
+    }
+    if (isProtectionPointMoving) {
+      return;
+    }
+    machine.execute('showProtectionPointMenu');
+
+    setIsProtectionPointClicked(false);
+    setIsProtectionPointMoving(false);
+    e.stopPropagation();
+    e.preventDefault();
+  };
+};
+
 export const usePointClickHandler = (index: number) => {
   const {
     pointElement,

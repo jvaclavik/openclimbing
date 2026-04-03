@@ -1,4 +1,4 @@
-import { ClimbingRoute } from './types';
+import { ClimbingRoute, PathPoints } from './types';
 import { Feature, FeatureTags, OsmId } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useClimbingContext } from './contexts/ClimbingContext';
@@ -12,6 +12,7 @@ import { saveChanges } from '../../../services/osm/auth/osmApiAuth';
 import { fetchFreshItem } from '../EditDialog/context/itemsHelpers';
 import { stringifyPath } from './utils/pathUtils';
 import { DataItem } from '../EditDialog/context/types';
+import { getCragProtectionTagPatch } from './utils/protectionPathTags';
 
 const getUpdatedPhotoTags = (route: ClimbingRoute) => {
   const updatedTags = {};
@@ -33,7 +34,10 @@ const getUpdatedPhotoTags = (route: ClimbingRoute) => {
   return updatedTags;
 };
 
-const areUpdatedTagsSame = (updatedTags: {}, origTags: FeatureTags) => {
+const areUpdatedTagsSame = (
+  updatedTags: FeatureTags,
+  origTags: FeatureTags,
+) => {
   const isSame = Object.keys(updatedTags).every(
     (key) => updatedTags[key] === origTags[key],
   );
@@ -68,12 +72,19 @@ const constructChanges = async (
 export const getClimbingCragUpdates = (
   crag: Feature,
   photoPaths: Array<string>,
+  protectionPointsByPhoto?: Record<string, PathPoints>,
 ): ClimbingUpdate[] => {
-  const updatedTags = {};
+  const updatedTags: FeatureTags = {};
   photoPaths.forEach((photoPath, index) => {
     updatedTags[`wikimedia_commons${index === 0 ? '' : `:${index + 1}`}`] =
       `File:${photoPath}`; // TODO this may change order of wikimedia_commons:# tags, we need photoPaths to store keys as well
   });
+  if (protectionPointsByPhoto) {
+    Object.assign(
+      updatedTags,
+      getCragProtectionTagPatch(crag.tags, protectionPointsByPhoto),
+    );
+  }
   const apiId = crag.osmMeta;
   return areUpdatedTagsSame(updatedTags, crag.tags)
     ? []
@@ -96,13 +107,13 @@ export const getClimbingRouteUpdates = (
 
 export const useSaveCragFactory = (setIsEditMode: Setter<boolean>) => {
   const { feature: crag } = useFeatureContext();
-  const { routes, photoPaths } = useClimbingContext();
+  const { routes, photoPaths, protectionPointsByPhoto } = useClimbingContext();
   const { showToast } = useSnackbar();
 
   return async () => {
     const updates = [
       ...getClimbingRouteUpdates(routes),
-      ...getClimbingCragUpdates(crag, photoPaths),
+      ...getClimbingCragUpdates(crag, photoPaths, protectionPointsByPhoto),
     ];
 
     if (updates.length === 0) {

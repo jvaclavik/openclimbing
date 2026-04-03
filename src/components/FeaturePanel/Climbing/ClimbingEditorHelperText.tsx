@@ -13,7 +13,12 @@ const InlineBlockContainer = styled.div`
 `;
 
 export const ClimbingEditorHelperText = () => {
-  const { routeSelectedIndex, getCurrentPath, machine } = useClimbingContext();
+  const {
+    routeSelectedIndex,
+    getCurrentPath,
+    machine,
+    isPlacingProtectionPoints,
+  } = useClimbingContext();
   const { feature } = useFeatureContext();
 
   const routePhotoPathsCount = getWikimediaCommonsPhotoPathKeys(
@@ -45,7 +50,13 @@ export const ClimbingEditorHelperText = () => {
 
   return (
     <>
-      {!isMobileMode && (
+      {!isMobileMode && isPlacingProtectionPoints && (
+        <Alert severity="info" sx={{ mb: 1 }}>
+          {t('climbingpanel.protection_points_hint')}
+        </Alert>
+      )}
+
+      {!isMobileMode && !isPlacingProtectionPoints && (
         <>
           {routeSelectedIndex === null && (
             <Alert severity="info">
@@ -85,7 +96,8 @@ export const ClimbingEditorHelperText = () => {
 
       {machine.currentStateName !== 'extendRoute' &&
         routeSelectedIndex !== null &&
-        !isInSchema && (
+        !isInSchema &&
+        !isPlacingProtectionPoints && (
           <>
             {isMobileMode ? (
               <DrawButton />

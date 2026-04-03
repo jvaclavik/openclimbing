@@ -44,8 +44,10 @@ export const ClimbingCragDialog = ({
   const {
     setScrollOffset,
     isPointMoving,
+    isProtectionPointMoving,
     setIsEditMode,
     isEditMode,
+    setIsPlacingProtectionPoints,
     machine,
     showDebugMenu,
     setRouteSelectedIndex,
@@ -114,6 +116,17 @@ export const ClimbingCragDialog = ({
     Router.push(`${getOsmappLink(feature)}${window.location.hash}`);
   };
   const handleCancel = () => {
+    // Reset UI/machine state so "cancel" leaves editor in a consistent non-edit mode.
+    setIsPlacingProtectionPoints(false);
+    if (machine.currentStateName === 'extendRoute') {
+      machine.execute('finishRoute');
+    }
+    if (
+      machine.currentStateName === 'pointMenu' ||
+      machine.currentStateName === 'protectionPointMenu'
+    ) {
+      machine.execute('cancelPointMenu');
+    }
     setIsEditMode(false);
     setTimeout(() => {
       loadPhotoRelatedData();
@@ -141,7 +154,8 @@ export const ClimbingCragDialog = ({
       <DialogContent
         dividers
         style={{
-          overscrollBehavior: isPointMoving ? 'none' : undefined,
+          overscrollBehavior:
+            isPointMoving || isProtectionPointMoving ? 'none' : undefined,
           padding: 0,
         }}
         ref={contentRef}
@@ -154,18 +168,20 @@ export const ClimbingCragDialog = ({
         <DialogActions>
           <Flex>
             <LeftActions>
-              {showDebugMenu && (
-                <Button
-                  onClick={onNewRouteCreate}
-                  color="primary"
-                  startIcon={<AddIcon />}
-                >
-                  Add new route
-                </Button>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <ClimbingEditorHelperText />
-              </div>
+              <Stack spacing={1} alignItems="flex-start" width="100%">
+                {showDebugMenu && (
+                  <Button
+                    onClick={onNewRouteCreate}
+                    color="primary"
+                    startIcon={<AddIcon />}
+                  >
+                    Add new route
+                  </Button>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <ClimbingEditorHelperText />
+                </div>
+              </Stack>
             </LeftActions>
             <div>
               <Stack spacing={2} direction="row">
