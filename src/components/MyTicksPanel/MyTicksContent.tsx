@@ -9,10 +9,10 @@ import {
 import { t } from '../../services/intl';
 import { PanelSidePadding } from '../utils/PanelHelpers';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
-import { OverpassFeature } from '../../services/overpass/overpassSearch';
 import { useSortedTable } from './useSortedTable';
 import { MyTicksRow } from './MyTicksRow';
 import { MyTicksGraphs } from './MyTicksGraphs/MyTicksGraphs';
+import { fetchedTicksToGraphFeatures } from './mapMyTicksRows';
 
 function NoTicksContent() {
   return (
@@ -35,14 +35,12 @@ function NoTicksContent() {
 
 type MyTicksContentProps = {
   fetchedTicks: FetchedClimbingTick[];
-  features: OverpassFeature[];
   readOnly?: boolean;
   emptyTicksMessage?: React.ReactNode;
 };
 
 export const MyTicksContent = ({
   fetchedTicks,
-  features,
   readOnly = false,
   emptyTicksMessage,
 }: MyTicksContentProps) => {
@@ -72,7 +70,7 @@ export const MyTicksContent = ({
           </Table>
         </TableContainer>
       )}
-      <MyTicksGraphs features={features} />
+      <MyTicksGraphs features={fetchedTicksToGraphFeatures(fetchedTicks)} />
     </>
   );
 };

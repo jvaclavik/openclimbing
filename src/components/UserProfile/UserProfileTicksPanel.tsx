@@ -1,12 +1,13 @@
 import React from 'react';
 import Router from 'next/router';
-import { CircularProgress, Link, Stack, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, Divider } from '@mui/material';
 import { t } from '../../services/intl';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import {
   PanelContent,
   PanelScrollbars,
   PanelSidePadding,
+  PANEL_GAP,
 } from '../utils/PanelHelpers';
 import { ClientOnly } from '../helpers';
 import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
@@ -15,8 +16,7 @@ import { useAddHeatmap } from '../MyTicksPanel/useAddHeatmap';
 import { useMyTicksPanelData } from '../MyTicksPanel/useMyTicksPanelData';
 import { MyTicksContent } from '../MyTicksPanel/MyTicksContent';
 import { useUserProfileFetch } from './useUserProfileFetch';
-
-const OSM_USER_BASE = 'https://www.openstreetmap.org/user';
+import { UserProfileHero } from './UserProfileHero';
 
 export const UserProfileTicksPanel = ({
   displayNameParam,
@@ -27,13 +27,12 @@ export const UserProfileTicksPanel = ({
   const state = useUserProfileFetch(displayNameParam);
 
   const readyTicks = state.kind === 'ready' ? state.ticks : null;
-  const overpassEnabled = state.kind === 'ready';
+  const ticksPanelEnabled = state.kind === 'ready';
 
-  const { fetchedTicks, features, isLoading } = useMyTicksPanelData(
+  const { fetchedTicks, isLoading } = useMyTicksPanelData(
     readyTicks,
-    false,
     userSettings['climbing.gradeSystem'],
-    { enabled: overpassEnabled },
+    { enabled: ticksPanelEnabled },
   );
 
   useAddHeatmap(fetchedTicks);
@@ -51,60 +50,53 @@ export const UserProfileTicksPanel = ({
         <PanelContent>
           <PanelScrollbars>
             <ClosePanelButton right onClick={handleClose} />
-            <PanelSidePadding>
-              <Typography
-                variant="h1"
-                component="h1"
-                sx={{ fontSize: '1.5rem' }}
-              >
-                {t('user_profile.title', { name: titleName })}
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                <Link
-                  href={`${OSM_USER_BASE}/${encodeURIComponent(titleName)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t('user_profile.osm_profile_link')}
-                </Link>
-              </Typography>
-            </PanelSidePadding>
 
-            {state.kind === 'loading' || (overpassEnabled && isLoading) ? (
-              <Stack justifyContent="center" alignItems="center" height="100%">
+            <UserProfileHero titleName={titleName} />
+
+            <Divider sx={{ mb: 2 }} />
+
+            {state.kind === 'loading' || (ticksPanelEnabled && isLoading) ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: 200,
+                  py: 4,
+                }}
+              >
                 <CircularProgress />
-              </Stack>
+              </Box>
             ) : null}
 
             {state.kind === 'unknown' ? (
               <PanelSidePadding>
-                <Typography variant="body1">
+                <Alert severity="info" variant="outlined">
                   {t('user_profile.unknown_user')}
-                </Typography>
+                </Alert>
               </PanelSidePadding>
             ) : null}
 
             {state.kind === 'error' ? (
               <PanelSidePadding>
-                <Typography variant="body1" color="error">
+                <Alert severity="error" variant="outlined">
                   {t('user_profile.load_error')}
-                </Typography>
+                </Alert>
               </PanelSidePadding>
             ) : null}
 
             {state.kind === 'ready' && !isLoading ? (
-              <MyTicksContent
-                fetchedTicks={fetchedTicks}
-                features={features}
-                readOnly
-                emptyTicksMessage={
-                  <PanelSidePadding>
-                    <Typography variant="body1">
+              <Box sx={{ px: PANEL_GAP, pt: 0 }}>
+                <MyTicksContent
+                  fetchedTicks={fetchedTicks}
+                  readOnly
+                  emptyTicksMessage={
+                    <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
                       {t('user_profile.no_ticks')}
-                    </Typography>
-                  </PanelSidePadding>
-                }
-              />
+                    </Alert>
+                  }
+                />
+              </Box>
             ) : null}
           </PanelScrollbars>
         </PanelContent>

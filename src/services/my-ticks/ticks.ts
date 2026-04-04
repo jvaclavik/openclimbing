@@ -65,6 +65,12 @@ export const tickStyles: Array<{
     description: t('tick.style_description_FS'),
     color: 'orange',
   },
+  {
+    key: 'PJ',
+    name: 'Project',
+    description: t('tick.style_description_PJ'),
+    color: '#9c27b0',
+  },
 ];
 
 const getLocalStorageItem = (key: string): Array<LocalStorageTick> => {

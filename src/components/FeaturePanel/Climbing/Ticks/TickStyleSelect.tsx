@@ -26,14 +26,22 @@ const StyledInfoOutlinedIcon = styled(InfoOutlinedIcon)`
 export const TickStyleSelect = ({
   value,
   onChange,
+  fullWidth,
 }: {
   value: TickStyle;
   onChange: (e) => void;
+  fullWidth?: boolean;
 }) => (
-  <FormControl>
+  <FormControl fullWidth={fullWidth}>
     <InputLabel>Tick style</InputLabel>
 
-    <Select value={value} onChange={onChange} label="Tick style" size="small">
+    <Select
+      value={value}
+      onChange={onChange}
+      label="Tick style"
+      size="small"
+      fullWidth={fullWidth}
+    >
       {tickStyles.map((tickStyle) => (
         <MenuItem key={tickStyle.key} value={tickStyle.key}>
           <Row>

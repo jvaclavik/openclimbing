@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getDb } from '../../../../src/server/db/db';
 import { findOsmUserIdByDisplayName } from '../../../../src/server/db/osmUserDisplayNames';
-import { convertClimbingTickFromDb } from '../../../../src/services/my-ticks/myTicksApi';
+import { climbingTickDbsToResponseTicks } from '../../../../src/server/db/enrichClimbingTicksWithRouteMeta';
 import { ClimbingTickDb } from '../../../../src/types';
 
 const MAX_NAME_LEN = 255;
@@ -47,7 +47,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.status(200).json({
       displayName: nameRow?.displayName ?? trimmed,
-      ticks: rows.map(convertClimbingTickFromDb),
+      ticks: climbingTickDbsToResponseTicks(db, rows),
     });
   } catch (err) {
     console.error(err); // eslint-disable-line no-console

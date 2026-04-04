@@ -38,6 +38,7 @@ export default {
   'tick.style_description_AF': 'Die Route vollständig frei ohne technische Hilfsmittel klettern.',
   'tick.style_description_TR': 'Die Route mit einem bereits oben verankerten Seil klettern.',
   'tick.style_description_FS': 'Die Route ohne jegliche Sicherung oder Seile klettern.',
+  'tick.style_description_PJ': 'Arbeit an der Route ohne kompletten Durchstieg: Versuche, Hängen im Seil, Erarbeiten der Züge oder aktives Projekt.',
 
   'climbing_renderer.climbing_grade_single': 'Schwierigkeitsgrad',
 

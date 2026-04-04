@@ -19,10 +19,15 @@ export const convertClimbingTickFromDb = (
   dbRow: ClimbingTickDb,
 ): ClimbingTick => {
   const { osmType, osmId, pairing, ...rest } = dbRow;
-  const shortId =
-    osmType && osmId
-      ? getShortId({ type: osmType as OsmType, id: osmId })
-      : null;
+  const idNum = osmId === null || osmId === undefined ? NaN : Number(osmId);
+  const hasOsmRef =
+    typeof osmType === 'string' &&
+    osmType.trim() !== '' &&
+    Number.isFinite(idNum) &&
+    idNum >= 1;
+  const shortId = hasOsmRef
+    ? getShortId({ type: osmType as OsmType, id: idNum })
+    : null;
 
   return {
     ...rest,
@@ -54,13 +59,11 @@ export const putClimbingTick = async (tick: Partial<ClimbingTick>) => {
 };
 
 export const getClimbingTicks = async () => {
-  const allTicks = await fetchJson<ClimbingTickDb[]>('/api/climbing-ticks', {
+  return fetchJson<ClimbingTick[]>('/api/climbing-ticks', {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     nocache: true,
   });
-
-  return allTicks.map(convertClimbingTickFromDb);
 };
 
 export const fetchPublicClimbingTicksByDisplayName = async (

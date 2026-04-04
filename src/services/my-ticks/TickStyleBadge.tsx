@@ -16,7 +16,7 @@ const Container = styled.div<{ $color: string }>`
 `;
 
 export const TickStyleBadge = ({ style }: TickStyleBadgeProps) => {
-  const styleConfig = tickStyles.find((s) => s.key === style);
+  const styleConfig = tickStyles.find((s) => s.key === style) ?? tickStyles[0];
   return (
     <Tooltip
       arrow
@@ -28,7 +28,9 @@ export const TickStyleBadge = ({ style }: TickStyleBadgeProps) => {
         </>
       }
     >
-      <Container $color={styleConfig.color}>{style}</Container>
+      <Container $color={styleConfig.color}>
+        {style != null ? style : ''}
+      </Container>
     </Tooltip>
   );
 };

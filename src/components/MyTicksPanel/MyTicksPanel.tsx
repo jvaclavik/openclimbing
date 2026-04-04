@@ -18,10 +18,9 @@ import { MyTicksContent } from './MyTicksContent';
 
 export const MyTicksPanel = () => {
   const { userSettings } = useUserSettingsContext();
-  const { ticks, isFetching } = useTicksContext();
-  const { fetchedTicks, features, isLoading } = useMyTicksPanelData(
+  const { ticks } = useTicksContext();
+  const { fetchedTicks, isLoading } = useMyTicksPanelData(
     ticks,
-    isFetching,
     userSettings['climbing.gradeSystem'],
   );
 
@@ -46,7 +45,7 @@ export const MyTicksPanel = () => {
                 <CircularProgress />
               </Stack>
             ) : (
-              <MyTicksContent fetchedTicks={fetchedTicks} features={features} />
+              <MyTicksContent fetchedTicks={fetchedTicks} />
             )}
           </PanelScrollbars>
         </PanelContent>

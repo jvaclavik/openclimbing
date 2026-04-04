@@ -2,9 +2,7 @@ import { ClimbingTick } from '../../types';
 
 export const PARTNERS_PAIRING_KEY = 'partners';
 
-export const parsePairing = (
-  raw: unknown,
-): Record<string, string> | null => {
+export const parsePairing = (raw: unknown): Record<string, string> | null => {
   if (raw == null || raw === '') {
     return null;
   }
@@ -74,4 +72,40 @@ export const collectPartnerSuggestionsFromTicks = (
     }
   }
   return [...set].sort((a, b) => a.localeCompare(b));
+};
+
+const byTimestampDesc = (a: ClimbingTick, b: ClimbingTick) =>
+  new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+
+/**
+ * Partners text from the most recent other tick on the same route; if none,
+ * from the most recent other tick on any route.
+ */
+export const getPartnersFromLastClimbedRoute = (
+  ticks: ClimbingTick[],
+  currentTick: ClimbingTick,
+): string | null => {
+  const sid = currentTick.shortId;
+  if (sid) {
+    const sameRoute = ticks
+      .filter((t) => t.shortId === sid && t.id !== currentTick.id)
+      .sort(byTimestampDesc);
+    for (const t of sameRoute) {
+      const p = getPartnersText(t).trim();
+      if (p) {
+        return p;
+      }
+    }
+  }
+
+  const anyOther = ticks
+    .filter((t) => t.id !== currentTick.id)
+    .sort(byTimestampDesc);
+  for (const t of anyOther) {
+    const p = getPartnersText(t).trim();
+    if (p) {
+      return p;
+    }
+  }
+  return null;
 };

@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { serverFetchOsmUser } from '../../../src/server/osmApiAuthServer';
 import { OSM_TOKEN_COOKIE } from '../../../src/services/osm/consts';
-import { normalizePairingForDb, parsePairing } from '../../../src/services/my-ticks/tickPairing';
+import {
+  normalizePairingForDb,
+  parsePairing,
+} from '../../../src/services/my-ticks/tickPairing';
 import { ClimbingTickDb } from '../../../src/types';
 import { getDb } from '../../../src/server/db/db';
 

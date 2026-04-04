@@ -2,11 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getDb } from '../../../src/server/db/db';
 import { serverFetchOsmUser } from '../../../src/server/osmApiAuthServer';
 import { OSM_TOKEN_COOKIE } from '../../../src/services/osm/consts';
-import {
-  normalizePairingForDb,
-  parsePairing,
-} from '../../../src/services/my-ticks/tickPairing';
+import { normalizePairingForDb } from '../../../src/services/my-ticks/tickPairing';
 import { ClimbingTickDb } from '../../../src/types';
+import { climbingTickDbsToResponseTicks } from '../../../src/server/db/enrichClimbingTicksWithRouteMeta';
 
 const addTickToDB = async (req: NextApiRequest) => {
   const user = await serverFetchOsmUser(req.cookies[OSM_TOKEN_COOKIE]);
@@ -42,10 +40,7 @@ const getAllTicks = async (req: NextApiRequest) => {
     'SELECT * FROM climbing_ticks WHERE "osmUserId" = ?',
   );
   const rows = statement.all(user.id);
-  return rows.map((row) => ({
-    ...row,
-    pairing: parsePairing(row.pairing),
-  }));
+  return climbingTickDbsToResponseTicks(getDb(), rows);
 };
 
 const performGetOrPost = async (req: NextApiRequest) => {

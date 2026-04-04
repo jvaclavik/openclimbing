@@ -54,6 +54,7 @@ export default {
   'tick.style_description_AF': '完全以自由攀登、不使用任何人工輔助器材的方式完成路線（All Free）。',
   'tick.style_description_TR': '在繩索已預先架設於頂部確保點的情況下攀爬路線（Top-rope）。',
   'tick.style_description_FS': '在不使用任何確保裝備或繩索的情況下攀爬路線（Free-solo）。',
+  'tick.style_description_PJ': '尚未完攀的練習與嘗試：試攀、掛繩休息、研究動作，或作為進行中的目標路線。',
 
   'climbing_renderer.climbing_grade_single': '攀岩難度',
   'climbing_renderer.climbing_grade_average': '平均攀岩難度',

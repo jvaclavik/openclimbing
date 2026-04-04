@@ -59,6 +59,7 @@ export type TickStyle =
   | 'AF'
   | 'TR'
   | 'FS'
+  | 'PJ'
   | null;
 
 /** @deprecated use ClimbingTick type */
