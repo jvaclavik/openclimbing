@@ -15,8 +15,10 @@ import { PartnersMentionsText } from '../FeaturePanel/Climbing/PartnersMentionsT
 
 export const MyTicksRow = ({
   fetchedTick,
+  readOnly = false,
 }: {
   fetchedTick: FetchedClimbingTick;
+  readOnly?: boolean;
 }) => {
   const routeDifficulties = getDifficulties(fetchedTick.tags);
   const { view } = useMapStateContext();
@@ -42,9 +44,11 @@ export const MyTicksRow = ({
       <TableCell sx={{ textAlign: 'right' }}>
         {format(date, DEFAULT_DATA_FORMAT)}
       </TableCell>
-      <TableCell>
-        <TickMoreButton tick={fetchedTick.tick} />
-      </TableCell>
+      {readOnly ? null : (
+        <TableCell>
+          <TickMoreButton tick={fetchedTick.tick} />
+        </TableCell>
+      )}
     </TableRow>
   );
 };

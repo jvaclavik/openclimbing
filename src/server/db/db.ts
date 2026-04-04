@@ -12,6 +12,38 @@ const getDbVersion = (db: Database) => {
   return result.user_version;
 };
 
+/**
+ * Ensures optional tables exist even if user_version was bumped without them
+ * (e.g. partial deploy, manual DB edit, or schema drift). Runs every getDb().
+ */
+const ensureOsmUserDisplayNamesTable = (db: Database) => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS osm_user_display_names
+    (
+      "osmUserId"   INTEGER PRIMARY KEY NOT NULL,
+      "displayName" TEXT NOT NULL
+    );
+  `);
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_osm_user_display_name_lower
+      ON osm_user_display_names (lower("displayName"));
+  `);
+};
+
+/**
+ * Applies version-based migrations. Must run on every getDb() (see HMR cache).
+ */
+const runPendingMigrations = (db: Database) => {
+  const v = getDbVersion(db);
+  if (v === 1) {
+    db.transaction(() => {
+      db.pragma('user_version = 2');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 1 to 2`); // eslint-disable-line no-console
+  }
+};
+
 // global to allow hot-reload in dev
 const store = global as unknown as { db: Database | undefined };
 
@@ -25,14 +57,17 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 1');
+        db.pragma('user_version = 2');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 1`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 2`); // eslint-disable-line no-console
     }
 
     store.db = db;
   }
+
+  ensureOsmUserDisplayNamesTable(store.db);
+  runPendingMigrations(store.db);
 
   return store.db;
 }

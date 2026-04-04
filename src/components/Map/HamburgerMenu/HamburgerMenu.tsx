@@ -32,6 +32,7 @@ import Link from 'next/link';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
 import { MyTicksMenuItem } from './MyTicksMenuItem';
+import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import ContrastIcon from '@mui/icons-material/Contrast';
 
 const StyledGithubIcon = styled(GithubIcon)`
@@ -175,7 +176,12 @@ export const HamburgerMenu = () => {
           <div>
             <UserHeader closeMenu={close} />
             <Divider sx={{ mt: 1, mb: 2 }} />
-            {isOpenClimbing && <MyTicksMenuItem closeMenu={close} />}
+            {isOpenClimbing && (
+              <>
+                <MyTicksMenuItem closeMenu={close} />
+                <MyClimbingProfileMenuItem closeMenu={close} />
+              </>
+            )}
             {(hasClimbingLayer || isOpenClimbing) && (
               <ClimbingGradesTableLink closeMenu={close} />
             )}

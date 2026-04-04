@@ -15,7 +15,9 @@ const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
   };
 };
 
-const convertFromDb = (dbRow: ClimbingTickDb): ClimbingTick => {
+export const convertClimbingTickFromDb = (
+  dbRow: ClimbingTickDb,
+): ClimbingTick => {
   const { osmType, osmId, pairing, ...rest } = dbRow;
   const shortId =
     osmType && osmId
@@ -58,7 +60,20 @@ export const getClimbingTicks = async () => {
     nocache: true,
   });
 
-  return allTicks.map(convertFromDb);
+  return allTicks.map(convertClimbingTickFromDb);
+};
+
+export const fetchPublicClimbingTicksByDisplayName = async (
+  displayName: string,
+): Promise<{ displayName: string; ticks: ClimbingTick[] }> => {
+  return await fetchJson(
+    `/api/climbing-ticks/public/${encodeURIComponent(displayName)}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      nocache: true,
+    },
+  );
 };
 
 export const deleteClimbingTick = async (id: number) => {

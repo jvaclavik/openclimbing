@@ -60,11 +60,16 @@ interface EnhancedTableProps {
   orderBy: string;
 }
 
+type EnhancedTableHeadProps = EnhancedTableProps & {
+  showActionsColumn: boolean;
+};
+
 function EnhancedTableHead({
   order,
   orderBy,
   onRequestSort,
-}: EnhancedTableProps) {
+  showActionsColumn,
+}: EnhancedTableHeadProps) {
   const createSortHandler =
     (property: OrderKey) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -88,13 +93,21 @@ function EnhancedTableHead({
             </TableSortLabel>
           </TableCell>
         ))}
-        <TableCell />
+        {showActionsColumn ? <TableCell /> : null}
       </TableRow>
     </TableHead>
   );
 }
 
-export const useSortedTable = (tickRows: FetchedClimbingTick[]) => {
+type UseSortedTableOptions = {
+  showActionsColumn?: boolean;
+};
+
+export const useSortedTable = (
+  tickRows: FetchedClimbingTick[],
+  options?: UseSortedTableOptions,
+) => {
+  const showActionsColumn = options?.showActionsColumn !== false;
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<OrderKey>('date');
 
@@ -116,6 +129,7 @@ export const useSortedTable = (tickRows: FetchedClimbingTick[]) => {
       order={order}
       orderBy={orderBy}
       onRequestSort={handleRequestSort}
+      showActionsColumn={showActionsColumn}
     />
   );
   return { visibleRows, tableHeader };

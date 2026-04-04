@@ -1,8 +1,8 @@
 /* eslint-disable import/no-mutable-exports */
-import { publishDbgObject } from '../utils';
-import { isBrowser } from '../components/helpers';
-import type { TranslationId } from './types';
 import { IncomingMessage } from 'node:http';
+import { isBrowser } from '../components/helpers';
+import { publishDbgObject } from '../utils';
+import type { TranslationId } from './types';
 
 type Project = {
   id: string;
@@ -44,6 +44,7 @@ const domains: Record<string, Project> = {
   'osmapp.org': osmapp,
   'openclimbing.org': openclimbing,
   '127.0.0.1:3000': openclimbing,
+  'localhost:3000': openclimbing,
 };
 const climbingDev = (host: string) =>
   /climbing(.*)vercel.app$/.test(host) ? openclimbingDev : null;

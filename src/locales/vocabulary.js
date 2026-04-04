@@ -19,7 +19,15 @@ export default {
   'user.login_register': 'Login / register',
   'user.logout': 'Logout',
   'user.my_ticks': 'My ticks',
+  'user.my_climbing_profile': 'My climbing profile',
   'user.user_settings': 'Settings',
+
+  'user_profile.title': 'Ticks by __name__',
+  'user_profile.osm_profile_link': 'OpenStreetMap profile',
+  'user_profile.unknown_user': 'This climber has not signed in to OpenClimbing yet, so their public tick list is not linked to this username.',
+  'user_profile.no_ticks': 'No ticks recorded yet.',
+  'user_profile.load_error': 'Could not load this profile.',
+  'user_profile.unavailable_project': 'Climbing profiles are only available in OpenClimbing.',
 
   'user_settings.general': 'General',
   'user_settings.show_weather_widget': 'Show the weather widget',
@@ -55,11 +63,9 @@ export default {
   'tick.style_description_FS': 'Climbing the route without any protective gear or ropes.',
 
   'tick.partners_label': 'Partners',
-  'tick.partners_helper':
-    'Use @nickname for OpenStreetMap usernames. Suggestions come from nicknames you used before.',
+  'tick.partners_helper': 'Use @nickname for OpenStreetMap usernames. Suggestions come from nicknames you used before.',
   'tick.partners_placeholder': 'e.g. with @alice',
-  'tick.partners_no_suggestions':
-    'No saved @nicknames yet — type an OSM username after @.',
+  'tick.partners_no_suggestions': 'No saved @nicknames yet — type an OSM username after @.',
 
   'climbing_renderer.climbing_grade_single': 'climbing grade',
   'climbing_renderer.climbing_grade_average': 'average climbing grade',
