@@ -40,10 +40,10 @@ const generateGeojson = (
 ): FeatureCollection => ({
   type: 'FeatureCollection',
   features: tickRows
-    .filter((tickRow) => tickRow.center)
+    .filter((tickRow) => tickRow.center && tickRow.center.length >= 2)
     .map((tickRow) => ({
       type: 'Feature',
-      geometry: { type: 'Point', coordinates: tickRow.center },
+      geometry: { type: 'Point', coordinates: tickRow.center! },
       properties: {
         mag: 1,
       },

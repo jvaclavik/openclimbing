@@ -48,13 +48,16 @@ const MyRouteTicksInner = () => {
   const { feature } = useFeatureContext();
   const { ticks, error, isFetching } = useTicksContext();
   const { loggedIn } = useOsmAuthContext();
-  const ticksForRoute = ticks.filter(
-    ({ shortId }) => shortId === getShortId(feature.osmMeta),
-  );
 
   if (!loggedIn) {
     return <NotLoggedIn />;
   }
+  if (ticks === null) {
+    return <DotLoader />;
+  }
+  const ticksForRoute = ticks.filter(
+    ({ shortId }) => shortId === getShortId(feature.osmMeta),
+  );
   if (isFetching && ticksForRoute.length === 0) {
     return <DotLoader />;
   }

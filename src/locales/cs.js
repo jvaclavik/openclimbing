@@ -11,10 +11,36 @@ export default {
 
   'climbing.photos': 'Fotky',
 
+  'tick.style_description_PJ': 'Práce na cestě bez čistého přelezu: pokusy, visení na laně, rozlezení nebo aktivní projekt.',
+
+  'tick.partners_label': 'Spolulezci',
+  'tick.partners_helper': 'Za @ zadej uživatelské jméno z OpenStreetMap. Návrhy se berou z přezdívek, které už máš u jiných zápisů.',
+  'tick.partners_placeholder': 'např. s @pepa',
+  'tick.partners_no_suggestions': 'Zatím žádné uložené @přezdívky — napiš celé OSM jméno za znakem @.',
+  'tick.partners_from_last_route': 'Spolulezci z poslední cesty',
+  'tick.partners_from_last_route_none': 'U žádného dřívějšího záznamu na této cestě (ani jinde) nejsou spolulezci.',
+  'tick.edit_dialog_title': 'Upravit přelez',
+  'tick.save': 'Uložit',
+  'tick.save_success': 'Přelez byl uložen',
+  'tick.date_label': 'Datum',
+  'tick.date_future_error': 'Datum výlezu nemůže být v budoucnosti.',
+  'tick.my_grade_label': 'Má obtížnost',
+  'tick.note_label': 'Poznámka pro ostatní',
+
   'user.login_register': 'Přihlásit se / Registrovat',
   'user.logout': 'Odhlásit se',
+  'my_ticks.route_unnamed': 'Cesta bez názvu',
+
   'user.my_ticks': 'Moje přelezy',
+  'user.my_climbing_profile': 'Můj lezecký profil',
   'user.user_settings': 'Nastavení',
+
+  'user_profile.title': 'Přelezy uživatele __name__',
+  'user_profile.osm_profile_link': 'Profil na OpenStreetMap',
+  'user_profile.unknown_user': 'Tento lezec se zatím nepřihlásil do OpenClimbing, takže pod tímto jménem není veřejný seznam přelezů.',
+  'user_profile.no_ticks': 'Zatím žádné zaznamenané přelezy.',
+  'user_profile.load_error': 'Profil se nepodařilo načíst.',
+  'user_profile.unavailable_project': 'Lezecké profily jsou jen v OpenClimbing.',
 
   'user_settings.general': 'Obecné',
   'user_settings.show_weather_widget': 'Zobrazit widget počasí',

@@ -36,6 +36,7 @@ export default {
   'tick.style_description_AF': 'Arrampicata interamente libera senza alcuno strumento di ausilio.',
   'tick.style_description_TR': 'Arrampicata con una corda già ancorata sopra.',
   'tick.style_description_FS': 'Arrampicata senza alcuno strumento protettivo e senza corda.',
+  'tick.style_description_PJ': 'Lavoro sulla via senza liberazione completa: tentativi, riposo in corda, studio dei movimenti o progetto attivo.',
 
   'climbing_renderer.climbing_grade_single': 'grado di arrampicata',
 

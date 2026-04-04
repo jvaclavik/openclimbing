@@ -1,5 +1,7 @@
 import fetch from 'isomorphic-unfetch';
 import { FetchError } from '../services/helpers';
+import { getDb } from './db/db';
+import { upsertOsmUserDisplayName } from './db/osmUserDisplayNames';
 
 const API_URL = `https://api.openstreetmap.org`;
 
@@ -34,8 +36,16 @@ export type ServerOsmUser = { id: number; username: string };
 
 export const serverFetchOsmUser = async (token: string) => {
   const { user } = await authFetch('/api/0.6/user/details.json', token);
-  return {
+  const osmUser = {
     id: user.id,
     username: user.display_name,
   } as ServerOsmUser;
+
+  try {
+    upsertOsmUserDisplayName(getDb(), osmUser);
+  } catch (err) {
+    console.error('OpenClimbing: could not cache OSM display name', err); // eslint-disable-line no-console
+  }
+
+  return osmUser;
 };

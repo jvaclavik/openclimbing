@@ -1,122 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import {
-  AppBar,
   Button,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
+  DialogTitle,
   IconButton,
   Stack,
-  TextField,
-  Toolbar,
   Tooltip,
-  Typography,
 } from '@mui/material';
-import { useSnackbar } from '../../utils/SnackbarContext';
-import { TickStyleSelect } from './Ticks/TickStyleSelect';
 import CloseIcon from '@mui/icons-material/Close';
-import { ClimbingTick } from '../../../types';
 import { clone } from 'lodash';
-import { TickStyle } from './types';
+import { useSnackbar } from '../../utils/SnackbarContext';
+import { ClimbingTick } from '../../../types';
 import { useTicksContext } from '../../utils/TicksContext';
-
-type EditTickModalProps = {
-  tickId: number;
-  data: ClimbingTick[];
-  isFetching: boolean;
-  onClose: () => void;
-};
-
-const EditTickHeader = (props: { onClose: () => void }) => (
-  <AppBar position="static" color="transparent">
-    <Toolbar>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        flex="1"
-        alignItems="center"
-      >
-        <Typography noWrap variant="h6" component="div">
-          Edit tick
-        </Typography>
-
-        <Tooltip title="Close crag detail">
-          <IconButton color="primary" edge="end" onClick={props.onClose}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Stack>
-    </Toolbar>
-  </AppBar>
-);
-
-const TickFields = ({
-  tempTick,
-  updateTempTick,
-}: {
-  tempTick: ClimbingTick;
-  updateTempTick: <T extends keyof ClimbingTick>(
-    key: T,
-    value: ClimbingTick[T],
-  ) => void;
-}) => (
-  <>
-    <TickStyleSelect
-      value={tempTick.style as TickStyle}
-      onChange={(e) => updateTempTick('style', e.target.value)}
-    />
-
-    <TextField
-      label="Date"
-      value={tempTick.timestamp}
-      onChange={(e) => {
-        updateTempTick('timestamp', e.target.value);
-      }}
-      InputLabelProps={{
-        shrink: true,
-      }}
-    />
-
-    <TextField
-      label="My grade"
-      value={tempTick.myGrade}
-      onChange={(e) => {
-        updateTempTick('myGrade', e.target.value);
-      }}
-      InputLabelProps={{
-        shrink: true,
-      }}
-    />
-
-    <TextField
-      label="Note for other climbers"
-      value={tempTick.note}
-      onChange={(e) => {
-        updateTempTick('note', e.target.value);
-      }}
-      InputLabelProps={{
-        shrink: true,
-      }}
-    />
-  </>
-);
+import {
+  applyDateInputToTickTimestamp,
+  isClimbCalendarDateAfterToday,
+  todayDateInputMax,
+} from '../../../services/my-ticks/tickTimestampInput';
+import { t } from '../../../services/intl';
+import { EditTickFormFields } from './EditTickFormFields';
 
 const useTempTick = () => {
   const { editedTickId, ticks, isFetching } = useTicksContext();
   const [tempTick, setTempTick] = useState<ClimbingTick>(undefined);
 
   useEffect(() => {
-    if (editedTickId && !isFetching) {
+    if (editedTickId && !isFetching && ticks) {
       const found = ticks.find((tick) => tick.id === editedTickId);
       if (found) {
-        setTempTick(clone(found));
+        let next = clone(found);
+        if (isClimbCalendarDateAfterToday(next.timestamp)) {
+          next = {
+            ...next,
+            timestamp: applyDateInputToTickTimestamp(
+              next.timestamp,
+              todayDateInputMax(),
+            ),
+          };
+        }
+        setTempTick(next);
       }
     }
   }, [ticks, isFetching, editedTickId]);
 
   const updateTempTick = (key: string, value: unknown) => {
-    setTempTick((tempTick) => ({
-      ...tempTick,
+    setTempTick((prev) => ({
+      ...prev,
       [key]: value,
     }));
   };
@@ -124,42 +56,98 @@ const useTempTick = () => {
 };
 
 export const EditTickModal = () => {
-  const { updateTick, editedTickId, setEditedTickId } = useTicksContext();
+  const { updateTick, editedTickId, setEditedTickId, ticks } =
+    useTicksContext();
   const { showToast } = useSnackbar();
   const { tempTick, updateTempTick } = useTempTick();
   const [loading, setLoading] = useState<boolean>(false);
+
   const onClose = () => {
     setEditedTickId(null);
   };
 
   const handleSave = async () => {
+    if (isClimbCalendarDateAfterToday(tempTick.timestamp)) {
+      showToast(t('tick.date_future_error'), 'error');
+      return;
+    }
     setLoading(true);
     try {
       await updateTick(tempTick);
-      showToast('Tick was updated', 'success');
+      showToast(t('tick.save_success'), 'success');
+      onClose();
     } catch (e) {
-      showToast(`Error: ${e}`, 'error');
+      showToast(`${t('error')}: ${e}`, 'error');
     } finally {
       setLoading(false);
-      onClose();
     }
   };
 
   return (
-    <Dialog open={!!editedTickId} onClose={onClose}>
-      <EditTickHeader onClose={onClose} />
-      <DialogContent dividers>
+    <Dialog
+      open={!!editedTickId}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: { borderRadius: 2 },
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          pr: 5,
+          pb: 1,
+          typography: 'h6',
+        }}
+      >
+        {t('tick.edit_dialog_title')}
+        <Tooltip title={t('close_panel')}>
+          <IconButton
+            aria-label={t('close_panel')}
+            onClick={onClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'text.secondary',
+            }}
+            size="small"
+          >
+            <CloseIcon />
+          </IconButton>
+        </Tooltip>
+      </DialogTitle>
+
+      <DialogContent dividers sx={{ pt: 2, px: 3 }}>
         {tempTick ? (
-          <Stack spacing={2}>
-            <TickFields tempTick={tempTick} updateTempTick={updateTempTick} />
-            <Button onClick={handleSave} loading={loading}>
-              Save
-            </Button>
-          </Stack>
+          <EditTickFormFields
+            key={tempTick.id}
+            tempTick={tempTick}
+            updateTempTick={updateTempTick}
+            allTicks={ticks ?? []}
+          />
         ) : (
-          <CircularProgress />
+          <Stack alignItems="center" py={4}>
+            <CircularProgress />
+          </Stack>
         )}
       </DialogContent>
+
+      <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+        <Button onClick={onClose} color="inherit" disabled={loading}>
+          {t('editdialog.cancel_button')}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={!tempTick || loading}
+          loading={loading}
+        >
+          {t('tick.save')}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

@@ -1,4 +1,9 @@
 import {
+  LayerSpecification,
+  SymbolLayerSpecification,
+} from '@maplibre/maplibre-gl-style-spec';
+import { AREA, CLIMBING_TILES_SOURCE, CRAG, GYM, VIA_FERRATA } from '../consts';
+import {
   byHasImages,
   hover,
   ifCrag,
@@ -6,11 +11,6 @@ import {
   linearByRouteCount,
   sortKey,
 } from './helpers';
-import {
-  LayerSpecification,
-  SymbolLayerSpecification,
-} from '@maplibre/maplibre-gl-style-spec';
-import { AREA, CLIMBING_TILES_SOURCE, CRAG, GYM, VIA_FERRATA } from '../consts';
 
 const areaSize = linearByRouteCount(0, 0.4, 400, 1);
 const cragSize = linearByRouteCount(0, 0.4, 50, 0.7);

@@ -5,7 +5,8 @@ import { join, roundedToDegUrl } from '../utils';
 import { PROJECT_URL } from './project';
 import { getIdFromShortener, getShortenerSlug } from './shortener';
 
-export const getShortId = ({ id, type }: OsmId): string => `${type[0]}${id}`;
+export const getShortId = ({ id, type }: OsmId): string =>
+  `${String(type)[0].toLowerCase()}${id}`;
 export const getUrlOsmId = ({ id, type }: OsmId): string => `${type}/${id}`;
 
 export const getReactKey = (feature: Feature) =>
@@ -14,9 +15,30 @@ export const getReactKey = (feature: Feature) =>
   (feature.point ? feature.center.join(',') : feature.osmMeta.version);
 
 export const getApiId = (shortId: string): OsmId => {
-  const type = { w: 'way', n: 'node', r: 'relation' }[shortId[0]] as OsmType;
-  const id = parseInt(shortId.substring(1), 10);
+  const t = String(shortId).trim();
+  const c = t[0]?.toLowerCase();
+  const type = { w: 'way', n: 'node', r: 'relation' }[c] as OsmType;
+  const id = parseInt(t.slice(1), 10);
   return { type, id };
+};
+
+/** Canonical `n123` / `w1` key for maps (trim + lowercase type prefix). */
+export const normalizeOsmShortIdKey = (shortId: string): string => {
+  const t = String(shortId).trim();
+  if (!t) {
+    return t;
+  }
+  return t[0].toLowerCase() + t.slice(1);
+};
+
+export const isValidOsmShortId = (
+  shortId: string | null | undefined,
+): boolean => {
+  if (shortId == null || !String(shortId).trim()) {
+    return false;
+  }
+  const { type, id } = getApiId(String(shortId));
+  return Boolean(type) && Number.isFinite(id) && id >= 1;
 };
 
 export const getOsmappLink = (feature: Feature | null) => {

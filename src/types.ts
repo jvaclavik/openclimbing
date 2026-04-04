@@ -57,6 +57,11 @@ export type ClimbingTick = {
   myGrade: string | null;
   note: string | null;
   pairing: Record<string, string> | null;
+  /** From climbing_features when serving GET /api/climbing-ticks. */
+  routeName?: string | null;
+  routeGradeTxt?: string | null;
+  routeLon?: number | null;
+  routeLat?: number | null;
 };
 
 export type ClimbingTickDb = Omit<ClimbingTick, 'shortId'> & {

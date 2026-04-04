@@ -1,11 +1,11 @@
-import { GeometryCollection, LineString, LonLat, OsmId, Point } from '../types';
-import { getPoiClass } from '../getPoiClass';
-import { getCenter } from '../getCenter';
-import { Feature as FeatureGeojson, FeatureCollection, Polygon } from 'geojson';
+import { FeatureCollection, Feature as FeatureGeojson, Polygon } from 'geojson';
 import { ASTNode } from '../../components/SearchBox/queryWizard/ast';
-import { Bbox } from '../../components/utils/MapStateContext';
 import { generateQuery } from '../../components/SearchBox/queryWizard/generateQuery';
 import { isAstNode } from '../../components/SearchBox/queryWizard/isAst';
+import { Bbox } from '../../components/utils/MapStateContext';
+import { getCenter } from '../getCenter';
+import { getPoiClass } from '../getPoiClass';
+import { GeometryCollection, LineString, LonLat, OsmId, Point } from '../types';
 import { fetchOverpass } from './fetchOverpass';
 
 const getOverpassQuery = ([a, b, c, d], query: string) =>
@@ -108,6 +108,8 @@ const isClosedWay = (element: OverpassObject) => {
 
 export type OverpassFeature = FeatureGeojson & {
   tags: Record<string, string>;
+  osmMeta: OsmId;
+  center?: LonLat;
 };
 
 export type OverpassResponse = {

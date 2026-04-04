@@ -1,4 +1,4 @@
--- SQLite schema v1
+-- SQLite schema v2 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -55,3 +55,12 @@ CREATE TABLE climbing_ticks
   note        TEXT,
   pairing     TEXT
 );
+
+CREATE TABLE osm_user_display_names
+(
+  "osmUserId"   INTEGER PRIMARY KEY NOT NULL,
+  "displayName" TEXT NOT NULL
+);
+
+CREATE INDEX idx_osm_user_display_name_lower
+  ON osm_user_display_names (lower("displayName"));

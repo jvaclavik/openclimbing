@@ -109,23 +109,26 @@ const useGetUpdateTick = () => {
 
 const useClimbingTicksQuery = () => {
   const { loggedIn } = useOsmAuthContext();
-  const {
-    data: ticks,
-    error,
-    isFetching,
-  } = useQuery({
+  const { data, error, isFetching, isFetched } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: getClimbingTicks,
-    initialData: [],
     keepPreviousData: true,
     enabled: PROJECT_ID === 'openclimbing' && loggedIn,
   });
 
+  // `isLoading` can be false before the first network round-trip settles; `isFetched` is false until then.
+  const ticks: ClimbingTick[] | null =
+    PROJECT_ID !== 'openclimbing' || !loggedIn
+      ? []
+      : !isFetched
+        ? null
+        : (data ?? []);
+
   return { ticks, error, isFetching };
 };
 
-const getIsTicked = (ticks: ClimbingTick[]) => (shortId: string) =>
-  ticks.some((tick) => tick.shortId === shortId);
+const getIsTicked = (ticks: ClimbingTick[] | null) => (shortId: string) =>
+  ticks?.some((tick) => tick.shortId === shortId) ?? false;
 
 export const TicksProvider: React.FC = ({ children }) => {
   const [editedTickId, setEditedTickId] = useState<number | null>(null);

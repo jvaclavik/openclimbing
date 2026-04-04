@@ -54,6 +54,7 @@ export default {
   'tick.style_description_AF': '完全以自由攀登方式完成路线，未使用任何人工器械辅助上升。',
   'tick.style_description_TR': '在绳索已预先挂在顶端保护站的情况下攀爬路线。',
   'tick.style_description_FS': '在不使用任何保护装备或绳索的情况下攀爬路线。',
+  'tick.style_description_PJ': '尚未完攀的练习与尝试：试攀、挂绳休息、拆解动作，或作为进行中的目标线路。',
 
   'climbing_renderer.climbing_grade_single': '攀岩难度',
   'climbing_renderer.climbing_grade_average': '平均攀岩难度',

@@ -2,6 +2,7 @@ import { ClimbingTick, ClimbingTickDb } from '../../types';
 import { fetchJson, fetchText } from '../fetch';
 import { getApiId, getShortId } from '../helpers';
 import { OsmType } from '../types';
+import { parsePairing } from './tickPairing';
 
 const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
   const { shortId, ...rest } = tick;
@@ -14,15 +15,23 @@ const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
   };
 };
 
-const convertFromDb = (dbRow: ClimbingTickDb): ClimbingTick => {
-  const { osmType, osmId, ...rest } = dbRow;
-  const shortId =
-    osmType && osmId
-      ? getShortId({ type: osmType as OsmType, id: osmId })
-      : null;
+export const convertClimbingTickFromDb = (
+  dbRow: ClimbingTickDb,
+): ClimbingTick => {
+  const { osmType, osmId, pairing, ...rest } = dbRow;
+  const idNum = osmId === null || osmId === undefined ? NaN : Number(osmId);
+  const hasOsmRef =
+    typeof osmType === 'string' &&
+    osmType.trim() !== '' &&
+    Number.isFinite(idNum) &&
+    idNum >= 1;
+  const shortId = hasOsmRef
+    ? getShortId({ type: osmType as OsmType, id: idNum })
+    : null;
 
   return {
     ...rest,
+    pairing: parsePairing(pairing),
     shortId,
   };
 };
@@ -50,13 +59,24 @@ export const putClimbingTick = async (tick: Partial<ClimbingTick>) => {
 };
 
 export const getClimbingTicks = async () => {
-  const allTicks = await fetchJson<ClimbingTickDb[]>('/api/climbing-ticks', {
+  return fetchJson<ClimbingTick[]>('/api/climbing-ticks', {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     nocache: true,
   });
+};
 
-  return allTicks.map(convertFromDb);
+export const fetchPublicClimbingTicksByDisplayName = async (
+  displayName: string,
+): Promise<{ displayName: string; ticks: ClimbingTick[] }> => {
+  return await fetchJson(
+    `/api/climbing-ticks/public/${encodeURIComponent(displayName)}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      nocache: true,
+    },
+  );
 };
 
 export const deleteClimbingTick = async (id: number) => {
