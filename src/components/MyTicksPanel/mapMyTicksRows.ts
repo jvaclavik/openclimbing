@@ -6,14 +6,17 @@ import {
 import {
   getDifficulties,
   findOrConvertRouteGrade,
+  findGradeTableRowIndexForGradeText,
   getOsmTagFromGradeSystem,
 } from '../../services/tagging/climbing/routeGrade';
+import { GRADE_TABLE } from '../../services/tagging/climbing/gradeData';
 import { GradeSystem } from '../../services/tagging/climbing/gradeSystems';
 import { OverpassFeature } from '../../services/overpass/overpassSearch';
 import { ClimbingTick } from '../../types';
 import { TickStyle } from '../FeaturePanel/Climbing/types';
 import { publishDbgObject } from '../../utils';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
+import { computeTickScore } from '../../services/my-ticks/tickScoring';
 
 const mergeTagsForTick = (
   tick: ClimbingTick,
@@ -28,7 +31,11 @@ const mergeTagsForTick = (
         delete base[k];
       }
     }
-    base[getOsmTagFromGradeSystem(gradeSystem)] = fromDb;
+    const rowIdx = findGradeTableRowIndexForGradeText(fromDb);
+    const column = GRADE_TABLE[gradeSystem];
+    const gradeInSystem =
+      rowIdx != null && column?.[rowIdx] != null ? column[rowIdx] : fromDb;
+    base[getOsmTagFromGradeSystem(gradeSystem)] = gradeInSystem;
   }
   return Object.keys(base).length ? base : undefined;
 };
@@ -92,6 +99,7 @@ const tickToFetchedRow = (
     apiId: getApiId(tick.shortId!),
     tags,
     tick,
+    tickScore: computeTickScore(tags, tick, gradeSystem),
   };
 };
 

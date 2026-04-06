@@ -14,7 +14,8 @@ import { MyTicksRow } from './MyTicksRow';
 import { MyTicksGraphs } from './MyTicksGraphs/MyTicksGraphs';
 import { fetchedTicksToGraphFeatures } from './mapMyTicksRows';
 
-function NoTicksContent() {
+/** Hint when the logged-in user has no ticks (e.g. climbing profile). */
+export function MyTicksEmptyHint() {
   return (
     <PanelSidePadding>
       <Typography variant="body1" gutterBottom>
@@ -48,7 +49,7 @@ export const MyTicksContent = ({
     showActionsColumn: !readOnly,
   });
 
-  const emptyContent = emptyTicksMessage ?? <NoTicksContent />;
+  const emptyContent = emptyTicksMessage ?? <MyTicksEmptyHint />;
 
   return (
     <>

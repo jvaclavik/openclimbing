@@ -9,7 +9,15 @@ function descendingComparator(
   b: FetchedClimbingTick,
   orderBy: OrderKey,
 ) {
-  return a[orderBy]?.localeCompare(b[orderBy]) ?? 0;
+  if (orderBy === 'points') {
+    return (a.tickScore?.points ?? 0) - (b.tickScore?.points ?? 0);
+  }
+  const av = a[orderBy];
+  const bv = b[orderBy];
+  if (typeof av === 'string' && typeof bv === 'string') {
+    return av.localeCompare(bv);
+  }
+  return 0;
 }
 
 type Order = 'asc' | 'desc';
@@ -23,7 +31,7 @@ function getComparator(
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-type OrderKey = 'name' | 'grade' | 'style' | 'date';
+type OrderKey = 'name' | 'grade' | 'style' | 'points' | 'date';
 
 interface HeadCell {
   id: OrderKey;
@@ -46,6 +54,11 @@ const headCells: readonly HeadCell[] = [
     id: 'style',
     numeric: true,
     label: t('my_ticks.route_style'),
+  },
+  {
+    id: 'points',
+    numeric: true,
+    label: t('my_ticks.route_points'),
   },
   {
     id: 'date',
