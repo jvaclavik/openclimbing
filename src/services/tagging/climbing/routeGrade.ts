@@ -79,6 +79,27 @@ export const sanitizeApproximationSymbol = (grade) => {
   return grade?.replace('~', '');
 };
 
+/**
+ * Řádek v kombinované tabulce obtížností podle textu stupně (hledá v libovolném sloupci).
+ * Použití např. k převodu `routeGradeTxt` z DB do zvoleného grade systému.
+ */
+export function findGradeTableRowIndexForGradeText(
+  gradeValue: string,
+): number | null {
+  const v = sanitizeApproximationSymbol(gradeValue?.trim());
+  if (!v) {
+    return null;
+  }
+  for (const system of Object.keys(GRADE_TABLE) as GradeSystem[]) {
+    const table = GRADE_TABLE[system];
+    const i = table.findIndex((item) => item.startsWith(v));
+    if (i >= 0) {
+      return i;
+    }
+  }
+  return null;
+}
+
 export const getDifficultyColor = (
   routeDifficulty: RouteDifficulty,
   mode: 'light' | 'dark',

@@ -41,6 +41,25 @@ export default {
   'user_profile.no_ticks': 'Zatím žádné zaznamenané přelezy.',
   'user_profile.load_error': 'Profil se nepodařilo načíst.',
   'user_profile.unavailable_project': 'Lezecké profily jsou jen v OpenClimbing.',
+  'user_profile.total_points': 'Celkem bodů',
+  'user_profile.sends_count': 'Přelezy (bez projektů)',
+  'user_profile.chart_monthly_points': 'Body za měsíc (posledních 12 měsíců)',
+  'user_profile.chart_cumulative_points': 'Kumulativní body v čase',
+
+  'my_ticks.route_points': 'Body',
+
+  'tick_scoring.page_title': 'Bodování přelezů',
+  'tick_scoring.intro':
+    'Každý přelez má body podle obtížnosti cesty a způsobu přelezu. Základ za obtížnost je u každého řádku v tabulce lezeckých stupňů (poslední sloupec). Body = zaokrouhlení (základ × násobič stylu). Projekt (PJ) = 0 bodů. Když nejde obtížnost určit, použije se malý výchozí základ.',
+  'tick_scoring.styles_heading': 'Násobiče podle stylu',
+  'tick_scoring.style_code': 'Kód',
+  'tick_scoring.style_name': 'Způsob',
+  'tick_scoring.multiplier': 'Násobič',
+  'tick_scoring.base_points': 'Základní body',
+  'tick_scoring.open_grade_table': 'Otevřít tabulku lezeckých stupňů',
+  'tick_scoring.footer_note': 'Použije se obtížnost cesty ve vašem výchozím systému; pokud chybí, použije se pole „Má obtížnost“ u ticku.',
+  'tick_scoring.menu_link': 'Bodování přelezů',
+  'tick_scoring.how_it_works_link': 'Jak se body počítají',
 
   'user_settings.general': 'Obecné',
   'user_settings.show_weather_widget': 'Zobrazit widget počasí',
@@ -399,6 +418,9 @@ export default {
   'climbing_grade_table.title': 'Tabulka lezeckých obtížností',
   'climbing_grade_table.show': 'Zobrazení lezeckých obtížností',
   'climbing_grade_table.warning': 'Převody lezeckých obtížností jsou přibližné. Pokud najdete nepřesnosti, dejte nám prosím vědět na ',
+  'climbing_grade_table.tick_base_points': 'Základ ticku',
+  'climbing_grade_table.tick_base_tooltip':
+    'Základní body za obtížnost před násobičem stylu. Odpovídá řádku v této tabulce: hodnota = (pořadí řádku odshora) × 2.',
 
   'grade_system_select.default_grade_system': 'Původní klasifikace',
   'grade_system_select.show_more': 'Zobrazit další...',

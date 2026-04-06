@@ -9,13 +9,35 @@ export type UserProfileFetchState =
   | { kind: 'error' }
   | { kind: 'ready'; displayName: string; ticks: ClimbingTick[] };
 
-export const useUserProfileFetch = (displayNameParam: string) => {
+function tryDecodeDisplayName(param: string): string {
+  try {
+    return decodeURIComponent(param);
+  } catch {
+    return param;
+  }
+}
+
+export const useUserProfileFetch = (
+  displayNameParam: string,
+  options?: { skip?: boolean },
+) => {
+  const skip = options?.skip === true;
   const [state, setState] = useState<UserProfileFetchState>({
     kind: 'loading',
   });
 
   useEffect(() => {
     let cancelled = false;
+
+    if (skip) {
+      setState({
+        kind: 'ready',
+        displayName: tryDecodeDisplayName(displayNameParam),
+        ticks: [],
+      });
+      return undefined;
+    }
+
     setState({ kind: 'loading' });
 
     fetchPublicClimbingTicksByDisplayName(displayNameParam)
@@ -43,7 +65,7 @@ export const useUserProfileFetch = (displayNameParam: string) => {
     return () => {
       cancelled = true;
     };
-  }, [displayNameParam]);
+  }, [displayNameParam, skip]);
 
   return state;
 };

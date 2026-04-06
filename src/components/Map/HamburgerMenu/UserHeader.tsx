@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import {
   Avatar,
   IconButton,
@@ -14,6 +15,8 @@ import { t } from '../../../services/intl';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { LoginIconButton } from './LoginIconButton';
 import { UserSettingsItem } from './UserSettingsItem';
+import { PROJECT_ID } from '../../../services/project';
+import { profilePathForOsmDisplayName } from '../../../services/my-ticks/profilePaths';
 
 type UserLoginProps = {
   closeMenu: () => void;
@@ -53,17 +56,47 @@ const StyleUserLink = styled('a')`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
-const OsmUserLink = ({ osmUser }: { osmUser: string }) => (
-  <StyleUserLink
-    href={`https://www.openstreetmap.org/user/${osmUser}`}
-    target="_blank"
-    rel="noopener"
-    color="text.primary"
-    variant="body1"
-  >
-    {osmUser}
-  </StyleUserLink>
-);
+const OsmUserLink = ({
+  osmUser,
+  onClose,
+}: {
+  osmUser: string;
+  onClose: () => void;
+}) => {
+  if (PROJECT_ID === 'openclimbing') {
+    return (
+      <Typography
+        component={Link}
+        href={profilePathForOsmDisplayName(osmUser)}
+        onClick={onClose}
+        variant="body1"
+        sx={{
+          maxWidth: 120,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          color: 'text.primary',
+          textDecoration: 'none',
+          display: 'block',
+          '&:hover': { textDecoration: 'underline' },
+        }}
+      >
+        {osmUser}
+      </Typography>
+    );
+  }
+  return (
+    <StyleUserLink
+      href={`https://www.openstreetmap.org/user/${encodeURIComponent(osmUser)}`}
+      target="_blank"
+      rel="noopener"
+      color="text.primary"
+      variant="body1"
+    >
+      {osmUser}
+    </StyleUserLink>
+  );
+};
 
 const LoggedUserHeader = ({ onClose }: { onClose: () => void }) => {
   const { osmUser, handleLogout } = useOsmAuthContext();
@@ -81,7 +114,7 @@ const LoggedUserHeader = ({ onClose }: { onClose: () => void }) => {
       <Stack direction="row" gap={1.5} alignItems="center" ml={0.5}>
         <LoginIconButton size={32} />
         <Stack direction="column" justifyContent="center">
-          <OsmUserLink osmUser={osmUser} />
+          <OsmUserLink osmUser={osmUser} onClose={onClose} />
           <LogoutButton onClick={handleLogout} />
         </Stack>
       </Stack>

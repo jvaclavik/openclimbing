@@ -10,6 +10,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { t } from '../../../../services/intl';
 import { GRADE_SYSTEMS } from '../../../../services/tagging/climbing/gradeSystems';
 import TuneIcon from '@mui/icons-material/Tune';
 
@@ -59,6 +60,23 @@ export const ClimbingGradesTableHead = ({
             </TableCell>
           );
         })}
+        <TableCell
+          sx={{
+            whiteSpace: 'nowrap',
+            textAlign: 'right',
+            bgcolor: 'background.paper',
+          }}
+        >
+          <Tooltip
+            arrow
+            title={t('climbing_grade_table.tick_base_tooltip')}
+            placement="left"
+          >
+            <Typography variant="caption" fontWeight={900} component="span">
+              {t('climbing_grade_table.tick_base_points')}
+            </Typography>
+          </Tooltip>
+        </TableCell>
         <TableCell sx={{ width: '100%', textAlign: 'right' }}>
           <IconButton
             size="small"

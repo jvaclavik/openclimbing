@@ -2,6 +2,7 @@ import { useState } from 'react';
 import React from 'react';
 import zip from 'lodash/zip';
 import { GRADE_TABLE } from '../../../../services/tagging/climbing/gradeData';
+import { gradeBasePointsFromRowIndex } from '../../../../services/my-ticks/tickScoring';
 import { useTheme } from '@emotion/react';
 import { TableBody, TableCell, TableRow } from '@mui/material';
 import { getDifficultyColor } from '../../../../services/tagging/climbing/routeGrade';
@@ -120,6 +121,17 @@ export const ClimbingGradesTableBody = ({ columns }: BodyProps) => {
               </StyledTableCell>
             );
           })}
+          <TableCell
+            align="right"
+            sx={{
+              verticalAlign: 'middle',
+              bgcolor: 'action.hover',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {gradeBasePointsFromRowIndex(rowIdx)}
+          </TableCell>
           <TableCell sx={{ width: '100%' }} />
         </TableRow>
       ))}

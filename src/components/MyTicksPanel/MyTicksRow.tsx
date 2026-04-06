@@ -44,6 +44,9 @@ export const MyTicksRow = ({
       <TableCell>
         <TickStyleBadge style={style} />
       </TableCell>
+      <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+        {fetchedTick.tickScore.points}
+      </TableCell>
       <TableCell sx={{ textAlign: 'right' }}>
         {format(date, DEFAULT_DATA_FORMAT)}
       </TableCell>

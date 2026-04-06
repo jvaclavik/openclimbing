@@ -28,10 +28,10 @@ import { LangSwitcher } from './LangSwitcher';
 import { HamburgerMenuButton } from './HamburgerMenuButton';
 import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import Link from 'next/link';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
-import { MyTicksMenuItem } from './MyTicksMenuItem';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import ContrastIcon from '@mui/icons-material/Contrast';
 
@@ -110,6 +110,14 @@ const ClimbingGradesTableLink = ({ closeMenu }) => (
     <ListItemText>{t('climbing_grade_table.title')}</ListItemText>
   </MenuItem>
 );
+const TickScoringLink = ({ closeMenu }) => (
+  <MenuItem href="/tick-scoring" component={Link} onClick={closeMenu}>
+    <ListItemIcon>
+      <EmojiEventsIcon />
+    </ListItemIcon>
+    <ListItemText>{t('tick_scoring.menu_link')}</ListItemText>
+  </MenuItem>
+);
 
 const InstallLink = () => {
   const handleClick = () => {
@@ -176,14 +184,12 @@ export const HamburgerMenu = () => {
           <div>
             <UserHeader closeMenu={close} />
             <Divider sx={{ mt: 1, mb: 2 }} />
-            {isOpenClimbing && (
-              <>
-                <MyTicksMenuItem closeMenu={close} />
-                <MyClimbingProfileMenuItem closeMenu={close} />
-              </>
-            )}
+            {isOpenClimbing && <MyClimbingProfileMenuItem closeMenu={close} />}
             {(hasClimbingLayer || isOpenClimbing) && (
-              <ClimbingGradesTableLink closeMenu={close} />
+              <>
+                <ClimbingGradesTableLink closeMenu={close} />
+                <TickScoringLink closeMenu={close} />
+              </>
             )}
           </div>
           <div>

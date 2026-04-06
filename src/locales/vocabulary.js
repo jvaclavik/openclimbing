@@ -28,6 +28,24 @@ export default {
   'user_profile.no_ticks': 'No ticks recorded yet.',
   'user_profile.load_error': 'Could not load this profile.',
   'user_profile.unavailable_project': 'Climbing profiles are only available in OpenClimbing.',
+  'user_profile.total_points': 'Total points',
+  'user_profile.sends_count': 'Sends (excl. projects)',
+  'user_profile.chart_monthly_points': 'Points per month (last 12 months)',
+  'user_profile.chart_cumulative_points': 'Cumulative points over time',
+
+  'tick_scoring.page_title': 'Tick scoring',
+  'tick_scoring.intro':
+    'Each tick earns points from the route difficulty and your climbing style. The grade base for each row is shown in the climbing grades table (last column). Points = round(grade base × style multiplier). Projects (PJ) earn 0 points. If the grade cannot be resolved, a small default base is used.',
+  'tick_scoring.styles_heading': 'Style multipliers',
+  'tick_scoring.style_code': 'Code',
+  'tick_scoring.style_name': 'Style',
+  'tick_scoring.multiplier': 'Multiplier',
+  'tick_scoring.base_points': 'Base points',
+  'tick_scoring.open_grade_table': 'Open climbing grades table',
+  'tick_scoring.footer_note':
+    'The route grade from your default system is used when available; otherwise the optional “My grade” field on the tick is used.',
+  'tick_scoring.menu_link': 'Tick scoring',
+  'tick_scoring.how_it_works_link': 'How tick points are calculated',
 
   'user_settings.general': 'General',
   'user_settings.show_weather_widget': 'Show the weather widget',
@@ -49,6 +67,7 @@ export default {
   'my_ticks.route_grade': 'Grade',
   'my_ticks.route_style': 'Style',
   'my_ticks.route_date': 'Date',
+  'my_ticks.route_points': 'Points',
   'my_ticks.route_unnamed': 'Unnamed route',
   'my_ticks.no_ticks_paragraph1': 'You have no ticks so far…',
   'my_ticks.no_ticks_paragraph2': 'Try to add one on the crag',
@@ -451,6 +470,9 @@ export default {
   'climbing_grade_table.title': 'Climbing grades table',
   'climbing_grade_table.show': 'Show climbing grades',
   'climbing_grade_table.warning': 'Please be aware that conversions are approximate. If you spot any inaccuracies, please report them to us on ',
+  'climbing_grade_table.tick_base_points': 'Tick base',
+  'climbing_grade_table.tick_base_tooltip':
+    'Base difficulty points for tick scoring before the style multiplier. Same row as in this table: value = (row number from the top) × 2.',
 
   'grade_system_select.default_grade_system': 'Default grade',
   'grade_system_select.show_more': 'Show more...',
