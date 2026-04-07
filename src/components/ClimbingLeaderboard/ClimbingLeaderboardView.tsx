@@ -133,6 +133,9 @@ export function ClimbingLeaderboardView({
     return (
       <PanelSidePadding>
         <Stack spacing={2}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            {t('leaderboard.title')}
+          </Typography>
           <LeaderboardPeriodSelect
             rangeSelectValue={rangeSelectValue}
             onRangeChange={onRangeChange}
@@ -148,6 +151,9 @@ export function ClimbingLeaderboardView({
     return (
       <PanelSidePadding>
         <Stack spacing={2}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            {t('leaderboard.title')}
+          </Typography>
           <LeaderboardPeriodSelect
             rangeSelectValue={rangeSelectValue}
             onRangeChange={onRangeChange}
@@ -165,14 +171,14 @@ export function ClimbingLeaderboardView({
     <>
       <PanelSidePadding>
         <Stack spacing={2}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            {t('leaderboard.title')}
+          </Typography>
           <LeaderboardPeriodSelect
             rangeSelectValue={rangeSelectValue}
             onRangeChange={onRangeChange}
             availableYears={availableYears}
           />
-          <Typography variant="h4" component="h1" gutterBottom>
-            {t('leaderboard.title')}
-          </Typography>
           <Typography variant="body2" color="text.secondary" paragraph>
             {leaderboardPeriodSubtext(state)}
           </Typography>

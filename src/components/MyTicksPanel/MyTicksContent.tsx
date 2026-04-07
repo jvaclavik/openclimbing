@@ -11,8 +11,6 @@ import { PanelSidePadding } from '../utils/PanelHelpers';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { useSortedTable } from './useSortedTable';
 import { MyTicksRow } from './MyTicksRow';
-import { MyTicksGraphs } from './MyTicksGraphs/MyTicksGraphs';
-import { fetchedTicksToGraphFeatures } from './mapMyTicksRows';
 
 /** Hint when the logged-in user has no ticks (e.g. climbing profile). */
 export function MyTicksEmptyHint() {
@@ -71,7 +69,6 @@ export const MyTicksContent = ({
           </Table>
         </TableContainer>
       )}
-      <MyTicksGraphs features={fetchedTicksToGraphFeatures(fetchedTicks)} />
     </>
   );
 };

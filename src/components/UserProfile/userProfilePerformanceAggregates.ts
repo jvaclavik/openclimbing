@@ -4,6 +4,8 @@ import { monthKeyFromDate } from '../../services/my-ticks/climbingStatsDateRange
 import {
   TICK_STYLE_SEGMENT_ORDER,
   coerceTickStyleFromDb,
+  tickStyles,
+  tickStyleToChartColor,
 } from '../../services/my-ticks/ticks';
 
 export function aggregateMonthlyPointsForKeys(
@@ -20,19 +22,6 @@ export function aggregateMonthlyPointsForKeys(
     map.set(k, (map.get(k) ?? 0) + row.tickScore.points);
   }
   return monthKeys.map((k) => ({ key: k, points: map.get(k) ?? 0 }));
-}
-
-export function cumulativePointsSeries(
-  ticks: FetchedClimbingTick[],
-): Array<{ date: string; total: number }> {
-  const sorted = [...ticks].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  );
-  let sum = 0;
-  return sorted.map((row) => {
-    sum += row.tickScore.points;
-    return { date: row.date, total: sum };
-  });
 }
 
 export function bestSendByMonth(
@@ -62,44 +51,82 @@ export function bestSendByMonth(
   });
 }
 
-export function areaVisitDays(
+export function cragVisitDays(
   ticks: FetchedClimbingTick[],
-  unknownAreaKey: string,
-): { area: string; days: number }[] {
-  const byArea = new Map<string, Set<string>>();
+  unknownCragKey: string,
+): { crag: string; days: number }[] {
+  const byCrag = new Map<string, Set<string>>();
   for (const t of ticks) {
     if ((t.style as TickStyle | null) === 'PJ') continue;
     const d = new Date(t.date);
     if (Number.isNaN(d.getTime())) continue;
     const dayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const area = t.areaName?.trim() ? t.areaName.trim() : unknownAreaKey;
-    if (!byArea.has(area)) byArea.set(area, new Set());
-    byArea.get(area)!.add(dayKey);
+    const crag = t.cragName?.trim() ? t.cragName.trim() : unknownCragKey;
+    if (!byCrag.has(crag)) byCrag.set(crag, new Set());
+    byCrag.get(crag)!.add(dayKey);
   }
-  return [...byArea.entries()]
-    .map(([area, days]) => ({ area, days: days.size }))
+  return [...byCrag.entries()]
+    .map(([crag, days]) => ({ crag, days: days.size }))
     .sort((a, b) => b.days - a.days);
 }
 
 export type GradeStyleSegment = { style: TickStyle; count: number };
+
+const NULL_STYLE_KEY = '__null__';
+
+function styleOrderKeys(): string[] {
+  return TICK_STYLE_SEGMENT_ORDER.map((s) => (s == null ? NULL_STYLE_KEY : s));
+}
+
+function segmentsFromStyleCounts(
+  byStyle: Map<string, number>,
+): GradeStyleSegment[] {
+  const orderKeys = styleOrderKeys();
+  const orderedSet = new Set<string>(orderKeys);
+  const out: GradeStyleSegment[] = [];
+  for (const key of orderKeys) {
+    const c = byStyle.get(key) ?? 0;
+    if (c > 0) {
+      out.push({
+        style: key === NULL_STYLE_KEY ? null : (key as TickStyle),
+        count: c,
+      });
+    }
+  }
+  let other = 0;
+  for (const [key, c] of byStyle) {
+    if (c > 0 && !orderedSet.has(key)) {
+      other += c;
+    }
+  }
+  if (other > 0) {
+    out.push({ style: null, count: other });
+  }
+  return out;
+}
 
 export function gradeSendCountsByStyle(ticks: FetchedClimbingTick[]): {
   grade: string;
   rowIndex: number;
   total: number;
   segments: GradeStyleSegment[];
+  sampleTick: FetchedClimbingTick | null;
 }[] {
-  type Agg = { byStyle: Map<string, number>; rowIndex: number };
+  type Agg = {
+    byStyle: Map<string, number>;
+    rowIndex: number;
+    sampleTick: FetchedClimbingTick | null;
+  };
   const map = new Map<string, Agg>();
 
   for (const t of ticks) {
     const g = t.grade?.trim() || '?';
     const coerced = coerceTickStyleFromDb(t.style as string);
-    const mapKey = coerced == null ? '__null__' : coerced;
+    const mapKey = coerced == null ? NULL_STYLE_KEY : coerced;
 
     let agg = map.get(g);
     if (!agg) {
-      agg = { byStyle: new Map(), rowIndex: -1 };
+      agg = { byStyle: new Map(), rowIndex: -1, sampleTick: t };
       map.set(g, agg);
     }
     agg.byStyle.set(mapKey, (agg.byStyle.get(mapKey) ?? 0) + 1);
@@ -107,41 +134,13 @@ export function gradeSendCountsByStyle(ticks: FetchedClimbingTick[]): {
     agg.rowIndex = Math.max(agg.rowIndex, ri);
   }
 
-  const nullKey = '__null__';
-  const orderKeys = TICK_STYLE_SEGMENT_ORDER.map((s) =>
-    s == null ? nullKey : s,
-  );
-  const orderedSet = new Set<string>(orderKeys);
-
-  const toSegments = (byStyle: Map<string, number>): GradeStyleSegment[] => {
-    const out: GradeStyleSegment[] = [];
-    for (const key of orderKeys) {
-      const c = byStyle.get(key) ?? 0;
-      if (c > 0) {
-        out.push({
-          style: key === nullKey ? null : (key as TickStyle),
-          count: c,
-        });
-      }
-    }
-    let other = 0;
-    for (const [key, c] of byStyle) {
-      if (c > 0 && !orderedSet.has(key)) {
-        other += c;
-      }
-    }
-    if (other > 0) {
-      out.push({ style: null, count: other });
-    }
-    return out;
-  };
-
   return [...map.entries()]
     .map(([grade, agg]) => ({
       grade,
       rowIndex: agg.rowIndex,
       total: [...agg.byStyle.values()].reduce((a, b) => a + b, 0),
-      segments: toSegments(agg.byStyle),
+      segments: segmentsFromStyleCounts(agg.byStyle),
+      sampleTick: agg.sampleTick,
     }))
     .sort((a, b) => b.rowIndex - a.rowIndex);
 }
@@ -152,4 +151,55 @@ export function sendCountExclProjects(ticks: FetchedClimbingTick[]): number {
 
 export function totalTickPoints(ticks: FetchedClimbingTick[]): number {
   return ticks.reduce((s, r) => s + r.tickScore.points, 0);
+}
+
+export function tickStylePieData(ticks: FetchedClimbingTick[]): Array<{
+  key: string;
+  name: string;
+  value: number;
+  color: string;
+}> {
+  const map = new Map<TickStyle, number>();
+  for (const t of ticks) {
+    const coerced = coerceTickStyleFromDb(t.style as string);
+    map.set(coerced, (map.get(coerced) ?? 0) + 1);
+  }
+  return tickStyles
+    .map((s) => ({
+      key: s.key == null ? '—' : String(s.key),
+      name: s.name,
+      value: map.get(s.key) ?? 0,
+      color: tickStyleToChartColor(s.key),
+    }))
+    .filter((r) => r.value > 0);
+}
+
+export function weekdayRadarData(ticks: FetchedClimbingTick[]): Array<{
+  key: string;
+  label: string;
+  value: number;
+}> {
+  // Date.getDay(): 0=Sun ... 6=Sat. Chceme pořadí Po..Ne.
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  const labels: Record<number, string> = {
+    1: 'Po',
+    2: 'Út',
+    3: 'St',
+    4: 'Čt',
+    5: 'Pá',
+    6: 'So',
+    0: 'Ne',
+  };
+  const counts = new Map<number, number>();
+  for (const t of ticks) {
+    const d = new Date(t.date);
+    if (Number.isNaN(d.getTime())) continue;
+    const dow = d.getDay();
+    counts.set(dow, (counts.get(dow) ?? 0) + 1);
+  }
+  return order.map((k) => ({
+    key: String(k),
+    label: labels[k] ?? String(k),
+    value: counts.get(k) ?? 0,
+  }));
 }
