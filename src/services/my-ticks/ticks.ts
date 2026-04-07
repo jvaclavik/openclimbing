@@ -5,6 +5,47 @@ import {
 import { t } from '../intl';
 
 const KEY = 'ticks';
+
+/** Pořadí segmentů ve skládaném grafu (stejné jako v TickStyleBadge). */
+export const TICK_STYLE_SEGMENT_ORDER: TickStyle[] = [
+  'OS',
+  'FL',
+  'RP',
+  'PP',
+  'RK',
+  'AF',
+  'TR',
+  'FS',
+  'PJ',
+  null,
+];
+
+const NAMED_COLOR_HEX: Record<string, string> = {
+  gray: '#9e9e9e',
+  red: '#d32f2f',
+  green: '#2e7d32',
+  pink: '#e91e63',
+  darkred: '#b71c1c',
+  lightgreen: '#66bb6a',
+  blue: '#1976d2',
+  orange: '#ed6c02',
+};
+
+export function tickStyleToChartColor(style: TickStyle): string {
+  const config = tickStyles.find((s) => s.key === style) ?? tickStyles[0];
+  const c = config.color ?? 'gray';
+  if (typeof c === 'string' && c.startsWith('#')) return c;
+  return NAMED_COLOR_HEX[c] ?? '#9e9e9e';
+}
+
+export function coerceTickStyleFromDb(
+  raw: string | null | undefined,
+): TickStyle {
+  if (raw == null || raw === '') return null;
+  const hit = tickStyles.find((s) => s.key === raw);
+  return hit ? hit.key : null;
+}
+
 export const tickStyles: Array<{
   key: TickStyle;
   name: string;

@@ -79,6 +79,30 @@ export const fetchPublicClimbingTicksByDisplayName = async (
   );
 };
 
+export type ClimbingLeaderboardEntry = {
+  osmUserId: number;
+  displayName: string;
+  points: number;
+  tickCount: number;
+};
+
+export const fetchClimbingTicksLeaderboard = async (
+  rangeSelectValue: string,
+): Promise<{
+  entries: ClimbingLeaderboardEntry[];
+  periodStartIso: string | null;
+  periodEndIso: string | null;
+  availableYears: number[];
+  periodRange: string;
+}> => {
+  const q = encodeURIComponent(rangeSelectValue);
+  return fetchJson(`/api/climbing-ticks/leaderboard?range=${q}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    nocache: true,
+  });
+};
+
 export const deleteClimbingTick = async (id: number) => {
   return await fetchJson(`/api/climbing-ticks/${id}`, {
     method: 'DELETE',

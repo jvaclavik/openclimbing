@@ -1,106 +1,77 @@
-import React, { useMemo } from 'react';
-import { Box, Stack } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, SelectChangeEvent, Stack } from '@mui/material';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
-import { TickStyle } from '../FeaturePanel/Climbing/types';
-import { PANEL_GAP } from '../utils/PanelHelpers';
 import {
+  DEFAULT_CLIMBING_STATS_DATE_RANGE,
+  climbingStatsDateRangeToSelectValue,
+  selectValueToClimbingStatsDateRange,
+  type ClimbingStatsDateRange,
+} from '../../services/my-ticks/climbingStatsDateRange';
+import { PANEL_GAP } from '../utils/PanelHelpers';
+import { ClimbingStatsDateRangeSelect } from '../climbingStats/ClimbingStatsDateRangeSelect';
+import { UserProfileBestSendByMonthChart } from './UserProfileBestSendByMonthChart';
+import {
+  UserProfileAreaDaysChart,
   UserProfileCumulativePointsChart,
+  UserProfileGradeHistogramChart,
   UserProfileMonthlyPointsChart,
   UserProfilePerformanceStats,
+  UserProfilePerformanceStatsLinks,
 } from './UserProfilePerformanceCharts';
-
-const MONTH_COUNT = 12;
-
-function monthKeyFromDate(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function lastNMonthKeys(n: number): string[] {
-  const out: string[] = [];
-  const d = new Date();
-  d.setDate(1);
-  for (let i = 0; i < n; i++) {
-    out.unshift(monthKeyFromDate(d));
-    d.setMonth(d.getMonth() - 1);
-  }
-  return out;
-}
-
-function aggregateMonthlyPoints(ticks: FetchedClimbingTick[]) {
-  const map = new Map<string, number>();
-  for (const row of ticks) {
-    const d = new Date(row.date);
-    if (Number.isNaN(d.getTime())) {
-      continue;
-    }
-    const k = monthKeyFromDate(d);
-    map.set(k, (map.get(k) ?? 0) + row.tickScore.points);
-  }
-  return map;
-}
-
-function cumulativePointsSeries(ticks: FetchedClimbingTick[]) {
-  const sorted = [...ticks].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  );
-  let sum = 0;
-  return sorted.map((row) => {
-    sum += row.tickScore.points;
-    return { date: row.date, total: sum };
-  });
-}
+import { useUserProfilePerformanceDerived } from './useUserProfilePerformanceDerived';
 
 export const UserProfilePerformanceSection = ({
   fetchedTicks,
 }: {
   fetchedTicks: FetchedClimbingTick[];
 }) => {
-  const monthKeys = useMemo(() => lastNMonthKeys(MONTH_COUNT), []);
-  const monthlyMap = useMemo(
-    () => aggregateMonthlyPoints(fetchedTicks),
-    [fetchedTicks],
+  const [range, setRange] = useState<ClimbingStatsDateRange>(
+    DEFAULT_CLIMBING_STATS_DATE_RANGE,
   );
-  const monthlySeries = useMemo(
-    () => monthKeys.map((k) => ({ key: k, points: monthlyMap.get(k) ?? 0 })),
-    [monthKeys, monthlyMap],
-  );
-  const maxMonthly = useMemo(
-    () => Math.max(1, ...monthlySeries.map((m) => m.points)),
-    [monthlySeries],
-  );
+  const d = useUserProfilePerformanceDerived(fetchedTicks, range);
 
-  const cumulative = useMemo(
-    () => cumulativePointsSeries(fetchedTicks),
-    [fetchedTicks],
-  );
-  const maxCumulative = cumulative.length
-    ? cumulative[cumulative.length - 1].total
-    : 0;
+  const onRangeChange = (e: SelectChangeEvent<string>) => {
+    const next = selectValueToClimbingStatsDateRange(e.target.value);
+    if (next) setRange(next);
+  };
 
-  const totalPoints = useMemo(
-    () => fetchedTicks.reduce((s, r) => s + r.tickScore.points, 0),
-    [fetchedTicks],
-  );
-  const sendCount = useMemo(
-    () =>
-      fetchedTicks.filter((r) => (r.style as TickStyle | null) !== 'PJ').length,
-    [fetchedTicks],
-  );
+  const selectValue = climbingStatsDateRangeToSelectValue(range);
 
   return (
     <Box sx={{ px: PANEL_GAP, pb: 2 }}>
       <Stack spacing={2}>
-        <UserProfilePerformanceStats
-          totalPoints={totalPoints}
-          sendCount={sendCount}
+        <ClimbingStatsDateRangeSelect
+          labelId="user-profile-period-label"
+          value={selectValue}
+          onChange={onRangeChange}
+          years={d.years}
         />
+
+        <UserProfilePerformanceStats
+          totalPoints={d.totalPoints}
+          sendCount={d.sendCount}
+        />
+        <UserProfilePerformanceStatsLinks />
+
         <UserProfileMonthlyPointsChart
-          monthlySeries={monthlySeries}
-          maxMonthly={maxMonthly}
+          monthlySeries={d.monthlySeries}
+          maxMonthly={d.maxMonthly}
         />
         <UserProfileCumulativePointsChart
-          cumulative={cumulative}
-          maxCumulative={maxCumulative}
+          cumulative={d.cumulative}
+          maxCumulative={d.maxCumulative}
+        />
+        <UserProfileBestSendByMonthChart
+          series={d.bestSendSeries}
+          maxRowIndex={d.maxBestRow}
+        />
+        <UserProfileAreaDaysChart
+          series={d.areaSeries}
+          maxDays={d.maxAreaDays}
+        />
+        <UserProfileGradeHistogramChart
+          series={d.gradeSeries}
+          maxCount={d.maxGradeCount}
         />
       </Stack>
     </Box>

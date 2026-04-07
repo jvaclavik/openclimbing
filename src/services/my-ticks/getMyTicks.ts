@@ -7,6 +7,8 @@ export type FetchedClimbingTick = {
   key: string;
   name: string;
   grade: string;
+  /** Oblast / skála z DB (parent cesty), pokud je v datech. */
+  areaName: string | null;
   center?: number[];
   index: number;
   date: string;

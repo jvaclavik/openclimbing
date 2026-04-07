@@ -1,4 +1,8 @@
-import { computeTickScore, findGradeRowIndex } from '../tickScoring';
+import {
+  computeTickPointsForLeaderboard,
+  computeTickScore,
+  findGradeRowIndex,
+} from '../tickScoring';
 import { ClimbingTick } from '../../../types';
 
 describe('tickScoring', () => {
@@ -25,6 +29,30 @@ describe('tickScoring', () => {
       'french',
     );
     expect(s.points).toBe(0);
+  });
+
+  test('computeTickPointsForLeaderboard matches row-based score for French 6a RP', () => {
+    const fromLeaderboard = computeTickPointsForLeaderboard({
+      style: 'RP',
+      routeGradeTxt: '6a',
+      myGrade: null,
+    });
+    const tick = {
+      id: 1,
+      osmUserId: 1,
+      shortId: 'w1',
+      timestamp: '2020-01-01',
+      style: 'RP',
+      myGrade: null,
+      note: null,
+      pairing: null,
+    } as import('../../../types').ClimbingTick;
+    const fromFull = computeTickScore(
+      { 'climbing:grade:french': '6a' },
+      tick,
+      'french',
+    );
+    expect(fromLeaderboard).toBe(fromFull.points);
   });
 
   test('RP has multiplier 1', () => {

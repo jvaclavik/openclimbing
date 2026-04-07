@@ -10,6 +10,8 @@ type FeatureRow = {
   gradeTxt: string | null;
   lon: number;
   lat: number;
+  parName: string | null;
+  parNameRaw: string | null;
 };
 
 const routeDisplayName = (
@@ -46,6 +48,7 @@ export function getRouteMetaMap(
     routeGradeTxt: string | null;
     routeLon: number | null;
     routeLat: number | null;
+    routeAreaName: string | null;
   }
 > {
   const pairs = new Map<string, { osmType: string; osmId: number }>();
@@ -60,9 +63,13 @@ export function getRouteMetaMap(
   }
   const list = [...pairs.values()];
   const orParts = list
-    .map(() => '("osmType" = ? AND "osmId" = ?)')
+    .map(() => '(r."osmType" = ? AND r."osmId" = ?)')
     .join(' OR ');
-  const sql = `SELECT "osmType", "osmId", name, "nameRaw", "gradeTxt", lon, lat FROM climbing_features WHERE ${orParts}`;
+  const sql = `SELECT r."osmType", r."osmId", r.name, r."nameRaw", r."gradeTxt", r.lon, r.lat,
+    par.name AS "parName", par."nameRaw" AS "parNameRaw"
+    FROM climbing_features r
+    LEFT JOIN climbing_features par ON par.id = r."parentId"
+    WHERE ${orParts}`;
   const stmt = db.prepare(sql);
   const found = stmt.all(
     ...list.flatMap((p) => [p.osmType, p.osmId]),
@@ -74,6 +81,7 @@ export function getRouteMetaMap(
       routeGradeTxt: string | null;
       routeLon: number | null;
       routeLat: number | null;
+      routeAreaName: string | null;
     }
   >();
   for (const row of found) {
@@ -83,6 +91,7 @@ export function getRouteMetaMap(
       routeGradeTxt: row.gradeTxt?.trim() || null,
       routeLon: Number.isFinite(row.lon) ? row.lon : null,
       routeLat: Number.isFinite(row.lat) ? row.lat : null,
+      routeAreaName: routeDisplayName(row.parName, row.parNameRaw),
     });
   }
   return map;

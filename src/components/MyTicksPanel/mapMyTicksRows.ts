@@ -84,10 +84,12 @@ const tickToFetchedRow = (
     Number.isFinite(tick.routeLat)
       ? [tick.routeLon, tick.routeLat]
       : undefined;
+  const areaFromTick = tick.routeAreaName?.trim();
   return {
     key: `${tick.shortId}-${tick.timestamp}`,
     name: fromDbName || fromFeatureName,
     grade: routeDifficulty.grade,
+    areaName: areaFromTick || null,
     center:
       centerFromDb ??
       (feature?.center && feature.center.length >= 2

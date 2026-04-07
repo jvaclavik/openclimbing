@@ -4,6 +4,7 @@ import { FeatureTags } from '../types';
 import { GRADE_TABLE } from '../tagging/climbing/gradeData';
 import { GradeSystem } from '../tagging/climbing/gradeSystems';
 import {
+  findGradeTableRowIndexForGradeText,
   findOrConvertRouteGrade,
   getDifficulties,
   sanitizeApproximationSymbol,
@@ -112,4 +113,24 @@ export function computeTickScore(
     gradeBase,
     multiplier: mult,
   };
+}
+
+/**
+ * Body za tick pro agregace (žebříček): řádek tabulky z textu obtížnosti,
+ * stejný základ jako u převodu přes spojenou tabulku stupňů.
+ */
+export function computeTickPointsForLeaderboard(tick: {
+  style: string | null;
+  routeGradeTxt?: string | null;
+  myGrade?: string | null;
+}): number {
+  const style = tick.style as TickStyle | null;
+  if (style === 'PJ') {
+    return 0;
+  }
+  const mult = getStyleMultiplier(style);
+  const gradeTxt = tick.routeGradeTxt?.trim() || tick.myGrade?.trim() || '';
+  const rowIdx = gradeTxt ? findGradeTableRowIndexForGradeText(gradeTxt) : null;
+  const gradeBase = rowIdx != null ? gradeBasePointsFromRowIndex(rowIdx) : 4;
+  return Math.round(gradeBase * mult);
 }

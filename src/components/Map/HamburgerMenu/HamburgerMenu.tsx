@@ -29,6 +29,7 @@ import { HamburgerMenuButton } from './HamburgerMenuButton';
 import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import Link from 'next/link';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
@@ -118,6 +119,14 @@ const TickScoringLink = ({ closeMenu }) => (
     <ListItemText>{t('tick_scoring.menu_link')}</ListItemText>
   </MenuItem>
 );
+const ClimbingLeaderboardLink = ({ closeMenu }) => (
+  <MenuItem href="/climbing-leaderboard" component={Link} onClick={closeMenu}>
+    <ListItemIcon>
+      <LeaderboardIcon />
+    </ListItemIcon>
+    <ListItemText>{t('leaderboard.menu_link')}</ListItemText>
+  </MenuItem>
+);
 
 const InstallLink = () => {
   const handleClick = () => {
@@ -189,6 +198,9 @@ export const HamburgerMenu = () => {
               <>
                 <ClimbingGradesTableLink closeMenu={close} />
                 <TickScoringLink closeMenu={close} />
+                {isOpenClimbing && (
+                  <ClimbingLeaderboardLink closeMenu={close} />
+                )}
               </>
             )}
           </div>

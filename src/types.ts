@@ -62,6 +62,8 @@ export type ClimbingTick = {
   routeGradeTxt?: string | null;
   routeLon?: number | null;
   routeLat?: number | null;
+  /** Název nadřazeného prvku (skála/sektor) z climbing_features.parentId. */
+  routeAreaName?: string | null;
 };
 
 export type ClimbingTickDb = Omit<ClimbingTick, 'shortId'> & {

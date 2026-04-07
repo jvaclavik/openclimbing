@@ -1,11 +1,26 @@
 import React from 'react';
-import { Box, Button, Link as MuiLink, Typography } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import {
+  Box,
+  IconButton,
+  Link as MuiLink,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import Link from 'next/link';
 import { t } from '../../services/intl';
+import { tickStyleToChartColor } from '../../services/my-ticks/ticks';
+import type { GradeStyleSegment } from './userProfilePerformanceAggregates';
 
 const CHART_W = 320;
 const CHART_H = 120;
 const CHART_PAD = 8;
+
+const PROFILE_CHART_TITLE_SX = {
+  fontWeight: 700,
+  mt: 2.5,
+  mb: 0.75,
+} as const;
 
 type MonthlyDatum = { key: string; points: number };
 
@@ -18,7 +33,7 @@ export function UserProfileMonthlyPointsChart({
 }) {
   return (
     <Box>
-      <Typography variant="subtitle1" gutterBottom>
+      <Typography variant="subtitle1" gutterBottom sx={PROFILE_CHART_TITLE_SX}>
         {t('user_profile.chart_monthly_points')}
       </Typography>
       <Box
@@ -118,7 +133,7 @@ export function UserProfileCumulativePointsChart({
 
   return (
     <Box>
-      <Typography variant="subtitle1" gutterBottom>
+      <Typography variant="subtitle1" gutterBottom sx={PROFILE_CHART_TITLE_SX}>
         {t('user_profile.chart_cumulative_points')}
       </Typography>
       <Box sx={{ width: '100%', overflow: 'auto' }}>
@@ -137,14 +152,6 @@ export function UserProfileCumulativePointsChart({
           />
         </svg>
       </Box>
-      <MuiLink
-        component={Link}
-        href="/tick-scoring"
-        variant="caption"
-        sx={{ display: 'inline-block', mt: 1 }}
-      >
-        {t('tick_scoring.how_it_works_link')}
-      </MuiLink>
     </Box>
   );
 }
@@ -173,7 +180,7 @@ export function UserProfilePerformanceStats({
       <Box
         sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
+          flexWrap: 'wrap',
           gap: 2,
           justifyContent: 'space-between',
           alignItems: { xs: 'flex-start', sm: 'center' },
@@ -188,23 +195,246 @@ export function UserProfilePerformanceStats({
           </Typography>
         </Box>
         <Box>
-          <Typography variant="body2" color="text.secondary">
-            {t('user_profile.sends_count')}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+            <Typography variant="body2" color="text.secondary" component="span">
+              {t('user_profile.sends_count')}
+            </Typography>
+            <Tooltip title={t('user_profile.sends_count_tooltip')}>
+              <IconButton
+                size="small"
+                aria-label={t('user_profile.sends_count_tooltip')}
+                sx={{ p: 0.25 }}
+              >
+                <InfoOutlinedIcon sx={{ fontSize: 18 }} color="action" />
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Typography variant="h4" component="p">
             {sendCount}
           </Typography>
         </Box>
-        <Button
-          component={Link}
-          href="/tick-scoring"
-          variant="outlined"
-          size="small"
-          sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}
-        >
-          {t('tick_scoring.menu_link')}
-        </Button>
       </Box>
+    </Box>
+  );
+}
+
+export function UserProfilePerformanceStatsLinks() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 2,
+        alignItems: 'center',
+        pl: 0.25,
+      }}
+    >
+      <MuiLink component={Link} href="/tick-scoring" variant="body2">
+        {t('tick_scoring.menu_link')}
+      </MuiLink>
+      <MuiLink component={Link} href="/climbing-leaderboard" variant="body2">
+        {t('leaderboard.menu_link')}
+      </MuiLink>
+    </Box>
+  );
+}
+
+type AreaDatum = { area: string; days: number };
+
+export function UserProfileAreaDaysChart({
+  series,
+  maxDays,
+}: {
+  series: AreaDatum[];
+  maxDays: number;
+}) {
+  if (series.length === 0) {
+    return null;
+  }
+  return (
+    <Box>
+      <Typography variant="subtitle1" gutterBottom sx={PROFILE_CHART_TITLE_SX}>
+        {t('user_profile.chart_area_days')}
+      </Typography>
+      <StackedHorizontalBars
+        rows={series.map((s) => ({
+          label: s.area,
+          value: s.days,
+          title: `${s.area}: ${s.days} ${t('user_profile.area_days_unit')}`,
+        }))}
+        maxValue={maxDays}
+        barColor="primary.main"
+      />
+    </Box>
+  );
+}
+
+function gradeSegmentsTooltip(
+  grade: string,
+  segments: GradeStyleSegment[],
+): string {
+  const parts = segments.map((s) => `${s.style ?? '—'}×${s.count}`);
+  return `${grade}: ${parts.join(', ')}`;
+}
+
+export function UserProfileGradeHistogramChart({
+  series,
+  maxCount,
+}: {
+  series: Array<{
+    grade: string;
+    total: number;
+    segments: GradeStyleSegment[];
+  }>;
+  maxCount: number;
+}) {
+  if (series.length === 0) {
+    return null;
+  }
+  return (
+    <Box>
+      <Typography variant="subtitle1" gutterBottom sx={PROFILE_CHART_TITLE_SX}>
+        {t('user_profile.chart_grade_distribution')}
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        {series.map((row, i) => {
+          const wPct = Math.max(4, (row.total / maxCount) * 100);
+          return (
+            <Box
+              key={`${row.grade}-${i}`}
+              title={gradeSegmentsTooltip(row.grade, row.segments)}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    width: 120,
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {row.grade}
+                </Typography>
+                <Box
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      height: 10,
+                      width: `${wPct}%`,
+                      maxWidth: '100%',
+                      display: 'flex',
+                      borderRadius: 0.5,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {row.segments.map((seg, si) => (
+                      <Box
+                        key={`${row.grade}-seg-${si}-${String(seg.style)}`}
+                        sx={{
+                          flexGrow: seg.count,
+                          flexBasis: 0,
+                          minWidth: seg.count > 0 ? 2 : 0,
+                          bgcolor: tickStyleToChartColor(seg.style),
+                        }}
+                      />
+                    ))}
+                  </Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ flexShrink: 0 }}
+                  >
+                    {row.total}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+}
+
+function StackedHorizontalBars({
+  rows,
+  maxValue,
+  barColor,
+}: {
+  rows: { label: string; value: number; title: string }[];
+  maxValue: number;
+  barColor: string;
+}) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+      {rows.map((r, i) => {
+        const wPct = Math.max(4, (r.value / maxValue) * 100);
+        return (
+          <Box key={`${r.label}-${i}`} title={r.title}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  width: 120,
+                  flexShrink: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {r.label}
+              </Typography>
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    height: 10,
+                    width: `${wPct}%`,
+                    maxWidth: '100%',
+                    bgcolor: barColor,
+                    borderRadius: 0.5,
+                  }}
+                />
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ flexShrink: 0 }}
+                >
+                  {r.value}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        );
+      })}
     </Box>
   );
 }
