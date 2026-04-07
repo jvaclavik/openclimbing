@@ -64,7 +64,8 @@
     "react-jss": "^10.6.0",
     "react-query": "^3.39.3",
     "react-split-pane": "^0.1.92",
-    "react-zoom-pan-pinch": "^3.7.0"
+    "react-zoom-pan-pinch": "^3.7.0",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",

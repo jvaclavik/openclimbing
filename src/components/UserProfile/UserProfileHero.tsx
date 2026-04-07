@@ -56,44 +56,29 @@ export const UserProfileHero = ({ titleName }: { titleName: string }) => {
   const { imageUrl } = useOsmProfileAvatarUrl(titleName);
 
   return (
-    <Box sx={{ px: PANEL_GAP, pb: 0 }}>
-      <Box
-        sx={(theme) => ({
-          mt: 1,
-          mb: 2,
-          p: 2.5,
-          borderRadius: 2,
-          border: 1,
-          borderColor: 'divider',
-          background:
-            theme.palette.mode === 'dark'
-              ? 'linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)'
-              : 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(0,0,0,0.03) 100%)',
-        })}
-      >
-        <Stack direction="row" spacing={2} alignItems="center">
-          {imageUrl ? (
-            <Box sx={{ flexShrink: 0, lineHeight: 0 }}>
-              <OsmUserAvatarImg src={imageUrl} alt={titleName} $size={56} />
-            </Box>
-          ) : (
-            <Avatar
-              sx={{
-                width: 56,
-                height: 56,
-                flexShrink: 0,
-                typography: 'h6',
-                bgcolor: 'primary.main',
-              }}
-            >
-              {initial}
-            </Avatar>
-          )}
-          <Stack spacing={0.5} flex={1} minWidth={0}>
-            <UserProfileHeroTitle titleName={titleName} />
-          </Stack>
+    <Box sx={{ px: PANEL_GAP, pb: 0, mt: 2, mb: 1.5 }}>
+      <Stack direction="row" spacing={2} alignItems="center">
+        {imageUrl ? (
+          <Box sx={{ flexShrink: 0, lineHeight: 0 }}>
+            <OsmUserAvatarImg src={imageUrl} alt={titleName} $size={56} />
+          </Box>
+        ) : (
+          <Avatar
+            sx={{
+              width: 56,
+              height: 56,
+              flexShrink: 0,
+              typography: 'h6',
+              bgcolor: 'primary.main',
+            }}
+          >
+            {initial}
+          </Avatar>
+        )}
+        <Stack spacing={0.5} flex={1} minWidth={0}>
+          <UserProfileHeroTitle titleName={titleName} />
         </Stack>
-      </Box>
+      </Stack>
     </Box>
   );
 };

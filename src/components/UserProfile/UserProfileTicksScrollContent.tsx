@@ -1,19 +1,10 @@
 import React from 'react';
-import { Alert, Box, CircularProgress, Divider } from '@mui/material';
+import { Alert, Box, CircularProgress } from '@mui/material';
 import { t } from '../../services/intl';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
-import {
-  PanelScrollbars,
-  PanelSidePadding,
-  PANEL_GAP,
-} from '../utils/PanelHelpers';
-import {
-  MyTicksContent,
-  MyTicksEmptyHint,
-} from '../MyTicksPanel/MyTicksContent';
+import { PanelScrollbars, PanelSidePadding } from '../utils/PanelHelpers';
 import { UserProfileHero } from './UserProfileHero';
 import { UserProfilePerformanceSection } from './UserProfilePerformanceSection';
-import { UserProfileGradeSystemBar } from './UserProfileGradeSystemBar';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { UserProfileFetchState } from './useUserProfileFetch';
 
@@ -28,6 +19,34 @@ type Props = {
   onClose: () => void;
 };
 
+function UserProfileFetchStateMessages({
+  own,
+  state,
+}: {
+  own: boolean;
+  state: UserProfileFetchState;
+}) {
+  if (!own && state.kind === 'unknown') {
+    return (
+      <PanelSidePadding>
+        <Alert severity="info" variant="outlined">
+          {t('user_profile.unknown_user')}
+        </Alert>
+      </PanelSidePadding>
+    );
+  }
+  if (!own && state.kind === 'error') {
+    return (
+      <PanelSidePadding>
+        <Alert severity="error" variant="outlined">
+          {t('user_profile.load_error')}
+        </Alert>
+      </PanelSidePadding>
+    );
+  }
+  return null;
+}
+
 export const UserProfileTicksScrollContent = ({
   titleName,
   own,
@@ -41,13 +60,15 @@ export const UserProfileTicksScrollContent = ({
   <PanelScrollbars>
     <ClosePanelButton right onClick={onClose} />
     <UserProfileHero titleName={titleName} />
-    <UserProfileGradeSystemBar />
 
-    {state.kind === 'ready' && !isLoading && fetchedTicks.length > 0 ? (
-      <UserProfilePerformanceSection fetchedTicks={fetchedTicks} />
+    {state.kind === 'ready' && !isLoading ? (
+      <UserProfilePerformanceSection
+        displayName={titleName}
+        own={own}
+        ticksPanelEnabled={ticksPanelEnabled}
+        fetchedTicks={fetchedTicks}
+      />
     ) : null}
-
-    <Divider sx={{ mb: 2 }} />
 
     {showLoader ? (
       <Box
@@ -63,38 +84,6 @@ export const UserProfileTicksScrollContent = ({
       </Box>
     ) : null}
 
-    {!own && state.kind === 'unknown' ? (
-      <PanelSidePadding>
-        <Alert severity="info" variant="outlined">
-          {t('user_profile.unknown_user')}
-        </Alert>
-      </PanelSidePadding>
-    ) : null}
-
-    {!own && state.kind === 'error' ? (
-      <PanelSidePadding>
-        <Alert severity="error" variant="outlined">
-          {t('user_profile.load_error')}
-        </Alert>
-      </PanelSidePadding>
-    ) : null}
-
-    {ticksPanelEnabled && !isLoading ? (
-      <Box sx={{ px: PANEL_GAP, pt: 0 }}>
-        <MyTicksContent
-          fetchedTicks={fetchedTicks}
-          readOnly={!own}
-          emptyTicksMessage={
-            own ? (
-              <MyTicksEmptyHint />
-            ) : (
-              <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
-                {t('user_profile.no_ticks')}
-              </Alert>
-            )
-          }
-        />
-      </Box>
-    ) : null}
+    <UserProfileFetchStateMessages own={own} state={state} />
   </PanelScrollbars>
 );
