@@ -1,17 +1,17 @@
-import { ClimbingRoute, PathPoints } from './types';
+import { saveChanges } from '../../../services/osm/auth/osmApiAuth';
 import { Feature, FeatureTags, OsmId } from '../../../services/types';
+import { Setter } from '../../../types';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { useClimbingContext } from './contexts/ClimbingContext';
 import { useSnackbar } from '../../utils/SnackbarContext';
+import { fetchFreshItem } from '../EditDialog/context/itemsHelpers';
+import { DataItem } from '../EditDialog/context/types';
+import { useClimbingContext } from './contexts/ClimbingContext';
+import { ClimbingRoute, PathPoints } from './types';
+import { stringifyPath } from './utils/pathUtils';
 import {
   getNextWikimediaCommonsIndex,
   getWikimediaCommonsKey,
 } from './utils/photo';
-import { Setter } from '../../../types';
-import { saveChanges } from '../../../services/osm/auth/osmApiAuth';
-import { fetchFreshItem } from '../EditDialog/context/itemsHelpers';
-import { stringifyPath } from './utils/pathUtils';
-import { DataItem } from '../EditDialog/context/types';
 import { getCragProtectionTagPatch } from './utils/protectionPathTags';
 
 const getUpdatedPhotoTags = (route: ClimbingRoute) => {
@@ -121,18 +121,20 @@ export const useSaveCragFactory = (setIsEditMode: Setter<boolean>) => {
       return;
     }
 
-    // eslint-disable-next-line no-alert
-    if (window.confirm('Are you sure you want to save?') === false) {
-      return;
+    try {
+      const changes = await constructChanges(updates);
+
+      const comment = `${changes.length} routes`;
+      const result = await saveChanges(crag, comment, changes);
+
+      console.log('All routes saved', { updates, changes, result }); // eslint-disable-line no-console
+      showToast('Data saved successfully!', 'success');
+      setIsEditMode(false);
+    } catch (err) {
+      console.error('Failed to save climbing crag', err); // eslint-disable-line no-console
+      const message =
+        (err as any)?.responseText ?? (err as any)?.message ?? String(err);
+      showToast(`Save failed: ${message}`, 'error');
     }
-
-    const changes = await constructChanges(updates);
-
-    const comment = `${changes.length} routes`;
-    const result = await saveChanges(crag, comment, changes);
-
-    console.log('All routes saved', { updates, changes, result }); // eslint-disable-line no-console
-    showToast('Data saved successfully!', 'success');
-    setIsEditMode(false);
   };
 };
