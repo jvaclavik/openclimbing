@@ -4,8 +4,8 @@ import { FetchError } from '../helpers';
 // TODO add proper overpass types from refreshClimbingTilesHelpers.ts
 
 const OVERPASS_HOSTS = [
-  'overpass.private.coffee', // alternative instance (minutely synced), we prefer it for bigger HW & less known
   'overpass-api.de', // main instance (minutely synced)
+  'overpass.private.coffee', // alternative instance (minutely synced), we prefer it for bigger HW & less known
   'maps.mail.ru/osm/tools/overpass', // last alternative (minutely synced)
 ];
 
@@ -14,7 +14,8 @@ const isRetryableError = (e: FetchError) => {
   return (
     (e instanceof Error && e.message.includes('fetchJson: parse error')) ||
     (e instanceof FetchError &&
-      (e.code === '429' ||
+      (e.code === 'network' ||
+        e.code === '429' ||
         e.code === '500' ||
         e.code === '502' ||
         e.code === '503' ||
