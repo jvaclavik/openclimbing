@@ -1,13 +1,12 @@
-import React from 'react';
-import { useMapStateContext } from '../../utils/MapStateContext';
-import { usePersistedState } from '../../utils/usePersistedState';
 import styled from '@emotion/styled';
-import { IconButton, Tooltip } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { ClimbingLegend } from './ClimbingLegend';
-import { AttributionLinks } from './AttributionLinks';
+import { IconButton, Tooltip } from '@mui/material';
 import { useIsClient, useMobileMode } from '../../helpers';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { useMapStateContext } from '../../utils/MapStateContext';
+import { usePersistedState } from '../../utils/usePersistedState';
+import { AttributionLinks } from './AttributionLinks';
+import { ClimbingLegend } from './ClimbingLegend';
 
 const IconContainer = styled.div<{ $isVisible: boolean }>`
   width: ${({ $isVisible }) => ($isVisible ? '20px' : '0')};
@@ -76,7 +75,7 @@ export const MapFooter = () => {
   const hasLegend = isMobileMode && featureShown ? false : hasClimbingLayer;
   const [legendShown, setLegendShown] = usePersistedState<boolean>(
     'isLegendVisible',
-    true,
+    false,
   );
   const isClient = useIsClient();
 
