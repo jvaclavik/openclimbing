@@ -19,7 +19,8 @@ const isRetryableError = (e: FetchError) => {
         e.code === '500' ||
         e.code === '502' ||
         e.code === '503' ||
-        e.code === '504'))
+        e.code === '504' ||
+        e.code === '406'))
   );
 };
 
