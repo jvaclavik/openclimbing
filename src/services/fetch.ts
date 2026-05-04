@@ -3,6 +3,8 @@ import { getCache, getKey, writeCacheSafe } from './fetchCache';
 import { isBrowser } from '../components/helpers';
 import { FetchError } from './helpers';
 
+const SSR_USER_AGENT = `OpenClimbing/${process.env.osmappVersion} (SSR; https://openclimbing.org)`;
+
 // TODO cancel request in map.on('click', ...)
 const abortableQueues: Record<string, AbortController> = {};
 
@@ -32,6 +34,10 @@ export const fetchText = async (url: string, opts: FetchOpts = {}) => {
   try {
     const res = await fetch(url, {
       ...opts,
+      headers: {
+        ...(!isBrowser() && { 'User-Agent': SSR_USER_AGENT }),
+        ...opts.headers,
+      },
       signal: abortableQueues[queueName]?.signal,
     });
 
@@ -67,7 +73,13 @@ export const fetchText = async (url: string, opts: FetchOpts = {}) => {
 };
 
 export const fetchJson = async <T = any>(url: string, opts: FetchOpts = {}) => {
-  const text = await fetchText(url, opts);
+  const text = await fetchText(url, {
+    ...opts,
+    headers: {
+      Accept: 'application/json',
+      ...opts.headers,
+    },
+  });
   try {
     return JSON.parse(text) as T;
   } catch (e) {

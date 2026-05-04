@@ -87,12 +87,19 @@ const getRelationElementsAndCenter = async (apiId: OsmId) => {
       tags: element.tags,
       osmMeta: apiId,
     });
-  const center = getPositionOfFirstItem
-    ? await fetchOverpassCenter({
-        id: element.members[0].ref,
-        type: element.members[0].type,
-      })
-    : await fetchOverpassCenter(apiId);
+
+  let center: LonLat | false;
+  try {
+    center = getPositionOfFirstItem
+      ? await fetchOverpassCenter({
+          id: element.members[0].ref,
+          type: element.members[0].type,
+        })
+      : await fetchOverpassCenter(apiId);
+  } catch (e) {
+    console.warn('getRelationElementsAndCenter() overpass center failed:', e); // eslint-disable-line no-console
+    center = false;
+  }
 
   return { element, center };
 };
