@@ -155,21 +155,34 @@ const fetchFeatureWithCenter = async (apiId: OsmId) => {
   return addSchemaToFeature(feature);
 };
 
+const buildMemberFeatureTree = (
+  memberFeature: Feature,
+  itemsMap: ReturnType<typeof getItemsMap>,
+  visited = new Set<string>(),
+): Feature => {
+  const key = `${memberFeature.osmMeta.type}/${memberFeature.osmMeta.id}`;
+  if (visited.has(key)) {
+    return { ...memberFeature, memberFeatures: [] };
+  }
+  visited.add(key);
+
+  const children = getMemberFeatures(memberFeature.members, itemsMap).map(
+    (child) => buildMemberFeatureTree(child, itemsMap, visited),
+  );
+  const result: Feature = { ...memberFeature, memberFeatures: children };
+  mergeMemberImageDefs(result);
+  return result;
+};
+
 const addMemberFeaturesToArea = async (relation: Feature) => {
   const { osmMeta } = relation;
   const fullQuery = `[out:json];rel(${osmMeta.id});>>;out center qt;`;
 
   const overpass = await fetchOverpass(fullQuery);
   const itemsMap = getItemsMap(overpass.elements);
+  const visited = new Set<string>();
   const memberFeatures = getMemberFeatures(relation.members, itemsMap).map(
-    (memberFeature) => {
-      const crag: Feature = {
-        ...memberFeature,
-        memberFeatures: getMemberFeatures(memberFeature.members, itemsMap),
-      };
-      mergeMemberImageDefs(crag);
-      return crag;
-    },
+    (memberFeature) => buildMemberFeatureTree(memberFeature, itemsMap, visited),
   );
 
   // TODO merge this with osmToFeature()
