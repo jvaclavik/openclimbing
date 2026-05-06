@@ -230,6 +230,10 @@ export default {
   'featurepanel.climbing_sectors_in': 'v oblasti',
   'featurepanel.sector': 'Lezecký sektor',
   'featurepanel.sectors': 'sektorů',
+  'featurepanel.area': 'Lezecká oblast',
+  'featurepanel.areas': 'oblastí',
+  'featurepanel.type_area': 'Oblast',
+  'featurepanel.type_crag': 'Sektor',
   'featurepanel.routes': 'cest',
   'featurepanel.hidden_crags': 'skrytých sektorů',
 

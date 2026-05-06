@@ -266,6 +266,10 @@ export default {
   'featurepanel.climbing_sectors_in': 'in',
   'featurepanel.sector': 'Climbing crag',
   'featurepanel.sectors': 'crags',
+  'featurepanel.area': 'Climbing area',
+  'featurepanel.areas': 'areas',
+  'featurepanel.type_area': 'Area',
+  'featurepanel.type_crag': 'Crag',
   'featurepanel.routes': 'routes',
   'featurepanel.hidden_crags': 'hidden crags',
 
