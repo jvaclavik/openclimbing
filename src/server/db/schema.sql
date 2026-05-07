@@ -16,7 +16,8 @@ CREATE TABLE climbing_features
   "gradeTxt"      TEXT,
   "gradeId"       INTEGER,
   "histogramCode" TEXT,
-  "parentId"      INTEGER
+  "parentId"      INTEGER,
+  feature         TEXT -- full GeoJSON Feature as JSON
 );
 
 CREATE TABLE climbing_tiles_cache
