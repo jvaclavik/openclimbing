@@ -108,6 +108,9 @@ const addRouteStarts = (features: ClimbingTilesFeature[]) => [
   ...features.filter(isRouteLineString).map(firstPointGeometry),
 ];
 
+const isGymOrFerrata = (f: ClimbingTilesFeature) =>
+  f.properties.type === 'gym' || f.properties.type === 'ferrata';
+
 export const buildTileGeojson = (
   isOptimizedToGrid: boolean,
   recordsInBbox: ClimbingFeaturesRow[],
@@ -115,9 +118,14 @@ export const buildTileGeojson = (
 ): GeoJSON.FeatureCollection => {
   const featuresInBbox = recordsInBbox.map(buildGeojson);
 
-  const features = isOptimizedToGrid
-    ? optimizeFeaturesToGrid(featuresInBbox, bbox)
-    : featuresInBbox;
+  let features: ClimbingTilesFeature[];
+  if (isOptimizedToGrid) {
+    const gymsAndFerratas = featuresInBbox.filter(isGymOrFerrata);
+    const rest = featuresInBbox.filter((f) => !isGymOrFerrata(f));
+    features = [...optimizeFeaturesToGrid(rest, bbox), ...gymsAndFerratas];
+  } else {
+    features = featuresInBbox;
+  }
 
   return {
     type: 'FeatureCollection' as const,

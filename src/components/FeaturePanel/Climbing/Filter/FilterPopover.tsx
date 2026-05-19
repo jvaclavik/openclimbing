@@ -3,6 +3,7 @@ import React from 'react';
 import { t, Translation } from '../../../../services/intl';
 import { MinimumRoutesFilter } from './MinimumRoutesFilter';
 import { GradeFilter } from './GradeFilter';
+import { ClimbingTypeFilter } from './ClimbingTypeFilter';
 import { PopperWithArrow } from '../../../utils/PopperWithArrow';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { Placement } from '@popperjs/core';
@@ -99,6 +100,7 @@ export const FilterPopover = ({
           <Box>
             <GradeFilter />
             <MinimumRoutesFilter />
+            <ClimbingTypeFilter />
             <ZoomWarning />
           </Box>
         </PopperWithArrow>

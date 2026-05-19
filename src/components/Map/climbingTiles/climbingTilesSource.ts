@@ -20,6 +20,7 @@ import { join } from '../../../utils';
 import { mapClimbingFilter } from '../../utils/userSettings/mapClimbingFilter';
 import { decodeHistogram } from '../../../server/climbing-tiles/overpass/histogram';
 import { constructOutlines } from './constructOutlines';
+import { Interval, PoiTypes } from '../../utils/userSettings/getClimbingFilter';
 
 const getTileJson = async ({ z, x, y }: Tile) => {
   try {
@@ -77,37 +78,60 @@ const processFeature = (
   };
 };
 
-const doClimbingFilter = (features: ClimbingTilesFeature[]) => {
-  const filteredFeatures = features.filter((feature) => {
+type FilterParams = {
+  gradeInterval: Interval;
+  minimumRoutes: number;
+  isDefaultFilter: boolean;
+  poiTypes: PoiTypes;
+};
+
+export const filterClimbingTilesFeatures = (
+  features: ClimbingTilesFeature[],
+  { gradeInterval, minimumRoutes, isDefaultFilter, poiTypes }: FilterParams,
+): ClimbingTilesFeature[] =>
+  features.filter((feature) => {
     const { type, routeCount, gradeId, histogramCode } = feature.properties;
 
-    if (['crag', 'area', 'gym', 'ferrata'].includes(type)) {
-      if (mapClimbingFilter.isDefaultFilter) {
-        return true;
-      }
+    if (type === 'gym') return poiTypes.gym;
+    if (type === 'ferrata') return poiTypes.ferrata;
+
+    if (type === 'crag' || type === 'area') {
+      if (!poiTypes.rock) return false;
+      if (isDefaultFilter) return true;
 
       if (routeCount && histogramCode) {
-        const [minIndex, maxIndex] = mapClimbingFilter.gradeInterval;
+        const [minIndex, maxIndex] = gradeInterval;
         const histogram = decodeHistogram(histogramCode);
         const filteredRouteCount = histogram
           .slice(minIndex, maxIndex)
           .reduce((a, b) => a + b, 0);
 
-        return filteredRouteCount >= mapClimbingFilter.minimumRoutes;
+        return filteredRouteCount >= minimumRoutes;
       }
       return false;
     }
 
-    // route
+    // route / route_top
     if (gradeId) {
-      const [minIndex, maxIndex] = mapClimbingFilter.gradeInterval;
+      if (!poiTypes.rock) return false;
+      const [minIndex, maxIndex] = gradeInterval;
       return gradeId >= minIndex && gradeId <= maxIndex;
     }
 
     return true;
   });
-  return filteredFeatures;
-};
+
+const doClimbingFilter = (features: ClimbingTilesFeature[]) =>
+  filterClimbingTilesFeatures(features, {
+    gradeInterval: mapClimbingFilter.gradeInterval,
+    minimumRoutes: mapClimbingFilter.minimumRoutes,
+    isDefaultFilter: mapClimbingFilter.isDefaultFilter,
+    poiTypes: mapClimbingFilter.poiTypes ?? {
+      rock: true,
+      ferrata: true,
+      gym: true,
+    },
+  });
 
 const updateData = async () => {
   const map = getGlobalMap();

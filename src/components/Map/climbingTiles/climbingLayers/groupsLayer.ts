@@ -54,6 +54,7 @@ export const groupsLayer: LayerSpecification = {
   metadata: { clickableWithOsmId: true },
   type: 'symbol',
   source: CLIMBING_TILES_SOURCE,
+  minzoom: 1,
   maxzoom: 20,
   filter: ['in', 'type', 'area', 'crag'],
   layout: GROUPS_LAYOUT,
@@ -73,8 +74,6 @@ export const gymsLayer: LayerSpecification = {
   ...groupsLayer,
   id: 'climbing gym',
   filter: ['==', 'type', 'gym'],
-  minzoom: 9,
-  maxzoom: 24,
   layout: {
     ...groupsLayer.layout,
     'icon-image': GYM.IMAGE,

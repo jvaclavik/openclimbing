@@ -560,6 +560,10 @@ export default {
   'crag_filter.reset': 'Reset',
   'crag_filter.done': 'Done',
   'crag_filter.zoom_in': 'Map filtering is in beta, all filtered results are shown from zoom __zoom__. <link>more info</link>',
+  'crag_filter.type': 'Type',
+  'crag_filter.type_rock': 'Rock climbing',
+  'crag_filter.type_ferrata': 'Via ferrata',
+  'crag_filter.type_gym': 'Climbing gym',
 
   'member_features.subitems': 'Subitems',
   'member_features.climbing': 'Climbing routes',
