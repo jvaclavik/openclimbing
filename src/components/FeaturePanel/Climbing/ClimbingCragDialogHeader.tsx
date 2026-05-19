@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import {
   AppBar,
   Box,
@@ -19,6 +20,7 @@ import { useDragItems } from '../../utils/useDragItems';
 import { moveElementToIndex, toInsertIndexAfterRemove } from './utils/array';
 import { t } from '../../../services/intl';
 import { usePhotoChange } from './utils/usePhotoChange';
+import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 
 const Title = styled.div`
   flex: 1;
@@ -47,6 +49,7 @@ const PhotoLinks = styled.div`
 export const ClimbingCragDialogHeader = ({ onClose }) => {
   const [isUserSettingsOpened, setIsUserSettingsOpened] =
     useState<boolean>(false);
+  const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
   const [clickCounter, setClickCounter] = useState<number>(0);
   const { photoPath, photoPaths, setShowDebugMenu, isEditMode, setPhotoPaths } =
     useClimbingContext();
@@ -147,6 +150,17 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
           )}
         </Title>
 
+        <Box mr={1}>
+          <Tooltip title={t('climbingpanel.pdf_export_button')}>
+            <IconButton
+              color="primary"
+              edge="end"
+              onClick={() => setIsPdfExportOpen(true)}
+            >
+              <PictureAsPdfIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Box mr={2}>
           <Tooltip title="Show settings">
             <IconButton
@@ -170,6 +184,12 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
         isOpened={isUserSettingsOpened}
         onClose={() => setIsUserSettingsOpened(false)}
       />
+      {isPdfExportOpen && (
+        <ClimbingPdfExportDialog
+          isOpen={isPdfExportOpen}
+          onClose={() => setIsPdfExportOpen(false)}
+        />
+      )}
     </AppBar>
   );
 };
