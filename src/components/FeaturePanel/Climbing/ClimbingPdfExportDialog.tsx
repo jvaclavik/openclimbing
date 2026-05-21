@@ -885,9 +885,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
   const printRootRef = useRef<HTMLDivElement>(null);
 
   // Render nothing until after first client mount: the dialog uses a portal to
-  // document.body which can't exist during SSR. Without this, server and client
-  // disagree (server: nothing, client: full overlay) and React reports a
-  // hydration mismatch.
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
