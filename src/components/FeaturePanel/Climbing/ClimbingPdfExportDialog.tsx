@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import styled from '@emotion/styled';
+import CloseIcon from '@mui/icons-material/Close';
+import PrintIcon from '@mui/icons-material/Print';
 import {
   Button,
   CircularProgress,
@@ -8,31 +8,32 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import PrintIcon from '@mui/icons-material/Print';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { LogoOpenClimbing } from '../../../assets/LogoOpenClimbing';
 
-import { useFeatureContext } from '../../utils/FeatureContext';
-import { useTicksContext } from '../../utils/TicksContext';
+import { getLabel } from '../../../helpers/featureLabel';
+import { getFullOsmappLink, getShortId } from '../../../services/helpers';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
-import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
-import { parseProtectionPointsByPhoto } from './utils/protectionPathTags';
-import {
-  getWikimediaCommonsPhotoValues,
-  removeFilePrefix,
-} from './utils/photo';
+import { t } from '../../../services/intl';
+import { TickStyleBadge } from '../../../services/my-ticks/TickStyleBadge';
 import {
   getDifficulties,
   getDifficulty,
   getDifficultyColor,
 } from '../../../services/tagging/climbing/routeGrade';
-import { getFullOsmappLink, getShortId } from '../../../services/helpers';
-import { getLabel } from '../../../helpers/featureLabel';
-import { t } from '../../../services/intl';
-import { ClimbingRoute, PathPoints, PointType, TickStyle } from './types';
-import { ConvertedRouteDifficultyBadge } from './ConvertedRouteDifficultyBadge';
-import { TickStyleBadge } from '../../../services/my-ticks/TickStyleBadge';
 import { ClimbingTick } from '../../../types';
+import { useFeatureContext } from '../../utils/FeatureContext';
+import { useTicksContext } from '../../utils/TicksContext';
+import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
+import { ConvertedRouteDifficultyBadge } from './ConvertedRouteDifficultyBadge';
+import { ClimbingRoute, PathPoints, PointType, TickStyle } from './types';
+import {
+  getWikimediaCommonsPhotoValues,
+  removeFilePrefix,
+} from './utils/photo';
+import { parseProtectionPointsByPhoto } from './utils/protectionPathTags';
+import { getShiftForStartPoint } from './utils/startPoint';
 
 type Dims = { w: number; h: number };
 
@@ -72,6 +73,10 @@ const BrandLogoWrap = styled.span`
   align-self: center;
 `;
 
+const BrandSpacer = styled.span`
+  flex: 1 1 auto;
+`;
+
 const BrandText = styled.span`
   font-family: 'Piazzolla', serif;
   font-weight: 900;
@@ -96,13 +101,11 @@ const GpsLink = styled.a`
 `;
 
 const PhotoBlock = styled.div`
-  margin: 12px 0 18px 0;
-`;
+  margin: 8px 0 14px 0;
 
-const PhotoCaption = styled.div`
-  font-size: 11px;
-  color: #555;
-  margin-top: 4px;
+  @media (max-width: 700px) {
+    margin: 4px 0 8px 0;
+  }
 `;
 
 const AllRoutesHeading = styled.h2`
@@ -116,7 +119,7 @@ const AllRoutesHeading = styled.h2`
 const RoutesTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-top: 12px;
+  margin-top: 4px;
   font-size: 13px;
 
   th,
@@ -155,6 +158,16 @@ const GradeCell = styled.td`
   font-family: monospace;
   font-weight: 700;
   white-space: nowrap;
+`;
+
+const RouteName = styled.div`
+  font-weight: 700;
+`;
+
+const RouteDescription = styled.div`
+  font-size: 11px;
+  color: #555;
+  margin-top: 2px;
 `;
 
 const LoadingWrap = styled.div`
@@ -349,96 +362,169 @@ type MarkerProps = {
   cx: number;
   cy: number;
   type: PointType;
-  unit: number;
+  /**
+   * Scale factor from "screen pixels" (the unit system used by crag-modal marker
+   * components like Bolt/Sling/Piton/Anchor) into user units of the PDF SVG
+   * (which uses the image's natural-pixel viewBox). Pre-computed from dims.w.
+   */
+  s: number;
 };
 
-const PdfMarker = ({ cx, cy, type, unit }: MarkerProps) => {
-  const stroke = unit * 0.4;
-  const r = unit * 1.4;
+// Re-uses the exact SVG paths from the crag-modal point components
+// (Bolt, Sling, Piton, Anchor, UnfinishedPoint) so the PDF matches the editor.
+// Colors are forced black foreground + white halo for max legibility on photos.
+const PdfMarker = ({ cx, cy, type, s }: MarkerProps) => {
+  const border = '#ffffff';
+  const fg = '#000000';
 
   if (type === 'bolt') {
+    const size = 14;
+    const sw = 2.5;
+    const shift = size / 2 - sw / 2;
     return (
-      <g transform={`translate(${cx} ${cy - r * 1.4}) rotate(45)`}>
+      <g
+        transform={`translate(${cx} ${cy}) scale(${s}) translate(0 ${-size / 2 - sw / 2}) rotate(45)`}
+      >
         <rect
-          x={-r}
-          y={-stroke * 0.5}
-          width={r * 2}
-          height={stroke}
-          fill="#fff"
-          stroke="#000"
-          strokeWidth={stroke * 0.4}
+          x={0}
+          y={shift}
+          width={size}
+          height={sw}
+          fill="transparent"
+          stroke={border}
+          strokeWidth={sw}
         />
         <rect
-          x={-stroke * 0.5}
-          y={-r}
-          width={stroke}
-          height={r * 2}
-          fill="#fff"
-          stroke="#000"
-          strokeWidth={stroke * 0.4}
+          x={shift}
+          y={0}
+          width={sw}
+          height={size}
+          fill="transparent"
+          stroke={border}
+          strokeWidth={sw}
         />
+        <rect x={0} y={shift} width={size} height={sw} fill={fg} />
+        <rect x={shift} y={0} width={sw} height={size} fill={fg} />
       </g>
     );
   }
-  if (type === 'anchor') {
-    return (
-      <g transform={`translate(${cx} ${cy - r * 1.4})`}>
-        <circle r={r} fill="#fff" stroke="#000" strokeWidth={stroke * 0.5} />
-        <circle r={r * 0.45} fill="#000" />
-      </g>
-    );
-  }
+
   if (type === 'sling') {
+    const d =
+      'M2 2C4.66667 4.74576 10.6667 9.32203 10.6667 14.2034C10.6667 17.5593 9.33333 20 7 20C4.66667 20 3.33333 17.5593 3.33333 14.2034C3.33333 9.32203 9.33333 4.74576 12 2';
     return (
-      <g transform={`translate(${cx} ${cy - r * 1.4})`}>
-        <rect
-          x={-r * 0.6}
-          y={-r}
-          width={r * 1.2}
-          height={r * 2}
-          rx={r * 0.6}
-          ry={r * 0.6}
-          fill="#fff"
-          stroke="#000"
-          strokeWidth={stroke * 0.5}
+      <g transform={`translate(${cx} ${cy}) scale(${s}) translate(15 -10)`}>
+        <path
+          d={d}
+          stroke={border}
+          strokeWidth={4}
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d={d}
+          stroke={fg}
+          strokeWidth={2}
+          strokeLinecap="round"
+          fill="none"
         />
       </g>
     );
   }
+
   if (type === 'piton') {
     return (
-      <g transform={`translate(${cx} ${cy - r * 1.4})`}>
-        <polygon
-          points={`0,${-r} ${r * 0.7},${r * 0.7} ${-r * 0.7},${r * 0.7}`}
-          fill="#fff"
-          stroke="#000"
-          strokeWidth={stroke * 0.5}
+      <g transform={`translate(${cx} ${cy}) scale(${s}) translate(-4 -6)`}>
+        <path
+          d="M1.72357 5.2168L24 1.6255"
+          stroke={border}
+          strokeWidth={4}
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle
+          cx={18.4758}
+          cy={6.49978}
+          r={3.37429}
+          stroke={border}
+          strokeWidth={4}
+          fill="none"
+        />
+        <path
+          d="M1.72357 5.2168L24 1.6255"
+          stroke={fg}
+          strokeWidth={2}
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle
+          cx={18.4758}
+          cy={6.49978}
+          r={3.37429}
+          stroke={fg}
+          strokeWidth={2}
+          fill="none"
         />
       </g>
     );
   }
-  if (type === 'unfinished') {
+
+  if (type === 'anchor') {
+    const r = 5;
     return (
-      <g transform={`translate(${cx} ${cy - r * 1.4})`}>
-        <line
-          x1={-r}
-          y1={-r}
-          x2={r}
-          y2={r}
-          stroke="#000"
-          strokeWidth={stroke}
+      <g transform={`translate(${cx} ${cy}) scale(${s}) translate(5 0)`}>
+        <circle
+          cx={0}
+          cy={0}
+          r={r}
+          fill="none"
+          strokeWidth={5}
+          stroke={border}
         />
-        <line
-          x1={-r}
-          y1={r}
-          x2={r}
-          y2={-r}
-          stroke="#000"
-          strokeWidth={stroke}
+        <g transform="translate(-1.5 0)">
+          <path d="M6.55 0.5L6.55 16.95" stroke={border} strokeWidth={5} />
+          <path
+            d="M2 12.75L6.55 18L11.1 12.75"
+            stroke={border}
+            fill="none"
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </g>
+        <circle cx={0} cy={0} r={r} fill="none" strokeWidth={3} stroke={fg} />
+        <g transform="translate(-1.5 0)">
+          <path d="M6.55 0.5L6.55 16.95" stroke={fg} strokeWidth={3} />
+          <path
+            d="M2 12.75L6.55 18L11.1 12.75"
+            stroke={fg}
+            fill="none"
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </g>
+      </g>
+    );
+  }
+
+  if (type === 'unfinished') {
+    const size = 12;
+    const sw = 1;
+    return (
+      <g
+        transform={`translate(${cx} ${cy}) scale(${s}) translate(${-size / 2 - sw / 2} ${size / 2 + sw / 2})`}
+      >
+        <polygon
+          stroke={border}
+          fill={fg}
+          strokeWidth={sw}
+          points={`0,0 ${size},0 ${size / 2},-${size}`}
         />
       </g>
     );
   }
+
   return null;
 };
 
@@ -524,11 +610,9 @@ type RouteRow = { route: ClimbingRoute; displayNumber: number };
 const RoutesSummary = ({
   items,
   ticks,
-  title,
 }: {
   items: RouteRow[];
   ticks: ClimbingTick[] | null;
-  title?: string;
 }) => {
   if (items.length === 0) return null;
 
@@ -537,32 +621,19 @@ const RoutesSummary = ({
       ? getShortId(route.feature.osmMeta)
       : '';
     if (!shortId || !ticks) return null;
-    const tick = ticks.find((t) => t.shortId === shortId);
+    const tick = ticks.find((tk) => tk.shortId === shortId);
     return tick ? (tick.style as TickStyle) : null;
   };
 
   return (
     <RoutesTable>
-      {title ? (
-        <caption
-          style={{
-            textAlign: 'left',
-            fontSize: 12,
-            color: '#555',
-            padding: '4px 0',
-            captionSide: 'top',
-          }}
-        >
-          {title}
-        </caption>
-      ) : null}
       <thead>
         <tr>
           <th style={{ width: 36, textAlign: 'center' }}>#</th>
+          <th>{t('climbingpanel.pdf_export_route_name')}</th>
           <th style={{ width: 48, textAlign: 'center' }}>
             {t('climbingpanel.pdf_export_tick_short')}
           </th>
-          <th>{t('climbingpanel.pdf_export_route_name')}</th>
           <th style={{ width: 110 }}>{t('climbingpanel.pdf_export_grade')}</th>
         </tr>
       </thead>
@@ -574,6 +645,8 @@ const RoutesSummary = ({
             'light',
           );
           const difficulties = getDifficulties(route.feature.tags);
+          const name = route.feature.tags?.name || '—';
+          const description = route.feature.tags?.description;
           return (
             <tr key={`${route.id}-${displayNumber}`}>
               <NumCell>
@@ -591,10 +664,15 @@ const RoutesSummary = ({
                   {displayNumber}
                 </span>
               </NumCell>
+              <td>
+                <RouteName>{name}</RouteName>
+                {description ? (
+                  <RouteDescription>{description}</RouteDescription>
+                ) : null}
+              </td>
               <TickCell>
                 {tickStyle != null ? <TickStyleBadge style={tickStyle} /> : ''}
               </TickCell>
-              <td>{route.feature.tags?.name || '—'}</td>
               <GradeCell>
                 <ConvertedRouteDifficultyBadge
                   routeDifficulties={difficulties}
@@ -629,6 +707,10 @@ const PhotoExport = ({
   const unit = Math.max(2, dims.w / 200); // base unit for stroke/text sizing
   const strokeWidth = unit * 0.9;
   const borderWidth = strokeWidth * 1.7;
+  // Markers from crag modal use coordinates in screen-pixel units. The PDF SVG
+  // viewBox is at image-natural-pixel scale, so we need to scale markers up by
+  // roughly the ratio of natural width to rendered print width.
+  const markerScale = dims.w / 700;
 
   const photoRoutes: RouteRow[] = routes
     .map((route, idx) => ({ route, displayNumber: idx + 1 }))
@@ -649,6 +731,7 @@ const PhotoExport = ({
           maxWidth: '100%',
           maxHeight: '22cm',
           margin: '0 auto',
+          height: 'auto',
         }}
       >
         <image href={imageUrl} width={dims.w} height={dims.h} />
@@ -690,7 +773,7 @@ const PhotoExport = ({
                     cx={p.x * dims.w}
                     cy={p.y * dims.h}
                     type={p.type}
-                    unit={unit}
+                    s={markerScale}
                   />
                 );
               })}
@@ -706,7 +789,7 @@ const PhotoExport = ({
               cx={p.x * dims.w}
               cy={p.y * dims.h}
               type={p.type}
-              unit={unit}
+              s={markerScale}
             />
           ) : null,
         )}
@@ -722,11 +805,21 @@ const PhotoExport = ({
           const shortId = route.feature?.osmMeta
             ? getShortId(route.feature.osmMeta)
             : '';
+          // Multi-route start-point shift: if earlier routes start at the same
+          // point, this badge is nudged to the right so numbers sit side by
+          // side instead of overlapping. Returned value is in screen px, so we
+          // convert to user units via markerScale.
+          const shiftPx = getShiftForStartPoint({
+            currentRouteSelectedIndex: routeIndex,
+            currentPosition: start,
+            checkedRoutes: routes,
+            photoPath,
+          });
           return (
             <RouteNumberBadge
               key={`num-${routeIndex}`}
               routeNumber={routeIndex + 1}
-              cx={start.x * dims.w}
+              cx={start.x * dims.w + shiftPx * markerScale}
               cy={start.y * dims.h}
               unit={unit}
               fill={strokeColor}
@@ -791,6 +884,13 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
 
   const printRootRef = useRef<HTMLDivElement>(null);
 
+  // Render nothing until after first client mount: the dialog uses a portal to
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handlePrint = () => {
     // In-page print: PrintStyles' @media print rules unlock body sizing
     // (overriding the global `body { position: fixed }`) so the browser can
@@ -799,7 +899,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
     window.print();
   };
 
-  if (!isOpen || typeof document === 'undefined') return null;
+  if (!isOpen || !mounted) return null;
 
   return ReactDOM.createPortal(
     <Overlay className="pdf-export-overlay pdf-export-print-portal">
@@ -828,11 +928,6 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
       <OverlayScroll>
         <PrintRoot ref={printRootRef} className="pdf-export-print-root">
           <BrandHeader>
-            <BrandLogoWrap>
-              <LogoOpenClimbing width={22} />
-            </BrandLogoWrap>
-            <BrandText>openclimbing.org</BrandText>
-            <HeaderSep>|</HeaderSep>
             <CragTitle>{label}</CragTitle>
             <CragMeta>
               {t('climbingpanel.pdf_export_routes_count', {
@@ -858,6 +953,11 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
                 </GpsLink>
               </>
             )}
+            <BrandSpacer />
+            <BrandLogoWrap>
+              <LogoOpenClimbing width={20} />
+            </BrandLogoWrap>
+            <BrandText>openclimbing.org</BrandText>
           </BrandHeader>
 
           {loading ? (
