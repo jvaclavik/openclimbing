@@ -23,6 +23,7 @@ import {
   getDifficultyColor,
 } from '../../../services/tagging/climbing/routeGrade';
 import { ClimbingTick } from '../../../types';
+import { Feature } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useTicksContext } from '../../utils/TicksContext';
 import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
@@ -114,6 +115,31 @@ const AllRoutesHeading = styled.h2`
   margin: 28px 0 8px 0;
   border-top: 1px solid #ddd;
   padding-top: 14px;
+`;
+
+const CragSectionHeading = styled.h2`
+  font-family: 'Piazzolla', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 24px 0 0 0;
+  padding-top: 14px;
+  border-top: 2px solid #bbb;
+
+  &:first-of-type {
+    margin-top: 4px;
+    padding-top: 0;
+    border-top: 0;
+  }
+`;
+
+const CragSectionMeta = styled.div`
+  font-size: 11px;
+  color: #555;
+  margin: 2px 0 4px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: baseline;
 `;
 
 const RoutesTable = styled.table`
@@ -844,10 +870,47 @@ type Props = {
   onClose: () => void;
 };
 
-export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
-  const { feature } = useFeatureContext();
-  const { isTicked, ticks } = useTicksContext();
+/**
+ * Computes the photos that should be exported for one crag:
+ * crag-level photos + per-route paths, but only those that actually have a
+ * route drawn on them. Used both by `CragPdfSection` and the parent to
+ * aggregate the global photo list for image preloading.
+ */
+const getCragExportPhotoPaths = (
+  feature: Feature,
+  routes: ClimbingRoute[],
+): string[] => {
+  const cragPhotos = getWikimediaCommonsPhotoValues(feature.tags).map(
+    removeFilePrefix,
+  );
+  const routePhotos = routes.flatMap((r) =>
+    r.paths ? Object.keys(r.paths) : [],
+  );
+  const all = Array.from(new Set([...cragPhotos, ...routePhotos]));
+  return all.filter((photoPath) =>
+    routes.some((route) => {
+      const p = route.paths?.[photoPath];
+      return p && p.length > 0;
+    }),
+  );
+};
 
+type CragPdfSectionProps = {
+  feature: Feature;
+  dims: Record<string, Dims>;
+  isTicked: (shortId: string) => boolean;
+  ticks: ClimbingTick[] | null;
+  /** Show the per-crag heading. False on single-crag exports (brand header covers it). */
+  showHeading: boolean;
+};
+
+const CragPdfSection = ({
+  feature,
+  dims,
+  isTicked,
+  ticks,
+  showHeading,
+}: CragPdfSectionProps) => {
   const routes = useMemo(() => osmToClimbingRoutes(feature), [feature]);
 
   const protectionPointsByPhoto = useMemo(
@@ -855,32 +918,117 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
     [feature.tags],
   );
 
-  const allPhotoPaths = useMemo(() => {
-    const cragPhotos = getWikimediaCommonsPhotoValues(feature.tags).map(
-      removeFilePrefix,
-    );
-    const routePhotos = routes.flatMap((r) =>
-      r.paths ? Object.keys(r.paths) : [],
-    );
-    return Array.from(new Set([...cragPhotos, ...routePhotos]));
-  }, [feature.tags, routes]);
-
   const photoPathsForExport = useMemo(
-    () =>
-      allPhotoPaths.filter((photoPath) =>
-        routes.some((route) => {
-          const p = route.paths?.[photoPath];
-          return p && p.length > 0;
-        }),
-      ),
-    [allPhotoPaths, routes],
+    () => getCragExportPhotoPaths(feature, routes),
+    [feature, routes],
   );
-
-  const { dims, loading } = useImageDims(photoPathsForExport);
 
   const label = getLabel(feature);
   const center = feature.center;
   const [lon, lat] = center ?? [];
+
+  return (
+    <>
+      {showHeading && (
+        <>
+          <CragSectionHeading>{label}</CragSectionHeading>
+          <CragSectionMeta>
+            <span>
+              {t('climbingpanel.pdf_export_routes_count', {
+                count: routes.length,
+              })}
+            </span>
+            {lat != null && lon != null && (
+              <>
+                <HeaderSep>·</HeaderSep>
+                <GpsLink
+                  href={getFullOsmappLink(feature)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {formatCoord(lat)}, {formatCoord(lon)}
+                </GpsLink>
+                <GpsLink
+                  href={buildMapyComUrl(lon, lat)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  (Mapy.com)
+                </GpsLink>
+              </>
+            )}
+          </CragSectionMeta>
+        </>
+      )}
+
+      {photoPathsForExport.map((photoPath) => {
+        const d = dims[photoPath];
+        if (!d) return null;
+        return (
+          <PhotoExport
+            key={photoPath}
+            photoPath={photoPath}
+            dims={d}
+            routes={routes}
+            protectionPoints={protectionPointsByPhoto?.[photoPath] ?? []}
+            isTicked={isTicked}
+            ticks={ticks}
+          />
+        );
+      })}
+
+      <AllRoutesHeading>
+        {t('climbingpanel.pdf_export_all_routes')}
+      </AllRoutesHeading>
+      <RoutesSummary
+        items={routes.map((route, idx) => ({
+          route,
+          displayNumber: idx + 1,
+        }))}
+        ticks={ticks}
+      />
+    </>
+  );
+};
+
+export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
+  const { feature } = useFeatureContext();
+  const { isTicked, ticks } = useTicksContext();
+
+  // For climbing=area, iterate over its child crags; otherwise treat the
+  // feature itself as a single crag.
+  const isArea = feature.tags.climbing === 'area';
+  const crags: Feature[] = useMemo(
+    () =>
+      isArea
+        ? (feature.memberFeatures ?? []).filter(
+            (f) => f.tags?.climbing === 'crag',
+          )
+        : [feature],
+    [feature, isArea],
+  );
+
+  // Aggregate every crag's photos so the loader can preload them all at once
+  // and the Print button only enables when everything is ready.
+  const allPhotoPaths = useMemo(() => {
+    const paths: string[] = [];
+    for (const crag of crags) {
+      const routes = osmToClimbingRoutes(crag);
+      paths.push(...getCragExportPhotoPaths(crag, routes));
+    }
+    return Array.from(new Set(paths));
+  }, [crags]);
+
+  const { dims, loading } = useImageDims(allPhotoPaths);
+
+  const label = getLabel(feature);
+  const center = feature.center;
+  const [lon, lat] = center ?? [];
+  const totalRoutesCount = useMemo(
+    () =>
+      crags.reduce((acc, crag) => acc + osmToClimbingRoutes(crag).length, 0),
+    [crags],
+  );
 
   const printRootRef = useRef<HTMLDivElement>(null);
 
@@ -931,7 +1079,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
             <CragTitle>{label}</CragTitle>
             <CragMeta>
               {t('climbingpanel.pdf_export_routes_count', {
-                count: routes.length,
+                count: totalRoutesCount,
               })}
             </CragMeta>
             {lat != null && lon != null && (
@@ -966,36 +1114,16 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
               <span>{t('climbingpanel.pdf_export_loading')}</span>
             </LoadingWrap>
           ) : (
-            <>
-              {photoPathsForExport.map((photoPath) => {
-                const d = dims[photoPath];
-                if (!d) return null;
-                return (
-                  <PhotoExport
-                    key={photoPath}
-                    photoPath={photoPath}
-                    dims={d}
-                    routes={routes}
-                    protectionPoints={
-                      protectionPointsByPhoto?.[photoPath] ?? []
-                    }
-                    isTicked={isTicked}
-                    ticks={ticks}
-                  />
-                );
-              })}
-
-              <AllRoutesHeading>
-                {t('climbingpanel.pdf_export_all_routes')}
-              </AllRoutesHeading>
-              <RoutesSummary
-                items={routes.map((route, idx) => ({
-                  route,
-                  displayNumber: idx + 1,
-                }))}
+            crags.map((crag) => (
+              <CragPdfSection
+                key={crag.osmMeta.id}
+                feature={crag}
+                dims={dims}
+                isTicked={isTicked}
                 ticks={ticks}
+                showHeading={isArea}
               />
-            </>
+            ))
           )}
         </PrintRoot>
       </OverlayScroll>
