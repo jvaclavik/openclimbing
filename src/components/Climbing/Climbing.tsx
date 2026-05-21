@@ -1,9 +1,10 @@
 import { useFeatureContext } from '../utils/FeatureContext';
-import { useRouter } from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { ClimbingContextProvider } from '../FeaturePanel/Climbing/contexts/ClimbingContext';
 import { ClimbingCragDialog } from '../FeaturePanel/Climbing/ClimbingCragDialog';
+import { ClimbingPdfExportDialog } from '../FeaturePanel/Climbing/ClimbingPdfExportDialog';
 import React from 'react';
-import { getReactKey } from '../../services/helpers';
+import { getOsmappLink, getReactKey } from '../../services/helpers';
 
 // TODO perhaps rename this to ClimbingDialog (and the folder as well)
 
@@ -12,14 +13,24 @@ export const Climbing = () => {
 
   const router = useRouter();
   const isClimbingDialogShown = router.query.all?.[2] === 'climbing';
-  const photo =
-    router.query.all?.[3] === 'photo' ? router.query.all?.[4] : undefined;
+  const subSection = router.query.all?.[3];
+  const photo = subSection === 'photo' ? router.query.all?.[4] : undefined;
   const routeNumber =
-    router.query.all?.[3] === 'route' ? router.query.all?.[4] : undefined;
-  const edit = router.query.all?.[3] === 'edit';
+    subSection === 'route' ? router.query.all?.[4] : undefined;
+  const edit = subSection === 'edit';
+  const isPdfRoute = subSection === 'pdf';
 
   if (!isClimbingDialogShown) {
     return null;
+  }
+
+  if (isPdfRoute) {
+    return (
+      <ClimbingPdfExportDialog
+        isOpen
+        onClose={() => Router.push(getOsmappLink(feature))}
+      />
+    );
   }
 
   return (

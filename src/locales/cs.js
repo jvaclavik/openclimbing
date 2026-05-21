@@ -427,7 +427,7 @@ export default {
   'climbingpanel.show_route_detail': 'Zobrazit detail cesty',
   'climbingpanel.add_tick': 'Přidat přelez',
   'climbingpanel.edit_route': 'Upravit cestu',
-  'climbingpanel.pdf_export_button': 'Exportovat do PDF',
+  'climbingpanel.pdf_export_button': 'Tisk',
   'climbingpanel.pdf_export_title': 'Export do PDF',
   'climbingpanel.pdf_export_print': 'Tisk / Uložit jako PDF',
   'climbingpanel.pdf_export_close': 'Zavřít',

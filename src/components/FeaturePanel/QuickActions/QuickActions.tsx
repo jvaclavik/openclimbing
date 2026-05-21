@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styled from '@emotion/styled';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -9,7 +8,7 @@ import { ShareButton } from './ShareDialog/ShareButton';
 import { t } from '../../../services/intl';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { isClimbingCrag } from '../../../utils';
-import { ClimbingPdfExportDialog } from '../Climbing/ClimbingPdfExportDialog';
+import { getOsmappLink } from '../../../services/helpers';
 
 const Wrapper = styled.div`
   max-width: 100%;
@@ -30,25 +29,6 @@ const Container = styled.div`
   gap: 8px;
 `;
 
-const PdfExportButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <>
-      <QuickActionButton
-        icon={PictureAsPdfIcon}
-        label={t('climbingpanel.pdf_export_button')}
-        onClick={() => setIsOpen(true)}
-      />
-      {isOpen && (
-        <ClimbingPdfExportDialog
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
-    </>
-  );
-};
-
 export const QuickActions = () => {
   const { feature } = useFeatureContext();
   const showPdfButton = isClimbingCrag(feature);
@@ -65,7 +45,15 @@ export const QuickActions = () => {
         />
         <StarButton />
         <ShareButton />
-        {showPdfButton && <PdfExportButton />}
+        {showPdfButton && (
+          <QuickActionButton
+            icon={PictureAsPdfIcon}
+            label={t('climbingpanel.pdf_export_button')}
+            onClick={() => {
+              Router.push(`${getOsmappLink(feature)}/climbing/pdf`);
+            }}
+          />
+        )}
       </Container>
     </Wrapper>
   );
