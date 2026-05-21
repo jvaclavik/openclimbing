@@ -7,7 +7,7 @@ import Router from 'next/router';
 import { ShareButton } from './ShareDialog/ShareButton';
 import { t } from '../../../services/intl';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { isClimbingCrag } from '../../../utils';
+import { isClimbingRelation } from '../../../utils';
 import { getOsmappLink } from '../../../services/helpers';
 
 const Wrapper = styled.div`
@@ -31,7 +31,9 @@ const Container = styled.div`
 
 export const QuickActions = () => {
   const { feature } = useFeatureContext();
-  const showPdfButton = isClimbingCrag(feature);
+  // Show PDF export for both crags and areas — area exports iterate over all
+  // child crags and produce a combined PDF.
+  const showPdfButton = isClimbingRelation(feature);
 
   return (
     <Wrapper>
