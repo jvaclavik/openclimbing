@@ -1,17 +1,17 @@
 import React, { createContext, useContext } from 'react';
-import { usePersistedState } from '../usePersistedState';
 import {
   GRADE_SYSTEMS,
   GradeSystem,
 } from '../../../services/tagging/climbing/gradeSystems';
+import { Setter } from '../../../types';
 import { TickStyle } from '../../FeaturePanel/Climbing/types';
 import { isMobileDevice } from '../../helpers';
+import { usePersistedState } from '../usePersistedState';
 import {
   ClimbingFilter,
   ClimbingFilterSettings,
   getClimbingFilter,
 } from './getClimbingFilter';
-import { Setter } from '../../../types';
 import { getGradeSystem } from './getGradeSystem';
 
 type CragViewLayout = 'vertical' | 'horizontal' | 'auto';
@@ -45,7 +45,7 @@ export type UserSettingsContextType = {
 const initialUserSettings: UserSettingsType = {
   // TODO remove initial settings and handle it as default in the usage code
   isImperial: false,
-  'weather.enabled': true,
+  'weather.enabled': false,
   'climbing.gradeSystem': null,
   'climbing.isGradesOnPhotosVisible': true,
   'climbing.defaultClimbingStyle': 'OS',

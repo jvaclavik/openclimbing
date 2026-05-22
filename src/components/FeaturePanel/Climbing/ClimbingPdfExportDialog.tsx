@@ -719,6 +719,9 @@ type PhotoExportProps = {
   protectionPoints: PathPoints;
   isTicked: (shortId: string) => boolean;
   ticks: ClimbingTick[] | null;
+  /** Hide the per-photo route table (e.g. when the only crag photo already
+   * covers every route — the bottom "All routes" table is enough). */
+  hideRoutesSummary?: boolean;
 };
 
 const PhotoExport = ({
@@ -728,10 +731,13 @@ const PhotoExport = ({
   protectionPoints,
   isTicked,
   ticks,
+  hideRoutesSummary,
 }: PhotoExportProps) => {
   const imageUrl = getCommonsImageUrl(fileForPath(photoPath), 1920);
   const unit = Math.max(2, dims.w / 200); // base unit for stroke/text sizing
-  const strokeWidth = unit * 0.9;
+  // Route lines: ~20% thinner than the original visual default — they were
+  // a bit too heavy on print.
+  const strokeWidth = unit * 0.72;
   const borderWidth = strokeWidth * 1.7;
   // Markers from crag modal use coordinates in screen-pixel units. The PDF SVG
   // viewBox is at image-natural-pixel scale, so we need to scale markers up by
@@ -855,7 +861,9 @@ const PhotoExport = ({
         })}
       </svg>
 
-      <RoutesSummary items={photoRoutes} ticks={ticks} />
+      {!hideRoutesSummary && (
+        <RoutesSummary items={photoRoutes} ticks={ticks} />
+      )}
     </PhotoBlock>
   );
 };
@@ -863,7 +871,7 @@ const PhotoExport = ({
 const formatCoord = (value: number) => value.toFixed(5);
 
 const buildMapyComUrl = (lon: number, lat: number) =>
-  `https://mapy.com/turisticka?q=${lat}%C2%B0%20${lon}%C2%B0`;
+  `https://mapy.com/en/turisticka?source=coor&id=${lon}%2C${lat}`;
 
 type Props = {
   isOpen: boolean;
@@ -923,6 +931,16 @@ const CragPdfSection = ({
     [feature, routes],
   );
 
+  // If there's exactly one photo AND every route is drawn on it, the per-photo
+  // table would be a copy of the bottom "All routes" table. Hide it then.
+  const singlePhotoCoversAllRoutes =
+    photoPathsForExport.length === 1 &&
+    routes.length > 0 &&
+    routes.every((r) => {
+      const p = r.paths?.[photoPathsForExport[0]];
+      return p && p.length > 0;
+    });
+
   const label = getLabel(feature);
   const center = feature.center;
   const [lon, lat] = center ?? [];
@@ -973,12 +991,14 @@ const CragPdfSection = ({
             protectionPoints={protectionPointsByPhoto?.[photoPath] ?? []}
             isTicked={isTicked}
             ticks={ticks}
+            hideRoutesSummary={singlePhotoCoversAllRoutes}
           />
         );
       })}
 
       <AllRoutesHeading>
         {t('climbingpanel.pdf_export_all_routes')}
+        {showHeading ? ` (${label})` : ''}
       </AllRoutesHeading>
       <RoutesSummary
         items={routes.map((route, idx) => ({
