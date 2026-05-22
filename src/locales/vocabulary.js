@@ -479,7 +479,7 @@ export default {
   'climbingpanel.show_route_detail': 'Show route detail',
   'climbingpanel.add_tick': 'Add tick',
   'climbingpanel.edit_route': 'Edit route',
-  'climbingpanel.pdf_export_button': 'Print',
+  'climbingpanel.pdf_export_button': 'Get PDF',
   'climbingpanel.pdf_export_title': 'Export to PDF',
   'climbingpanel.pdf_export_print': 'Print / Save as PDF',
   'climbingpanel.pdf_export_close': 'Close',

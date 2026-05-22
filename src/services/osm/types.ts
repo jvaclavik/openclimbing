@@ -6,6 +6,8 @@ export type OsmElement<T extends OsmType = 'node' | 'way' | 'relation'> = {
   id: number;
   lat: number;
   lon: number;
+  // Added by Overpass when the query uses `out center` (ways and relations).
+  center?: { lat: number; lon: number };
   timestamp: string;
   version: number;
   changeset: number;

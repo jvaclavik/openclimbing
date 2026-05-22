@@ -31,10 +31,14 @@ export const getMemberFeatures = (
       const feature = addSchemaToFeature(osmToFeature(element));
       feature.osmMeta.role = role;
 
-      // TODO this code is not used, but it had some meaning, leaving for now :)
-      // feature.center = element.center
-      //   ? [element.center.lon, element.center.lat] // from overpass "out center"
-      //   : feature.center;
+      // Overpass `out center` adds an `element.center` to ways/relations.
+      // osmToFeature() doesn't read it (only handles node lat/lon), so set it
+      // here for member features – otherwise crags inside a climbing area have
+      // no `feature.center` and any UI relying on it (maps, GPS links, ...)
+      // can't position them.
+      if (!feature.center && element.center) {
+        feature.center = [element.center.lon, element.center.lat];
+      }
 
       return feature;
     })

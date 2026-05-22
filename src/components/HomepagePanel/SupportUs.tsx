@@ -1,3 +1,7 @@
+import { keyframes } from '@emotion/react';
+import styled from '@emotion/styled';
+import CloseIcon from '@mui/icons-material/Close';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
   AccordionDetails,
@@ -7,17 +11,13 @@ import {
   Dialog,
   DialogContent,
   IconButton,
+  Link,
   Stack,
   Toolbar,
   Tooltip,
   Typography,
-  Link,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import React, { useState } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
+import { useState } from 'react';
 import { useUserThemeContext } from '../../helpers/theme';
 import { t } from '../../services/intl';
 
@@ -134,7 +134,7 @@ export const SupportUs = () => {
                   <li>
                     <Typography variant="body2">
                       <a
-                        href="https://github.com/sponsors/zbycz"
+                        href="https://github.com/sponsors/jvaclavik"
                         target="_blank"
                       >
                         Github sponsor
