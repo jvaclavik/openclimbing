@@ -27,6 +27,7 @@ import { Feature } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useTicksContext } from '../../utils/TicksContext';
 import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
+import { ClimbingBadges } from './ClimbingBadges';
 import { ConvertedRouteDifficultyBadge } from './ConvertedRouteDifficultyBadge';
 import { ClimbingRoute, PathPoints, PointType, TickStyle } from './types';
 import {
@@ -52,6 +53,62 @@ const CragTitle = styled.span`
   font-family: 'Piazzolla', serif;
   font-size: 18px;
   font-weight: 700;
+`;
+
+const AreaTitle = styled.span`
+  font-family: 'Piazzolla', serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #2c5d8a;
+  line-height: 1.1;
+`;
+
+const FeatureDescription = styled.div`
+  font-size: 12px;
+  color: #444;
+  margin: 6px 0 10px 0;
+  line-height: 1.4;
+  white-space: pre-wrap;
+`;
+
+const RouteLengthChip = styled.span`
+  display: inline-block;
+  font-size: 11px;
+  color: #555;
+  margin-top: 2px;
+`;
+
+const RouteBadgesWrap = styled.div`
+  margin: 3px 0 1px 0;
+
+  &:empty {
+    display: none;
+  }
+`;
+
+const HazardAlert = styled.div`
+  background: #fff4e5;
+  border-left: 4px solid #ed6c02;
+  padding: 8px 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  color: #663c00;
+  border-radius: 2px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+`;
+
+const HazardTitle = styled.div`
+  font-weight: 700;
+  margin-bottom: 2px;
+`;
+
+const BadgesWrap = styled.div`
+  margin: 6px 0 10px 0;
+
+  & .MuiStack-root {
+    align-items: flex-start;
+  }
 `;
 
 const CragMeta = styled.span`
@@ -109,12 +166,13 @@ const PhotoBlock = styled.div`
   }
 `;
 
-const AllRoutesHeading = styled.h2`
-  font-family: 'Piazzolla', serif;
-  font-size: 18px;
-  margin: 28px 0 8px 0;
-  border-top: 1px solid #ddd;
-  padding-top: 14px;
+const AllRoutesHeading = styled.div`
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 14px 0 0 0;
 `;
 
 const CragSectionHeading = styled.h2`
@@ -300,6 +358,51 @@ const PrintStyles = () => (
 );
 
 const fileForPath = (path: string) => `File:${path}`;
+
+/**
+ * Print-friendly version of `ClimbingRestriction` — that component depends on
+ * `useFeatureContext`, while here we want to render the alert for arbitrary
+ * features (area or each crag inside it).
+ */
+const FeatureHazardAlert = ({ feature }: { feature: Feature }) => {
+  const restriction = feature.tags?.['climbing:restriction'];
+  const description = feature.tags?.['climbing:restriction:time_description'];
+  if (!restriction && !description) return null;
+  return (
+    <HazardAlert>
+      <HazardTitle>{t('featurepanel.climbing_restriction')}</HazardTitle>
+      {description}
+    </HazardAlert>
+  );
+};
+
+/**
+ * Renders feature-level extras shared between brand header (top feature) and
+ * per-crag sections inside an area: long-form description, climbing-type and
+ * hazard badges, plus an access-restriction warning.
+ */
+const FeatureExtras = ({ feature }: { feature: Feature }) => {
+  const description = feature.tags?.description;
+  // Bail out cheaply when nothing to show. ClimbingBadges renders an empty
+  // wrapper for features with no relevant tags, but it still mounts MUI Stack,
+  // which we'd rather avoid in the printed tree.
+  const hasBadges = Object.keys(feature.tags ?? {}).some(
+    (k) => k.startsWith('climbing:') && feature.tags?.[k] === 'yes',
+  );
+  return (
+    <>
+      {description ? (
+        <FeatureDescription>{description}</FeatureDescription>
+      ) : null}
+      {hasBadges && (
+        <BadgesWrap>
+          <ClimbingBadges feature={feature} />
+        </BadgesWrap>
+      )}
+      <FeatureHazardAlert feature={feature} />
+    </>
+  );
+};
 
 const useImageDims = (photoPaths: string[]) => {
   const [dims, setDims] = useState<Record<string, Dims>>({});
@@ -673,6 +776,14 @@ const RoutesSummary = ({
           const difficulties = getDifficulties(route.feature.tags);
           const name = route.feature.tags?.name || '—';
           const description = route.feature.tags?.description;
+          const rawLength = route.feature.tags?.['climbing:length'];
+          // OSM stores climbing:length as a bare number in meters by default;
+          // append "m" only when there isn't already a non-digit suffix.
+          const lengthDisplay = rawLength
+            ? /^\d+(\.\d+)?$/.test(rawLength)
+              ? `${rawLength} m`
+              : rawLength
+            : null;
           return (
             <tr key={`${route.id}-${displayNumber}`}>
               <NumCell>
@@ -692,8 +803,14 @@ const RoutesSummary = ({
               </NumCell>
               <td>
                 <RouteName>{name}</RouteName>
+                <RouteBadgesWrap>
+                  <ClimbingBadges feature={route.feature} />
+                </RouteBadgesWrap>
                 {description ? (
                   <RouteDescription>{description}</RouteDescription>
+                ) : null}
+                {lengthDisplay ? (
+                  <RouteLengthChip>{lengthDisplay}</RouteLengthChip>
                 ) : null}
               </td>
               <TickCell>
@@ -976,6 +1093,7 @@ const CragPdfSection = ({
               </>
             )}
           </CragSectionMeta>
+          <FeatureExtras feature={feature} />
         </>
       )}
 
@@ -996,10 +1114,12 @@ const CragPdfSection = ({
         );
       })}
 
-      <AllRoutesHeading>
-        {t('climbingpanel.pdf_export_all_routes')}
-        {showHeading ? ` (${label})` : ''}
-      </AllRoutesHeading>
+      {photoPathsForExport.length > 1 && (
+        <AllRoutesHeading>
+          {t('climbingpanel.pdf_export_all_routes')}
+          {showHeading ? ` (${label})` : ''}
+        </AllRoutesHeading>
+      )}
       <RoutesSummary
         items={routes.map((route, idx) => ({
           route,
@@ -1096,7 +1216,11 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
       <OverlayScroll>
         <PrintRoot ref={printRootRef} className="pdf-export-print-root">
           <BrandHeader>
-            <CragTitle>{label}</CragTitle>
+            {isArea ? (
+              <AreaTitle>{label}</AreaTitle>
+            ) : (
+              <CragTitle>{label}</CragTitle>
+            )}
             <CragMeta>
               {t('climbingpanel.pdf_export_routes_count', {
                 count: totalRoutesCount,
@@ -1127,6 +1251,8 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
             </BrandLogoWrap>
             <BrandText>openclimbing.org</BrandText>
           </BrandHeader>
+
+          <FeatureExtras feature={feature} />
 
           {loading ? (
             <LoadingWrap>
