@@ -12,10 +12,17 @@ import { updateMapFilter } from './mapClimbingFilter';
 
 export type Interval = [number, number];
 
+export type PoiTypes = {
+  rock: boolean;
+  ferrata: boolean;
+  gym: boolean;
+};
+
 export type ClimbingFilterSettings = {
   filterGradeSystem: GradeSystem;
   gradeInterval: Interval | null;
   minimumRoutes: number;
+  poiTypes: Partial<PoiTypes>;
 };
 
 type SetFilter = <T extends keyof ClimbingFilterSettings>(
@@ -25,9 +32,13 @@ type SetFilter = <T extends keyof ClimbingFilterSettings>(
 
 const SETTINGS_KEY = 'climbing.filter';
 const DEFAULT_MINIMUM_ROUTES = 1;
+const DEFAULT_POI_TYPES: PoiTypes = { rock: true, ferrata: true, gym: false };
 
 const isSameInterval = (a: Interval, b: Interval) =>
   a[0] === b[0] && a[1] === b[1];
+
+const isSamePoiTypes = (a: PoiTypes, b: PoiTypes) =>
+  a.rock === b.rock && a.ferrata === b.ferrata && a.gym === b.gym;
 
 export type ClimbingFilter = {
   grades: string[];
@@ -35,9 +46,12 @@ export type ClimbingFilter = {
   setGradeInterval: Setter<Interval>;
   minimumRoutes: number;
   setMinimumRoutes: Setter<number>;
+  poiTypes: PoiTypes;
+  setPoiTypes: Setter<PoiTypes>;
   isDefaultFilter: boolean;
   isGradeIntervalDefault: boolean;
   isMinimumRoutesDefault: boolean;
+  isPoiTypesDefault: boolean;
   reset: () => void;
 };
 
@@ -62,15 +76,29 @@ export const getClimbingFilter = (
   const minimumRoutes = data?.minimumRoutes ?? DEFAULT_MINIMUM_ROUTES;
   const setMinimumRoutes = (num: number) => setFilter('minimumRoutes', num);
 
+  const poiTypes: PoiTypes = {
+    ...DEFAULT_POI_TYPES,
+    ...(data?.poiTypes ?? {}),
+  };
+  const setPoiTypes = (next: PoiTypes) => setFilter('poiTypes', next);
+
   const isGradeIntervalDefault = isSameInterval(
     gradeInterval,
     defaultGradeInterval,
   );
   const isMinimumRoutesDefault = minimumRoutes === DEFAULT_MINIMUM_ROUTES;
+  const isPoiTypesDefault = isSamePoiTypes(poiTypes, DEFAULT_POI_TYPES);
 
-  const isDefaultFilter = isGradeIntervalDefault && isMinimumRoutesDefault;
+  const isDefaultFilter =
+    isGradeIntervalDefault && isMinimumRoutesDefault && isPoiTypesDefault;
 
-  updateMapFilter(userSystem, gradeInterval, minimumRoutes, isDefaultFilter);
+  updateMapFilter(
+    userSystem,
+    gradeInterval,
+    minimumRoutes,
+    poiTypes,
+    isDefaultFilter,
+  );
 
   return {
     grades,
@@ -78,9 +106,12 @@ export const getClimbingFilter = (
     setGradeInterval,
     minimumRoutes,
     setMinimumRoutes,
+    poiTypes,
+    setPoiTypes,
     isDefaultFilter,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
+    isPoiTypesDefault,
     reset: () => setUserSetting(SETTINGS_KEY, {} as ClimbingFilterSettings),
   };
 };

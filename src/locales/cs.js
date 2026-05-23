@@ -508,6 +508,10 @@ export default {
   'crag_filter.reset': 'Reset',
   'crag_filter.done': 'Hotovo',
   'crag_filter.zoom_in': 'Filtrování nad mapou je v beta režimu, všechny výsledky se zobrazí od zoomu __zoom__. <link>více informací</link>',
+  'crag_filter.type': 'Typ',
+  'crag_filter.type_rock': 'Skály',
+  'crag_filter.type_ferrata': 'Ferraty',
+  'crag_filter.type_gym': 'Lezecké stěny',
 
   'member_features.subitems': 'Položky',
   'member_features.climbing': 'Lezecké cesty',
