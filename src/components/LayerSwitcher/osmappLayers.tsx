@@ -112,7 +112,7 @@ export const osmappLayers: Layers = {
   cuzkSat: {
     name: 'ČÚZK ortofoto (CZ)',
     type: 'basemap',
-    url: 'https://geoportal.cuzk.cz/WMS_ORTOFOTO_PUB/service.svc/get?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=GR_ORTFOTORGB&STYLES=&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}',
+    url: 'https://ags.cuzk.gov.cz/arcgis1/services/ORTOFOTO/MapServer/WMSServer?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=0&STYLES=&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}',
     Icon: SatelliteIcon,
     attribution: ['&copy; <a href="https://geoportal.cuzk.cz">ČÚZK</a>'],
     bboxes: [czBbox],
@@ -123,7 +123,7 @@ export const osmappLayers: Layers = {
         cuzkMap: {
           name: 'ČÚZK map (CZ)',
           type: 'basemap',
-          url: 'https://geoportal.cuzk.cz/WMS_ZM10_PUB/WMService.aspx?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&LAYERS=GR_ZM10&STYLES=&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}',
+          url: 'https://ags.cuzk.gov.cz/arcgis1/services/ZTM/ZTM10/MapServer/WMSServer?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&LAYERS=0&STYLES=&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}',
           Icon: MapIcon,
           attribution: ['&copy; <a href="https://geoportal.cuzk.cz">ČÚZK</a>'],
           bboxes: [czBbox],
