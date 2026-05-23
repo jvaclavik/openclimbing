@@ -4,6 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ClimbingTick } from '../../../types';
 import { TickStyle } from './types';
 import { TickStyleSelect } from './Ticks/TickStyleSelect';
+import { TickStyleWizard } from './Ticks/TickStyleWizard';
 import { PartnersTextField } from './PartnersTextField';
 import {
   collectPartnerSuggestionsFromTicks,
@@ -47,11 +48,14 @@ export const EditTickFormFields = ({
 
   return (
     <Stack spacing={2.5}>
-      <TickStyleSelect
-        fullWidth
-        value={tempTick.style as TickStyle}
-        onChange={(e) => updateTempTick('style', e.target.value)}
-      />
+      <Stack spacing={0.5}>
+        <TickStyleSelect
+          fullWidth
+          value={tempTick.style as TickStyle}
+          onChange={(e) => updateTempTick('style', e.target.value)}
+        />
+        <TickStyleWizard onSelect={(style) => updateTempTick('style', style)} />
+      </Stack>
 
       <TextField
         label={t('tick.date_label')}
