@@ -60,13 +60,20 @@ export const useKeyDown = (
   }, [key, listener]);
 };
 
+export const isTypingInFormField = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target instanceof HTMLInputElement) return true;
+  if (target instanceof HTMLTextAreaElement) return true;
+  if (target instanceof HTMLSelectElement) return true;
+  if (target.isContentEditable) return true;
+  return false;
+};
+
 export const useFocusOnSlash = (
   inputRef: React.MutableRefObject<HTMLInputElement>,
 ) => {
   useKeyDown('/', (e) => {
-    const isEventInInput = e.target instanceof HTMLInputElement;
-    const isEventInTextarea = e.target instanceof HTMLTextAreaElement;
-    if (!isEventInInput && !isEventInTextarea) {
+    if (!isTypingInFormField(e.target)) {
       e.preventDefault();
       inputRef.current?.focus();
     }

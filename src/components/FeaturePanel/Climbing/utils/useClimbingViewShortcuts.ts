@@ -3,6 +3,7 @@ import { useClimbingContext } from '../contexts/ClimbingContext';
 import { usePhotoChange } from './usePhotoChange';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { confirmDiscardUnsavedClimbingEdits } from './confirmDiscardUnsavedClimbingEdits';
+import { isTypingInFormField } from '../../../../helpers/hooks';
 
 export const useClimbingViewShortcuts = () => {
   const {
@@ -19,6 +20,8 @@ export const useClimbingViewShortcuts = () => {
   const { userSettings, setUserSetting } = useUserSettingsContext();
   useEffect(() => {
     const downHandler = (e) => {
+      if (isTypingInFormField(e.target)) return;
+
       if (e.ctrlKey && e.key === 'h') {
         setIsRoutesLayerVisible(!isRoutesLayerVisible);
       }

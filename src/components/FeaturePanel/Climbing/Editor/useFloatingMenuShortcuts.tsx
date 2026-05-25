@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { PointType } from '../types';
 import { useClimbingContext } from '../contexts/ClimbingContext';
+import { isTypingInFormField } from '../../../../helpers/hooks';
 
 export const useFloatingMenuShortcuts = (
   onPointTypeChange: (type: PointType | null) => void,
@@ -15,6 +16,8 @@ export const useFloatingMenuShortcuts = (
 
   useEffect(() => {
     const downHandler = (e) => {
+      if (isTypingInFormField(e.target)) return;
+
       if (isEditMode) {
         if (e.key === 'b') {
           onPointTypeChange('bolt');
