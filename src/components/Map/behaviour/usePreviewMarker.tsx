@@ -20,7 +20,7 @@ const ArrowIcon = styled.div`
   transform-origin: 50% 50%;
   pointer-events: none;
   display: none;
-  z-index: 10000;
+  z-index: 1100;
 `;
 
 export const PreviewArrow = () => <ArrowIcon id="preview-arrow" />;
