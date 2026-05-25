@@ -16,6 +16,7 @@ import {
   useHandleQuery,
   useInputValueWithUrl,
 } from './useHandleQuery';
+import { useFeatureContext } from '../utils/FeatureContext';
 
 const AutocompleteConfigured = (
   props: AutocompleteProps<Option, false, true, true>,
@@ -46,6 +47,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const options = useGetOptions(inputValue, valueRef);
   const onHighlight = useGetOnHighlight();
   const onSelected = useGetOnSelected(setIsLoading);
+  const { setPreview } = useFeatureContext();
 
   useHandleDirectQuery(onSelected, setInputValue, setIsLoading);
   useHandleQuery(setInputValue, setIsOpen, lastSyncedValue);
@@ -56,6 +58,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       onClose={() => {
         setIsOpen(false);
         setUrlQuery('', lastSyncedValue);
+        setPreview(null);
       }}
       onOpen={() => {
         setIsOpen(true);
