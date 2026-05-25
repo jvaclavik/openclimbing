@@ -1,20 +1,20 @@
 // TODO move this file to ./auth folder
 import escape from 'lodash/escape';
-import { Feature, FeatureTags, LonLat, OsmId, SuccessInfo } from '../../types';
-import { getApiId, getFullOsmappLink, getUrlOsmId } from '../../helpers';
-import { join } from '../../../utils';
-import { clearFetchCache } from '../../fetchCache';
-import { getLabel } from '../../../helpers/featureLabel';
-import { OSM_WEBSITE } from '../consts';
-import { getDiffXml } from './getDIffXml';
-import { SingleDocXmljs } from './xmlTypes';
-import { xmljsBuildOsm } from './xmlHelpers';
-import * as api from './api';
-import { getFirstExistingId } from '../getFirstExistingId';
 import {
   DataItem,
   Members,
 } from '../../../components/FeaturePanel/EditDialog/context/types';
+import { getLabel } from '../../../helpers/featureLabel';
+import { join } from '../../../utils';
+import { clearFetchCache } from '../../fetchCache';
+import { getApiId, getFullOsmappLink, getUrlOsmId } from '../../helpers';
+import { Feature, FeatureTags, LonLat, OsmId, SuccessInfo } from '../../types';
+import { OSM_WEBSITE } from '../consts';
+import { getFirstExistingId } from '../getFirstExistingId';
+import * as api from './api';
+import { getDiffXml } from './getDIffXml';
+import { xmljsBuildOsm } from './xmlHelpers';
+import { SingleDocXmljs } from './xmlTypes';
 
 export const getChangesetXml = ({ changesetComment, feature }) => {
   const tags = [
@@ -39,7 +39,7 @@ const getChangesetComment = (
   const action = undelete ? 'Undeleted' : toBeDeleted ? 'Deleted' : 'Edited';
   const name = getLabel(original) || getUrlOsmId(original.osmMeta);
   const description = `${action} ${name}`;
-  return join(comment, ' • ', `${description} #osmapp`);
+  return join(comment, ' • ', `${description} #openclimbing.org`);
 };
 
 const getXmlTags = (newTags: FeatureTags) =>
@@ -87,14 +87,14 @@ const getCommentMulti = (
   const suffix = changes.some(isClimbingChange) ? ' #climbing' : '';
 
   // TODO find topmost parent in changes and use its name
-  // eg. survey • Edited Roviště (5 items) #osmapp #climbing
+  // eg. survey • Edited Roviště (5 items) #openclimbing.org #climbing
 
   if (original.point) {
     // adding a new node or relation
     const typeTag = changes[0].tagsEntries[0]?.join('=') ?? 'item with no tags';
     const name = Object.fromEntries(changes[0].tagsEntries).name ?? '';
     const label = join(typeTag, ' ', name);
-    return join(comment, ' • ', `Added ${label} #osmapp${suffix}`);
+    return join(comment, ' • ', `Added ${label} #openclimbing.org`);
   }
 
   const toBeDeleted = changes.length === 1 && changes[0].toBeDeleted;

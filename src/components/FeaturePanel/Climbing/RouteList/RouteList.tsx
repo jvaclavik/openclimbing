@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { RouteListDndContent } from './RouteListDndContent';
+import { isTypingInFormField } from '../../../../helpers/hooks';
 
 const Container = styled.div`
   padding-bottom: 20px;
@@ -21,6 +22,7 @@ export const RouteList = ({ isEditable }: { isEditable?: boolean }) => {
   useEffect(() => {
     const downHandler = (e) => {
       if (routes.length === 0) return;
+      if (isTypingInFormField(e.target)) return;
 
       if (e.key === 'ArrowDown') {
         const nextRoute = routes[routeSelectedIndex + 1];
