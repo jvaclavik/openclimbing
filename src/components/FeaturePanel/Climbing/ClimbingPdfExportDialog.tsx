@@ -22,12 +22,12 @@ import {
   getDifficulty,
   getDifficultyColor,
 } from '../../../services/tagging/climbing/routeGrade';
-import { ClimbingTick } from '../../../types';
 import { Feature } from '../../../services/types';
+import { ClimbingTick } from '../../../types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useTicksContext } from '../../utils/TicksContext';
-import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
 import { ClimbingBadges } from './ClimbingBadges';
+import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
 import { ConvertedRouteDifficultyBadge } from './ConvertedRouteDifficultyBadge';
 import { ClimbingRoute, PathPoints, PointType, TickStyle } from './types';
 import {
@@ -244,9 +244,7 @@ const GradeCell = styled.td`
   white-space: nowrap;
 `;
 
-const RouteName = styled.div`
-  font-weight: 700;
-`;
+const RouteName = styled.div``;
 
 const RouteDescription = styled.div`
   font-size: 11px;
@@ -784,6 +782,9 @@ const RoutesSummary = ({
               ? `${rawLength} m`
               : rawLength
             : null;
+          const isDrawn = route.paths
+            ? Object.values(route.paths).some((p) => p && p.length > 0)
+            : false;
           return (
             <tr key={`${route.id}-${displayNumber}`}>
               <NumCell>
@@ -802,7 +803,14 @@ const RoutesSummary = ({
                 </span>
               </NumCell>
               <td>
-                <RouteName>{name}</RouteName>
+                <RouteName
+                  style={{
+                    fontWeight: isDrawn ? '900' : '400',
+                    color: isDrawn ? '#000' : '#666',
+                  }}
+                >
+                  {name}
+                </RouteName>
                 <RouteBadgesWrap>
                   <ClimbingBadges feature={route.feature} />
                 </RouteBadgesWrap>

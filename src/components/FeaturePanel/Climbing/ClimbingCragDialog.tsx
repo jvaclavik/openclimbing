@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
 import Router, { useRouter } from 'next/router';
@@ -64,6 +64,11 @@ export const ClimbingCragDialog = ({
   const saveCrag = useSaveCragFactory(setIsEditMode);
   const router = useRouter();
   const featureLink = getOsmappLink(feature);
+  // Hide the dialog synchronously when the user clicks close. Router.push can
+  // take a moment to actually unmount us (it re-runs getServerSideProps on the
+  // catch-all route), and without this the X felt like it didn't respond on the
+  // first click. The component remounts on each open, so no reset effect needed.
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     const tags = routes[routeNumber]?.feature?.tags || {};
@@ -116,7 +121,12 @@ export const ClimbingCragDialog = ({
       return;
     }
 
-    Router.push(`${getOsmappLink(feature)}${window.location.hash}`);
+    setClosing(true);
+    if (feature) {
+      Router.push(`${getOsmappLink(feature)}${window.location.hash}`);
+    } else {
+      Router.back();
+    }
   };
   const handleCancel = () => {
     if (!confirmDiscardUnsavedClimbingEdits(hasUnsavedEdits)) {
@@ -147,7 +157,7 @@ export const ClimbingCragDialog = ({
   return (
     <Dialog
       fullScreen
-      open
+      open={!closing}
       onClose={handleClose}
       disableEscapeKeyDown={isEditMode}
       slotProps={{
