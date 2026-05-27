@@ -20,8 +20,9 @@ const globalStyle = (theme: Theme) => css`
     font-family: 'Roboto', sans-serif;
     background-color: ${theme.palette.background.default};
 
-    // disable pulling the page around on mobile
-    overscroll-behavior: none;
+    // disable pulling the page around on mobile (pull-to-refresh),
+    // but keep horizontal axis on 'auto' so Chrome back gesture works
+    overscroll-behavior-y: none;
   }
 
   body {
