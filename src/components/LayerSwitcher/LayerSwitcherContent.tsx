@@ -1,5 +1,5 @@
 import React from 'react';
-import { PersonAdd } from '@mui/icons-material';
+import PersonAdd from '@mui/icons-material/PersonAdd';
 import { isViewInsideBbox, LayersHeader } from './helpers';
 import { osmappLayers } from './osmappLayers';
 import { Layer, useMapStateContext, View } from '../utils/MapStateContext';

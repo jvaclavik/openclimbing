@@ -1,5 +1,5 @@
 import { GradeSystem } from '../../../services/tagging/climbing/gradeSystems';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { Interval, PoiTypes } from './getClimbingFilter';
 
 export const mapClimbingFilter = {

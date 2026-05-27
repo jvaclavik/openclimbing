@@ -1,18 +1,16 @@
-import {
-  ArrowUpward,
-  FmdGood,
-  RampLeft,
-  RampRight,
-  RoundaboutLeft,
-  SportsScore,
-  TurnLeft,
-  TurnRight,
-  TurnSharpRight,
-  TurnSlightLeft,
-  TurnSlightRight,
-  UTurnLeft,
-  UTurnRight,
-} from '@mui/icons-material';
+import ArrowUpward from '@mui/icons-material/ArrowUpward';
+import FmdGood from '@mui/icons-material/FmdGood';
+import RampLeft from '@mui/icons-material/RampLeft';
+import RampRight from '@mui/icons-material/RampRight';
+import RoundaboutLeft from '@mui/icons-material/RoundaboutLeft';
+import SportsScore from '@mui/icons-material/SportsScore';
+import TurnLeft from '@mui/icons-material/TurnLeft';
+import TurnRight from '@mui/icons-material/TurnRight';
+import TurnSharpRight from '@mui/icons-material/TurnSharpRight';
+import TurnSlightLeft from '@mui/icons-material/TurnSlightLeft';
+import TurnSlightRight from '@mui/icons-material/TurnSlightRight';
+import UTurnLeft from '@mui/icons-material/UTurnLeft';
+import UTurnRight from '@mui/icons-material/UTurnRight';
 import QuestionMark from '@mui/icons-material/QuestionMark';
 import TurnSharpLeft from '@mui/icons-material/TurnSharpLeft';
 

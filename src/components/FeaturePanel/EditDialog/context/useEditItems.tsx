@@ -4,7 +4,7 @@ import { Setter } from '../../../../types';
 import { useCallback, useMemo, useState } from 'react';
 import { publishDbgObject } from '../../../../utils';
 import { getPresetTranslation } from '../../../../services/tagging/translations';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import {
   DataItem,
   EditDataItem,

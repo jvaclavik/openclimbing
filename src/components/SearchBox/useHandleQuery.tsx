@@ -1,7 +1,7 @@
 import { Setter } from '../../types';
 import Router, { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { useInputValueState } from './options/geocoder';
 
 const setInUrl = (value: string) => {

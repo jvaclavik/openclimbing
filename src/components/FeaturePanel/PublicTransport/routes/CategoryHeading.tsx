@@ -9,12 +9,10 @@ import {
   MenuItem,
   Stack,
 } from '@mui/material';
-import {
-  MoreHoriz,
-  Search,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
+import MoreHoriz from '@mui/icons-material/MoreHoriz';
+import Search from '@mui/icons-material/Search';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const fmtCategory = (category: string) => {
   return (
