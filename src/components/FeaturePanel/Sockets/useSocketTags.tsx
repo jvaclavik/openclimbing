@@ -2,7 +2,7 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import pickBy from 'lodash/pickBy';
 import mapKeys from 'lodash/mapKeys';
 import groupBy from 'lodash/groupBy';
-import { mapValues } from 'lodash';
+import mapValues from 'lodash/mapValues';
 
 export const useSocketTags = () => {
   const { feature } = useFeatureContext();

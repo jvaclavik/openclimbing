@@ -1,4 +1,4 @@
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import { fetchJson } from '../fetch';
 import { Field } from './types/Fields';
 import { intl } from '../intl';

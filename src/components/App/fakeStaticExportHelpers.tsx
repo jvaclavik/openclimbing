@@ -5,7 +5,7 @@ import Router from 'next/router';
 import { OSM_USER_COOKIE } from '../../services/osm/consts';
 import { getIdFromShortener } from '../../services/shortener';
 import { getUrlOsmId } from '../../services/helpers';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { DEFAULT_VIEW } from './helpers';
 
 const doLangRadirect = () => {

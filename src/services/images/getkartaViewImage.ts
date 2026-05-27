@@ -1,4 +1,4 @@
-import { parseInt } from 'lodash';
+import parseInt from 'lodash/parseInt';
 import { fetchJson } from '../fetch';
 import { getImageFromCenterFactory } from './getImageFromCenterFactory';
 

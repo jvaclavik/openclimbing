@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { clone } from 'lodash';
+import clone from 'lodash/clone';
 import { useSnackbar } from '../../utils/SnackbarContext';
 import { ClimbingTick } from '../../../types';
 import { useTicksContext } from '../../utils/TicksContext';

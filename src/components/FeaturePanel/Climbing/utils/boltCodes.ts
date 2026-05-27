@@ -1,4 +1,4 @@
-import { invert } from 'lodash';
+import invert from 'lodash/invert';
 import { PointType } from '../types';
 
 export const boltCodeMap: Record<string, PointType> = {

@@ -27,8 +27,8 @@ export default withSentryConfig(nextConfig, {
   org: 'osmapp', // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
   project: 'osmapp',
   silent: !process.env.CI,
-  widenClientFileUpload: true, // Upload a larger set of source maps for prettier stack traces (increases build time)
-  reactComponentAnnotation: { enabled: true }, // Automatically annotate React components to show their full name in breadcrumbs and session replay
+  widenClientFileUpload: false, // smaller set of source maps -> faster builds, smaller Sentry storage
+  reactComponentAnnotation: { enabled: false }, // component-name annotations bloat runtime bundle
   // tunnelRoute: '/monitoring',
   hideSourceMaps: false,
   disableLogger: true, // Automatically tree-shake Sentry logger statements to reduce bundle size
