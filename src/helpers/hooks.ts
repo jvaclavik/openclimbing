@@ -12,10 +12,14 @@ export const useScreensize = () => {
       height: window.innerHeight,
     });
 
+    // Only react to width changes (orientation). Ignore height-only changes
+    // — those fire when the mobile keyboard opens or when the URL bar
+    // appears/disappears on scroll, which would cascade into Drawer
+    // remounts that steal focus from text inputs (Brave/Chrome Android).
     const handleResize = () => {
-      setScreenSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
+      setScreenSize((prev) => {
+        if (prev.width === window.innerWidth) return prev;
+        return { width: window.innerWidth, height: window.innerHeight };
       });
     };
 
