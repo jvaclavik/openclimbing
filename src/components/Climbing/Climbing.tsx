@@ -3,7 +3,7 @@ import Router, { useRouter } from 'next/router';
 import { ClimbingContextProvider } from '../FeaturePanel/Climbing/contexts/ClimbingContext';
 import { ClimbingCragDialog } from '../FeaturePanel/Climbing/ClimbingCragDialog';
 import { ClimbingPdfExportDialog } from '../FeaturePanel/Climbing/ClimbingPdfExportDialog';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOsmappLink, getReactKey } from '../../services/helpers';
 
 // TODO perhaps rename this to ClimbingDialog (and the folder as well)
@@ -20,6 +20,16 @@ export const Climbing = () => {
   const edit = subSection === 'edit';
   const isPdfRoute = subSection === 'pdf';
 
+  // Hide the PDF dialog synchronously on close. The URL change via Router.push
+  // can take a moment (especially on a deep-linked load where the target page
+  // re-runs getServerSideProps), and without local state the dialog stays
+  // visible until the route transition finishes — looking like the X button
+  // didn't react on the first click.
+  const [pdfClosing, setPdfClosing] = useState(false);
+  useEffect(() => {
+    if (isPdfRoute) setPdfClosing(false);
+  }, [isPdfRoute]);
+
   if (!isClimbingDialogShown) {
     return null;
   }
@@ -27,8 +37,17 @@ export const Climbing = () => {
   if (isPdfRoute) {
     return (
       <ClimbingPdfExportDialog
-        isOpen
-        onClose={() => Router.push(getOsmappLink(feature))}
+        isOpen={!pdfClosing}
+        onClose={() => {
+          setPdfClosing(true);
+          // Guard against feature being momentarily null during transitions —
+          // getOsmappLink dereferences feature unconditionally and would throw.
+          if (feature) {
+            Router.push(getOsmappLink(feature));
+          } else {
+            Router.back();
+          }
+        }}
       />
     );
   }
