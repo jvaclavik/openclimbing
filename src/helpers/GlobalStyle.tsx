@@ -65,6 +65,10 @@ const globalStyle = (theme: Theme) => css`
   .maplibregl-map {
     user-select: none;
     -webkit-user-select: none;
+    // prevent iOS long-press selection/callout (magnifier loupe)
+    // and Android blue tap-highlight flash on the map
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
   }
   .maplibregl-ctrl-bottom-right {
     bottom: 50px !important;
