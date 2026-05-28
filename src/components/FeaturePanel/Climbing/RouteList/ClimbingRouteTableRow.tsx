@@ -59,12 +59,14 @@ const RouteNameContainer = styled.div`
   position: relative;
   align-items: center;
   user-select: text;
+  -webkit-user-select: text;
 `;
 
 const RouteDescriptionContainer = styled.div`
   font-size: 10px;
   color: ${({ theme }) => theme.palette.text.secondary};
   user-select: text;
+  -webkit-user-select: text;
 `;
 
 const RouteAuthorContainer = styled(RouteDescriptionContainer)``;

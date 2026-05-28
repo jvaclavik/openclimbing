@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useMapStateContext, View } from '../utils/MapStateContext';
 import {
@@ -38,6 +38,23 @@ const useUpdateMap = createMapEffectHook<[View]>((map, viewForMap) => {
   map.jumpTo({ center, zoom: parseFloat(viewForMap[0]) });
 });
 
+// iOS Safari sometimes initiates a text-selection / loupe gesture during
+// MapLibre's tap-then-hold-and-drag zoom — even with user-select:none in
+// CSS. selectstart fires before any visual feedback, so preventing it here
+// is the surest way to keep the selection UI from ever appearing on the map.
+const useSuppressMapSelection = () => {
+  useEffect(() => {
+    const onSelectStart = (e: Event) => {
+      const target = e.target as Element | null;
+      if (target?.closest?.('.maplibregl-map')) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('selectstart', onSelectStart);
+    return () => document.removeEventListener('selectstart', onSelectStart);
+  }, []);
+};
+
 const NotSupportedMessage = () => (
   <span
     style={{ position: 'absolute', left: '48%', top: '48%', maxWidth: '350px' }}
@@ -56,6 +73,7 @@ const BrowserMap = () => {
   const { currentTheme } = useUserThemeContext();
 
   const [map, containerRef, mapRef] = useInitMap();
+  useSuppressMapSelection();
   useAddTopRightControls(map, mobileMode);
   useOnMapClicked(map, setFeature, mapClickOverrideRef);
   useOnMapLongPressed(map, setFeature);
