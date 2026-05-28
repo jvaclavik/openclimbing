@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useMapStateContext, View } from '../utils/MapStateContext';
 import {
@@ -38,6 +38,57 @@ const useUpdateMap = createMapEffectHook<[View]>((map, viewForMap) => {
   map.jumpTo({ center, zoom: parseFloat(viewForMap[0]) });
 });
 
+// iOS Safari shows a magnifier loupe and text-selection UI during touch
+// gestures on the map (notably the tap-then-hold-and-drag zoom) — even with
+// user-select:none in CSS. Two listeners cover the two stages:
+//   - selectstart fires when selection would start; prevent it.
+//   - touchstart with passive:false lets us kill iOS's default touch
+//     behaviors (loupe, callout) before any visual feedback appears.
+// Skip buttons/links so the MapLibre +/- controls keep working.
+const useSuppressMapSelection = (
+  containerRef: React.RefObject<HTMLDivElement>,
+) => {
+  useEffect(() => {
+    const onSelectStart = (e: Event) => {
+      const target = e.target as Element | null;
+      if (target?.closest?.('.maplibregl-map')) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('selectstart', onSelectStart);
+    return () => document.removeEventListener('selectstart', onSelectStart);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return undefined;
+    // Only suppress on the second touchstart of a quick tap-tap-hold sequence
+    // (the gesture that triggers the iOS loupe). A bare single tap must keep
+    // its default browser behavior so the synthetic click event still fires
+    // for feature-clicking on the map.
+    let lastTouchEnd = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      const target = e.target as Element | null;
+      if (target?.closest?.('button, a, [role="button"], input, textarea')) {
+        return;
+      }
+      const isSecondQuickTap = Date.now() - lastTouchEnd < 350;
+      if (isSecondQuickTap) {
+        e.preventDefault();
+      }
+    };
+    const onTouchEnd = () => {
+      lastTouchEnd = Date.now();
+    };
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [containerRef]);
+};
+
 const NotSupportedMessage = () => (
   <span
     style={{ position: 'absolute', left: '48%', top: '48%', maxWidth: '350px' }}
@@ -56,6 +107,7 @@ const BrowserMap = () => {
   const { currentTheme } = useUserThemeContext();
 
   const [map, containerRef, mapRef] = useInitMap();
+  useSuppressMapSelection(containerRef);
   useAddTopRightControls(map, mobileMode);
   useOnMapClicked(map, setFeature, mapClickOverrideRef);
   useOnMapLongPressed(map, setFeature);

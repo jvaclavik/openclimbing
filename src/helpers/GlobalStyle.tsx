@@ -33,6 +33,21 @@ const globalStyle = (theme: Theme) => css`
     left: 0;
   }
 
+  // On touch devices, disable text selection by default. iOS Safari can
+  // initiate a selection loupe during multi-tap gestures even when only
+  // descendants have user-select:none; applying it at the root reliably
+  // suppresses the loupe everywhere. Form fields handle their own
+  // selection natively; specific text-content elements opt back in with
+  // 'user-select: text' (e.g. ClimbingRouteTableRow).
+  @media (hover: none) and (pointer: coarse) {
+    html,
+    body {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+  }
+
   a,
   .linkLikeButton {
     color: ${theme.palette.tertiary
@@ -62,13 +77,17 @@ const globalStyle = (theme: Theme) => css`
     margin-top: 0;
   }
 
-  .maplibregl-map {
+  .maplibregl-map,
+  .maplibregl-map * {
+    // Apply to all descendants too — iOS Safari can still start text selection
+    // / show the magnifier loupe on inner elements (canvas, markers) during
+    // gestures like double-tap-then-hold-and-drag (TapDragZoom) where it
+    // interprets the held touch as a selection start.
     user-select: none;
     -webkit-user-select: none;
-    // prevent iOS long-press selection/callout (magnifier loupe)
-    // and Android blue tap-highlight flash on the map
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-drag: none;
   }
   .maplibregl-ctrl-bottom-right {
     bottom: 50px !important;
