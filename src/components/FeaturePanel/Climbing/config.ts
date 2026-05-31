@@ -26,9 +26,9 @@ export const useConfig = () => {
     anchorBorderColor: borderColor,
     anchorBorderColorSelected: inactiveColor,
 
-    pathBorderWidth: (5.1 / photoZoom.scale) * imageScale,
+    pathBorderWidth: (6.2 / photoZoom.scale) * imageScale,
     pathBorderOpacity: 1,
-    pathStrokeWidth: (3.5 / photoZoom.scale) * imageScale,
+    pathStrokeWidth: (4.4 / photoZoom.scale) * imageScale,
   };
 };
 
