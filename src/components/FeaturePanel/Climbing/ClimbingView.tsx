@@ -1,34 +1,34 @@
-import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import SplitPane from 'react-split-pane';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import EditIcon from '@mui/icons-material/Edit';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import MapIcon from '@mui/icons-material/Map';
 import { CircularProgress, Fab, IconButton, Tooltip } from '@mui/material';
+import { useEffect, useState } from 'react';
+import SplitPane from 'react-split-pane';
 import { TransformComponent } from 'react-zoom-pan-pinch';
-import { useClimbingContext } from './contexts/ClimbingContext';
-import { RoutesEditor } from './Editor/RoutesEditor';
+import {
+  CommonsAllowedWidth,
+  getCommonsImageUrl,
+} from '../../../services/images/getCommonsImageUrl';
+import { t } from '../../../services/intl';
+import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { ClimbingViewContent } from './ClimbingViewContent';
+import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
+import { useClimbingContext } from './contexts/ClimbingContext';
+import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
+import { RoutesEditor } from './Editor/RoutesEditor';
+import { TransformWrapper } from './TransformWrapper';
 import {
   getResolution,
   getWikimediaCommonsPhotoValues,
   removeFilePrefix,
 } from './utils/photo';
-import { TransformWrapper } from './TransformWrapper';
-import { convertHexToRgba } from '../../utils/colorUtils';
-import {
-  CommonsAllowedWidth,
-  getCommonsImageUrl,
-} from '../../../services/images/getCommonsImageUrl';
-import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
-import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
-import { ClimbingViewContent } from './ClimbingViewContent';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
-import MapIcon from '@mui/icons-material/Map';
-import EditIcon from '@mui/icons-material/Edit';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useGetCragViewLayout } from './utils/useCragViewLayout';
-import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
-import { t } from '../../../services/intl';
 import { useClimbingViewShortcuts } from './utils/useClimbingViewShortcuts';
+import { useGetCragViewLayout } from './utils/useCragViewLayout';
 import { useReplacePhotoIfNeeded } from './utils/useReplacePhotoIfNeeded';
 
 export const DEFAULT_CRAG_VIEW_LAYOUT = 'horizontal';
