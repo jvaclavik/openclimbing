@@ -35,7 +35,7 @@ export const Piton = ({
         <path
           d="M1.72357 5.2168L24 1.6255"
           stroke={borderColor}
-          strokeWidth="4"
+          strokeWidth="5.5"
           strokeLinecap="round"
           fill="none"
         />
@@ -44,7 +44,7 @@ export const Piton = ({
           cy="6.49978"
           r="3.37429"
           stroke={borderColor}
-          strokeWidth="4"
+          strokeWidth="5.5"
           fill="none"
         />
       </g>

@@ -25,9 +25,12 @@ export const Anchor = ({
     ? config.anchorBorderColorSelected
     : config.anchorBorderColor;
 
+  // Anchor icon shrunk slightly so it doesn't visually dominate the route
+  // line — paired with the wider path strokes in config.ts.
+  const anchorScale = 0.8;
   return (
     <g
-      transform={`translate(${x + 5} ${y}) scale(${1 / photoZoom.scale})`}
+      transform={`translate(${x + 5} ${y}) scale(${anchorScale / photoZoom.scale})`}
       cursor="help"
       onClick={onClick}
       pointerEvents={pointerEvents}
@@ -38,14 +41,14 @@ export const Anchor = ({
         fill="none"
         r={size}
         cursor="pointer"
-        strokeWidth={5}
+        strokeWidth={6.5}
         stroke={borderColor}
       />
       <g transform="translate(-1.5, 0)">
         <path
           d="M6.54999 0.5L6.54999 16.95"
           stroke={borderColor}
-          strokeWidth="5"
+          strokeWidth="6.5"
         />
         <path
           d="M2 12.75L6.55 18L11.1 12.75"
