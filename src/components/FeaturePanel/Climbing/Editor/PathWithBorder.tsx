@@ -1,12 +1,11 @@
-import React from 'react';
 import { useTheme } from '@mui/material';
-import { useConfig } from '../config';
-import { useClimbingContext } from '../contexts/ClimbingContext';
 import {
   getDifficulty,
   getDifficultyColor,
 } from '../../../../services/tagging/climbing/routeGrade';
 import { useMobileMode } from '../../../helpers';
+import { useConfig } from '../config';
+import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PathPoints } from '../types';
 import { RouteLine } from './RouteLine';
 
@@ -47,7 +46,13 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
   const BorderPath = () => (
     <RouteLine
       pathPx={pathPx}
-      strokeWidth={isOtherSelected ? 2 : config.pathBorderWidth}
+      strokeWidth={
+        isOtherSelected
+          ? 2
+          : isSelected
+            ? config.pathBorderWidthSelected
+            : config.pathBorderWidth
+      }
       stroke={contrastColor}
       opacity={opacity ? opacity : isOtherSelected ? 0 : 1}
     />
@@ -56,7 +61,7 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
   const RoutePath = () => (
     <RouteLine
       pathPx={pathPx}
-      strokeWidth={isOtherSelected ? 1 : config.pathStrokeWidth}
+      strokeWidth={isOtherSelected ? 1.3 : config.pathStrokeWidth}
       stroke={isOtherSelected ? 'white' : strokeColor}
       opacity={opacity ? opacity : isOtherSelected ? (isEditMode ? 1 : 0.6) : 1}
     />

@@ -378,15 +378,29 @@ export const ClimbingView = () => {
   useEffect(() => {
     const resolution = getResolution({
       windowDimensions,
+      imageSize,
       photoPath,
       photoZoom,
       loadedPhotos,
     });
-    setPhotoResolution(resolution);
 
-    const allowed: CommonsAllowedWidth[] = [500, 960, 1920];
-    const width = allowed.find((w) => resolution <= w) ?? 'original'; // TODO - make proper solution: getResolution() should return only Allowed Widths
-    const url = getCommonsImageUrl(`File:${photoPath}`, width);
+    // Wikimedia Commons only serves thumbnails at a fixed set of widths
+    // (https://www.mediawiki.org/wiki/Common_thumbnail_sizes). Requests for
+    // arbitrary widths — and direct hits on the original file URL — are
+    // rejected with "Use thumbnail sizes listed on https://w.wiki/GHai",
+    // which used to leave the photo never-loading and the resolution loader
+    // spinning forever. Bucket up to the next allowed size, never to
+    // 'original' (which doesn't go through /thumb/ and is rate-blocked).
+    const allowed: CommonsAllowedWidth[] = [500, 960, 1280, 1920, 3840];
+    const bucketedWidth =
+      allowed.find((w) => resolution <= w) ?? allowed[allowed.length - 1];
+
+    // Track the bucketed width (not the raw resolution) as the loaded-key,
+    // so two close zoom levels that round to the same thumbnail size share
+    // the cache entry and the loader hides as soon as that bucket is loaded.
+    setPhotoResolution(bucketedWidth);
+
+    const url = getCommonsImageUrl(`File:${photoPath}`, bucketedWidth);
 
     setImageUrl(url);
     if (!backgroundImageUrl && photoPath) {
@@ -394,6 +408,7 @@ export const ClimbingView = () => {
     }
   }, [
     backgroundImageUrl,
+    imageSize,
     loadedPhotos,
     photoPath,
     photoZoom,

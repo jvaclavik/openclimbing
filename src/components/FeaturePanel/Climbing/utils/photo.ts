@@ -120,33 +120,44 @@ const getHighestCachedResolution = ({ loadedPhotos, photoPath }) => {
     }, null);
 };
 
-const getResolutionAccordingZoom = ({ windowDimensions, photoZoom }) => {
+const getDisplayedPhotoWidth = ({ imageSize, windowDimensions }) => {
+  // Prefer the actual rendered image width — it already accounts for the
+  // split pane size and for object-fit: contain narrowing portrait photos.
+  // Window width is only a fallback used before the first photo has loaded
+  // and imageSize is still {0, 0}; we go conservative there so the very
+  // first thumbnail isn't wildly oversized for the actual display area.
+  if (imageSize?.width > 0) return imageSize.width;
+  return (windowDimensions?.width ?? 0) * 0.5;
+};
+
+const getResolutionAccordingZoom = ({
+  windowDimensions,
+  imageSize,
+  photoZoom,
+}) => {
   const retinaMultiplier = isIOS() ? 2 : 1;
-  const AVERAGE_IMAGE_PERCENTAGE_FILL = 0.7;
   const ROUND_SIZES_TO = 200;
-  const MEDIUM_ZOOM_MULTIPLIER = 2.5;
-  const LARGE_ZOOM_MULTIPLIER = 4;
 
-  const width =
-    Math.ceil(
-      (windowDimensions.width * AVERAGE_IMAGE_PERCENTAGE_FILL) / ROUND_SIZES_TO,
-    ) *
-    ROUND_SIZES_TO *
-    retinaMultiplier;
+  const baseWidth = getDisplayedPhotoWidth({ imageSize, windowDimensions });
+  // Zoom > 1 means the user wants more detail; <= 1 means the photo is shown
+  // smaller than its natural size and we don't gain by fetching anything
+  // larger than its rendered width.
+  const zoomFactor = Math.max(1, photoZoom?.scale ?? 1);
 
-  if (photoZoom.scale >= 4.5) return width * LARGE_ZOOM_MULTIPLIER;
-  if (photoZoom.scale > 2.3) return width * MEDIUM_ZOOM_MULTIPLIER;
-  return width;
+  const needed = baseWidth * zoomFactor * retinaMultiplier;
+  return Math.ceil(needed / ROUND_SIZES_TO) * ROUND_SIZES_TO;
 };
 
 export const getResolution = ({
   windowDimensions,
+  imageSize,
   photoPath,
   photoZoom,
   loadedPhotos,
 }) => {
   const newResolution = getResolutionAccordingZoom({
     windowDimensions,
+    imageSize,
     photoZoom,
   });
 

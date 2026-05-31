@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { TransformWrapper as Wrapper } from 'react-zoom-pan-pinch';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { ZoomState } from './types';
@@ -96,6 +96,7 @@ export const TransformWrapper = ({ children }) => {
       onPanningStart={handlePanningStart}
       onPanning={handlePanning}
       onPanningStop={handlePanningStop}
+      maxScale={10}
       disablePadding
       // velocityDisabled prevents the library's momentum/fling animation on
       // pan release. With it enabled, an accidental sub-threshold mouse move

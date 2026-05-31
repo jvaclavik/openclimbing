@@ -46,6 +46,7 @@ export const Bolt = ({
         y={shift}
         fill="transparent"
         stroke={borderColor}
+        strokeWidth={2.5}
         pointerEvents={pointerEvents}
       />
       <rect
@@ -55,6 +56,7 @@ export const Bolt = ({
         y={0}
         fill="transparent"
         stroke={borderColor}
+        strokeWidth={2.5}
         pointerEvents={pointerEvents}
       />
 

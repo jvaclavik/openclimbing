@@ -36,7 +36,7 @@ export const Sling = ({
       <path
         d="M2 2C4.66667 4.74576 10.6667 9.32203 10.6667 14.2034C10.6667 17.5593 9.33333 20 7 20C4.66667 20 3.33333 17.5593 3.33333 14.2034C3.33333 9.32203 9.33333 4.74576 12 2"
         stroke={borderColor}
-        strokeWidth="4"
+        strokeWidth="5.5"
         strokeLinecap="round"
         fill="none"
       />

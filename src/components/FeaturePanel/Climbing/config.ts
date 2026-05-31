@@ -27,6 +27,9 @@ export const useConfig = () => {
     anchorBorderColorSelected: inactiveColor,
 
     pathBorderWidth: (6.2 / photoZoom.scale) * imageScale,
+    // Thicker outer outline for the currently selected route so it visually
+    // pops out over the rest of the routes — same inner stroke, wider border.
+    pathBorderWidthSelected: (8.2 / photoZoom.scale) * imageScale,
     pathBorderOpacity: 1,
     pathStrokeWidth: (4.4 / photoZoom.scale) * imageScale,
   };

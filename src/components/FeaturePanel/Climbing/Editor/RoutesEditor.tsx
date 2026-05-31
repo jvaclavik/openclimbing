@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { RoutesLayer } from './RoutesLayer';
 import { useClimbingContext } from '../contexts/ClimbingContext';
-import { getCommonsImageUrl } from '../../../../services/images/getCommonsImageUrl';
 import { isMobileDevice } from '../../../helpers';
 
 const EditorContainer = styled.div<{
@@ -52,32 +51,7 @@ export const RoutesEditor = ({
     photoRef,
     photoPath,
     setLoadedPhotos,
-    photoPaths,
   } = useClimbingContext();
-
-  const preloadOtherPhotos = () => {
-    const photosToLoad = photoPaths.filter((path) => !loadedPhotos[path]);
-
-    const tempLoadedPhotos = photosToLoad.reduce((acc, otherPhotoPath) => {
-      const sanitizedOtherPhotoPath = decodeURI(otherPhotoPath);
-      const img = new Image();
-      const url = getCommonsImageUrl(
-        `File:${sanitizedOtherPhotoPath}`,
-        photoResolution,
-      );
-      img.src = url;
-
-      return {
-        ...acc,
-        [sanitizedOtherPhotoPath]: {
-          ...acc[sanitizedOtherPhotoPath],
-          [photoResolution]: true,
-        },
-      };
-    }, loadedPhotos);
-
-    setLoadedPhotos(tempLoadedPhotos);
-  };
 
   const onPhotoLoad = () => {
     setLoadedPhotos({
@@ -85,7 +59,6 @@ export const RoutesEditor = ({
       [photoPath]: { ...loadedPhotos[photoPath], [photoResolution]: true },
     });
     loadPhotoRelatedData();
-    preloadOtherPhotos();
     setIsPhotoLoading(false);
   };
 

@@ -17,7 +17,7 @@ export const UnfinishedPoint = ({
   const onClick = onMarkClick ?? routePointClick;
   const config = useConfig();
 
-  const strokeWidth = 1;
+  const strokeWidth = 2;
   const size = 12;
   const dx = x - size / 2 - strokeWidth / 2;
   const dy = y + size / 2 + strokeWidth / 2;

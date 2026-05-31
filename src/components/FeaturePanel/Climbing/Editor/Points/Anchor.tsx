@@ -41,14 +41,14 @@ export const Anchor = ({
         fill="none"
         r={size}
         cursor="pointer"
-        strokeWidth={5}
+        strokeWidth={6.5}
         stroke={borderColor}
       />
       <g transform="translate(-1.5, 0)">
         <path
           d="M6.54999 0.5L6.54999 16.95"
           stroke={borderColor}
-          strokeWidth="5"
+          strokeWidth="6.5"
         />
         <path
           d="M2 12.75L6.55 18L11.1 12.75"
