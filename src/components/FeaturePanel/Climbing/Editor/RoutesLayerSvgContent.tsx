@@ -4,6 +4,7 @@ import { useClimbingContext } from '../contexts/ClimbingContext';
 import { RouteWithLabel } from './RouteWithLabel';
 import { InteractivePath } from './InteractivePath';
 import { RouteMarks } from './RouteMarks';
+import { RouteNumber } from './RouteNumber';
 
 export const RoutesLayerSvgContent = () => {
   const isMobileMode = useMobileMode();
@@ -36,6 +37,20 @@ export const RoutesLayerSvgContent = () => {
       {routes.map((_, routeIndex) => (
         <RouteMarks key={routeIndex} routeIndex={routeIndex} />
       ))}
+
+      {/* Render all route number badges + grades on top of every path and
+          mark, so they're never visually covered by another route's line. */}
+      {routes.map((_, routeIndex) => (
+        <RouteNumber key={routeIndex} routeIndex={routeIndex} />
+      ))}
+
+      {routeSelectedIndex != null ? (
+        <RouteNumber routeIndex={routeSelectedIndex} />
+      ) : null}
+
+      {routeIndexHovered != null && !isMobileMode ? (
+        <RouteNumber routeIndex={routeIndexHovered} />
+      ) : null}
     </>
   );
 };

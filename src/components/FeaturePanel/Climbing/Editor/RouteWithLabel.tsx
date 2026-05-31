@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { RouteNumber } from './RouteNumber';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { StartPoint } from './StartPoint';
 import { RoutePath } from './RoutePath';
@@ -20,10 +19,5 @@ export const RouteWithLabel = ({ routeIndex }: Props) => {
     return <StartPoint routeIndex={routeIndex} />; // TODO move the <NonEditablePoint> to RoutePath later
   }
 
-  return (
-    <>
-      <RoutePath routeIndex={routeIndex} />
-      <RouteNumber routeIndex={routeIndex} />
-    </>
-  );
+  return <RoutePath routeIndex={routeIndex} />;
 };

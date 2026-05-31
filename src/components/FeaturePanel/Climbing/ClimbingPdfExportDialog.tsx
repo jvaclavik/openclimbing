@@ -963,21 +963,32 @@ const PhotoExport = ({
             ? getShortId(route.feature.osmMeta)
             : '';
           // Multi-route start-point shift: if earlier routes start at the same
-          // point, this badge is nudged to the right so numbers sit side by
-          // side instead of overlapping. Returned value is in screen px, so we
-          // convert to user units via markerScale.
-          const shiftPx = getShiftForStartPoint({
+          // point, badges stack vertically; once they would run past the bottom
+          // of the photo, the next badge wraps into a new column to the right.
+          // Returned offsets are in screen px, so we convert to user units via
+          // markerScale.
+          const rowHeightUserUnits = 18 * markerScale;
+          const maxRowsPerColumn = Math.max(
+            1,
+            Math.floor(
+              Math.max(0, dims.h - start.y * dims.h) / rowHeightUserUnits,
+            ),
+          );
+          const shift = getShiftForStartPoint({
             currentRouteSelectedIndex: routeIndex,
             currentPosition: start,
             checkedRoutes: routes,
             photoPath,
+            maxRowsPerColumn,
+            rowShift: 18,
+            columnShift: 18,
           });
           return (
             <RouteNumberBadge
               key={`num-${routeIndex}`}
               routeNumber={routeIndex + 1}
-              cx={start.x * dims.w + shiftPx * markerScale}
-              cy={start.y * dims.h}
+              cx={start.x * dims.w + shift.x * markerScale}
+              cy={start.y * dims.h + shift.y * markerScale}
               unit={unit}
               fill={strokeColor}
               isTicked={shortId ? isTicked(shortId) : false}

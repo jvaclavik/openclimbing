@@ -1,5 +1,4 @@
 import React from 'react';
-import { RouteNumber } from './RouteNumber';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { Point } from './Points/Point';
 import { MouseTrackingLine } from './MouseTrackingLine';
@@ -64,7 +63,6 @@ export const StartPoint = ({ routeIndex }: Props) => {
         <NonEditablePoint isSelected={isSelected} x={x} y={y} />
       )}
       <MouseTrackingLine routeIndex={routeIndex} />
-      <RouteNumber routeIndex={routeIndex} />
     </>
   );
 };
