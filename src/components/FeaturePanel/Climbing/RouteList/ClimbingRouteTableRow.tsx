@@ -38,6 +38,15 @@ import { PROJECT_ID } from '../../../../services/project';
 
 const Container = styled.div`
   width: 100%;
+  container-type: inline-size;
+`;
+
+const NameColumn = styled(Stack)`
+  // Hide name/description/author when the row becomes too narrow so the panel
+  // can shrink down to ~100px without horizontal overflow.
+  @container (max-width: 220px) {
+    display: none;
+  }
 `;
 const RouteNumberContainer = styled.div`
   width: 22px;
@@ -71,7 +80,19 @@ const RouteDescriptionContainer = styled.div`
 
 const RouteAuthorContainer = styled(RouteDescriptionContainer)``;
 
-const RouteGradeContainer = styled.div``;
+const RouteGradeContainer = styled.div`
+  // When the name column is hidden the grade sits next to the route number
+  // instead of drifting to the row's centre (via flex space-between).
+  @container (max-width: 220px) {
+    margin-right: auto;
+  }
+`;
+
+const MoreMenuContainer = styled.div`
+  @container (max-width: 220px) {
+    display: none;
+  }
+`;
 
 const Row = styled('a', {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -317,13 +338,15 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
                 {index + 1}
               </RouteNumber>
             </RouteNumberContainer>
-            <Stack justifyContent="stretch" flex={1}>
+            <NameColumn justifyContent="stretch" flex={1}>
               <RouteName feature={feature} selected={isSelected} />
               <RouteDescription feature={feature} />
               <RouteAuthor feature={feature} />
-            </Stack>
+            </NameColumn>
             <RouteGrade feature={feature} />
-            <MoreMenu feature={feature} />
+            <MoreMenuContainer>
+              <MoreMenu feature={feature} />
+            </MoreMenuContainer>
           </Row>
         </Container>
       </>

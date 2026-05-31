@@ -67,6 +67,10 @@ const TableHeader = styled.div`
   font-size: 11px;
   padding-top: 12px;
   padding-bottom: 4px;
+
+  @container (max-width: 220px) {
+    display: none;
+  }
 `;
 const NameHeader = styled.div`
   flex: 1;

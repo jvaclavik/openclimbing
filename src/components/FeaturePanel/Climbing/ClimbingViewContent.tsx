@@ -1,25 +1,24 @@
 import styled from '@emotion/styled';
+import { Button, ButtonGroup, Typography } from '@mui/material';
 import {
   CLIMBING_ROUTE_ROW_HEIGHT,
   DIALOG_TOP_BAR_HEIGHT,
   SPLIT_PANE_DEFAULT_SIZE,
 } from './config';
-import { useClimbingContext } from './contexts/ClimbingContext';
-import { invertedBoltCodeMap } from './utils/boltCodes';
-import { RouteList } from './RouteList/RouteList';
 import { ContentContainer } from './ContentContainer';
-import { Button, ButtonGroup, Typography } from '@mui/material';
+import { useClimbingContext } from './contexts/ClimbingContext';
+import { RouteList } from './RouteList/RouteList';
+import { invertedBoltCodeMap } from './utils/boltCodes';
 
-import { RouteDistribution } from './RouteDistribution';
-import React from 'react';
 import dynamic from 'next/dynamic';
+import { t } from '../../../services/intl';
+import { useFeatureContext } from '../../utils/FeatureContext';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { EditButton } from '../EditButton';
 import { EditDialog } from '../EditDialog/EditDialog';
-import { useGetCragViewLayout } from './utils/useCragViewLayout';
-import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
-import { useFeatureContext } from '../../utils/FeatureContext';
 import { PanelLabel } from './PanelLabel';
-import { t } from '../../../services/intl';
+import { RouteDistribution } from './RouteDistribution';
+import { useGetCragViewLayout } from './utils/useCragViewLayout';
 
 const CragMapDynamic = dynamic(() => import('./CragMap'), {
   ssr: false,
@@ -39,6 +38,12 @@ const ContentBelowRouteList = styled.div<{
       ${DIALOG_TOP_BAR_HEIGHT + CLIMBING_ROUTE_ROW_HEIGHT + 40}px
   );`
       : `calc(100vh - ${DIALOG_TOP_BAR_HEIGHT + CLIMBING_ROUTE_ROW_HEIGHT + 40}px);`};
+`;
+
+const HideOnNarrowPanel = styled.div`
+  @container (max-width: 220px) {
+    display: none;
+  }
 `;
 
 export const ClimbingViewContent = ({ isMapVisible }) => {
@@ -93,16 +98,18 @@ export const ClimbingViewContent = ({ isMapVisible }) => {
             </>
           )}
         </ContentContainer>
-        <RouteDistribution features={feature.memberFeatures} />
+        <HideOnNarrowPanel>
+          <RouteDistribution features={feature.memberFeatures} />
+        </HideOnNarrowPanel>
 
         {feature.tags.description ? (
-          <>
+          <HideOnNarrowPanel>
             <PanelLabel>{t('climbingview.description')}</PanelLabel>
 
-            <Typography ml={4.5} mr={4.5}>
+            <Typography ml={2} mr={2}>
               {feature.tags.description}
             </Typography>
-          </>
+          </HideOnNarrowPanel>
         ) : null}
 
         <EditButton />

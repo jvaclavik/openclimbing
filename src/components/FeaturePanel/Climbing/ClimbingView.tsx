@@ -39,6 +39,9 @@ const BottomContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
+  // Establish a container so descendants can adapt to the right panel's width
+  // via @container queries (header, edit button, grade alignment, ...).
+  container-type: inline-size;
 `;
 const FabContainer = styled.div`
   position: absolute;
@@ -438,15 +441,27 @@ export const ClimbingView = () => {
       {photoPath ? (
         <SplitPane
           split={cragViewLayout}
-          minSize={0}
-          maxSize="100%"
+          // Keep the photo pane at least 150 px so the right/bottom panel can
+          // never grow to the point of hiding the photo entirely.
+          minSize={150}
+          // Negative maxSize = stop divider N px before container's far edge.
+          // A string like "100%" is silently ignored (only numbers are honored),
+          // so the divider would otherwise drift past any CSS cap.
+          maxSize={-100}
           size={splitPaneSize ?? SPLIT_PANE_DEFAULT_SIZE}
           onDragStarted={onDragStarted}
           onDragFinished={onDragFinished}
           pane1Style={
             cragViewLayout === 'vertical'
-              ? { maxWidth: 'calc(100vw - 300px)' }
-              : { maxHeight: '90%' }
+              ? { maxWidth: 'calc(100vw - 100px)' }
+              : { maxHeight: 'calc(100% - 100px)' }
+          }
+          // Without this, pane2's default flex `min-width: auto` is its
+          // content's intrinsic width (~417px in this list). Pane2 then refuses
+          // to shrink below that, while react-split-pane still inflates pane1's
+          // inline width past the visible area, shifting the cover background.
+          pane2Style={
+            cragViewLayout === 'vertical' ? { minWidth: 0 } : { minHeight: 0 }
           }
         >
           <BackgroundContainer
