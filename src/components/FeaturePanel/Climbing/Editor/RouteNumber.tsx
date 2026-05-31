@@ -1,15 +1,14 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from 'react';
 import styled from '@emotion/styled';
-import { useClimbingContext } from '../contexts/ClimbingContext';
-import { useRouteNumberColors } from '../utils/useRouteNumberColors';
 import { useTheme } from '@mui/material';
-import { RouteDifficulty } from './RouteDifficulty';
-import { getShiftForStartPoint } from '../utils/startPoint';
 import { getShortId } from '../../../../services/helpers';
-import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { useMobileMode } from '../../../helpers';
 import { useTicksContext } from '../../../utils/TicksContext';
+import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { useClimbingContext } from '../contexts/ClimbingContext';
+import { getShiftForStartPoint } from '../utils/startPoint';
+import { useRouteNumberColors } from '../utils/useRouteNumberColors';
+import { RouteDifficulty } from './RouteDifficulty';
 
 const Text = styled.text<{ $scale: number }>`
   user-select: none;
@@ -53,7 +52,6 @@ const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
   const { isTicked } = useTicksContext();
   const isMobileMode = useMobileMode();
   const {
-    imageSize,
     photoZoom,
     isRouteSelected,
     machine,
@@ -69,24 +67,6 @@ const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
   const HOVER_WIDTH = 10 / photoZoom.scale;
   const TEXT_Y_SHIFT = 13 / photoZoom.scale;
 
-  const getX = () => {
-    const isFarRight = x + RECT_WIDTH / 2 + OUTLINE_WIDTH > imageSize.width;
-    const isFarLeft = x < RECT_WIDTH / 2 + OUTLINE_WIDTH;
-    if (isFarRight) {
-      return imageSize.width - RECT_WIDTH / 2 - OUTLINE_WIDTH;
-    }
-    if (isFarLeft) {
-      return RECT_WIDTH / 2 + OUTLINE_WIDTH;
-    }
-    return x;
-  };
-
-  const getY = () => {
-    const isFarBottom = y + RECT_Y_OFFSET + RECT_HEIGHT > imageSize.height;
-    if (isFarBottom) return imageSize.height - RECT_HEIGHT - OUTLINE_WIDTH;
-    return y + RECT_Y_OFFSET;
-  };
-
   const onMouseEnter = isMobileMode
     ? undefined
     : () => {
@@ -99,8 +79,10 @@ const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
         setRouteIndexHovered(null);
       };
 
-  const newX = getX(); // this shifts X coordinate in case of too small photo
-  const newY = getY(); // this shifts Y coordinate in case of too small photo
+  // Edge clamping is done at the RouteNumber level so the badge and its grade
+  // stay aligned. Caller passes the final, on-screen coordinates.
+  const newX = x;
+  const newY = y + RECT_Y_OFFSET;
 
   const commonProps = {
     cursor: 'pointer',
@@ -171,40 +153,147 @@ const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
 };
 
 export const RouteNumber = ({ routeIndex }: { routeIndex: number }) => {
-  const { getPixelPosition, getPathForRoute, routes, photoPath, photoZoom } =
-    useClimbingContext();
+  const {
+    getPixelPosition,
+    getPathForRoute,
+    routes,
+    photoPath,
+    photoZoom,
+    imageSize,
+  } = useClimbingContext();
   const { userSettings } = useUserSettingsContext();
 
   const route = routes[routeIndex];
   const path = getPathForRoute(route);
   if (!route || !path || path?.length === 0) return null;
 
-  const shift =
-    getShiftForStartPoint({
-      currentRouteSelectedIndex: routeIndex,
-      currentPosition: path[0],
-      checkedRoutes: routes,
-      photoPath,
-    }) / photoZoom.scale;
-
   const { x, y } = getPixelPosition({
     ...path[0],
     units: 'percentage',
   });
+
+  const gradesVisible = userSettings['climbing.isGradesOnPhotosVisible'];
+  const hasSiblings = routes.some((other, idx) => {
+    if (idx === routeIndex) return false;
+    const otherFirst = other?.paths?.[photoPath]?.[0];
+    return (
+      otherFirst && otherFirst.x === path[0].x && otherFirst.y === path[0].y
+    );
+  });
+  // With siblings the grade sits next to each badge in a tight stack; alone,
+  // it sits centered below the badge as before.
+  const gradeBeside = hasSiblings && gradesVisible;
+
+  const rowShiftRaw = 22;
+  const columnShiftRaw = gradeBeside ? 70 : 22;
+  const rowHeight = rowShiftRaw / photoZoom.scale;
+  const columnShiftPx = columnShiftRaw / photoZoom.scale;
+  const maxRowsPerColumn = Math.max(
+    1,
+    Math.floor(Math.max(0, imageSize.height - y) / rowHeight),
+  );
+  // Wrap any extra columns to the left when the start point is too close to
+  // the right edge.
+  const mirrorLeft = imageSize.width - x < columnShiftPx;
+
+  const shift = getShiftForStartPoint({
+    currentRouteSelectedIndex: routeIndex,
+    currentPosition: path[0],
+    checkedRoutes: routes,
+    photoPath,
+    maxRowsPerColumn,
+    rowShift: rowShiftRaw,
+    columnShift: columnShiftRaw,
+  });
+  const shiftX = (mirrorLeft ? -shift.x : shift.x) / photoZoom.scale;
+  const shiftY = shift.y / photoZoom.scale;
+
+  let badgeX = x + shiftX;
+  let badgeY = y + shiftY;
+
   const shortId = route.feature?.osmMeta
     ? getShortId(route.feature.osmMeta)
     : null;
+
+  const digits = String(routeIndex).length;
+  const rectWidth = ((digits > 2 ? digits : 0) * 3 + 18) / photoZoom.scale;
+  const gradeGap = 6 / photoZoom.scale;
+  const gradeHalfWidth = 20 / photoZoom.scale;
+
+  const difficultyProps = gradeBeside
+    ? {
+        x: mirrorLeft
+          ? badgeX - rectWidth / 2 - gradeGap
+          : badgeX + rectWidth / 2 + gradeGap,
+        y: badgeY + 21 / photoZoom.scale,
+        textAnchor: (mirrorLeft ? 'end' : 'start') as 'start' | 'end',
+      }
+    : {
+        x: badgeX,
+        y: badgeY + 40 / photoZoom.scale,
+        textAnchor: (imageSize.width - badgeX < gradeHalfWidth
+          ? 'end'
+          : 'middle') as 'middle' | 'end',
+      };
+
+  // Compute the combined badge + grade bounding box and shift everything by a
+  // single delta if it spills off any image edge. This keeps the badge and its
+  // grade visually attached even when their start point sits near the corner.
+  const outlinePad = 2 / photoZoom.scale;
+  const rectHeight = 18 / photoZoom.scale;
+  const rectYOffset = 8 / photoZoom.scale;
+  const gradeFullWidth = 40 / photoZoom.scale;
+  const gradeAscent = 11 / photoZoom.scale;
+  const gradeDescent = 3 / photoZoom.scale;
+
+  let boundLeft = badgeX - rectWidth / 2 - outlinePad;
+  let boundRight = badgeX + rectWidth / 2 + outlinePad;
+  let boundTop = badgeY + rectYOffset - outlinePad;
+  let boundBottom = badgeY + rectYOffset + rectHeight + outlinePad;
+
+  if (gradesVisible) {
+    const gradeLeftEdge =
+      difficultyProps.textAnchor === 'start'
+        ? difficultyProps.x
+        : difficultyProps.textAnchor === 'end'
+          ? difficultyProps.x - gradeFullWidth
+          : difficultyProps.x - gradeFullWidth / 2;
+    const gradeRightEdge = gradeLeftEdge + gradeFullWidth;
+    const gradeTopEdge = difficultyProps.y - gradeAscent;
+    const gradeBottomEdge = difficultyProps.y + gradeDescent;
+    boundLeft = Math.min(boundLeft, gradeLeftEdge);
+    boundRight = Math.max(boundRight, gradeRightEdge);
+    boundTop = Math.min(boundTop, gradeTopEdge);
+    boundBottom = Math.max(boundBottom, gradeBottomEdge);
+  }
+
+  let dx = 0;
+  let dy = 0;
+  if (boundLeft < 0) dx = -boundLeft;
+  else if (boundRight > imageSize.width) dx = imageSize.width - boundRight;
+  if (boundTop < 0) dy = -boundTop;
+  else if (boundBottom > imageSize.height) dy = imageSize.height - boundBottom;
+
+  badgeX += dx;
+  badgeY += dy;
+  const difficultyX = difficultyProps.x + dx;
+  const difficultyY = difficultyProps.y + dy;
 
   return (
     <>
       <RouteNumberBadge
         routeIndex={routeIndex}
-        x={x + shift}
-        y={y}
+        x={badgeX}
+        y={badgeY}
         shortId={shortId}
       />
-      {userSettings['climbing.isGradesOnPhotosVisible'] && (
-        <RouteDifficulty x={x + shift} y={y + 40} route={route} />
+      {gradesVisible && (
+        <RouteDifficulty
+          x={difficultyX}
+          y={difficultyY}
+          textAnchor={difficultyProps.textAnchor}
+          route={route}
+        />
       )}
     </>
   );

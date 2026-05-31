@@ -62,6 +62,11 @@ export const constructOutlines = (features: ClimbingTilesFeature[]) => {
       const { maxDimension, minZoom } = getMeasures(hull);
       const inflation = maxDimension * 0.1;
       const buffered = buffer(hull, inflation, { units: 'degrees' });
+      // buffer() returns undefined when the projected geometry yields NaN
+      // coordinates (degenerate inputs). Skip the outline in that case.
+      if (!buffered) {
+        return [];
+      }
       const smooth = polygonSmooth(buffered, { iterations: 3 });
 
       return [

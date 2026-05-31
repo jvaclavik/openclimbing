@@ -14,22 +14,40 @@ type Props = {
   route: ClimbingRoute;
   x: number;
   y: number;
+  textAnchor?: 'start' | 'middle' | 'end';
 };
 
-const Text = ({ children, scale, ...rest }) => (
+const Text = ({ children, scale, textAnchor, ...rest }) => (
   // eslint-disable-next-line react/jsx-props-no-spreading
-  <text textAnchor="middle" fontWeight="bold" fontSize={11 / scale} {...rest}>
+  <text
+    textAnchor={textAnchor}
+    fontWeight="bold"
+    fontSize={11 / scale}
+    {...rest}
+  >
     {children}
   </text>
 );
 
-const TextOutline = ({ children, x, y, stroke, scale }) => (
-  <Text x={x} y={y} strokeWidth={3 / scale} stroke={stroke} scale={scale}>
+const TextOutline = ({ children, x, y, stroke, scale, textAnchor }) => (
+  <Text
+    x={x}
+    y={y}
+    strokeWidth={3 / scale}
+    stroke={stroke}
+    scale={scale}
+    textAnchor={textAnchor}
+  >
     {children}
   </Text>
 );
 
-export const RouteDifficulty = ({ route, x, y }: Props) => {
+export const RouteDifficulty = ({
+  route,
+  x,
+  y,
+  textAnchor = 'middle',
+}: Props) => {
   const theme = useTheme();
   const { userSettings } = useUserSettingsContext();
   const {
@@ -53,10 +71,11 @@ export const RouteDifficulty = ({ route, x, y }: Props) => {
         y={y}
         stroke={theme.palette.getContrastText(color)}
         scale={scale}
+        textAnchor={textAnchor}
       >
         {routeDifficulty.grade}
       </TextOutline>
-      <Text x={x} y={y} fill={color} scale={scale}>
+      <Text x={x} y={y} fill={color} scale={scale} textAnchor={textAnchor}>
         {routeDifficulty.grade}
       </Text>
     </>
