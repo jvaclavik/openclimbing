@@ -1,40 +1,36 @@
-import { Feature } from '../../../../services/types';
-import React, { forwardRef, useState } from 'react';
 import styled from '@emotion/styled';
-import { ConvertedRouteDifficultyBadge } from '../ConvertedRouteDifficultyBadge';
-import {
-  getDifficulties,
-  getGradeIndexFromTags,
-} from '../../../../services/tagging/climbing/routeGrade';
 import CheckIcon from '@mui/icons-material/Check';
-import { getWikimediaCommonsPhotoPathKeys } from '../utils/photo';
-import { RouteNumber } from '../RouteNumber';
-import { getOsmappLink, getShortId } from '../../../../services/helpers';
+import EditIcon from '@mui/icons-material/Edit';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { intl, t } from '../../../../services/intl';
 import {
-  Chip,
   CircularProgress,
   IconButton,
   MenuItem,
   Stack,
-  Tooltip,
   Typography,
 } from '@mui/material';
-import Router from 'next/router';
-import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import Link from 'next/link';
-import { useEditDialogContext } from '../../helpers/EditDialogContext';
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
+import Router from 'next/router';
+import React, { forwardRef, useState } from 'react';
+import { getOsmappLink, getShortId } from '../../../../services/helpers';
+import { intl, t } from '../../../../services/intl';
+import { PROJECT_ID } from '../../../../services/project';
+import {
+  getDifficulties,
+  getGradeIndexFromTags,
+} from '../../../../services/tagging/climbing/routeGrade';
+import { Feature } from '../../../../services/types';
 import { useMobileMode } from '../../../helpers';
-import { ClimbingBadges } from '../ClimbingBadges';
-import { useMoreMenu } from '../useMoreMenu';
-import { useClimbingContext } from '../contexts/ClimbingContext';
-import { useTicksContext } from '../../../utils/TicksContext';
 import { useOsmAuthContext } from '../../../utils/OsmAuthContext';
 import { useSnackbar } from '../../../utils/SnackbarContext';
-import { PROJECT_ID } from '../../../../services/project';
+import { useTicksContext } from '../../../utils/TicksContext';
+import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { useEditDialogContext } from '../../helpers/EditDialogContext';
+import { ClimbingBadges } from '../ClimbingBadges';
+import { ConvertedRouteDifficultyBadge } from '../ConvertedRouteDifficultyBadge';
+import { RouteNumber } from '../RouteNumber';
+import { useMoreMenu } from '../useMoreMenu';
+import { getWikimediaCommonsPhotoPathKeys } from '../utils/photo';
 
 const Container = styled.div`
   width: 100%;
@@ -50,15 +46,6 @@ const NameColumn = styled(Stack)`
 `;
 const RouteNumberContainer = styled.div`
   width: 22px;
-`;
-const SelectedButtonContainer = styled.div`
-  position: absolute;
-  right: 0;
-`;
-const StyledChip = styled(Chip)`
-  font-size: 11px;
-  font-weight: 600;
-  height: 18px;
 `;
 
 const RouteNameContainer = styled.div`
@@ -213,30 +200,6 @@ const MoreMenu = ({ feature }: MoreMenuProps) => {
 const getRouteDetailUrl = (feature: Feature) =>
   `${getOsmappLink(feature)}${typeof window !== 'undefined' ? window.location.hash : ''}`;
 
-const SelectedButton = () => {
-  const { setRouteSelectedIndex } = useClimbingContext();
-
-  const handleDeselectRoute = (e) => {
-    setRouteSelectedIndex(null);
-    e.preventDefault();
-  };
-
-  return (
-    <SelectedButtonContainer>
-      <Tooltip title="Deselect route">
-        <StyledChip
-          label="selected"
-          onDelete={handleDeselectRoute}
-          size="small"
-          deleteIcon={<CloseIcon />}
-          color="secondary"
-          variant="filled"
-        />
-      </Tooltip>
-    </SelectedButtonContainer>
-  );
-};
-
 const RouteDescription = ({ feature }: { feature: Feature }) =>
   feature.tags?.description ? (
     <RouteDescriptionContainer>
@@ -259,8 +222,6 @@ const RouteName = (props: { feature: Feature; selected: boolean }) => {
         {props.feature.tags?.name}
       </Typography>
       <ClimbingBadges feature={props.feature} />
-
-      {!isMobileMode && props.selected && <SelectedButton />}
     </RouteNameContainer>
   );
 };
