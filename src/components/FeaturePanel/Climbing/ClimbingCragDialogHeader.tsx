@@ -15,11 +15,9 @@ import { getLabel } from '../../../helpers/featureLabel';
 import { t } from '../../../services/intl';
 import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { useDragItems } from '../../utils/useDragItems';
 import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { PhotoLink } from './PhotoLink';
-import { moveElementToIndex, toInsertIndexAfterRemove } from './utils/array';
 import { usePhotoChange } from './utils/usePhotoChange';
 
 const Title = styled.div`
@@ -51,8 +49,7 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
     useState<boolean>(false);
   const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
   const [clickCounter, setClickCounter] = useState<number>(0);
-  const { photoPath, photoPaths, setShowDebugMenu, isEditMode, setPhotoPaths } =
-    useClimbingContext();
+  const { photoPath, photoPaths, setShowDebugMenu } = useClimbingContext();
 
   const { feature } = useFeatureContext();
   const onPhotoChange = usePhotoChange();
@@ -66,24 +63,6 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
       setClickCounter(0);
     }
   };
-
-  const movePhotos = (_oldIndex, _newIndex) => {
-    // @TODO: Implement moving photos
-  };
-
-  const {
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-    HighlightedDropzone,
-    ItemContainer,
-    draggedItem,
-    draggedOverIndex,
-  } = useDragItems<string>({
-    initialItems: photoPaths,
-    moveItems: movePhotos,
-    direction: 'vertical',
-  });
 
   return (
     <AppBar position="static" color="transparent">
@@ -105,45 +84,14 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
               </Typography>
               <PhotoLinks>
                 {photoPaths.map((photo, index) => (
-                  <ItemContainer key={photo}>
-                    <PhotoLink
-                      key={photo}
-                      photo={photo}
-                      onClick={() => onPhotoChange(photo)}
-                      isCurrentPhoto={photo === photoPath}
-                      {...(isEditMode
-                        ? {
-                            draggable: true,
-                            onDragStart: (e) => {
-                              handleDragStart(e, {
-                                id: index,
-                                content: photo,
-                              });
-                            },
-                            onDragOver: (e) => {
-                              handleDragOver(e, index);
-                            },
-                            onDragEnd: (e) => {
-                              handleDragEnd(e);
-
-                              const newArray = moveElementToIndex(
-                                photoPaths,
-                                draggedItem.id,
-                                toInsertIndexAfterRemove(
-                                  draggedItem.id,
-                                  draggedOverIndex,
-                                ),
-                              );
-
-                              setPhotoPaths(newArray);
-                            },
-                          }
-                        : {})}
-                    >
-                      {index + 1}
-                    </PhotoLink>
-                    <HighlightedDropzone index={index} />
-                  </ItemContainer>
+                  <PhotoLink
+                    key={photo}
+                    photo={photo}
+                    onClick={() => onPhotoChange(photo)}
+                    isCurrentPhoto={photo === photoPath}
+                  >
+                    {index + 1}
+                  </PhotoLink>
                 ))}
               </PhotoLinks>
             </PhotosContainer>

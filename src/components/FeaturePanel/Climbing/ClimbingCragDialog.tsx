@@ -1,24 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
-import Router, { useRouter } from 'next/router';
 import {
-  Dialog,
-  DialogContent,
-  DialogActions,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
   Stack,
 } from '@mui/material';
+import Router, { useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
+import { getOsmappLink } from '../../../services/helpers';
+import { t } from '../../../services/intl';
+import { useFeatureContext } from '../../utils/FeatureContext';
+import { ClimbingCragDialogHeader } from './ClimbingCragDialogHeader';
+import { ClimbingEditorHelperText } from './ClimbingEditorHelperText';
 import { ClimbingView } from './ClimbingView';
 import { useClimbingContext } from './contexts/ClimbingContext';
-import { ClimbingCragDialogHeader } from './ClimbingCragDialogHeader';
-import { getOsmappLink } from '../../../services/helpers';
-import { useFeatureContext } from '../../utils/FeatureContext';
 import { useSaveCragFactory } from './useSaveCragFactory';
-import { getWikimediaCommonsPhotoKeys, removeFilePrefix } from './utils/photo';
-import { ClimbingEditorHelperText } from './ClimbingEditorHelperText';
-import { t } from '../../../services/intl';
 import { confirmDiscardUnsavedClimbingEdits } from './utils/confirmDiscardUnsavedClimbingEdits';
+import { getWikimediaCommonsPhotoKeys, removeFilePrefix } from './utils/photo';
 
 const Flex = styled.div`
   display: flex;
