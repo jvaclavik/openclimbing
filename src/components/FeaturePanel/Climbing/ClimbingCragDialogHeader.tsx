@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import CloseIcon from '@mui/icons-material/Close';
-import TuneIcon from '@mui/icons-material/Tune';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import TuneIcon from '@mui/icons-material/Tune';
 import {
   AppBar,
   Box,
@@ -11,16 +10,17 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { useState } from 'react';
+import { getLabel } from '../../../helpers/featureLabel';
+import { t } from '../../../services/intl';
+import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
+import { useFeatureContext } from '../../utils/FeatureContext';
+import { useDragItems } from '../../utils/useDragItems';
+import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { PhotoLink } from './PhotoLink';
-import { useFeatureContext } from '../../utils/FeatureContext';
-import { getLabel } from '../../../helpers/featureLabel';
-import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
-import { useDragItems } from '../../utils/useDragItems';
 import { moveElementToIndex, toInsertIndexAfterRemove } from './utils/array';
-import { t } from '../../../services/intl';
 import { usePhotoChange } from './utils/usePhotoChange';
-import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 
 const Title = styled.div`
   flex: 1;
@@ -140,7 +140,7 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
                           }
                         : {})}
                     >
-                      {index}
+                      {index + 1}
                     </PhotoLink>
                     <HighlightedDropzone index={index} />
                   </ItemContainer>
