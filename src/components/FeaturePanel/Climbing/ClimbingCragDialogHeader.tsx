@@ -12,14 +12,13 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { getLabel } from '../../../helpers/featureLabel';
+import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
 import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { useDragItems } from '../../utils/useDragItems';
+import { useMobileMode } from '../../helpers';
 import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 import { useClimbingContext } from './contexts/ClimbingContext';
-import { PhotoLink } from './PhotoLink';
-import { moveElementToIndex, toInsertIndexAfterRemove } from './utils/array';
 import { usePhotoChange } from './utils/usePhotoChange';
 
 const Title = styled.div`
@@ -34,25 +33,146 @@ const PhotosContainer = styled.div`
   align-items: center;
 `;
 
-const PhotosTitle = styled.div`
-  color: ${({ theme }) => theme.palette.text.secondary};
+const PhotoGallery = styled.div`
+  display: flex;
+  flex-direction: row;
+  /* No gap so adjacent thumbnails share an edge — keeps hover continuous
+     and avoids a flicker zone when sweeping the mouse between them. */
+  gap: 2px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  /* keep thumbnails compact and let the row scroll horizontally if needed */
+  scrollbar-width: thin;
 `;
 
-const PhotoLinks = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  gap: 4px;
-  margin-bottom: 2px;
+const PhotoThumbnailButton = styled.button<{ $isCurrentPhoto: boolean }>`
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  /* Fixed height; width grows with the image's natural aspect ratio. */
+  height: 40px;
+  width: auto;
+  padding: 0;
+  border: 2px solid
+    ${({ $isCurrentPhoto, theme }) =>
+      $isCurrentPhoto ? theme.palette.primary.main : 'transparent'};
+  border-radius: 4px;
+  background: ${({ theme }) => theme.palette.action.hover};
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    opacity 0.12s ease,
+    border-color 0.12s ease;
+
+  &:hover {
+    opacity: ${({ $isCurrentPhoto }) => ($isCurrentPhoto ? 1 : 0.85)};
+  }
 `;
+
+const PhotoThumbnailImage = styled.img`
+  height: 100%;
+  width: auto;
+  display: block;
+`;
+
+const PhotoIndexBadge = styled.span`
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 14px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 3px;
+  pointer-events: none;
+`;
+
+const TooltipPreview = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 260px;
+`;
+
+const TooltipPreviewImage = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+`;
+
+const TooltipPreviewCaption = styled.span`
+  font-size: 11px;
+  line-height: 14px;
+  word-break: break-word;
+`;
+
+type PhotoThumbnailProps = {
+  photo: string;
+  index: number;
+  isCurrentPhoto: boolean;
+  onClick: () => void;
+};
+
+const PhotoThumbnail = ({
+  photo,
+  index,
+  isCurrentPhoto,
+  onClick,
+}: PhotoThumbnailProps) => {
+  const isMobileMode = useMobileMode();
+  const thumbUrl = getCommonsImageUrl(`File:${photo}`, 120);
+  const previewUrl = getCommonsImageUrl(`File:${photo}`, 250);
+
+  const button = (
+    <PhotoThumbnailButton
+      type="button"
+      $isCurrentPhoto={isCurrentPhoto}
+      onClick={onClick}
+      aria-current={isCurrentPhoto ? 'true' : undefined}
+      aria-label={`Show photo ${index + 1}`}
+    >
+      {thumbUrl && <PhotoThumbnailImage src={thumbUrl} alt="" loading="lazy" />}
+    </PhotoThumbnailButton>
+  );
+
+  if (isMobileMode) {
+    return button;
+  }
+
+  return (
+    <Tooltip
+      title={
+        <TooltipPreview>
+          {previewUrl && (
+            <TooltipPreviewImage src={previewUrl} alt="" loading="lazy" />
+          )}
+          <TooltipPreviewCaption>
+            {`Photo ${index + 1} — ${photo}`}
+          </TooltipPreviewCaption>
+        </TooltipPreview>
+      }
+      enterDelay={2000}
+      enterNextDelay={60}
+      leaveDelay={120}
+      slotProps={{
+        popper: {
+          modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
+        },
+      }}
+    >
+      {button}
+    </Tooltip>
+  );
+};
 
 export const ClimbingCragDialogHeader = ({ onClose }) => {
   const [isUserSettingsOpened, setIsUserSettingsOpened] =
     useState<boolean>(false);
   const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
   const [clickCounter, setClickCounter] = useState<number>(0);
-  const { photoPath, photoPaths, setShowDebugMenu, isEditMode, setPhotoPaths } =
-    useClimbingContext();
+  const { photoPath, photoPaths, setShowDebugMenu } = useClimbingContext();
 
   const { feature } = useFeatureContext();
   const onPhotoChange = usePhotoChange();
@@ -66,24 +186,6 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
       setClickCounter(0);
     }
   };
-
-  const movePhotos = (_oldIndex, _newIndex) => {
-    // @TODO: Implement moving photos
-  };
-
-  const {
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-    HighlightedDropzone,
-    ItemContainer,
-    draggedItem,
-    draggedOverIndex,
-  } = useDragItems<string>({
-    initialItems: photoPaths,
-    moveItems: movePhotos,
-    direction: 'vertical',
-  });
 
   return (
     <AppBar position="static" color="transparent">
@@ -100,52 +202,17 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
           </Typography>
           {photoPaths?.length > 1 && (
             <PhotosContainer>
-              <Typography variant="caption" color="secondary">
-                {t('climbing.photos')}
-              </Typography>
-              <PhotoLinks>
+              <PhotoGallery>
                 {photoPaths.map((photo, index) => (
-                  <ItemContainer key={photo}>
-                    <PhotoLink
-                      key={photo}
-                      photo={photo}
-                      onClick={() => onPhotoChange(photo)}
-                      isCurrentPhoto={photo === photoPath}
-                      {...(isEditMode
-                        ? {
-                            draggable: true,
-                            onDragStart: (e) => {
-                              handleDragStart(e, {
-                                id: index,
-                                content: photo,
-                              });
-                            },
-                            onDragOver: (e) => {
-                              handleDragOver(e, index);
-                            },
-                            onDragEnd: (e) => {
-                              handleDragEnd(e);
-
-                              const newArray = moveElementToIndex(
-                                photoPaths,
-                                draggedItem.id,
-                                toInsertIndexAfterRemove(
-                                  draggedItem.id,
-                                  draggedOverIndex,
-                                ),
-                              );
-
-                              setPhotoPaths(newArray);
-                            },
-                          }
-                        : {})}
-                    >
-                      {index + 1}
-                    </PhotoLink>
-                    <HighlightedDropzone index={index} />
-                  </ItemContainer>
+                  <PhotoThumbnail
+                    key={photo}
+                    photo={photo}
+                    index={index}
+                    isCurrentPhoto={photo === photoPath}
+                    onClick={() => onPhotoChange(photo)}
+                  />
                 ))}
-              </PhotoLinks>
+              </PhotoGallery>
             </PhotosContainer>
           )}
         </Title>

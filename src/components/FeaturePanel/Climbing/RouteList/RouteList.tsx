@@ -11,7 +11,7 @@ const Container = styled.div`
   position: relative; // mobile safari fix
 `;
 
-export const RouteList = ({ isEditable }: { isEditable?: boolean }) => {
+export const RouteList = (_props: { isEditable?: boolean }) => {
   const {
     routes,
     setRouteSelectedIndex,
@@ -48,8 +48,6 @@ export const RouteList = ({ isEditable }: { isEditable?: boolean }) => {
   }, [routeSelectedIndex, routes, routeIndexExpanded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Container>
-      {routes.length !== 0 && <RouteListDndContent isEditable={isEditable} />}
-    </Container>
+    <Container>{routes.length !== 0 && <RouteListDndContent />}</Container>
   );
 };

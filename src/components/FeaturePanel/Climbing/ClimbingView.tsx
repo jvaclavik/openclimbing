@@ -1,34 +1,36 @@
-import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import SplitPane from 'react-split-pane';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import EditIcon from '@mui/icons-material/Edit';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import MapIcon from '@mui/icons-material/Map';
 import { CircularProgress, Fab, IconButton, Tooltip } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+import SplitPane from 'react-split-pane';
 import { TransformComponent } from 'react-zoom-pan-pinch';
-import { useClimbingContext } from './contexts/ClimbingContext';
-import { RoutesEditor } from './Editor/RoutesEditor';
+import {
+  CommonsAllowedWidth,
+  getCommonsImageUrl,
+} from '../../../services/images/getCommonsImageUrl';
+import { t } from '../../../services/intl';
+import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { ClimbingViewContent } from './ClimbingViewContent';
+import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
+import { useClimbingContext } from './contexts/ClimbingContext';
+import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
+import { RoutesEditor } from './Editor/RoutesEditor';
+import { TransformWrapper } from './TransformWrapper';
 import {
   getResolution,
   getWikimediaCommonsPhotoValues,
   removeFilePrefix,
 } from './utils/photo';
-import { TransformWrapper } from './TransformWrapper';
-import { convertHexToRgba } from '../../utils/colorUtils';
-import {
-  CommonsAllowedWidth,
-  getCommonsImageUrl,
-} from '../../../services/images/getCommonsImageUrl';
-import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
-import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
-import { ClimbingViewContent } from './ClimbingViewContent';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
-import MapIcon from '@mui/icons-material/Map';
-import EditIcon from '@mui/icons-material/Edit';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useGetCragViewLayout } from './utils/useCragViewLayout';
-import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
-import { t } from '../../../services/intl';
 import { useClimbingViewShortcuts } from './utils/useClimbingViewShortcuts';
+import { useGetCragViewLayout } from './utils/useCragViewLayout';
 import { useReplacePhotoIfNeeded } from './utils/useReplacePhotoIfNeeded';
 
 export const DEFAULT_CRAG_VIEW_LAYOUT = 'horizontal';
@@ -227,6 +229,37 @@ const BackgroundContainer = styled.div<{
   height: 100%;
 `;
 
+const RestorePaneFab = styled.div<{
+  $cragViewLayout: 'horizontal' | 'vertical';
+}>`
+  position: absolute;
+  z-index: 1000001;
+  ${({ $cragViewLayout }) =>
+    $cragViewLayout === 'horizontal'
+      ? `
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+      `
+      : `
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+      `}
+`;
+
+// Pane2 (routes list) is considered effectively collapsed once its rendered
+// size along the split axis drops below this threshold. We don't require it
+// to literally reach 0 — once it's this small, the dragger is useless and we
+// swap it for a single restore-arrow FAB that brings the routes list back.
+const PANE2_COLLAPSED_THRESHOLD_PX = 100;
+
+// Once pane2 crosses the threshold, we set splitPaneSize to this sentinel so
+// pane2 actually goes to 0 px (pane1Style: maxHeight/maxWidth 100% clamps
+// pane1 back down to the container, so the actual rendered size is fine on
+// any screen). Stored in the user setting until the restore arrow resets it.
+const COLLAPSED_PANE_SIZE_PX = 100000;
+
 const getWindowDimensions = () => {
   const { innerWidth: width, innerHeight: height } = window;
   return {
@@ -368,6 +401,45 @@ export const ClimbingView = () => {
     windowDimensions,
   ]);
 
+  const pane2Ref = useRef<HTMLDivElement>(null);
+  const [isPane2Collapsed, setIsPane2Collapsed] = useState(false);
+
+  useEffect(() => {
+    const node = pane2Ref.current;
+    if (!node || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      const dim = cragViewLayout === 'horizontal' ? height : width;
+      setIsPane2Collapsed(dim < PANE2_COLLAPSED_THRESHOLD_PX);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [cragViewLayout]);
+
+  // Once the threshold is crossed (arrow is showing), snap pane2 down to 0
+  // by parking splitPaneSize at the sentinel.
+  // Skip when:
+  //   * user is actively dragging — react-split-pane is the controlled
+  //     source then and changing the size mid-drag would teleport the
+  //     divider;
+  //   * splitPaneSize is null — that means the user just clicked the restore
+  //     arrow (or the default is in effect); pane2 hasn't visually grown
+  //     yet so isPane2Collapsed is still true from the previous tick. If we
+  //     snapped here we'd immediately re-park at the sentinel and the panel
+  //     would flash open and close.
+  useEffect(() => {
+    if (
+      isPane2Collapsed &&
+      !isSplitViewDragging &&
+      splitPaneSize != null &&
+      splitPaneSize !== COLLAPSED_PANE_SIZE_PX
+    ) {
+      setUserSetting('climbing.splitPaneSize', COLLAPSED_PANE_SIZE_PX);
+    }
+  }, [isPane2Collapsed, isSplitViewDragging, splitPaneSize, setUserSetting]);
+
   const showArrowOnTop = splitPaneSize === 0;
   const showArrowOnBottom =
     splitPaneSize === viewportSize.height - editorPosition.y;
@@ -444,17 +516,21 @@ export const ClimbingView = () => {
           // Keep the photo pane at least 150 px so the right/bottom panel can
           // never grow to the point of hiding the photo entirely.
           minSize={150}
-          // Negative maxSize = stop divider N px before container's far edge.
-          // A string like "100%" is silently ignored (only numbers are honored),
-          // so the divider would otherwise drift past any CSS cap.
-          maxSize={-100}
+          // Allow the photo pane to grow all the way (pane2 down to 0 px).
+          // When pane2 collapses, a restore-arrow FAB takes the divider's job.
           size={splitPaneSize ?? SPLIT_PANE_DEFAULT_SIZE}
           onDragStarted={onDragStarted}
           onDragFinished={onDragFinished}
+          // pane1 needs an explicit max equal to the container size; without
+          // it, an oversized inline size set by react-split-pane (e.g. a
+          // stored splitPaneSize from before the window shrunk) overflows the
+          // container instead of clamping responsively. The previous
+          // `calc(100% - 100px)` was the same idea but additionally enforced
+          // a 100 px floor for pane2 — which is what blocked drag-to-full.
           pane1Style={
             cragViewLayout === 'vertical'
-              ? { maxWidth: 'calc(100vw - 100px)' }
-              : { maxHeight: 'calc(100% - 100px)' }
+              ? { maxWidth: '100%' }
+              : { maxHeight: '100%' }
           }
           // Without this, pane2's default flex `min-width: auto` is its
           // content's intrinsic width (~417px in this list). Pane2 then refuses
@@ -514,10 +590,32 @@ export const ClimbingView = () => {
                   </TransformComponent>
                 </TransformWrapper>
               </BlurContainer>
+              {isPane2Collapsed && (
+                <RestorePaneFab $cragViewLayout={cragViewLayout}>
+                  <Tooltip
+                    title={t('climbing.photos') /* shown on hover */}
+                    enterDelay={500}
+                    arrow
+                  >
+                    <Fab
+                      size="small"
+                      color="secondary"
+                      onClick={onSplitPaneSizeReset}
+                      aria-label="Show route list"
+                    >
+                      {cragViewLayout === 'horizontal' ? (
+                        <ArrowUpwardIcon />
+                      ) : (
+                        <ArrowBackIcon />
+                      )}
+                    </Fab>
+                  </Tooltip>
+                </RestorePaneFab>
+              )}
             </>
           </BackgroundContainer>
 
-          <BottomContainer>
+          <BottomContainer ref={pane2Ref}>
             <FabMapSwitcher
               isMapVisible={isMapVisible}
               setIsMapVisible={setIsMapVisible}

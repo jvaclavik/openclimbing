@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from '@emotion/styled';
 import {
   Accordion,
   AccordionDetails,
@@ -28,6 +29,20 @@ import {
 } from '../../../context/EditContext';
 import { OpenAllButton } from '../helpers';
 import { Member } from '../../../context/types';
+import { useDragItems } from '../../../../../utils/useDragItems';
+import { DragHandler } from '../../../../../utils/DragHandler';
+import { moveElementToIndex } from '../../../../Climbing/utils/array';
+
+const MemberRow = styled.div`
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+`;
+
+const MemberRowMain = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
 
 const SectionName = () => {
   const theme = useTheme();
@@ -108,9 +123,28 @@ const CustomAccordion = ({
   );
 };
 
-const MemberItem = ({ member }: { member: Member }) => {
+type DraggableMemberItemProps = {
+  member: Member;
+  index: number;
+  canReorder: boolean;
+  dragHandlers: {
+    handleDragStart: (
+      e: React.DragEvent<HTMLDivElement>,
+      dragged: { id: number; content: Member },
+    ) => void;
+    handleDragOver: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+    handleDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
+  };
+};
+
+const DraggableMemberItem = ({
+  member,
+  index,
+  canReorder,
+  dragHandlers,
+}: DraggableMemberItemProps) => {
   const handleClick = useHandleItemClick();
-  return (
+  const row = (
     <FeatureRow
       shortId={member.shortId}
       originalLabel={member.originalLabel}
@@ -118,23 +152,74 @@ const MemberItem = ({ member }: { member: Member }) => {
       onClick={(e: React.MouseEvent) => handleClick(e, member.shortId)}
     />
   );
+
+  if (!canReorder) {
+    return row;
+  }
+
+  return (
+    <MemberRow onDragOver={(e) => dragHandlers.handleDragOver(e, index)}>
+      <DragHandler
+        onDragStart={(e) =>
+          dragHandlers.handleDragStart(e, { id: index, content: member })
+        }
+        onDragOver={(e) => dragHandlers.handleDragOver(e, index)}
+        onDragEnd={dragHandlers.handleDragEnd}
+      />
+      <MemberRowMain>{row}</MemberRowMain>
+    </MemberRow>
+  );
 };
 
 export const MembersEditor = () => {
-  const { shortId, members, tags } = useCurrentItem();
+  const { shortId, members, tags, setMembers } = useCurrentItem();
   const convertible = isConvertible(shortId, tags);
   const handleOpenAll = useHandleOpenAllMembers();
+
+  const {
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+    HighlightedDropzone,
+    ItemContainer,
+    draggedItem,
+  } = useDragItems<Member>({
+    initialItems: members ?? [],
+    moveItems: (oldIndex, newIndex) => {
+      setMembers((prev) => moveElementToIndex(prev ?? [], oldIndex, newIndex));
+    },
+    direction: 'horizontal',
+  });
 
   if (!members && !convertible) {
     return null;
   }
 
+  const canReorder = (members?.length ?? 0) > 1;
+
   return (
     <CustomAccordion membersLength={members?.length}>
       {!!members && (
         <List disablePadding>
-          {members.map((member) => (
-            <MemberItem key={member.shortId} member={member} />
+          {members.map((member, index) => (
+            <ItemContainer key={member.shortId}>
+              {canReorder && draggedItem != null && draggedItem.id > index && (
+                <HighlightedDropzone index={index} />
+              )}
+              <DraggableMemberItem
+                member={member}
+                index={index}
+                canReorder={canReorder}
+                dragHandlers={{
+                  handleDragStart,
+                  handleDragOver,
+                  handleDragEnd,
+                }}
+              />
+              {canReorder && draggedItem != null && draggedItem.id <= index && (
+                <HighlightedDropzone index={index} activeAt={index + 1} />
+              )}
+            </ItemContainer>
           ))}
         </List>
       )}

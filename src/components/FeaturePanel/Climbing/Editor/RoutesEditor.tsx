@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { RoutesLayer } from './RoutesLayer';
 import { useClimbingContext } from '../contexts/ClimbingContext';
@@ -88,6 +88,23 @@ export const RoutesEditor = ({
     preloadOtherPhotos();
     setIsPhotoLoading(false);
   };
+
+  // Without this, the SVG overlay's pixel dimensions (driven by imageSize)
+  // drift out of sync with the <img>'s actual rendered size whenever the
+  // photo area resizes for any reason other than the cases that already call
+  // loadPhotoRelatedData() — most notably DialogActions toggling, or
+  // saveCrag exiting edit mode without calling loadPhotoRelatedData. Stored
+  // route points (percentage coords) then render at slightly wrong pixel
+  // positions until something else triggers a recalculation.
+  useEffect(() => {
+    const node = photoRef.current;
+    if (!node || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(() => {
+      loadPhotoRelatedData();
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <EditorContainer
       $imageHeight={imageSize.height}

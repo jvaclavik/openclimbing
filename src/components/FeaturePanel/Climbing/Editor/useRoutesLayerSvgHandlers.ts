@@ -37,7 +37,6 @@ export const useRoutesLayerSvgHandlers = () => {
 
   const onClick = useCallback(
     (event: React.MouseEvent) => {
-      if (!isEditMode) return;
       if (isZoomingRef.current) return;
 
       if (

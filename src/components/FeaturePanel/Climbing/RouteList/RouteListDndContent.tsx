@@ -1,20 +1,13 @@
 import { useRef } from 'react';
 import styled from '@emotion/styled';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { RenderListRow } from './RouteListRow';
-import { useDragItems } from '../../../utils/useDragItems';
-import { DragHandler } from '../../../utils/DragHandler';
 import { GradeSystemSelect } from '../GradeSystemSelect';
 import { t } from '../../../../services/intl';
 import { Box } from '@mui/material';
 import { useReplacePhotoIfNeeded } from '../utils/useReplacePhotoIfNeeded';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
-
-type Item = {
-  id: number;
-  content: React.ReactNode;
-};
 
 const Container = styled.div`
   width: 100%;
@@ -36,8 +29,7 @@ const MaxWidthContainer = styled.div`
   flex-direction: row;
 `;
 
-const RowWithDragHandler = styled.div<{
-  isDraggedOver: boolean;
+const RowInner = styled.div<{
   isSelected: boolean;
 }>`
   cursor: pointer;
@@ -77,26 +69,10 @@ const NameHeader = styled.div`
   padding-left: 40px;
 `;
 
-export const RouteListDndContent = ({ isEditable }) => {
-  const {
-    routes,
-    moveRoute,
-    setRouteSelectedIndex,
-    routeSelectedIndex,
-    isRouteSelected,
-    isEditMode,
-    machine,
-    showDebugMenu,
-  } = useClimbingContext();
-  const [items, setItems] = useState([]);
+export const RouteListDndContent = () => {
+  const { routes, routeSelectedIndex, isRouteSelected, isEditMode, machine } =
+    useClimbingContext();
   const { userSettings } = useUserSettingsContext();
-  useEffect(() => {
-    const content = routes.map((route, index) => ({
-      id: index,
-      route,
-    }));
-    setItems(content);
-  }, [routes]);
   const parentRef = useRef<HTMLDivElement>(null);
   const replacePhotoIfNeeded = useReplacePhotoIfNeeded();
   const onRowClick = (index: number) => {
@@ -113,44 +89,9 @@ export const RouteListDndContent = ({ isEditable }) => {
     }
   };
 
-  const handleControlDragStart = (
-    e: React.DragEvent<HTMLDivElement>,
-    dragged: Item,
-  ) => {
-    e.stopPropagation();
-    e.dataTransfer.setData('text/plain', JSON.stringify(dragged));
-    setDraggedItem(dragged);
-  };
-
-  const handleControlDragEnd = () => {
-    setDraggedItem(null);
-    setDraggedOverIndex(null);
-  };
-
   const stopPropagation = (e) => {
     e.stopPropagation();
   };
-
-  const {
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-    HighlightedDropzone,
-    setDraggedItem,
-    setDraggedOverIndex,
-    draggedItem,
-    draggedOverIndex,
-  } = useDragItems<React.ReactNode>({
-    initialItems: routes,
-    moveItems: (oldIndex, newIndex) => {
-      moveRoute(oldIndex, newIndex);
-
-      // maybe move to moveRoute?
-      if (routeSelectedIndex === oldIndex) setRouteSelectedIndex(newIndex);
-      if (routeSelectedIndex === newIndex) setRouteSelectedIndex(oldIndex);
-    },
-    direction: 'vertical',
-  });
 
   return (
     <Container ref={parentRef}>
@@ -162,43 +103,28 @@ export const RouteListDndContent = ({ isEditable }) => {
           </Box>
         </MaxWidthContainer>
       </TableHeader>
-      {items.map((item, index) => {
+      {routes.map((route, index) => {
         const isSelected = isRouteSelected(index);
         return (
-          <Row key={item.id}>
-            {draggedItem?.id > index && <HighlightedDropzone index={index} />}
-            <RowWithDragHandler
-              isDraggedOver={index === draggedOverIndex}
-              draggable
-              onDragStart={(e) => handleDragStart(e, item)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDragEnd={handleDragEnd}
+          <Row key={route.id ?? index}>
+            <RowInner
               isSelected={isSelected}
               onClick={() => {
                 onRowClick(index);
               }}
             >
               <MaxWidthContainer>
-                {showDebugMenu && isEditMode && isEditable && (
-                  <DragHandler
-                    onDragStart={(e) => handleControlDragStart(e, item)}
-                    onDragEnd={handleControlDragEnd}
-                  />
-                )}
                 <RowContent>
                   <RenderListRow
-                    key={item.route.id}
-                    routeId={item.route.id}
+                    key={route.id}
+                    routeId={route.id}
                     stopPropagation={stopPropagation}
                     parentRef={parentRef}
-                    feature={item.route.feature}
+                    feature={route.feature}
                   />
                 </RowContent>
               </MaxWidthContainer>
-            </RowWithDragHandler>
-            {draggedItem?.id <= index && (
-              <HighlightedDropzone index={index} activeAt={index + 1} />
-            )}
+            </RowInner>
           </Row>
         );
       })}

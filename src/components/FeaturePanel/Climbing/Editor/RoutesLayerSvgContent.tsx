@@ -20,13 +20,6 @@ export const RoutesLayerSvgContent = () => {
         </React.Fragment>
       ))}
 
-      {routeSelectedIndex != null ? (
-        <>
-          <RouteWithLabel routeIndex={routeSelectedIndex} />
-          <InteractivePath routeIndex={routeSelectedIndex} />
-        </>
-      ) : null}
-
       {routeIndexHovered != null && !isMobileMode ? (
         <>
           <RouteWithLabel routeIndex={routeIndexHovered} />
@@ -34,9 +27,20 @@ export const RoutesLayerSvgContent = () => {
         </>
       ) : null}
 
+      {routeSelectedIndex != null ? (
+        <>
+          <RouteWithLabel routeIndex={routeSelectedIndex} />
+          <InteractivePath routeIndex={routeSelectedIndex} />
+        </>
+      ) : null}
+
       {routes.map((_, routeIndex) => (
         <RouteMarks key={routeIndex} routeIndex={routeIndex} />
       ))}
+
+      {routeSelectedIndex != null ? (
+        <RouteMarks routeIndex={routeSelectedIndex} />
+      ) : null}
 
       {/* Render all route number badges + grades on top of every path and
           mark, so they're never visually covered by another route's line. */}
@@ -44,12 +48,12 @@ export const RoutesLayerSvgContent = () => {
         <RouteNumber key={routeIndex} routeIndex={routeIndex} />
       ))}
 
-      {routeSelectedIndex != null ? (
-        <RouteNumber routeIndex={routeSelectedIndex} />
-      ) : null}
-
       {routeIndexHovered != null && !isMobileMode ? (
         <RouteNumber routeIndex={routeIndexHovered} />
+      ) : null}
+
+      {routeSelectedIndex != null ? (
+        <RouteNumber routeIndex={routeSelectedIndex} />
       ) : null}
     </>
   );
