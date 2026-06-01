@@ -29,9 +29,9 @@ export const RouteLine = ({
   const getLineDasharray = (previousLineType: LineType) => {
     if (previousLineType === 'dotted') {
       if (isMobileMode) {
-        return '0.6 4';
+        return '0.6 2.5';
       }
-      return '0.3 9';
+      return '0.3 5';
     }
 
     return undefined;

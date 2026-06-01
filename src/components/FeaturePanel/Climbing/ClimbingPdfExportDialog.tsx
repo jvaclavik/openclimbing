@@ -18,6 +18,7 @@ import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl'
 import { t } from '../../../services/intl';
 import { TickStyleBadge } from '../../../services/my-ticks/TickStyleBadge';
 import {
+  findOrConvertRouteGrade,
   getDifficulties,
   getDifficulty,
   getDifficultyColor,
@@ -26,6 +27,7 @@ import { Feature } from '../../../services/types';
 import { ClimbingTick } from '../../../types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useTicksContext } from '../../utils/TicksContext';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { ClimbingBadges } from './ClimbingBadges';
 import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
 import { ConvertedRouteDifficultyBadge } from './ConvertedRouteDifficultyBadge';
@@ -858,8 +860,18 @@ const PhotoExport = ({
   ticks,
   hideRoutesSummary,
 }: PhotoExportProps) => {
+  const { userSettings } = useUserSettingsContext();
+  const gradesVisible = userSettings['climbing.isGradesOnPhotosVisible'];
+  const selectedRouteSystem = userSettings['climbing.gradeSystem'];
   const imageUrl = getCommonsImageUrl(fileForPath(photoPath), 1920);
-  const unit = Math.max(2, dims.w / 200); // base unit for stroke/text sizing
+  // Use a reference dimension that reflects the *printed* width of the
+  // photo, not just dims.w. Portrait photos are capped by `max-height: 22cm`
+  // while landscape photos use a fixed page width (~19cm, see the SVG style
+  // below). Without this, a portrait's badge/line ends up much smaller on
+  // paper than a landscape's for the same nominal unit value. 0.86 ≈
+  // 19cm / 22cm — the ratio at which the height cap starts to bite.
+  const refDim = Math.max(dims.w, dims.h * 0.86);
+  const unit = Math.max(2, refDim / 200); // base unit for stroke/text sizing
   // Route lines: ~20% thinner than the original visual default — they were
   // a bit too heavy on print.
   const strokeWidth = unit * 0.72;
@@ -867,7 +879,7 @@ const PhotoExport = ({
   // Markers from crag modal use coordinates in screen-pixel units. The PDF SVG
   // viewBox is at image-natural-pixel scale, so we need to scale markers up by
   // roughly the ratio of natural width to rendered print width.
-  const markerScale = dims.w / 700;
+  const markerScale = refDim / 700;
 
   const photoRoutes: RouteRow[] = routes
     .map((route, idx) => ({ route, displayNumber: idx + 1 }))
@@ -962,11 +974,18 @@ const PhotoExport = ({
           const shortId = route.feature?.osmMeta
             ? getShortId(route.feature.osmMeta)
             : '';
-          // Multi-route start-point shift: if earlier routes start at the same
-          // point, badges stack vertically; once they would run past the bottom
-          // of the photo, the next badge wraps into a new column to the right.
-          // Returned offsets are in screen px, so we convert to user units via
-          // markerScale.
+          // Match the in-dialog layout: when other routes share this start
+          // point and grades are visible, the grade sits next to each badge
+          // in a tight column; alone, it sits centered below the badge.
+          const hasSiblings = routes.some((other, idx) => {
+            if (idx === routeIndex) return false;
+            const otherFirst = other?.paths?.[photoPath]?.[0];
+            return (
+              otherFirst && otherFirst.x === start.x && otherFirst.y === start.y
+            );
+          });
+          const gradeBeside = hasSiblings && gradesVisible;
+          const columnShiftRaw = gradeBeside ? 70 : 22;
           const rowHeightUserUnits = 18 * markerScale;
           const maxRowsPerColumn = Math.max(
             1,
@@ -981,18 +1000,133 @@ const PhotoExport = ({
             photoPath,
             maxRowsPerColumn,
             rowShift: 18,
-            columnShift: 18,
+            columnShift: columnShiftRaw,
           });
+          // Mirror columns to the left when the start point is close to the
+          // right edge — matches the crag dialog so the grade text never
+          // spills off the photo.
+          const columnShiftPx = columnShiftRaw * markerScale;
+          const startXpx = start.x * dims.w;
+          const mirrorLeft = dims.w - startXpx < columnShiftPx;
+          let cx = startXpx + (mirrorLeft ? -shift.x : shift.x) * markerScale;
+          let cy = start.y * dims.h + shift.y * markerScale;
+
+          // Badge geometry — must mirror RouteNumberBadge layout.
+          const badgeDigits = String(routeIndex + 1).length;
+          const badgeWidth =
+            unit * (badgeDigits > 2 ? 5.5 + badgeDigits * 1.2 : 6);
+          const badgeHeight = unit * 6;
+          const badgeTopY0 = cy + unit * 2;
+          const badgeOutlinePad = unit * 0.3;
+
+          let gradeText: string | null = null;
+          if (gradesVisible) {
+            const difficulties = getDifficulties(route.feature?.tags);
+            if (difficulties && difficulties.length > 0) {
+              const { routeDifficulty } = findOrConvertRouteGrade(
+                difficulties,
+                selectedRouteSystem,
+              );
+              if (routeDifficulty?.grade) {
+                gradeText = routeDifficulty.grade;
+              }
+            }
+          }
+
+          // Grade text geometry (relative to the un-clamped cx/cy).
+          const gradeFontSize = unit * 3.5;
+          const gradeBesideX = mirrorLeft
+            ? cx - badgeWidth / 2 - unit * 1.5
+            : cx + badgeWidth / 2 + unit * 1.5;
+          const gradeBesideY = badgeTopY0 + badgeHeight / 2 + unit * 1.4;
+          const gradeBelowX = cx;
+          const gradeBelowY = badgeTopY0 + badgeHeight + unit * 4.5;
+          const gradeX = gradeBeside ? gradeBesideX : gradeBelowX;
+          const gradeY = gradeBeside ? gradeBesideY : gradeBelowY;
+          const gradeAnchor: 'start' | 'middle' | 'end' = gradeBeside
+            ? mirrorLeft
+              ? 'end'
+              : 'start'
+            : 'middle';
+
+          // Combined badge + grade bounding box, then a single shift if any
+          // edge spills out of the photo — same approach as RouteNumber in
+          // the crag dialog so the badge and its grade stay glued together.
+          let boundLeft = cx - badgeWidth / 2 - badgeOutlinePad;
+          let boundRight = cx + badgeWidth / 2 + badgeOutlinePad;
+          let boundTop = badgeTopY0 - badgeOutlinePad;
+          let boundBottom = badgeTopY0 + badgeHeight + badgeOutlinePad;
+          if (gradeText) {
+            const gradeHalfWidth = unit * 4; // generous half-width estimate
+            const gradeFullWidth = gradeHalfWidth * 2;
+            const gradeLeft =
+              gradeAnchor === 'start'
+                ? gradeX
+                : gradeAnchor === 'end'
+                  ? gradeX - gradeFullWidth
+                  : gradeX - gradeHalfWidth;
+            const gradeRight = gradeLeft + gradeFullWidth;
+            const gradeTop = gradeY - gradeFontSize;
+            const gradeBottom = gradeY + unit * 0.6;
+            boundLeft = Math.min(boundLeft, gradeLeft);
+            boundRight = Math.max(boundRight, gradeRight);
+            boundTop = Math.min(boundTop, gradeTop);
+            boundBottom = Math.max(boundBottom, gradeBottom);
+          }
+          let dx = 0;
+          let dy = 0;
+          if (boundLeft < 0) dx = -boundLeft;
+          else if (boundRight > dims.w) dx = dims.w - boundRight;
+          if (boundTop < 0) dy = -boundTop;
+          else if (boundBottom > dims.h) dy = dims.h - boundBottom;
+          cx += dx;
+          cy += dy;
+          const finalGradeX = gradeX + dx;
+          const finalGradeY = gradeY + dy;
+
           return (
-            <RouteNumberBadge
-              key={`num-${routeIndex}`}
-              routeNumber={routeIndex + 1}
-              cx={start.x * dims.w + shift.x * markerScale}
-              cy={start.y * dims.h + shift.y * markerScale}
-              unit={unit}
-              fill={strokeColor}
-              isTicked={shortId ? isTicked(shortId) : false}
-            />
+            <React.Fragment key={`num-${routeIndex}`}>
+              <RouteNumberBadge
+                routeNumber={routeIndex + 1}
+                cx={cx}
+                cy={cy}
+                unit={unit}
+                fill={strokeColor}
+                isTicked={shortId ? isTicked(shortId) : false}
+              />
+              {gradeText && (
+                <>
+                  {/* Two text nodes — outline first, then fill — mirrors
+                      the RouteDifficulty component used in the crag dialog
+                      and avoids paint-order quirks in some SVG renderers. */}
+                  <text
+                    x={finalGradeX}
+                    y={finalGradeY}
+                    textAnchor={gradeAnchor}
+                    fontFamily="Roboto, sans-serif"
+                    fontWeight={700}
+                    fontSize={gradeFontSize}
+                    stroke="#fff"
+                    strokeWidth={unit * 0.9}
+                    strokeLinejoin="round"
+                    fill="none"
+                  >
+                    {gradeText}
+                  </text>
+                  <text
+                    x={finalGradeX}
+                    y={finalGradeY}
+                    textAnchor={gradeAnchor}
+                    fontFamily="Roboto, sans-serif"
+                    fontWeight={700}
+                    fontSize={gradeFontSize}
+                    fill={strokeColor}
+                  >
+                    {gradeText}
+                  </text>
+                </>
+              )}
+            </React.Fragment>
           );
         })}
       </svg>
@@ -1197,6 +1331,20 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Esc closes the overlay. Bound on keydown so it fires even while focus is
+  // inside the print content (no native dialog backdrop catches it for us).
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
 
   const handlePrint = () => {
     // In-page print: PrintStyles' @media print rules unlock body sizing

@@ -5,7 +5,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { isTypingInFormField } from '../../../../helpers/hooks';
 
 import UndoIcon from '@mui/icons-material/Undo';
 import {
@@ -106,6 +107,21 @@ export const RouteFloatingMenu = () => {
   const isPointMenuLike =
     machine.currentStateName === 'pointMenu' ||
     machine.currentStateName === 'protectionPointMenu';
+
+  // Delete key opens the delete-point confirmation dialog when a point is
+  // selected in edit mode. Matches the trash-can button on the floating
+  // toolbar but lets the user delete without reaching for the mouse.
+  useEffect(() => {
+    if (!isEditMode || !isPointMenuLike) return undefined;
+    const handler = (e: KeyboardEvent) => {
+      if (isTypingInFormField(e.target as Element)) return;
+      if (e.key !== 'Delete') return;
+      e.preventDefault();
+      setIsDeletePointDialogVisible(true);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isEditMode, isPointMenuLike]);
 
   const onMouseEnter = () => {
     setRouteIndexHovered(routeSelectedIndex);
