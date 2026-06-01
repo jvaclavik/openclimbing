@@ -14,7 +14,6 @@ export const TransformWrapper = ({ children }) => {
   const {
     setArePointerEventsDisabled,
     setPhotoZoom,
-    isEditMode,
     isPanningDisabled,
     isAddingPointBlockedRef,
     isZoomingRef,
@@ -81,8 +80,11 @@ export const TransformWrapper = ({ children }) => {
 
   return (
     <Wrapper
+      // Disabled everywhere — in edit mode the double-tap would conflict
+      // with point-add gestures, and in view mode it triggers an unwanted
+      // zoom on the second tap of any double-tap-to-select recovery.
       doubleClick={{
-        disabled: isEditMode,
+        disabled: true,
         mode: 'toggle',
         step: 1,
         animationTime: 150,
