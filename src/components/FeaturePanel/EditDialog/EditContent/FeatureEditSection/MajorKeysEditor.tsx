@@ -4,6 +4,7 @@ import { t } from '../../../../../services/intl';
 import {
   getNextWikimediaCommonsIndex,
   getWikimediaCommonsKey,
+  isWikimediaCommonsFileSlotKey,
 } from '../../../Climbing/utils/photo';
 import { useEditDialogContext } from '../../../helpers/EditDialogContext';
 import {
@@ -90,6 +91,13 @@ export const MajorKeysEditor: React.FC = () => {
   useEffect(() => {
     if (focusTag === 'name' && !activeMajorKeys.includes('name')) {
       setActiveMajorKeys((arr) => [...arr, 'name']);
+    }
+    if (
+      typeof focusTag === 'string' &&
+      isWikimediaCommonsFileSlotKey(focusTag) &&
+      !activeMajorKeys.includes(focusTag)
+    ) {
+      setActiveMajorKeys((arr) => [...arr, focusTag]);
     }
   }, [activeMajorKeys, focusTag]);
 

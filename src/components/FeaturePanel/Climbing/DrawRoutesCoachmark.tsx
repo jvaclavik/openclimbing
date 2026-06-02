@@ -1,6 +1,7 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Box, IconButton, Typography } from '@mui/material';
 import { t } from '../../../services/intl';
 import { useMobileMode } from '../../helpers';
 import { PopperWithArrow } from '../../utils/PopperWithArrow';
@@ -77,21 +78,21 @@ export const DrawRoutesCoachmark = ({
       placement="top-end"
       offset={[0, 14]}
       title={<span>{t('climbingpanel.coachmark_draw_routes_title')}</span>}
+      addition={
+        <IconButton
+          size="small"
+          aria-label={t('climbingpanel.coachmark_dismiss')}
+          onClick={handleDismiss}
+          sx={{ mr: 0.5 }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      }
     >
       <Box paddingX={2} paddingY={1} maxWidth={300}>
         <Typography variant="body2" color="text.secondary" mb={2}>
           {t('climbingpanel.coachmark_draw_routes_body')}
         </Typography>
-        <Stack direction="row" justifyContent="flex-end">
-          <Button
-            size="small"
-            variant="contained"
-            color="secondary"
-            onClick={handleDismiss}
-          >
-            {t('climbingpanel.coachmark_got_it')}
-          </Button>
-        </Stack>
       </Box>
     </PopperWithArrow>
   );
