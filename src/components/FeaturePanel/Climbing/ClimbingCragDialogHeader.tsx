@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -14,11 +15,16 @@ import { useState } from 'react';
 import { getLabel } from '../../../helpers/featureLabel';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
+import { useMobileMode } from '../../helpers';
 import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { useMobileMode } from '../../helpers';
+import { useEditDialogContext } from '../helpers/EditDialogContext';
 import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 import { useClimbingContext } from './contexts/ClimbingContext';
+import {
+  getNextWikimediaCommonsIndex,
+  getWikimediaCommonsKey,
+} from './utils/photo';
 import { usePhotoChange } from './utils/usePhotoChange';
 
 const Title = styled.div`
@@ -73,6 +79,31 @@ const PhotoThumbnailImage = styled.img`
   height: 100%;
   width: auto;
   display: block;
+`;
+
+const AddPhotoPlaceholderButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 40px;
+  width: 56px;
+  padding: 0;
+  margin-left: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    color 0.12s ease,
+    background 0.12s ease;
+
+  &:hover {
+    color: ${({ theme }) => theme.palette.primary.main};
+    background: ${({ theme }) => theme.palette.action.hover};
+  }
 `;
 
 const PhotoIndexBadge = styled.span`
@@ -172,12 +203,21 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
     useState<boolean>(false);
   const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
   const [clickCounter, setClickCounter] = useState<number>(0);
-  const { photoPath, photoPaths, setShowDebugMenu } = useClimbingContext();
+  const { photoPath, photoPaths, setShowDebugMenu, isEditMode } =
+    useClimbingContext();
+  const { openWithTag } = useEditDialogContext();
 
   const { feature } = useFeatureContext();
   const onPhotoChange = usePhotoChange();
 
   const label = getLabel(feature);
+
+  const handleAddPhoto = () => {
+    const nextKey = getWikimediaCommonsKey(
+      getNextWikimediaCommonsIndex(feature.tags),
+    );
+    openWithTag(nextKey);
+  };
 
   const handleOnClick = () => {
     setClickCounter(clickCounter + 1);
@@ -200,7 +240,8 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
           >
             {label}
           </Typography>
-          {photoPaths?.length > 1 && (
+          {(photoPaths?.length > 1 ||
+            (isEditMode && photoPaths?.length >= 1)) && (
             <PhotosContainer>
               <PhotoGallery>
                 {photoPaths.map((photo, index) => (
@@ -212,6 +253,17 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
                     onClick={() => onPhotoChange(photo)}
                   />
                 ))}
+                {isEditMode && (
+                  <Tooltip title={t('climbingpanel.add_photo_tooltip')}>
+                    <AddPhotoPlaceholderButton
+                      type="button"
+                      onClick={handleAddPhoto}
+                      aria-label={t('climbingpanel.add_photo_tooltip')}
+                    >
+                      <AddPhotoAlternateIcon fontSize="small" />
+                    </AddPhotoPlaceholderButton>
+                  </Tooltip>
+                )}
               </PhotoGallery>
             </PhotosContainer>
           )}

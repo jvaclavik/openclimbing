@@ -506,6 +506,11 @@ export default {
   'routedistribution.grade_system_description': 'Distribution of routes by difficulty is in __gradeSystemName__ grade system',
   'climbingpanel.draw_route': 'Draw route',
   'climbingpanel.draw_routes': 'Draw routes',
+  'climbingpanel.coachmark_draw_routes_title': 'You can draw climbing routes too',
+  'climbingpanel.coachmark_draw_routes_body':
+    'Know this sector? Help fellow climbers — trace the route lines right onto the photo, or upload a new one.',
+  'climbingpanel.coachmark_dismiss': 'Dismiss',
+  'climbingpanel.add_photo_tooltip': 'Add another photo',
 
   'climbingpanel.show_route_detail': 'Show route detail',
   'climbingpanel.add_tick': 'Add tick',

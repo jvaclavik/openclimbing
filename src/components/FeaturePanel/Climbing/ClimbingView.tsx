@@ -19,8 +19,12 @@ import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { ClimbingViewContent } from './ClimbingViewContent';
-import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
+import { CLIMBING_ROUTE_ROW_HEIGHT, getSplitPaneDefaultSize } from './config';
 import { useClimbingContext } from './contexts/ClimbingContext';
+import {
+  DrawRoutesCoachmark,
+  markDrawRoutesCoachmarkSeen,
+} from './DrawRoutesCoachmark';
 import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
 import { RoutesEditor } from './Editor/RoutesEditor';
 import { TransformWrapper } from './TransformWrapper';
@@ -313,6 +317,7 @@ export const ClimbingView = () => {
   const [isSplitViewDragging, setIsSplitViewDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(null);
+  const [editFabAnchor, setEditFabAnchor] = useState<HTMLElement | null>(null);
   const cragViewLayout = useGetCragViewLayout();
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const splitPaneSize = userSettings['climbing.splitPaneSize'];
@@ -500,11 +505,14 @@ export const ClimbingView = () => {
   };
 
   const handleEdit = () => {
+    markDrawRoutesCoachmarkSeen();
     setIsEditMode(true);
     setTimeout(() => {
       loadPhotoRelatedData();
     });
   };
+
+  const showDrawRoutesCoachmark = !isEditMode && isFirstPhotoLoaded;
 
   return (
     <Container>
@@ -533,7 +541,7 @@ export const ClimbingView = () => {
           minSize={150}
           // Allow the photo pane to grow all the way (pane2 down to 0 px).
           // When pane2 collapses, a restore-arrow FAB takes the divider's job.
-          size={splitPaneSize ?? SPLIT_PANE_DEFAULT_SIZE}
+          size={splitPaneSize ?? getSplitPaneDefaultSize(cragViewLayout)}
           onDragStarted={onDragStarted}
           onDragFinished={onDragFinished}
           // pane1 needs an explicit max equal to the container size; without
@@ -567,10 +575,19 @@ export const ClimbingView = () => {
                     enterDelay={1500}
                     arrow
                   >
-                    <Fab size="small" color="secondary" onClick={handleEdit}>
+                    <Fab
+                      ref={setEditFabAnchor}
+                      size="small"
+                      color="secondary"
+                      onClick={handleEdit}
+                    >
                       <EditIcon />
                     </Fab>
                   </Tooltip>
+                  <DrawRoutesCoachmark
+                    anchorEl={editFabAnchor}
+                    isVisible={showDrawRoutesCoachmark}
+                  />
                 </FabContainer>
               )}
 
