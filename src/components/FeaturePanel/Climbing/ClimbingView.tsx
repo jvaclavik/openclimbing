@@ -21,6 +21,10 @@ import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsCon
 import { ClimbingViewContent } from './ClimbingViewContent';
 import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
 import { useClimbingContext } from './contexts/ClimbingContext';
+import {
+  DrawRoutesCoachmark,
+  markDrawRoutesCoachmarkSeen,
+} from './DrawRoutesCoachmark';
 import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
 import { RoutesEditor } from './Editor/RoutesEditor';
 import { TransformWrapper } from './TransformWrapper';
@@ -313,6 +317,7 @@ export const ClimbingView = () => {
   const [isSplitViewDragging, setIsSplitViewDragging] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(null);
+  const [editFabAnchor, setEditFabAnchor] = useState<HTMLElement | null>(null);
   const cragViewLayout = useGetCragViewLayout();
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const splitPaneSize = userSettings['climbing.splitPaneSize'];
@@ -500,11 +505,14 @@ export const ClimbingView = () => {
   };
 
   const handleEdit = () => {
+    markDrawRoutesCoachmarkSeen();
     setIsEditMode(true);
     setTimeout(() => {
       loadPhotoRelatedData();
     });
   };
+
+  const showDrawRoutesCoachmark = !isEditMode && isFirstPhotoLoaded;
 
   return (
     <Container>
@@ -567,10 +575,19 @@ export const ClimbingView = () => {
                     enterDelay={1500}
                     arrow
                   >
-                    <Fab size="small" color="secondary" onClick={handleEdit}>
+                    <Fab
+                      ref={setEditFabAnchor}
+                      size="small"
+                      color="secondary"
+                      onClick={handleEdit}
+                    >
                       <EditIcon />
                     </Fab>
                   </Tooltip>
+                  <DrawRoutesCoachmark
+                    anchorEl={editFabAnchor}
+                    isVisible={showDrawRoutesCoachmark}
+                  />
                 </FabContainer>
               )}
 

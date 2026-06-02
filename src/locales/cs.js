@@ -454,6 +454,10 @@ export default {
   'routedistribution.grade_system_description': 'Graf rozdělení cest podle obtížnosti je ve stupnici __gradeSystemName__',
   'climbingpanel.draw_route': 'Zakreslit cestu',
   'climbingpanel.draw_routes': 'Zakreslit cesty',
+  'climbingpanel.coachmark_draw_routes_title': 'Zakreslit cesty může každý',
+  'climbingpanel.coachmark_draw_routes_body': 'Znáš tenhle sektor? Pomoz ostatním lezcům a vyznač linie cest přímo do fotky.',
+  'climbingpanel.coachmark_got_it': 'Rozumím',
+  'climbingpanel.coachmark_dismiss': 'Zavřít',
 
   'climbingpanel.show_route_detail': 'Zobrazit detail cesty',
   'climbingpanel.add_tick': 'Přidat přelez',
