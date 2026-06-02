@@ -37,4 +37,6 @@ export const useConfig = () => {
 
 export const CLIMBING_ROUTE_ROW_HEIGHT = 50;
 export const DIALOG_TOP_BAR_HEIGHT = 56;
-export const SPLIT_PANE_DEFAULT_SIZE = '60vh';
+
+export const getSplitPaneDefaultSize = (layout: 'horizontal' | 'vertical') =>
+  layout === 'vertical' ? '70vw' : '70vh';

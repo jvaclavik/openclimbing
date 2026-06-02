@@ -19,7 +19,7 @@ import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { ClimbingViewContent } from './ClimbingViewContent';
-import { CLIMBING_ROUTE_ROW_HEIGHT, SPLIT_PANE_DEFAULT_SIZE } from './config';
+import { CLIMBING_ROUTE_ROW_HEIGHT, getSplitPaneDefaultSize } from './config';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import {
   DrawRoutesCoachmark,
@@ -541,7 +541,7 @@ export const ClimbingView = () => {
           minSize={150}
           // Allow the photo pane to grow all the way (pane2 down to 0 px).
           // When pane2 collapses, a restore-arrow FAB takes the divider's job.
-          size={splitPaneSize ?? SPLIT_PANE_DEFAULT_SIZE}
+          size={splitPaneSize ?? getSplitPaneDefaultSize(cragViewLayout)}
           onDragStarted={onDragStarted}
           onDragFinished={onDragFinished}
           // pane1 needs an explicit max equal to the container size; without

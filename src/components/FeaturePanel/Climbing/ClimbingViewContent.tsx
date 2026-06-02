@@ -3,7 +3,7 @@ import { Button, ButtonGroup, Typography } from '@mui/material';
 import {
   CLIMBING_ROUTE_ROW_HEIGHT,
   DIALOG_TOP_BAR_HEIGHT,
-  SPLIT_PANE_DEFAULT_SIZE,
+  getSplitPaneDefaultSize,
 } from './config';
 import { ContentContainer } from './ContentContainer';
 import { useClimbingContext } from './contexts/ClimbingContext';
@@ -34,7 +34,7 @@ const ContentBelowRouteList = styled.div<{
       ? `
   calc(
     100vh -
-      ${$splitPaneSize ? `${$splitPaneSize}px` : SPLIT_PANE_DEFAULT_SIZE} -
+      ${$splitPaneSize ? `${$splitPaneSize}px` : getSplitPaneDefaultSize($cragViewLayout)} -
       ${DIALOG_TOP_BAR_HEIGHT + CLIMBING_ROUTE_ROW_HEIGHT + 40}px
   );`
       : `calc(100vh - ${DIALOG_TOP_BAR_HEIGHT + CLIMBING_ROUTE_ROW_HEIGHT + 40}px);`};
