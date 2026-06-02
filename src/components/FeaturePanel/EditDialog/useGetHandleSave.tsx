@@ -1,50 +1,18 @@
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { useEditDialogFeature } from './utils';
 import { useEditContext } from './context/EditContext';
-import { createNoteText } from './createNoteText';
 import { t } from '../../../services/intl';
 import { saveChanges } from '../../../services/osm/auth/osmApiAuth';
-import { insertOsmNote } from '../../../services/osm/insertOsmNote';
 import { useSnackbar } from '../../utils/SnackbarContext';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
-import { getFullOsmappLink } from '../../../services/helpers';
-
-const useGetSaveNote = () => {
-  const { showToast } = useSnackbar();
-  const { feature, isUndelete } = useEditDialogFeature();
-  const { location, comment, items } = useEditContext();
-
-  return async () => {
-    const texts = [];
-    if (comment) {
-      texts.push(`${comment}`);
-    }
-    texts.push(
-      ...items
-        .filter(({ modified }) => modified)
-        .map((item) => createNoteText(item, location, comment, isUndelete)),
-    );
-
-    texts.push(`\nSubmitted from ${getFullOsmappLink(feature)}`);
-
-    const noteText = texts.join('\n\n--------\n');
-    if (!noteText.length) {
-      showToast(t('editdialog.changes_needed'), 'warning');
-      return;
-    }
-
-    return await insertOsmNote(feature.center, noteText);
-  };
-};
 
 export const useGetHandleSave = () => {
   const { showToast } = useSnackbar();
-  const { loggedIn, handleLogout } = useOsmAuthContext();
+  const { loggedIn, handleLoginAsync, handleLogout } = useOsmAuthContext();
   const { feature } = useEditDialogFeature();
   const { setRedirectOnClose } = useEditDialogContext();
   const { setSuccessInfo, setIsSaving, comment, items, setValidate } =
     useEditContext();
-  const saveNote = useGetSaveNote();
 
   return async () => {
     try {
@@ -58,12 +26,19 @@ export const useGetHandleSave = () => {
         return;
       }
 
+      if (!loggedIn) {
+        try {
+          await handleLoginAsync();
+        } catch {
+          showToast(t('editdialog.login_required'), 'warning');
+          return;
+        }
+      }
+
       setIsSaving(true);
 
       const changes = items.filter((item) => item.modified);
-      const successInfo = loggedIn
-        ? await saveChanges(feature, comment, changes)
-        : await saveNote();
+      const successInfo = await saveChanges(feature, comment, changes);
 
       setSuccessInfo(successInfo);
       setRedirectOnClose(successInfo.redirect);

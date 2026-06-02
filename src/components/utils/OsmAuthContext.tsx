@@ -13,6 +13,7 @@ type OsmAuthType = {
   userImage: string;
   loading: boolean;
   handleLogin: () => void;
+  handleLoginAsync: () => Promise<OsmUser>;
   handleLogout: () => void;
 };
 
@@ -35,9 +36,19 @@ export const OsmAuthProvider = ({ children, cookies }) => {
     setLoading(false);
   };
 
-  const handleLogin = () => {
+  const handleLoginAsync = async () => {
     setLoading(true);
-    loginAndfetchOsmUser().then(successfulLogin);
+    try {
+      const user = await loginAndfetchOsmUser();
+      successfulLogin(user);
+      return user;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+  const handleLogin = () => {
+    handleLoginAsync().catch(() => {});
   };
   const handleLogout = () => osmLogout().then(() => setOsmUser(undefined));
 
@@ -47,6 +58,7 @@ export const OsmAuthProvider = ({ children, cookies }) => {
     userImage: osmUser?.imageUrl || '',
     loading,
     handleLogin,
+    handleLoginAsync,
     handleLogout,
   };
 

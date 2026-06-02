@@ -239,7 +239,6 @@ export default {
   'featurepanel.all_tags_heading': 'Tagy',
   'featurepanel.details_heading': 'Detaily',
   'featurepanel.edit_button_title': 'Upravit v databázi OpenStreetMap',
-  'featurepanel.note_button': 'Navrhnout úpravu',
   'featurepanel.edit_button': 'Upravit místo',
   'featurepanel.add_place_button': 'Přidat místo',
   'featurepanel.undelete_button': 'Znovu přidat',
@@ -291,18 +290,18 @@ export default {
   'editdialog.undelete_heading': 'Znovu přidat do OpenStreetMap',
   'editdialog.edit_heading': 'Upravit',
   'editdialog.items': 'položky',
-  'editdialog.suggest_heading': 'Navrhnout úpravu',
   'editdialog.feature_type_select': 'Zvolte typ objektu',
   'editdialog.options_heading': 'Možnosti',
   'editdialog.cancel_button': 'Zrušit',
   'editdialog.save_button_edit': 'Uložit do OSM',
   'editdialog.save_button_delete': 'Smazat',
-  'editdialog.save_button_note': 'Odeslat návrh',
   'editdialog.changes_needed': 'Proveďte, prosím, požadované změny.',
   'editdialog.osm_session_expired': 'Vaše přihlášení do OpenStreetMap vypršelo. Prosím, přihlašte se znovu.',
   'editdialog.loggedInMessage': 'Jste přihlášeni jako <b>__osmUser__</b>, změny se ihned projeví v mapě.',
   'editdialog.logout': 'odhlásit',
-  'editdialog.anonymousMessage': 'Vkládáte <b>anonymní</b> poznámku do mapy. Pokud se přihlásíte do OpenStreetMap, změny se ihned projeví v mapě.',
+  'editdialog.login_required_message':
+    'Pro uložení změn se musíš přihlásit do OpenStreetMap. Stačí jednou — pak budou tvoje úpravy chodit rovnou do mapy.',
+  'editdialog.login_required': 'Pro uložení změn je nutné přihlášení.',
   'editdialog.add_major_tag': 'Přidat',
   'editdialog.upload_photo': 'Nahrát fotku',
   'editdialog.upload_photo_tooltip':
@@ -319,9 +318,6 @@ export default {
         vkládejte pouze informace z vlastních nebo ověřených zdrojů. Je zakázano
         kopírovat data krytá autorským zákonem (např. Google Maps).
         <a href="https://wiki.openstreetmap.org/wiki/Cs:Jak_mapujeme">Více informací</a>`,
-  'editdialog.info_note': `Váš návrh budou zpracovávat dobrovolníci OpenStreetMap, zde pro ně
-        můžete přidat doplňující poznámku. Vhodné je podložit váš příspěvek odkazem na zdroj
-        informace (web, foto atd.).`,
   'editdialog.climbing_editor': 'Lezení',
   'editdialog.tags_editor': 'Všechny vlastnosti – tagy',
   'editdialog.add_tag': 'Přidat tag',
