@@ -4,10 +4,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddLocationIcon from '@mui/icons-material/AddLocation';
 import React from 'react';
 import { t } from '../../services/intl';
-import { useOsmAuthContext } from '../utils/OsmAuthContext';
 import { useEditDialogContext } from './helpers/EditDialogContext';
 import { useEditDialogFeature } from './EditDialog/utils';
-import CommentIcon from '@mui/icons-material/Comment';
 
 // When this button lives inside a narrow @container (e.g. shrunk climbing
 // side panel), collapse it to an icon-only button.
@@ -27,20 +25,14 @@ const ButtonText = styled.span`
   }
 `;
 
-const getLabel = (
-  loggedIn: boolean,
-  isAddPlace: boolean,
-  isUndelete: boolean,
-) => {
+const getLabel = (isAddPlace: boolean, isUndelete: boolean) => {
   if (isAddPlace) return t('featurepanel.add_place_button');
   if (isUndelete) return t('featurepanel.undelete_button');
-  if (loggedIn) return t('featurepanel.edit_button');
-  return t('featurepanel.note_button');
+  return t('featurepanel.edit_button');
 };
 
 export const EditButton = () => {
   const { isAddPlace, isUndelete } = useEditDialogFeature();
-  const { loggedIn } = useOsmAuthContext();
   const { open } = useEditDialogContext();
 
   return (
@@ -48,19 +40,13 @@ export const EditButton = () => {
       <ResponsiveButton
         size="large"
         startIcon={
-          isAddPlace || isUndelete ? (
-            <AddLocationIcon />
-          ) : loggedIn ? (
-            <EditIcon />
-          ) : (
-            <CommentIcon />
-          )
+          isAddPlace || isUndelete ? <AddLocationIcon /> : <EditIcon />
         }
         variant="outlined"
         color="primary"
         onClick={open}
       >
-        <ButtonText>{getLabel(loggedIn, isAddPlace, isUndelete)}</ButtonText>
+        <ButtonText>{getLabel(isAddPlace, isUndelete)}</ButtonText>
       </ResponsiveButton>
     </Box>
   );

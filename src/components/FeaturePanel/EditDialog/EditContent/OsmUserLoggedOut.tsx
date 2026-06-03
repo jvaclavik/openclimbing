@@ -26,13 +26,13 @@ export const OsmUserLoggedOut = () => {
   return (
     <Box sx={{ marginBottom: 2 }}>
       <Alert
-        severity="warning"
+        severity="info"
         icon={<LightbulbIcon />}
         action={
           <Button onClick={handleLogin}>{t('featurepanel.login')}</Button>
         }
       >
-        <Translation id="editdialog.anonymousMessage" />
+        <Translation id="editdialog.login_required_message" />
       </Alert>
     </Box>
   );

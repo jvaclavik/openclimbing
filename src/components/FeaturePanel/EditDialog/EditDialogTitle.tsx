@@ -1,24 +1,16 @@
 import { DialogTitle, IconButton, Stack } from '@mui/material';
 import React from 'react';
 import { useEditDialogFeature } from './utils';
-import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { t } from '../../../services/intl';
-import CommentIcon from '@mui/icons-material/Comment';
 import EditIcon from '@mui/icons-material/Edit';
 import { useEditContext } from './context/EditContext';
 import CloseIcon from '@mui/icons-material/Close';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
 
 const useGetDialogTitle = (isAddPlace, isUndelete) => {
-  const { loggedIn } = useOsmAuthContext();
   const { items } = useEditContext();
   if (isAddPlace) return t('editdialog.add_heading');
   if (isUndelete) return t('editdialog.undelete_heading');
-  if (!loggedIn) {
-    if (items.length > 1)
-      return `${t('editdialog.suggest_heading')}: ${items.length} ${t('editdialog.items')}`;
-    return `${t('editdialog.suggest_heading')}`;
-  }
 
   if (items.length > 1)
     return `${t('editdialog.edit_heading')}: ${items.length} ${t('editdialog.items')}`;
@@ -26,7 +18,6 @@ const useGetDialogTitle = (isAddPlace, isUndelete) => {
 };
 
 export const EditDialogTitle = () => {
-  const { loggedIn } = useOsmAuthContext();
   const { isAddPlace, isUndelete } = useEditDialogFeature();
   const { close } = useEditDialogContext();
 
@@ -41,7 +32,7 @@ export const EditDialogTitle = () => {
         justifyContent="space-between"
       >
         <Stack direction="row" gap={2} alignItems="center">
-          {loggedIn ? <EditIcon /> : <CommentIcon />}
+          <EditIcon />
           {dialogTitle}
         </Stack>
 
