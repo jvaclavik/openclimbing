@@ -1,5 +1,5 @@
-import { Chip, CircularProgress, Stack } from '@mui/material';
-import { forwardRef, MouseEventHandler, ReactNode } from 'react';
+import { Button, CircularProgress, Stack } from '@mui/material';
+import { forwardRef, MouseEventHandler } from 'react';
 
 type Props = {
   icon: React.FC<{ fontSize: 'small' }>;
@@ -11,29 +11,30 @@ type Props = {
 
 export const QuickActionButton = forwardRef<HTMLButtonElement, Props>(
   ({ icon: Icon, label, suffix, onClick, loading }, ref) => (
-    <Chip
+    <Button
       ref={ref}
-      component="button"
-      label={
-        suffix ? (
-          <Stack direction="row" alignItems="center" gap={0.5}>
-            <span>{label}</span>
-            {suffix}
-          </Stack>
-        ) : (
-          label
-        )
-      }
-      icon={
+      onClick={onClick}
+      color="secondary"
+      variant="contained"
+      disabled={loading}
+      size="small"
+      startIcon={
         loading ? (
           <CircularProgress size={14} color="inherit" />
         ) : (
           <Icon fontSize="small" />
         )
       }
-      onClick={onClick}
-      disabled={loading}
-    />
+    >
+      {suffix ? (
+        <Stack direction="row" alignItems="center" gap={0.5}>
+          <span>{label}</span>
+          {suffix}
+        </Stack>
+      ) : (
+        label
+      )}
+    </Button>
   ),
 );
 QuickActionButton.displayName = 'QuickActionButton';

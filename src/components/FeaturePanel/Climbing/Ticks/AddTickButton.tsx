@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Button } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import { useSnackbar } from '../../../utils/SnackbarContext';
-import { useOsmAuthContext } from '../../../utils/OsmAuthContext';
-import { useTicksContext } from '../../../utils/TicksContext';
-import { useFeatureContext } from '../../../utils/FeatureContext';
+import { Button } from '@mui/material';
+import { useState } from 'react';
 import { getShortId } from '../../../../services/helpers';
+import { useFeatureContext } from '../../../utils/FeatureContext';
+import { useOsmAuthContext } from '../../../utils/OsmAuthContext';
+import { useSnackbar } from '../../../utils/SnackbarContext';
+import { useTicksContext } from '../../../utils/TicksContext';
 import { t } from '../../../../services/intl';
 
 export const AddTickButton = () => {
@@ -38,7 +38,7 @@ export const AddTickButton = () => {
         onClick={onClick}
         color="secondary"
         size="small"
-        variant="text"
+        variant="contained"
         endIcon={<CheckIcon color={ticked ? 'success' : undefined} />}
         loading={loading}
       >

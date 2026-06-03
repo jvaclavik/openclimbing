@@ -1,14 +1,14 @@
-import { useTheme } from '@mui/material';
 import { useClimbingContext } from './contexts/ClimbingContext';
+import { useExtraPalette } from '../../../helpers/extraPalette';
 
 export const useConfig = () => {
-  const theme: any = useTheme();
   const { photoZoom, imageSize } = useClimbingContext();
+  const { climbingPath } = useExtraPalette();
 
-  const activeColor = theme.palette.climbing.active;
-  const inactiveColor = theme.palette.climbing.inactive;
-  const borderColor = theme.palette.climbing.border;
-  const selectedColor = theme.palette.climbing.selected;
+  const activeColor = climbingPath.active;
+  const inactiveColor = climbingPath.inactive;
+  const borderColor = climbingPath.border;
+  const selectedColor = climbingPath.selected;
 
   const imageScale = Math.max(
     0.5,

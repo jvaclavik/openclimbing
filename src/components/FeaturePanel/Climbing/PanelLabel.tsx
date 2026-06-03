@@ -1,7 +1,7 @@
-import React from 'react';
 import styled from '@emotion/styled';
-import { ContentContainer } from './ContentContainer';
 import { Box } from '@mui/material';
+import React from 'react';
+import { ContentContainer } from './ContentContainer';
 
 type PanelLabelProps = {
   children: React.ReactNode;
@@ -22,9 +22,9 @@ export const Title = styled.h2`
   margin: 0;
   align-self: center;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.palette.secondary.main};
+  color: ${({ theme }) => theme.palette.secondary.contrastText};
 `;
 export const Addition = styled.div`
   color: ${({ theme }) => theme.palette.secondary.main};

@@ -4,6 +4,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { getShortId } from '../../../services/helpers';
 import { useTicksContext } from '../../utils/TicksContext';
+import { extraPalette } from '../../../helpers/extraPalette';
 
 const Text = styled.div``;
 const Container = styled.div`
@@ -12,7 +13,8 @@ const Container = styled.div`
   border-radius: 22px;
   align-items: center;
   padding: 2px 8px;
-  background-color: ${({ theme }) => theme.palette.climbing.tick};
+  background-color: ${({ theme }) =>
+    extraPalette[theme.palette.mode].tickBadge};
   font-size: 13px;
   font-weight: 900;
   gap: 4px;

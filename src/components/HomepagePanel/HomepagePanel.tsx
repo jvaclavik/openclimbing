@@ -4,6 +4,7 @@ import { useMobileMode } from '../helpers';
 import { Homepage } from './Homepage';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import { useRouter } from 'next/router';
+import { PROJECT_ID } from '../../services/project';
 
 /** shows conditionally on first visit
  */
@@ -20,7 +21,7 @@ export const HomepagePanel = () => {
     if (feature || notIndex) hideHomepage();
   }, [feature, notIndex, hideHomepage]);
 
-  if (!homepageShown) {
+  if (!homepageShown || PROJECT_ID !== 'openclimbing') {
     return null;
   }
 

@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 
 import { Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { extraPalette } from '../../../helpers/extraPalette';
 
 const Container = styled.div`
   position: relative;
@@ -22,9 +23,11 @@ const Circle = styled.div<{
   line-height: 20px;
   border-radius: 50%;
   background: ${({ theme, $hasCircle }) =>
-    $hasCircle ? theme.palette.climbing.primary : undefined};
+    $hasCircle
+      ? extraPalette[theme.palette.mode].routeNumber.background
+      : undefined};
   color: ${({ theme, $hasCircle }) =>
-    $hasCircle ? theme.palette.climbing.secondary : '#999'};
+    $hasCircle ? extraPalette[theme.palette.mode].routeNumber.text : '#999'};
   display: flex;
   justify-content: center;
   align-items: center;

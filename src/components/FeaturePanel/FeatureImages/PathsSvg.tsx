@@ -17,6 +17,7 @@ import {
 import { Size } from './types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { getReactKey } from '../../../services/helpers';
+import { extraPalette } from '../../../helpers/extraPalette';
 
 const StyledSvg = styled.svg`
   position: absolute;
@@ -66,7 +67,7 @@ const Path = ({
 }: PathProps) => {
   const theme = useTheme();
   const color = isHighlighted
-    ? theme.palette.climbing.selected
+    ? extraPalette[theme.palette.mode].climbingPath.selected
     : getDifficultyColor(getDifficulty(feature.tags), theme.palette.mode);
   const contrastColor = theme.palette.getContrastText(color);
   const d = path

@@ -1,4 +1,10 @@
-import React from 'react';
+import styled from '@emotion/styled';
+import {
+  documentGetInitialProps,
+  DocumentHeadTags,
+  DocumentHeadTagsProps,
+} from '@mui/material-nextjs/v13-pagesRouter';
+import type { DocumentContext } from 'next/dist/shared/lib/utils';
 import Document, {
   DocumentInitialProps,
   DocumentProps,
@@ -7,20 +13,13 @@ import Document, {
   Main,
   NextScript,
 } from 'next/document';
-import type { DocumentContext } from 'next/dist/shared/lib/utils';
-import {
-  documentGetInitialProps,
-  DocumentHeadTags,
-  DocumentHeadTagsProps,
-} from '@mui/material-nextjs/v13-pagesRouter';
-import { getServerIntl } from '../src/services/intlServer';
-import { InjectIntl, setIntl } from '../src/services/intl';
-import { FaviconsOsmapp } from '../src/helpers/FaviconsOsmapp';
-import { PROJECT_ID, setProjectForSSR } from '../src/services/project';
 import { FaviconsOpenClimbing } from '../src/helpers/FaviconsOpenClimbing';
-import styled from '@emotion/styled';
+import { FaviconsOsmapp } from '../src/helpers/FaviconsOsmapp';
 import { getUrlForLangLinks, LangLinks } from '../src/helpers/LangLinks';
 import { OpenSearch } from '../src/helpers/OpenSearch';
+import { InjectIntl, setIntl } from '../src/services/intl';
+import { getServerIntl } from '../src/services/intlServer';
+import { PROJECT_ID, setProjectForSSR } from '../src/services/project';
 
 const Body = styled.body`
   @media (prefers-color-scheme: light) {
@@ -49,17 +48,16 @@ export default class MyDocument extends Document<Props> {
         <Head>
           <meta charSet="utf-8" />
           <DocumentHeadTags emotionStyleTags={emotionStyleTags} />
-          {isOpenClimbing ? (
-            <link
-              href="https://fonts.googleapis.com/css2?family=Piazzolla:ital,opsz,wght@0,8..30,900;1,8..30,900&family=Roboto:wght@300;400;500;700;900&display=swap"
-              rel="stylesheet"
-            />
-          ) : (
-            <link
-              href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
-              rel="stylesheet"
-            />
-          )}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin=""
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=Piazzolla:ital,opsz,wght@0,8..30,900;1,8..30,900&display=swap"
+            rel="stylesheet"
+          />
 
           <link rel="preconnect" href="https://api.maptiler.com" />
           <link rel="preconnect" href="https://a.mapillary.com" />

@@ -1,11 +1,11 @@
-import React from 'react';
-import { Global, css, Theme } from '@emotion/react';
+import { css, Global, Theme } from '@emotion/react';
 import {
   isDesktopResolution,
   isMobileMode,
   isTabletResolution,
 } from '../components/helpers';
 import { convertHexToRgba } from '../components/utils/colorUtils';
+import { extraPalette } from './extraPalette';
 
 // This function doesn't contain any logic - so no extraction needed.
 // eslint-disable-next-line max-lines-per-function
@@ -17,7 +17,7 @@ const globalStyle = (theme: Theme) => css`
     padding: 0;
     height: 100%;
     border: 0;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Outfit', sans-serif;
     background-color: ${theme.palette.background.default};
 
     // disable pulling the page around on mobile (pull-to-refresh),
@@ -50,7 +50,7 @@ const globalStyle = (theme: Theme) => css`
 
   a,
   .linkLikeButton {
-    color: ${theme.palette.tertiary
+    color: ${theme.palette.primary
       .main}; // CAREFUL: Emotion doesn't apply Dark style in dev mode
     text-decoration: none;
     border: 0;
@@ -113,7 +113,7 @@ const globalStyle = (theme: Theme) => css`
     overflow-y: auto; // especially for indoor selector at the Louvre #18/48.8610/2.3389 :)
 
     .maplibregl-ctrl-icon {
-      filter: ${theme.palette.invertFilter};
+      filter: ${extraPalette[theme.palette.mode].invertFilter};
     }
 
     @media ${isMobileMode} {

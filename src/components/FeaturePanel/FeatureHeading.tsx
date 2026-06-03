@@ -1,12 +1,12 @@
 import React from 'react';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useMediaQuery } from '@mui/material';
-import { PoiDescription } from './helpers/PoiDescription';
 import { getLabel, getSecondaryLabel } from '../../helpers/featureLabel';
+import { PROJECT_ID } from '../../services/project';
+import { PoiDescription } from './helpers/PoiDescription';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { QuickActions } from './QuickActions/QuickActions';
-import { PROJECT_ID } from '../../services/project';
-import { css } from '@emotion/react';
 
 const Container = styled.div<{ isStandalone: boolean }>`
   margin: 20px 0 20px 0;
@@ -52,7 +52,7 @@ const Heading = styled.h1<{ $deleted: boolean; $isOpenClimbing: boolean }>`
     css`
       font-family: 'Piazzolla', sans-serif;
       font-weight: 900;
-      font-size: 46px;
+      font-size: 48px;
     `}
   margin: 0;
   ${({ $deleted }) => $deleted && 'text-decoration: line-through;'}

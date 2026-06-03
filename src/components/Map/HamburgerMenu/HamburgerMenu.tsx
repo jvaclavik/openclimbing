@@ -21,6 +21,7 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import { useMapStateContext } from '../../utils/MapStateContext';
 import { getIdEditorLink } from '../../FeaturePanel/helpers/externalLinks';
 import { UserTheme, useUserThemeContext } from '../../../helpers/theme';
+import { extraPalette } from '../../../helpers/extraPalette';
 import GithubIcon from '../../../assets/GithubIcon';
 import { LangSwitcher } from './LangSwitcher';
 import { HamburgerMenuButton } from './HamburgerMenuButton';
@@ -37,7 +38,7 @@ import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import ContrastIcon from '@mui/icons-material/Contrast';
 
 const StyledGithubIcon = styled(GithubIcon)`
-  filter: ${({ theme }) => theme.palette.invertFilter};
+  filter: ${({ theme }) => extraPalette[theme.palette.mode].invertFilter};
 `;
 
 const useIsBrowser = () => {

@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material';
 import { isDesktop, useMobileMode } from '../helpers';
 import { useScrollShadow } from '../FeaturePanel/Climbing/utils/useScrollShadow';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
+import { extraPalette } from '../../helpers/extraPalette';
 
 export const FEATURE_PANEL_WIDTH = 410;
 
@@ -17,7 +18,8 @@ const EffectiveHeight = styled.main`
 
 const SearchBoxBackground = styled.div`
   height: ${SEARCH_BOX_HEIGHT}px;
-  background-color: ${({ theme }) => theme.palette.background.searchBox};
+  background-color: ${({ theme }) =>
+    extraPalette[theme.palette.mode].searchBox};
   position: relative;
   z-index: 1;
 `;

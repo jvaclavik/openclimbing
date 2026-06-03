@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge, IconButton, Tooltip } from '@mui/material';
-import { t } from '../../../../services/intl';
 import FilterListAltIcon from '@mui/icons-material/FilterListAlt';
+import { Badge, IconButton, Tooltip } from '@mui/material';
+import React from 'react';
+import { t } from '../../../../services/intl';
 
 export const CragsInAreaFilterIcon = ({
   onClick,
@@ -15,7 +15,7 @@ export const CragsInAreaFilterIcon = ({
   return (
     <Tooltip title={t('crag_filter.title')}>
       <IconButton
-        color={open ? 'primary' : 'secondary'}
+        color={open ? 'primary' : 'default'}
         edge="end"
         onClick={onClick}
       >

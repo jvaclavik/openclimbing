@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
-import React from 'react';
-import Router from 'next/router';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useFeatureContext } from '../utils/FeatureContext';
+import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
+import Router from 'next/router';
+import React from 'react';
+import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
 import {
   getOsmappLink,
   getReactKey,
@@ -13,28 +13,28 @@ import {
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 import { Feature, isInstant } from '../../services/types';
 import { ClientOnly, isMobileMode, useMobileMode } from '../helpers';
-import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
+import { useFeatureContext } from '../utils/FeatureContext';
 
-import { Slider, Wrapper } from './FeatureImages/FeatureImages';
-import { Image } from './FeatureImages/Image/Image';
+import Link from 'next/link';
 import { getInstantImage } from '../../services/images/getImageDefs';
 import { intl, t } from '../../services/intl';
-import Link from 'next/link';
-import { naturalSort } from './Climbing/utils/array';
-import { PanelLabel } from './Climbing/PanelLabel';
 import { PROJECT_ID } from '../../services/project';
-import { getClickHandler } from './FeatureImages/Image/helpers';
-import { MemberItem } from './MemberFeatures/MemberItem';
-import { RouteDistribution } from './Climbing/RouteDistribution';
 import { PhotoCoverageRing } from './Climbing/PhotoCoverageRing';
 import { hasPathOnPhoto } from './Climbing/utils/photo';
 import { CragsInAreaSort } from './Climbing/CragsInAreaSort/CragsInAreaSort';
+import { useCragsInAreaSort } from './Climbing/CragsInAreaSort/utils/useCragsInAreaSort';
 import { CragsInAreaFilter } from './Climbing/Filter/CragsInAreaFilter';
 import {
   useGetFilteredCrags,
   useGetMemberCrags,
 } from './Climbing/Filter/utils/useGetFilteredCrags';
-import { useCragsInAreaSort } from './Climbing/CragsInAreaSort/utils/useCragsInAreaSort';
+import { PanelLabel } from './Climbing/PanelLabel';
+import { RouteDistribution } from './Climbing/RouteDistribution';
+import { naturalSort } from './Climbing/utils/array';
+import { Slider, Wrapper } from './FeatureImages/FeatureImages';
+import { getClickHandler } from './FeatureImages/Image/helpers';
+import { Image } from './FeatureImages/Image/Image';
+import { MemberItem } from './MemberFeatures/MemberItem';
 
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
 
@@ -557,8 +557,8 @@ const CragsInAreaInner = () => {
           <CragsInAreaFilter />
         </FilterRow>
       )}
-      <AllCragsDistribution crags={crags} />
       <AreaInfo crags={crags} subAreas={subAreas} />
+      <AllCragsDistribution crags={crags} />
       <CragList crags={crags} subAreas={subAreas} />
     </>
   );

@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { SEARCH_BOX_HEIGHT } from './consts';
 import { css } from '@emotion/react';
 import { isDesktop } from '../helpers';
+import { extraPalette } from '../../helpers/extraPalette';
 
 export const TopPanel = styled.div<{ $isMobileMode: boolean }>`
   position: absolute;
@@ -10,7 +11,7 @@ export const TopPanel = styled.div<{ $isMobileMode: boolean }>`
     !$isMobileMode &&
     css`
       box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.12);
-      background-color: ${theme.palette.background.searchBox};
+      background-color: ${extraPalette[theme.palette.mode].searchBox};
     `}
 
   padding: 8px;

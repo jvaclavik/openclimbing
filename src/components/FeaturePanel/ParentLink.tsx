@@ -1,19 +1,14 @@
 import styled from '@emotion/styled';
-import React from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Button, Stack, Typography } from '@mui/material';
+import Router from 'next/router';
 import { getReactKey, getOsmappLink, getShortId } from '../../services/helpers';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
 import { useFeatureContext } from '../utils/FeatureContext';
-import { Chip, Stack, Typography } from '@mui/material';
-import Router from 'next/router';
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 
 const ParentItem = styled.div`
   margin: 12px 0 4px 0;
-
-  a:hover {
-    text-decoration: none;
-  }
 `;
 
 export const ParentButton = ({
@@ -36,19 +31,21 @@ export const ParentButton = ({
 
   return (
     <Typography component="h2" variant="subtitle2" color="primary">
-      <Chip
+      <Button
         size="small"
-        label={children}
-        icon={
+        variant="contained"
+        color="secondary"
+        startIcon={
           hasArrow ? (
             <ArrowBackIcon fontSize="inherit" color="inherit" />
           ) : undefined
         }
         onClick={(e) => handleLink(e, parentFeature)}
         href={getOsmappLink(parentFeature)}
-        component="a"
         title={title}
-      />
+      >
+        {children}
+      </Button>
     </Typography>
   );
 };

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge, IconButton, Tooltip } from '@mui/material';
-import { t } from '../../../../services/intl';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+import { Badge, IconButton, Tooltip } from '@mui/material';
+import React from 'react';
+import { t } from '../../../../services/intl';
 import { SortBy } from './types';
 
 export const CragsInAreaSortButton = ({
@@ -15,7 +15,7 @@ export const CragsInAreaSortButton = ({
 }) => (
   <Tooltip title={t('crag_sort.title')}>
     <IconButton
-      color={open ? 'primary' : 'secondary'}
+      color={open ? 'primary' : 'default'}
       edge="end"
       onClick={onClick}
     >

@@ -26,6 +26,7 @@ import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
 import { SupportUs } from './SupportUs';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { PROJECT_NAME } from '../../services/project';
+import { extraPalette } from '../../helpers/extraPalette';
 const AccordionStyle = {
   '&:before': {
     backgroundColor: 'transparent !important',
@@ -189,7 +190,7 @@ const Buttons = ({ onClose }) => {
 };
 
 const StyledGithubIcon = styled(GithubIcon)`
-  filter: ${({ theme }) => theme.palette.invertFilter};
+  filter: ${({ theme }) => extraPalette[theme.palette.mode].invertFilter};
   margin: -2px 8px 0 0;
 `;
 

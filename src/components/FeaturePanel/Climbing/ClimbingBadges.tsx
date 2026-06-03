@@ -1,20 +1,20 @@
-import React from 'react';
-import { Feature, TranslationId } from '../../../services/types';
 import styled from '@emotion/styled';
-import { Chip, Stack, Tooltip } from '@mui/material';
-import { t } from '../../../services/intl';
-import { useFeatureContext } from '../../utils/FeatureContext';
 import ChildFriendlyIcon from '@mui/icons-material/ChildFriendly';
 import TerrainIcon from '@mui/icons-material/Terrain';
+import { Chip, Stack, Tooltip } from '@mui/material';
+import React from 'react';
+import { t } from '../../../services/intl';
 import { CLIMBING_ROCK_OPTIONS } from '../../../services/tagging/climbing/climbingRockData';
+import { Feature, TranslationId } from '../../../services/types';
+import { useFeatureContext } from '../../utils/FeatureContext';
 
 const StyledChip = styled(Chip)`
-  font-size: 10px;
-  font-weight: 600;
-  height: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  height: 16px;
   padding: 0;
   > span {
-    padding: 4px;
+    padding: 4px 6px;
   }
 `;
 

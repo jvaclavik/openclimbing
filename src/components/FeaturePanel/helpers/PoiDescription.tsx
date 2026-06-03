@@ -1,8 +1,7 @@
-import React from 'react';
 import styled from '@emotion/styled';
+import { Typography } from '@mui/material';
 import { getHumanPoiType } from '../../../helpers/featureLabel';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { Typography } from '@mui/material';
 import { PoiIcon } from '../../utils/icons/PoiIcon';
 
 const PoiType = styled.div<{ $isSkeleton: Boolean }>`
@@ -37,7 +36,7 @@ export const PoiDescription = () => {
       />
       <Typography
         variant="caption"
-        color="secondary"
+        color="textSecondary"
         textTransform="lowercase"
         component="h2"
       >

@@ -13,6 +13,7 @@ import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { setLastFeature } from '../../services/lastFeatureStorage';
 import { DirectionsButton } from '../Directions/DirectionsButton';
 import { usePanelShown } from '../utils/usePanelShown';
+import { extraPalette } from '../../helpers/extraPalette';
 
 const TopPanel = styled.div`
   position: absolute;
@@ -37,8 +38,8 @@ const StyledPaper = styled(Paper, {
   align-items: center;
   background-color: ${({ $withShadow, theme }) =>
     $withShadow
-      ? theme.palette.background.searchInput
-      : theme.palette.background.searchInputPanel};
+      ? extraPalette[theme.palette.mode].searchInput
+      : extraPalette[theme.palette.mode].searchInputPanel};
   -webkit-backdrop-filter: blur(35px);
   backdrop-filter: blur(35px);
   transition: box-shadow 0s !important;

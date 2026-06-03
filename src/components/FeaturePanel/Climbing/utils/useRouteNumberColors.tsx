@@ -1,4 +1,4 @@
-import { useTheme } from '@mui/material';
+import { useExtraPalette } from '../../../../helpers/extraPalette';
 
 type RouteNumberColorsParams = {
   isSelected?: boolean;
@@ -15,48 +15,47 @@ export const useRouteNumberColors = ({
   hasPathInDifferentPhoto,
   isOnDifferentPhoto,
 }: RouteNumberColorsParams) => {
-  const theme: any = useTheme();
-  const { climbing } = theme.palette;
+  const { routeNumber } = useExtraPalette();
 
   if (hasPathOnThisPhoto && isSelected) {
     return {
-      background: climbing.secondary,
-      text: climbing.primary,
-      border: `solid 1px ${climbing.secondary}`,
+      background: routeNumber.text,
+      text: routeNumber.background,
+      border: `solid 1px ${routeNumber.text}`,
     };
   }
   if (hasPathOnThisPhoto) {
     return {
-      background: climbing.primary,
-      text: climbing.secondary,
-      border: `solid 1px ${climbing.primary}`,
+      background: routeNumber.background,
+      text: routeNumber.text,
+      border: `solid 1px ${routeNumber.background}`,
     };
   }
   if (isOnThisPhoto) {
     return {
-      background: climbing.primary,
-      text: climbing.secondary,
-      border: `dashed 1px ${climbing.tertiary}`,
+      background: routeNumber.background,
+      text: routeNumber.text,
+      border: `dashed 1px ${routeNumber.border}`,
     };
   }
   if (hasPathInDifferentPhoto) {
     return {
       background: 'transparent',
-      text: climbing.secondary,
-      border: `solid 1px ${climbing.tertiary}`,
+      text: routeNumber.text,
+      border: `solid 1px ${routeNumber.border}`,
     };
   }
   if (isOnDifferentPhoto) {
     return {
       background: 'transparent',
-      text: climbing.secondary,
-      border: `dashed 1px ${climbing.tertiary}`,
+      text: routeNumber.text,
+      border: `dashed 1px ${routeNumber.border}`,
     };
   }
 
   return {
     background: 'transparent',
-    text: climbing.secondary,
+    text: routeNumber.text,
     border: 'solid 1px transparent',
   };
 };

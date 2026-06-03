@@ -1,90 +1,95 @@
-import Cookies from 'js-cookie';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { grey, red } from '@mui/material/colors';
-import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useMediaQuery } from '@mui/material';
+import { grey, red } from '@mui/material/colors';
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles';
+import Cookies from 'js-cookie';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { Setter } from '../types';
 
+const sharedThemeOptions: ThemeOptions = {
+  typography: {
+    fontFamily: ['"Outfit"'].join(','),
+  },
+  shape: {
+    borderRadius: '12px',
+  },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        sizeSmall: {
+          fontWeight: 500,
+          paddingLeft: 8,
+          paddingRight: 8,
+        },
+        sizeMedium: {
+          fontWeight: 700,
+          paddingLeft: 16,
+          paddingRight: 16,
+        },
+        sizeLarge: {
+          fontWeight: 700,
+          paddingLeft: 20,
+          paddingRight: 20,
+        },
+        root: {
+          textTransform: 'none',
+          borderRadius: '20px',
+          letterSpacing: -0.1,
+          paddingLeft: 8,
+          paddingRight: 8,
+          lineHeight: 1.6,
+        },
+      },
+    },
+  },
+};
+
 const lightTheme = createTheme({
+  ...sharedThemeOptions,
   palette: {
+    mode: 'light',
     divider: 'rgba(0, 0, 0, 0.04)',
     primary: {
-      main: '#556cd6',
+      main: '#d84315',
     },
     secondary: {
-      main: '#737373',
-    },
-    tertiary: {
-      main: '#0078a8', // links
+      main: '#757575',
+      contrastText: '#ffffff',
     },
     error: {
       main: red.A400,
     },
     background: {
-      default: '#f6f6f6ff',
+      default: '#f6f6f6',
       elevation: '#ddd',
       paper: '#fafafa',
       hover: '#f2f3f2',
-      searchBox: '#eb5757',
-      searchInput: 'rgba(255,255,255,0.6)',
-      searchInputSolid: 'rgb(249, 248, 244)',
-      searchInputPanel: 'rgba(255,255,255,0.8)',
-    },
-    invertFilter: 'invert(0)',
-    climbing: {
-      primary: '#D1D1D1',
-      secondary: '#202020',
-      tertiary: '#666',
-      tick: '#F2EFCB',
-
-      // @TODO: following colors should be deleted in the future
-      active: '#00854dff',
-      inactive: '#f6f6f6',
-      border: '#555555ff',
-      selected: '#000000',
     },
   },
 });
 
 const darkTheme = createTheme({
+  ...sharedThemeOptions,
   palette: {
     mode: 'dark',
     divider: 'rgba(255, 255, 255, 0.04)',
     primary: {
-      main: '#ffb74d',
+      main: '#ff7c4d',
     },
     secondary: {
-      main: '#737373',
-    },
-    tertiary: {
-      main: '#00b6ff', // links
+      main: '#ffffff1f',
+      contrastText: '#ffffff',
     },
     error: {
       main: red.A400,
     },
-
     background: {
-      default: '#303030',
-      elevation: '#333333',
-      paper: '#424242',
+      default: '#1a1a1a',
+      elevation: '#212121',
+      paper: '#242424',
       hover: grey['700'],
-      searchBox: '#963838',
-      searchInput: 'rgba(0,0,0,0.5)',
-      searchInputSolid: 'rgb(35, 26, 26)',
-      searchInputPanel: 'rgba(0,0,0,0.7)',
-    },
-    invertFilter: 'invert(1)',
-    climbing: {
-      primary: '#000000',
-      secondary: '#fff',
-      tertiary: '#666',
-      tick: '#5B5C50',
-
-      // @TODO: following colors should be deleted in the future
-      active: '#2fbc81ff',
-      inactive: '#0a0a0aff',
-      border: '#ffffffff',
-      selected: '#ffffff',
     },
   },
 });

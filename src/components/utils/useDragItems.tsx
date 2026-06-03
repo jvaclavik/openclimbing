@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import React, { useEffect, useState } from 'react';
 import { alpha } from '@mui/material/styles';
 import { toInsertIndexAfterRemove } from '../FeaturePanel/Climbing/utils/array';
+import { extraPalette } from '../../helpers/extraPalette';
 
 export const HighlightedDropzoneVertical = styled.div<{
   $isActive: boolean;
@@ -16,7 +17,7 @@ export const HighlightedDropzoneVertical = styled.div<{
     if (!$isDragging) {
       return 'transparent';
     }
-    const c = theme.palette.climbing.active;
+    const c = extraPalette[theme.palette.mode].climbingPath.active;
     if ($isActive) {
       return c;
     }
@@ -38,7 +39,7 @@ export const HighlightedDropzoneHorizontal = styled.div<{
     if (!$isDragging) {
       return 'transparent';
     }
-    const c = theme.palette.climbing.active;
+    const c = extraPalette[theme.palette.mode].climbingPath.active;
     if ($isActive) {
       return c;
     }
