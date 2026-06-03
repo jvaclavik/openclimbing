@@ -102,7 +102,9 @@ type UserThemeContextType = {
 export const UserThemeContext = createContext<UserThemeContextType>(undefined);
 
 const useGetCurrentTheme = (userTheme: UserTheme) => {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', {
+    defaultMatches: true,
+  });
 
   return useMemo(() => {
     if (userTheme === 'system') {
