@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OpenClimbing – Wikimedia Commons auth</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+    <div id="noredirect">
+      <h1>OpenClimbing – Wikimedia Commons auth</h1>
+      <p>
+        [en] If this popup doesn't close automatically, it is probably an error.
+        Please, let us know at
+        <a href="https://github.com/jvaclavik/openclimbing/issues">the issue tracker</a>.
+      </p>
+      <p>
+        [cs] Pokud se toto okno automaticky nezavře, pravděpodobně došlo k chybě.
+        Prosím, dejte nám vědět
+        <a href="https://github.com/jvaclavik/openclimbing/issues">zde</a>.
+      </p>
+      <img src="/openclimbing/logo/openclimbing.svg" />
+    </div>
+
+    <script>
+      document.getElementById('noredirect').style.display = 'none';
+      setTimeout(() => {
+        document.getElementById('noredirect').style.display = 'block';
+      }, 10000);
+
+      const params = new URLSearchParams(location.search);
+      if (params.has('code') || params.has('error')) {
+        new BroadcastChannel('wikimedia-commons-auth-complete').postMessage(
+          location.href,
+        );
+        window.close();
+      }
+    </script>
+  </body>
+</html>
