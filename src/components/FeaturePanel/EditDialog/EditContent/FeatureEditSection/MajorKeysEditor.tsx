@@ -15,6 +15,7 @@ import { useCurrentItem } from '../../context/EditContext';
 import { MajorKeysFieldList } from './MajorKeysFieldList';
 import { MajorKeysInactivePicker } from './MajorKeysInactivePicker';
 import { FeatureTags } from '../../../../../services/types';
+import { EditDialogUploadHost } from '../../EditDialogUploadHost';
 
 const basicMajorKeys = ['name', 'description', 'website'];
 const nonClimbingMajorKeys = ['phone', 'opening_hours'];
@@ -117,6 +118,10 @@ export const MajorKeysEditor: React.FC = () => {
         inactiveMajorKeys={inactiveMajorKeys}
         names={data.names}
         onAdd={(k) => setActiveMajorKeys((arr) => [...arr, k])}
+      />
+      <EditDialogUploadHost
+        activeMajorKeys={activeMajorKeys}
+        setActiveMajorKeys={setActiveMajorKeys}
       />
     </Box>
   );

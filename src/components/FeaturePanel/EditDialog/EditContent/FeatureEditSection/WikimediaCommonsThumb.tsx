@@ -18,7 +18,12 @@ const isValidFileThumb = (value: string) => {
   return Boolean(value) && regex.test(value);
 };
 
-type Props = { value: string };
+type Props = {
+  value: string;
+  /** When provided and value is empty, clicking the placeholder calls this
+   * handler instead of opening the Commons Upload Wizard. */
+  onPlaceholderClick?: () => void;
+};
 
 const thumbBoxSx = {
   width: THUMB_BOX_WIDTH,
@@ -32,7 +37,10 @@ const thumbBoxSx = {
   justifyContent: 'center',
 } as const;
 
-export const WikimediaCommonsThumb: React.FC<Props> = ({ value }) => {
+export const WikimediaCommonsThumb: React.FC<Props> = ({
+  value,
+  onPlaceholderClick,
+}) => {
   const trimmed = value.trim();
   const thumbUrl =
     value.startsWith('File:') && isValidFileThumb(value)
@@ -78,6 +86,35 @@ export const WikimediaCommonsThumb: React.FC<Props> = ({ value }) => {
   }
 
   if (trimmed === '') {
+    if (onPlaceholderClick) {
+      return (
+        <Tooltip
+          arrow
+          title={t('uploaddialog.row_upload_cta')}
+          enterDelay={1000}
+        >
+          <Box
+            onClick={onPlaceholderClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onPlaceholderClick();
+              }
+            }}
+            sx={{
+              ...thumbBoxSx,
+              cursor: 'pointer',
+              '&:hover': { bgcolor: 'action.selected' },
+            }}
+            aria-label={t('uploaddialog.row_upload_cta')}
+          >
+            {inner}
+          </Box>
+        </Tooltip>
+      );
+    }
     return (
       <Tooltip
         arrow

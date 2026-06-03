@@ -10,6 +10,11 @@ import {
   EditDialogContent,
   EditDialogLoadingSkeleton,
 } from './EditDialogContent';
+import {
+  EditDialogUploadProvider,
+  useEditDialogUploadContext,
+} from './EditDialogUploadContext';
+import { EditDialogDropZone } from './EditDialogDropZone';
 
 const useIsFullScreen = () => {
   const theme = useTheme();
@@ -24,7 +29,9 @@ const StyledDialog = styled(Dialog)`
 const CustomizedDialog: React.FC = ({ children }) => {
   const handleClose = useEditDialogClose();
   const { opened } = useEditDialogContext();
-  const fullScreen = useIsFullScreen();
+  const mobileFullScreen = useIsFullScreen();
+  const { maximized } = useEditDialogUploadContext();
+  const fullScreen = mobileFullScreen || maximized;
   const { items } = useEditContext();
   const hasMoreItems = items.length > 1;
   const { successInfo } = useEditContext();
@@ -41,7 +48,7 @@ const CustomizedDialog: React.FC = ({ children }) => {
         paper: {
           sx: {
             height: '100%',
-            maxWidth: hasMoreItems ? 1100 : 900,
+            maxWidth: maximized ? '100%' : hasMoreItems ? 1100 : 900,
           },
           elevation: 0,
         },
@@ -88,9 +95,13 @@ export const EditDialog = () => {
   return (
     <EditContextProvider key={getReactKey(feature)}>
       {opened && (
-        <CustomizedDialog>
-          <EditDialogFetcher />
-        </CustomizedDialog>
+        <EditDialogUploadProvider>
+          <CustomizedDialog>
+            <EditDialogDropZone>
+              <EditDialogFetcher />
+            </EditDialogDropZone>
+          </CustomizedDialog>
+        </EditDialogUploadProvider>
       )}
     </EditContextProvider>
   );

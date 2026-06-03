@@ -19,6 +19,7 @@ import {
   View,
 } from '../src/components/utils/MapStateContext';
 import { OsmAuthProvider } from '../src/components/utils/OsmAuthContext';
+import { WikimediaCommonsAuthProvider } from '../src/components/utils/WikimediaCommonsAuthContext';
 import { EditDialogProvider } from '../src/components/FeaturePanel/helpers/EditDialogContext';
 import Map from '../src/components/Map/Map';
 import { TitleAndMetaTags } from '../src/helpers/TitleAndMetaTags';
@@ -106,30 +107,32 @@ const MyApp = (props: Props) => {
               >
                 <MapStateProvider initialMapView={mapView}>
                   <OsmAuthProvider cookies={cookies}>
-                    <StarsProvider>
-                      <EditDialogProvider /* TODO supply router.query */>
-                        <QueryClientProvider client={reactQueryClient}>
-                          <TicksProvider>
-                            <Head>
-                              <meta
-                                name="viewport"
-                                content="width=device-width, user-scalable=no, initial-scale=1, interactive-widget=resizes-visual"
-                              />
-                            </Head>
-                            <Loading />
-                            <SearchBox />
-                            <ResponsiveFeaturePanel />
-                            <HomepagePanel />
-                            <Climbing />
-                            <Map />
-                            <TitleAndMetaTags />
+                    <WikimediaCommonsAuthProvider cookies={cookies}>
+                      <StarsProvider>
+                        <EditDialogProvider /* TODO supply router.query */>
+                          <QueryClientProvider client={reactQueryClient}>
+                            <TicksProvider>
+                              <Head>
+                                <meta
+                                  name="viewport"
+                                  content="width=device-width, user-scalable=no, initial-scale=1, interactive-widget=resizes-visual"
+                                />
+                              </Head>
+                              <Loading />
+                              <SearchBox />
+                              <ResponsiveFeaturePanel />
+                              <HomepagePanel />
+                              <Climbing />
+                              <Map />
+                              <TitleAndMetaTags />
 
-                            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-                            <Component {...pageProps} />
-                          </TicksProvider>
-                        </QueryClientProvider>
-                      </EditDialogProvider>
-                    </StarsProvider>
+                              {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+                              <Component {...pageProps} />
+                            </TicksProvider>
+                          </QueryClientProvider>
+                        </EditDialogProvider>
+                      </StarsProvider>
+                    </WikimediaCommonsAuthProvider>
                   </OsmAuthProvider>
                 </MapStateProvider>
               </FeatureProvider>

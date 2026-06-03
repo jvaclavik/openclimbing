@@ -1,9 +1,20 @@
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
-import { Box, IconButton, Paper, Stack, Tooltip } from '@mui/material';
-import React from 'react';
+import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import {
+  Box,
+  Button,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import React, { useState } from 'react';
 import { t } from '../../../../../services/intl';
 import { TextFieldWithCharacterCount } from './helpers';
 import { WikimediaCommonsThumb } from './WikimediaCommonsThumb';
+import { useOptionalEditDialogUploadContext } from '../../EditDialogUploadContext';
 
 const isWikimediaCommonsFileNameInvalid = (value: string) => {
   const regex = /^File:.+\.[a-zA-Z0-9_]+$/;
@@ -20,6 +31,49 @@ type Props = {
   dragHandle?: React.ReactNode;
 };
 
+type EmptyRowCtaProps = {
+  pasteMode: boolean;
+  onUpload: () => void;
+  onEnterPaste: () => void;
+  onLeavePaste: () => void;
+};
+
+const EmptyRowCta: React.FC<EmptyRowCtaProps> = ({
+  pasteMode,
+  onUpload,
+  onEnterPaste,
+  onLeavePaste,
+}) => {
+  if (pasteMode) {
+    return (
+      <Button
+        variant="text"
+        size="small"
+        startIcon={<ArrowBack />}
+        onClick={onLeavePaste}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        {t('uploaddialog.row_back_to_upload')}
+      </Button>
+    );
+  }
+  return (
+    <Stack spacing={1} alignItems="flex-start">
+      <Button
+        variant="contained"
+        size="medium"
+        startIcon={<CloudUploadOutlined />}
+        onClick={onUpload}
+      >
+        {t('uploaddialog.row_upload_cta')}
+      </Button>
+      <Button variant="text" size="small" onClick={onEnterPaste}>
+        {t('uploaddialog.row_paste_existing')}
+      </Button>
+    </Stack>
+  );
+};
+
 export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   fileKey,
   index,
@@ -29,6 +83,19 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   onRemove,
   dragHandle,
 }) => {
+  const uploadCtx = useOptionalEditDialogUploadContext();
+  const debugMode = Boolean(uploadCtx?.debugMode);
+  const handleUploadClick = () =>
+    uploadCtx?.openUpload({ targetSlotKey: fileKey });
+
+  const isEmpty = !value.trim();
+  // In debug mode the empty row starts as upload CTA; the user can switch to
+  // paste mode to type/paste an existing filename. Outside debug mode behavior
+  // is unchanged (input shown immediately).
+  const [pasteMode, setPasteMode] = useState(!debugMode);
+  const showCta = debugMode && isEmpty && !pasteMode;
+  const showInput = !showCta;
+
   const label = `${t('tags.wikimedia_commons_photo')}${
     index > 0 ? ` (${index + 1})` : ''
   }`;
@@ -48,33 +115,57 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
           sx={{ flexShrink: 0 }}
         >
           {dragHandle != null && <Box>{dragHandle}</Box>}
-          <WikimediaCommonsThumb value={value} />
+          <WikimediaCommonsThumb
+            value={value}
+            onPlaceholderClick={
+              debugMode && isEmpty ? handleUploadClick : undefined
+            }
+          />
         </Stack>
 
-        <Box
-          flex={1}
-          minWidth={0}
-          sx={{
-            alignSelf: { xs: 'stretch', sm: 'auto' },
-          }}
-        >
-          <TextFieldWithCharacterCount
-            label={label}
-            errorText={
-              invalidFile
-                ? t('editdialog.upload_photo_filename_error')
-                : undefined
-            }
-            error={invalidFile}
-            k={fileKey}
-            autoFocus={focusTag === fileKey}
-            placeholder="File:Photo example.jpg (or paste URL)"
-            onChange={(e) => onValueChange(fileKey, e.target.value)}
-            value={value}
-            margin="none"
-            multiline={false}
-          />
-        </Box>
+        <Stack flex={1} minWidth={0} spacing={1}>
+          <Typography variant="caption" color="text.secondary">
+            {label}
+          </Typography>
+
+          {showCta && debugMode && isEmpty && (
+            <EmptyRowCta
+              pasteMode={pasteMode}
+              onUpload={handleUploadClick}
+              onEnterPaste={() => setPasteMode(true)}
+              onLeavePaste={() => setPasteMode(false)}
+            />
+          )}
+
+          {showInput && (
+            <Stack spacing={0.5}>
+              <TextFieldWithCharacterCount
+                label=""
+                errorText={
+                  invalidFile
+                    ? t('editdialog.upload_photo_filename_error')
+                    : undefined
+                }
+                error={invalidFile}
+                k={fileKey}
+                autoFocus={focusTag === fileKey || pasteMode}
+                placeholder="File:Photo example.jpg (or paste URL)"
+                onChange={(e) => onValueChange(fileKey, e.target.value)}
+                value={value}
+                margin="none"
+                multiline={false}
+              />
+              {debugMode && isEmpty && pasteMode && (
+                <EmptyRowCta
+                  pasteMode={pasteMode}
+                  onUpload={handleUploadClick}
+                  onEnterPaste={() => setPasteMode(true)}
+                  onLeavePaste={() => setPasteMode(false)}
+                />
+              )}
+            </Stack>
+          )}
+        </Stack>
 
         <Box sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}>
           <Tooltip title={t('editdialog.remove')}>

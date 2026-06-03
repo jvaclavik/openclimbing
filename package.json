@@ -42,6 +42,8 @@
     "canvg": "^4.0.3",
     "date-fns": "^4.1.0",
     "dice-coefficient": "^2.1.1",
+    "exifr": "^7.1.3",
+    "heic2any": "^0.0.4",
     "image-size": "^2.0.2",
     "isomorphic-unfetch": "^4.0.2",
     "isomorphic-xml2js": "^0.1.3",
