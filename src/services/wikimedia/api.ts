@@ -1,21 +1,43 @@
 import { COMMONS_API_URL } from './consts';
 import { getValidAccessToken } from './auth/session';
 
+type ApiError = { code: string; info: string };
+
+const throwIfApiError = (data: unknown, context: string) => {
+  const error = (data as { error?: ApiError } | null | undefined)?.error;
+  if (error) {
+    throw new Error(`Commons ${context}: ${error.code} – ${error.info}`);
+  }
+};
+
+const buildOriginParam = (accessToken: string | null) => {
+  // For authenticated cross-origin requests MediaWiki requires `origin` to match
+  // the browser's Origin header exactly; using `*` would make the API treat the
+  // call as anonymous and silently drop the Bearer token.
+  if (accessToken && typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return '*';
+};
+
 const apiGet = async <T>(params: Record<string, string>): Promise<T> => {
   const accessToken = await getValidAccessToken();
   const query = new URLSearchParams({
     ...params,
     format: 'json',
     formatversion: '2',
-    origin: '*',
+    origin: buildOriginParam(accessToken),
   });
   const response = await fetch(`${COMMONS_API_URL}?${query}`, {
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   });
   if (!response.ok) {
-    throw new Error(`Commons API error ${response.status}`);
+    const text = await response.text().catch(() => '');
+    throw new Error(`Commons API error ${response.status}: ${text}`);
   }
-  return response.json();
+  const data = await response.json();
+  throwIfApiError(data, `${params.action}/${params.meta ?? params.list ?? ''}`);
+  return data as T;
 };
 
 type CsrfTokenResponse = {
@@ -106,6 +128,7 @@ export const uploadFile = async ({
   formData.append('action', 'upload');
   formData.append('format', 'json');
   formData.append('formatversion', '2');
+  formData.append('origin', buildOriginParam(accessToken));
   formData.append('filename', filename);
   formData.append('comment', comment);
   formData.append('text', text);
