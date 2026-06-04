@@ -136,51 +136,57 @@ const STORY_URL = (lang) =>
     ? 'https://medium.com/@jvaclavik/p%C5%99%C3%ADb%C4%9Bh-za-openclimbing-org-e1e2b3de2024'
     : 'https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac';
 
-const Buttons = ({ onClose }) => (
-  <>
-    <Button
-      variant="contained"
-      color="primary"
-      endIcon={<ChevronRightIcon />}
-      onClick={onClose}
-      fullWidth
-      size="large"
-      sx={{ mt: 4, mb: 2 }}
-    >
-      {t('homepage.go_to_map_button')}
-    </Button>
-    <Box mb={2}>
-      <Stack spacing={1} direction="row">
+const Buttons = ({ onClose }) => {
+  const isMobileMode = useMobileMode();
+
+  return (
+    <>
+      {isMobileMode && (
         <Button
-          variant="text"
+          variant="contained"
+          color="primary"
+          endIcon={<ChevronRightIcon />}
+          onClick={onClose}
           fullWidth
-          href="https://medium.com/@jvaclavik/how-to-contribute-to-openclimbing-org-9a159ddd5d4c"
-          target="_blank"
+          size="large"
+          sx={{ mt: 4, mb: 2 }}
         >
-          {t('homepage.add_new_climbing_area')}
+          {t('homepage.go_to_map_button')}
         </Button>
-        <Button
-          variant="text"
-          fullWidth
-          href={STORY_URL(intl.lang)}
-          target="_blank"
-        >
-          {t('homepage.our_story')}
-        </Button>
-      </Stack>
-      <Box sx={{ textAlign: 'center' }}>
-        <Button
-          variant="text"
-          href="https://community.openclimbing.org"
-          target="_blank"
-        >
-          <QuestionAnswerIcon fontSize="inherit" sx={{ mr: 1 }} />
-          {t('climbing.forum')}
-        </Button>
+      )}
+      <Box mb={2}>
+        <Stack spacing={1} direction="row">
+          <Button
+            variant="text"
+            fullWidth
+            href="https://medium.com/@jvaclavik/how-to-contribute-to-openclimbing-org-9a159ddd5d4c"
+            target="_blank"
+          >
+            {t('homepage.add_new_climbing_area')}
+          </Button>
+          <Button
+            variant="text"
+            fullWidth
+            href={STORY_URL(intl.lang)}
+            target="_blank"
+          >
+            {t('homepage.our_story')}
+          </Button>
+        </Stack>
+        <Box sx={{ textAlign: 'center' }}>
+          <Button
+            variant="text"
+            href="https://community.openclimbing.org"
+            target="_blank"
+          >
+            <QuestionAnswerIcon fontSize="inherit" sx={{ mr: 1 }} />
+            {t('climbing.forum')}
+          </Button>
+        </Box>
       </Box>
-    </Box>
-  </>
-);
+    </>
+  );
+};
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
