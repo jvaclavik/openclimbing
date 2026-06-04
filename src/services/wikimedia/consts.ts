@@ -7,7 +7,13 @@ export const WIKIMEDIA_OAUTH_TOKEN_URL =
 export const WIKIMEDIA_OAUTH_PROFILE_URL =
   'https://meta.wikimedia.org/w/rest.php/oauth2/resource/profile';
 
-export const COMMONS_API_URL = 'https://commons.wikimedia.org/w/api.php';
+/**
+ * Wikimedia Commons restricts CORS to wiki / toolforge domains, so the
+ * browser cannot call the Action API directly. We route everything through
+ * our own Next.js API routes (server-to-server has no CORS).
+ */
+export const COMMONS_API_PROXY_URL = '/api/wikimedia/commons-api';
+export const COMMONS_UPLOAD_PROXY_URL = '/api/wikimedia/upload';
 
 export const WIKIMEDIA_CLIENT_ID =
   process.env.NEXT_PUBLIC_WIKIMEDIA_CLIENT_ID ?? '';
