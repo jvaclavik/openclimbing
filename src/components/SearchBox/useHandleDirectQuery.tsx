@@ -4,14 +4,12 @@ import { Setter } from '../../types';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { useEffect, useRef } from 'react';
 import { getFirstOption } from './useGetOptions';
-import { useStarsContext } from '../utils/StarsContext';
 
 export const useHandleDirectQuery = (
   onSelected: (_: null, option: Option) => void,
   setInputValue: Setter<string>,
   setIsLoading: Setter<boolean>,
 ) => {
-  const { stars } = useStarsContext();
   const { bbox, view } = useMapStateContext();
   const lastQuery = useRef<string | undefined>();
   const router = useRouter();
@@ -31,11 +29,11 @@ export const useHandleDirectQuery = (
       setInputValue(query);
       setIsLoading(true);
 
-      const foundOption = await getFirstOption(query, stars, view);
+      const foundOption = await getFirstOption(query, view);
       setIsLoading(false);
       if (foundOption) {
         onSelected(null, foundOption);
       }
     })();
-  }, [bbox, onSelected, query, setInputValue, setIsLoading, stars, view]);
+  }, [bbox, onSelected, query, setInputValue, setIsLoading, view]);
 };

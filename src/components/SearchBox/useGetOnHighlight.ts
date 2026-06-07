@@ -18,11 +18,6 @@ export const useGetOnHighlight = () => {
     if (!option) {
       return;
     }
-    if (option.type === 'star' && option.star.center) {
-      const { center } = option.star;
-      setPreview({ center } as Feature); // TODO fix setPreview to accept only coordinates
-      return;
-    }
     if (option.type === 'coords') {
       const { center } = option.coords;
       setPreview({ center } as Feature); // TODO fix setPreview to accept only coordinates

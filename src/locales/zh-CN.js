@@ -160,8 +160,8 @@ export default {
 
   'featurepanel.no_name': '无名称',
   'featurepanel.share_button': '分享',
-  'featurepanel.favorites_save_button': '保存',
-  'featurepanel.favorites_unsave_button': '已保存',
+  'featurepanel.save_button': '保存',
+  'featurepanel.saved_button': '已保存',
   'featurepanel.directions_button': '路线',
   'featurepanel.error': '从 OpenStreetMap 获取要素时发生错误 __code__',
   'featurepanel.error_unknown': '从 OpenStreetMap 获取要素时发生未知错误。',

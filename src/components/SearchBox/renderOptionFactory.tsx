@@ -2,7 +2,6 @@ import React from 'react';
 import { OverpassRow } from './options/overpass';
 import { PresetRow } from './options/preset';
 import { LoaderRow } from './utils';
-import { StarRow } from './options/stars';
 import { GeocoderRow } from './options/geocoder';
 import { Option } from './types';
 import { OsmRow } from './options/osm';
@@ -23,8 +22,6 @@ const Row = ({ option, inputValue }: Props) => {
       return <ClimbingRow option={option} inputValue={inputValue} />;
     case 'preset':
       return <PresetRow option={option} inputValue={inputValue} />;
-    case 'star':
-      return <StarRow option={option} inputValue={inputValue} />;
     case 'overpass':
       return <OverpassRow option={option} />;
     case 'osm':

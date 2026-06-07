@@ -5,10 +5,6 @@ export const getOptionToLonLat = (option: Option) => {
     return option.coords.center;
   }
 
-  if (option.type === 'star') {
-    return option.star.center;
-  }
-
   if (option.type === 'geocoder') {
     return option.geocoder.geometry.coordinates;
   }

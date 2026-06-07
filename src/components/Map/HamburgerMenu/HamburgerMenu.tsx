@@ -34,6 +34,8 @@ import Link from 'next/link';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
+import { MyListsSection } from './MyListsSection';
+import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import ContrastIcon from '@mui/icons-material/Contrast';
 
 const StyledGithubIcon = styled(GithubIcon)`
@@ -186,6 +188,7 @@ export const HamburgerMenu = () => {
   const isOpenClimbing = PROJECT_ID === 'openclimbing';
   const { activeLayers } = useMapStateContext();
   const hasClimbingLayer = activeLayers.includes('climbing');
+  const { loggedIn } = useOsmAuthContext();
   return (
     <>
       <Drawer open={opened} onClose={close} anchor="right">
@@ -194,6 +197,13 @@ export const HamburgerMenu = () => {
             <UserHeader closeMenu={close} />
             <Divider sx={{ mt: 1, mb: 2 }} />
             {isOpenClimbing && <MyClimbingProfileMenuItem closeMenu={close} />}
+            {loggedIn && (
+              <>
+                <Divider sx={{ my: 1 }} />
+                <MyListsSection closeMenu={close} />
+                <Divider sx={{ my: 1 }} />
+              </>
+            )}
             {(hasClimbingLayer || isOpenClimbing) && (
               <>
                 <ClimbingGradesTableLink closeMenu={close} />

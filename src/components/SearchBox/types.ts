@@ -1,5 +1,4 @@
 import { LonLat } from '../../services/types';
-import { Star } from '../utils/StarsContext';
 import { ASTNode } from './queryWizard/ast';
 import { Bbox } from '../utils/MapStateContext';
 import { ClimbingSearchRecord } from '../../types';
@@ -70,8 +69,6 @@ export type PresetOption = GenericOption<
   }
 >;
 
-export type StarOption = GenericOption<'star', Star>;
-
 type LoaderOption = GenericOption<'loader', null>;
 
 export type CoordsOption = GenericOption<
@@ -96,7 +93,6 @@ export type TilesOption = GenericOption<
  * A option for the searchbox
  */
 export type Option =
-  | StarOption
   | CoordsOption
   | OverpassOption
   | PresetOption

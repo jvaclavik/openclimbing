@@ -95,8 +95,8 @@ export default {
 
   'featurepanel.no_name': 'Kein Name',
   'featurepanel.share_button': 'Teilen',
-  'featurepanel.favorites_save_button': 'Favorisieren',
-  'featurepanel.favorites_unsave_button': 'Entfavorisieren',
+  'featurepanel.save_button': 'Speichern',
+  'featurepanel.saved_button': 'Gespeichert',
   'featurepanel.directions_button': 'Route',
   'featurepanel.share_button': 'Teilen',
   'featurepanel.error': 'Fehler __code__ während des Abrufs des Objekts von OpenStreetMap',

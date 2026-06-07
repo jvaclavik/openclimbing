@@ -102,8 +102,8 @@ export default {
 
   'featurepanel.no_name': '名前なし',
   'featurepanel.share_button': '共有',
-  'featurepanel.favorites_save_button': 'お気に入りに保存',
-  'featurepanel.favorites_unsave_button': 'お気に入りから削除',
+  'featurepanel.save_button': '保存',
+  'featurepanel.saved_button': '保存済み',
   'featurepanel.directions_button': '経路',
   'featurepanel.error': 'OpenStreetMap から地物を取得中にエラー __code__',
   'featurepanel.error_unknown': 'OpenStreetMap から地物を取得中に不明なエラーが発生しました。',

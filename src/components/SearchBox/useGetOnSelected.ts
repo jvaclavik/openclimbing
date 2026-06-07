@@ -5,7 +5,6 @@ import { Option } from './types';
 import { osmOptionSelected } from './options/osm';
 import { coordsOptionsSelected } from './options/coords';
 import { geocoderOptionSelected } from './options/geocoder';
-import { starOptionSelected } from './options/stars';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { Setter } from '../../types';
 import { useCallback } from 'react';
@@ -33,9 +32,6 @@ export const useGetOnSelected = (setOverpassLoading: Setter<boolean>) => {
       setPreview(null); // it could be stuck from onHighlight
 
       switch (option.type) {
-        case 'star':
-          starOptionSelected(option);
-          break;
         case 'overpass':
         case 'preset':
           overpassOptionSelected(option, setOverpassLoading, bbox, showToast);

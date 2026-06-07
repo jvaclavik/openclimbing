@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -14,13 +15,18 @@ import Router from 'next/router';
 import React, { forwardRef, useState } from 'react';
 import { getOsmappLink, getShortId } from '../../../../services/helpers';
 import { intl, t } from '../../../../services/intl';
+import { featureToItem } from '../../../../services/my-lists/featureToItem';
 import { PROJECT_ID } from '../../../../services/project';
 import {
   getDifficulties,
   getGradeIndexFromTags,
 } from '../../../../services/tagging/climbing/routeGrade';
-import { Feature } from '../../../../services/types';
+import { Feature, LonLat } from '../../../../services/types';
 import { useMobileMode } from '../../../helpers';
+import { ListBadges } from '../../../MyLists/ListBadges';
+import { ListPickerDialog } from '../../../MyLists/ListPickerDialog';
+import { useMapStateContext } from '../../../utils/MapStateContext';
+import { useMyListsContext } from '../../../utils/MyListsContext';
 import { useOsmAuthContext } from '../../../utils/OsmAuthContext';
 import { useSnackbar } from '../../../utils/SnackbarContext';
 import { useTicksContext } from '../../../utils/TicksContext';
@@ -80,6 +86,11 @@ const MoreMenuContainer = styled.div`
     display: none;
   }
 `;
+
+const RouteListBadges = ({ shortId }: { shortId: string }) => {
+  const { listsContaining } = useMyListsContext();
+  return <ListBadges lists={listsContaining(shortId)} />;
+};
 
 const Row = styled('a', {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -151,27 +162,83 @@ const AddTickMenuItem = ({ feature, closeMenu }: AddTickMenuItemProps) => {
   );
 };
 
+const viewToLonLat = (view: [string, string, string]): LonLat => [
+  parseFloat(view[2]),
+  parseFloat(view[1]),
+];
+
+type AddToListMenuItemProps = {
+  closeMenu: (event: React.MouseEvent) => void;
+  onOpenPicker: () => void;
+};
+const AddToListMenuItem = ({
+  closeMenu,
+  onOpenPicker,
+}: AddToListMenuItemProps) => {
+  const { loggedIn, handleLogin } = useOsmAuthContext();
+  const { showToast } = useSnackbar();
+
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.preventDefault();
+    closeMenu(event);
+    if (!loggedIn) {
+      showToast(
+        t('mylists.login_required'),
+        'info',
+        <span style={{ display: 'inline-block' }}>
+          <button type="button" onClick={handleLogin}>
+            {t('mylists.login_cta')}
+          </button>
+        </span>,
+      );
+      return;
+    }
+    onOpenPicker();
+  };
+
+  return (
+    <MenuItem onClick={handleClick} disableRipple>
+      <BookmarkAddOutlinedIcon />
+      {t('mylists.add_to_list')}
+    </MenuItem>
+  );
+};
+
 type MoreMenuProps = {
   feature: Feature;
 };
 const MoreMenu = ({ feature }: MoreMenuProps) => {
   const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
   const { open: openEditDialog } = useEditDialogContext();
+  const { view } = useMapStateContext();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const routeDetailUrl = getRouteDetailUrl(feature);
+  const pickerItem = featureToItem(feature, viewToLonLat(view));
 
   const handleShowRouteDetail = (event: React.MouseEvent) => {
     handleCloseMore(event);
     event.stopPropagation();
   };
 
+  // React synthetic events bubble through the virtual tree even from portaled
+  // MUI Menu items, so without this stop the Row's onClick (Router.push to
+  // /climbing/route/X, which opens ClimbingCragDialog) would still fire for
+  // every menu item click.
+  const swallowBubble = (e: React.MouseEvent) => e.stopPropagation();
+
   return (
-    <>
+    <span onClick={swallowBubble}>
       <IconButton color="secondary" onClick={handleClickMore}>
         <MoreHorizIcon color="secondary" />
       </IconButton>
 
       <MoreMenu>
         <AddTickMenuItem feature={feature} closeMenu={handleCloseMore} />
+        <AddToListMenuItem
+          closeMenu={handleCloseMore}
+          onOpenPicker={() => setPickerOpen(true)}
+        />
 
         <MenuItem
           onClick={(e: React.MouseEvent) => {
@@ -193,7 +260,13 @@ const MoreMenu = ({ feature }: MoreMenuProps) => {
           {t('climbingpanel.show_route_detail')}
         </MenuItem>
       </MoreMenu>
-    </>
+
+      <ListPickerDialog
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        item={pickerItem}
+      />
+    </span>
   );
 };
 
@@ -300,7 +373,10 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
               </RouteNumber>
             </RouteNumberContainer>
             <NameColumn justifyContent="stretch" flex={1}>
-              <RouteName feature={feature} selected={isSelected} />
+              <Stack direction="row" gap={1}>
+                <RouteName feature={feature} selected={isSelected} />
+                <RouteListBadges shortId={shortId} />
+              </Stack>
               <RouteDescription feature={feature} />
               <RouteAuthor feature={feature} />
             </NameColumn>

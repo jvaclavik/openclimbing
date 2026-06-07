@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useMapStateContext, View } from '../utils/MapStateContext';
-import { Star, useStarsContext } from '../utils/StarsContext';
 import { abortFetch } from '../../services/fetch';
 import {
   GEOCODER_ABORTABLE_QUEUE,
@@ -9,7 +8,6 @@ import {
   GeocoderAborted,
   GeocoderDebounced,
 } from './options/geocoder';
-import { getStarsOptions } from './options/stars';
 import { getOverpassOptions } from './options/overpass';
 import { getPresetOptions } from './options/preset';
 import { Option } from './types';
@@ -21,10 +19,9 @@ import {
   fetchClimbingSearchOptions,
 } from './options/climbing';
 
-const getMatchedOptions = (inputValue: string, stars: Star[]) => {
+const getMatchedOptions = (inputValue: string) => {
   if (inputValue === '') {
-    const starOptions = getStarsOptions(stars, '');
-    return starOptions;
+    return [];
   }
 
   const coordOptions = getCoordsOption(inputValue);
@@ -48,24 +45,19 @@ const getMatchedOptions = (inputValue: string, stars: Star[]) => {
   }
 };
 
-const getSearchOptions = async (stars: Star[], inputValue: string) => {
-  const starOptions = getStarsOptions(stars, inputValue);
+const getSearchOptions = async (inputValue: string) => {
   const { firstTwoPresets, restPresets } = await getPresetOptions(inputValue);
-  const before = [...starOptions, ...firstTwoPresets];
+  const before = [...firstTwoPresets];
   return { restPresets, before };
 };
 
-export const getFirstOption = async (
-  query: string,
-  stars: Star[],
-  view: View,
-) => {
-  const options = getMatchedOptions(query, stars);
+export const getFirstOption = async (query: string, view: View) => {
+  const options = getMatchedOptions(query);
   if (options && options.length > 0) {
     return options[0];
   }
 
-  const { before } = await getSearchOptions(stars, query);
+  const { before } = await getSearchOptions(query);
   if (before && before.length > 0) {
     return before[0];
   }
@@ -81,7 +73,6 @@ export const useGetOptions = (
   valueRef: React.MutableRefObject<string>,
 ) => {
   const { view } = useMapStateContext();
-  const { stars } = useStarsContext();
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -90,16 +81,13 @@ export const useGetOptions = (
         abortFetch(GEOCODER_ABORTABLE_QUEUE);
         abortFetch(CLIMBING_SEARCH_ABORTABLE_QUEUE);
 
-        const options = getMatchedOptions(inputValue, stars);
+        const options = getMatchedOptions(inputValue);
         if (options) {
           setOptions(options);
           return;
         }
 
-        const { before, restPresets } = await getSearchOptions(
-          stars,
-          inputValue,
-        );
+        const { before, restPresets } = await getSearchOptions(inputValue);
         setOptions([...before, { type: 'loader' }]);
 
         await debounceGeocoderOrReject(400);
@@ -128,7 +116,7 @@ export const useGetOptions = (
 
     // We don't want to re-send the request on change of View
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputValue, stars]);
+  }, [inputValue]);
 
   return options;
 };

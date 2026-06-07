@@ -91,8 +91,8 @@ export default {
 
   'featurepanel.no_name': 'Nessun nome',
   'featurepanel.share_button': 'Condividi',
-  'featurepanel.favorites_save_button': 'Salva nei preferiti',
-  'featurepanel.favorites_unsave_button': 'Rimuovi dai preferiti',
+  'featurepanel.save_button': 'Salva',
+  'featurepanel.saved_button': 'Salvato',
   'featurepanel.directions_button': 'Indicazioni',
   'featurepanel.error': 'Errore __code__ durante il recupero di un elemento da OpenStreetMap',
   'featurepanel.error_unknown': 'Errore sconosciuto durante il recupero di un elemento da OpenStreetMap.',
