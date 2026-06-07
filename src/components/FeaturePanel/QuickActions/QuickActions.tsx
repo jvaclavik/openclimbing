@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { QuickActionButton } from './QuickActionButton';
-import { StarButton } from './StarButton';
+import { SaveButton } from './SaveButton';
 import Router from 'next/router';
 import { ShareButton } from './ShareDialog/ShareButton';
 import { t } from '../../../services/intl';
@@ -45,7 +45,7 @@ export const QuickActions = () => {
             Router.push('/directions');
           }}
         />
-        <StarButton />
+        <SaveButton />
         <ShareButton />
         {showPdfButton && (
           <QuickActionButton

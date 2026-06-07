@@ -29,7 +29,7 @@ import {
   getMapViewFromHash,
 } from '../src/components/App/helpers';
 import { FeatureProvider } from '../src/components/utils/FeatureContext';
-import { StarsProvider } from '../src/components/utils/StarsContext';
+import { MyListsProvider } from '../src/components/utils/MyListsContext';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Loading } from '../src/components/App/Loading';
 import { SearchBox } from '../src/components/SearchBox/SearchBox';
@@ -108,9 +108,9 @@ const MyApp = (props: Props) => {
                 <MapStateProvider initialMapView={mapView}>
                   <OsmAuthProvider cookies={cookies}>
                     <WikimediaCommonsAuthProvider cookies={cookies}>
-                      <StarsProvider>
-                        <EditDialogProvider /* TODO supply router.query */>
-                          <QueryClientProvider client={reactQueryClient}>
+                      <EditDialogProvider /* TODO supply router.query */>
+                        <QueryClientProvider client={reactQueryClient}>
+                          <MyListsProvider>
                             <TicksProvider>
                               <Head>
                                 <meta
@@ -129,9 +129,9 @@ const MyApp = (props: Props) => {
                               {/* eslint-disable-next-line react/jsx-props-no-spreading */}
                               <Component {...pageProps} />
                             </TicksProvider>
-                          </QueryClientProvider>
-                        </EditDialogProvider>
-                      </StarsProvider>
+                          </MyListsProvider>
+                        </QueryClientProvider>
+                      </EditDialogProvider>
                     </WikimediaCommonsAuthProvider>
                   </OsmAuthProvider>
                 </MapStateProvider>

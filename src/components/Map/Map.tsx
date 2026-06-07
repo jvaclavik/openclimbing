@@ -13,6 +13,7 @@ import { TopMenu } from './HamburgerMenu/TopMenu';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { Weather } from './Weather/Weather';
 import { MapFilter } from './MapFilter/MapFilter';
+import { MyListsLayer } from './MyListsLayer';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
@@ -87,6 +88,7 @@ const Map = () => {
   return (
     <>
       <BrowserMapDynamic />
+      {mapLoaded && <MyListsLayer />}
       {!mapLoaded && <Spinner color="secondary" />}
       <NoscriptMessage />
       <TopRight>

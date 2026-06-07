@@ -1,5 +1,4 @@
 import { MapClickOverride, useMapStateContext } from '../utils/MapStateContext';
-import { useStarsContext } from '../utils/StarsContext';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { abortFetch } from '../../services/fetch';
 import {
@@ -10,7 +9,6 @@ import {
   GeocoderDebounced,
   useInputValueState,
 } from '../SearchBox/options/geocoder';
-import { getStarsOptions } from '../SearchBox/options/stars';
 import styled from '@emotion/styled';
 import {
   Autocomplete,
@@ -152,7 +150,6 @@ const useOptions = (
   valueRef: React.MutableRefObject<string>,
 ) => {
   const { view } = useMapStateContext();
-  const { stars } = useStarsContext();
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -161,7 +158,7 @@ const useOptions = (
         abortFetch(GEOCODER_ABORTABLE_QUEUE);
 
         if (inputValue === '') {
-          setOptions(getStarsOptions(stars, inputValue));
+          setOptions([]);
           return;
         }
 
@@ -180,7 +177,7 @@ const useOptions = (
         throw e;
       }
     })();
-  }, [inputValue, stars]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [inputValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return options;
 };

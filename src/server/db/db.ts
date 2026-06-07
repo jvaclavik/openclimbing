@@ -30,6 +30,41 @@ const ensureOsmUserDisplayNamesTable = (db: Database) => {
   `);
 };
 
+const createUserListsTables = (db: Database) => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_lists
+    (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      "osmUserId" INTEGER NOT NULL,
+      name        TEXT    NOT NULL,
+      emoji       TEXT    NOT NULL,
+      color       TEXT    NOT NULL DEFAULT '#FFFFFF',
+      "createdAt" TEXT    NOT NULL,
+      "sortOrder" INTEGER NOT NULL DEFAULT 0
+    );
+  `);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_user_lists_user ON user_lists ("osmUserId");`,
+  );
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_list_items
+    (
+      id        INTEGER PRIMARY KEY AUTOINCREMENT,
+      "listId"  INTEGER NOT NULL REFERENCES user_lists(id) ON DELETE CASCADE,
+      "shortId" TEXT    NOT NULL,
+      label     TEXT    NOT NULL,
+      "poiType" TEXT    NOT NULL,
+      lon       REAL    NOT NULL,
+      lat       REAL    NOT NULL,
+      "addedAt" TEXT    NOT NULL,
+      UNIQUE ("listId", "shortId")
+    );
+  `);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_user_list_items_list ON user_list_items ("listId");`,
+  );
+};
+
 /**
  * Applies version-based migrations. Must run on every getDb() (see HMR cache).
  */
@@ -41,6 +76,30 @@ const runPendingMigrations = (db: Database) => {
     })();
 
     console.log(`Database ${DB_PATH} migrated from version 1 to 2`); // eslint-disable-line no-console
+  }
+  if (getDbVersion(db) === 2) {
+    db.transaction(() => {
+      createUserListsTables(db);
+      db.pragma('user_version = 3');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 2 to 3`); // eslint-disable-line no-console
+  }
+  if (getDbVersion(db) === 3) {
+    db.transaction(() => {
+      const hasColor = db
+        .prepare<[], { name: string }>(`PRAGMA table_info(user_lists)`)
+        .all()
+        .some((c) => c.name === 'color');
+      if (!hasColor) {
+        db.exec(
+          `ALTER TABLE user_lists ADD COLUMN color TEXT NOT NULL DEFAULT '#FFFFFF';`,
+        );
+      }
+      db.pragma('user_version = 4');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 3 to 4`); // eslint-disable-line no-console
   }
 };
 
@@ -57,10 +116,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 2');
+        db.pragma('user_version = 4');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 2`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 4`); // eslint-disable-line no-console
     }
 
     store.db = db;

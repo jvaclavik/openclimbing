@@ -160,8 +160,8 @@ export default {
 
   'featurepanel.no_name': '無名',
   'featurepanel.share_button': '分享',
-  'featurepanel.favorites_save_button': '儲存',
-  'featurepanel.favorites_unsave_button': '已儲存',
+  'featurepanel.save_button': '儲存',
+  'featurepanel.saved_button': '已儲存',
   'featurepanel.directions_button': '路線',
   'featurepanel.error': '由 OpenStreetMap 擷取物件時發生錯誤 __code__',
   'featurepanel.error_unknown': '由 OpenStreetMap 擷取物件時發生未知錯誤。',

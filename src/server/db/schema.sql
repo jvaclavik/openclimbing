@@ -1,4 +1,4 @@
--- SQLite schema v2 (see db.ts migrations when bumping user_version)
+-- SQLite schema v4 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -64,3 +64,31 @@ CREATE TABLE osm_user_display_names
 
 CREATE INDEX idx_osm_user_display_name_lower
   ON osm_user_display_names (lower("displayName"));
+
+CREATE TABLE user_lists
+(
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  "osmUserId" INTEGER NOT NULL,
+  name        TEXT    NOT NULL,
+  emoji       TEXT    NOT NULL,
+  color       TEXT    NOT NULL DEFAULT '#FFFFFF',
+  "createdAt" TEXT    NOT NULL,
+  "sortOrder" INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_user_lists_user ON user_lists ("osmUserId");
+
+CREATE TABLE user_list_items
+(
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  "listId"  INTEGER NOT NULL REFERENCES user_lists(id) ON DELETE CASCADE,
+  "shortId" TEXT    NOT NULL,
+  label     TEXT    NOT NULL,
+  "poiType" TEXT    NOT NULL,
+  lon       REAL    NOT NULL,
+  lat       REAL    NOT NULL,
+  "addedAt" TEXT    NOT NULL,
+  UNIQUE ("listId", "shortId")
+);
+
+CREATE INDEX idx_user_list_items_list ON user_list_items ("listId");
