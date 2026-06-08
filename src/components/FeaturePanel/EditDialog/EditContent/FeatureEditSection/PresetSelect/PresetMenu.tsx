@@ -23,10 +23,13 @@ const useGetOnClick = () => {
       ? Object.entries(newPreset.addTags ?? newPreset.tags ?? {})
       : [];
 
+    const toAddKeys = new Set(toAdd.map(([key]) => key));
+
     setTagsEntries((prev) => [
       ...toAdd,
       ...prev.filter(
-        ([key, value]) => !(toRemove[key] && toRemove[key] === value),
+        ([key, value]) =>
+          !toAddKeys.has(key) && !(toRemove[key] && toRemove[key] === value),
       ),
     ]);
   };
