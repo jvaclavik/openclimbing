@@ -290,6 +290,7 @@ export default {
   'featurepanel.type_crag': 'Sektor',
   'featurepanel.routes': 'cest',
   'featurepanel.hidden_crags': 'skrytých sektorů',
+  'photo_coverage.tooltip': '__withPhoto__ z __total__ cest (__percent__\u00A0%) je zakresleno na fotce',
 
   'opening_hours.open': 'Otevřeno: __todayTime__',
   'opening_hours.now_closed_but_today': 'Nyní zavřeno, dnes: __todayTime__',

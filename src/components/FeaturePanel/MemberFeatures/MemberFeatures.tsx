@@ -10,6 +10,8 @@ import { Feature } from '../../../services/types';
 import { isRouteMaster } from '../../../utils';
 import { t } from '../../../services/intl';
 import { getDividedFeaturesBySections } from '../Climbing/utils/getDividedFeaturesBySections';
+import { PhotoCoverageRing } from '../Climbing/PhotoCoverageRing';
+import { hasPathOnPhoto } from '../Climbing/utils/photo';
 
 const getHeading = (feature: Feature) => {
   if (feature.tags.climbing === 'crag') {
@@ -44,17 +46,30 @@ export const MemberFeatures = () => {
   const climbingRoutesFeatures = dividedFeaturesBySections.routes;
   const otherFeatures = dividedFeaturesBySections.other;
   const headingNum = climbingRoutesFeatures.length || memberFeatures.length;
+  const routesWithPhoto = climbingRoutesFeatures.filter((route) =>
+    hasPathOnPhoto(route.tags),
+  ).length;
 
   return (
     <Box mb={1}>
       <Box ml={-2} mr={-2}>
         <PanelLabel>
-          <Stack direction="row" gap={1.5}>
+          <Stack direction="row" gap={1.5} alignItems="center">
             <div>{getHeading(feature)}</div>
             <Chip
               size="small"
               variant="outlined"
-              label={headingNum}
+              label={
+                <Stack direction="row" gap={0.75} alignItems="center">
+                  <span>{headingNum}</span>
+                  {climbingRoutesFeatures.length > 0 && (
+                    <PhotoCoverageRing
+                      total={climbingRoutesFeatures.length}
+                      withPhoto={routesWithPhoto}
+                    />
+                  )}
+                </Stack>
+              }
               sx={{ position: 'relative', top: -3 }}
             />
           </Stack>

@@ -74,6 +74,13 @@ export const isWikimediaCommonsPhotoPath = (tag: string) => {
 export const getWikimediaCommonsPhotoPathKeys = (tags: FeatureTags) =>
   Object.keys(tags).filter(isWikimediaCommonsPhotoPath);
 
+// A route is considered "drawn on a photo" when it has at least one
+// non-empty `wikimedia_commons[...]:path` tag describing its line on an image.
+export const hasPathOnPhoto = (tags: FeatureTags) =>
+  getWikimediaCommonsPhotoPathKeys(tags).some((key) =>
+    Boolean(tags[key]?.trim()),
+  );
+
 export const getWikimediaCommonsTags = (tags: FeatureTags) => {
   return naturalSort(
     Object.entries(tags).filter(([key]) => {

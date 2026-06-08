@@ -326,6 +326,7 @@ export default {
   'featurepanel.type_crag': 'Crag',
   'featurepanel.routes': 'routes',
   'featurepanel.hidden_crags': 'hidden crags',
+  'photo_coverage.tooltip': '__withPhoto__ of __total__ routes (__percent__\u00A0%) are drawn on a photo',
 
   'opening_hours.all_day': '24 hours',
   'opening_hours.open': 'Open: __todayTime__',
