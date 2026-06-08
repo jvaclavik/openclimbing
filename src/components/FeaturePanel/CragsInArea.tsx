@@ -24,6 +24,8 @@ import { PROJECT_ID } from '../../services/project';
 import { getClickHandler } from './FeatureImages/Image/helpers';
 import { MemberItem } from './MemberFeatures/MemberItem';
 import { RouteDistribution } from './Climbing/RouteDistribution';
+import { PhotoCoverageRing } from './Climbing/PhotoCoverageRing';
+import { hasPathOnPhoto } from './Climbing/utils/photo';
 import { CragsInAreaSort } from './Climbing/CragsInAreaSort/CragsInAreaSort';
 import { CragsInAreaFilter } from './Climbing/Filter/CragsInAreaFilter';
 import {
@@ -96,6 +98,12 @@ const StyledLink = styled(Link)`
   }
 `;
 
+const ChipContent = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+`;
+
 const Header = ({
   label,
   chipContent,
@@ -156,6 +164,15 @@ const AreaInfo = ({
       return acc + (memberFeatures?.length ?? 0);
     }, 0) +
     subAreas.reduce((acc, subArea) => acc + countRoutesInArea(subArea), 0);
+  const routesWithPhoto =
+    crags.reduce(
+      (acc, { memberFeatures }) => acc + countRoutesWithPhoto(memberFeatures),
+      0,
+    ) +
+    subAreas.reduce(
+      (acc, subArea) => acc + countRoutesWithPhotoInArea(subArea),
+      0,
+    );
   const totalItems = crags.length + subAreas.length;
 
   return (
@@ -166,6 +183,7 @@ const AreaInfo = ({
             crags={crags.length}
             areas={subAreas.length}
             routes={numberOfRoutes}
+            routesWithPhoto={routesWithPhoto}
           />
         ) : null
       }
@@ -216,6 +234,20 @@ const countRoutesInArea = (feature: Feature): number =>
     return acc;
   }, 0);
 
+const countRoutesWithPhoto = (routes: Feature[] = []): number =>
+  routes.filter((route) => hasPathOnPhoto(route.tags)).length;
+
+const countRoutesWithPhotoInArea = (feature: Feature): number =>
+  (feature.memberFeatures ?? []).reduce((acc, child) => {
+    if (child.tags.climbing === 'crag') {
+      return acc + countRoutesWithPhoto(child.memberFeatures);
+    }
+    if (child.tags.climbing === 'area') {
+      return acc + countRoutesWithPhotoInArea(child);
+    }
+    return acc;
+  }, 0);
+
 const collectAreaImages = (feature: Feature, limit = 20) => {
   const ownImages = getFeatureImages(feature);
   const childImages = (feature.memberFeatures ?? []).flatMap(getFeatureImages);
@@ -255,10 +287,16 @@ const CragItem = ({
             label={getLabel(feature)}
             chipContent={
               feature.members?.length ? (
-                <>
-                  <strong>{feature.members.length}</strong>{' '}
-                  {t('featurepanel.routes')}
-                </>
+                <ChipContent>
+                  <span>
+                    <strong>{feature.members.length}</strong>{' '}
+                    {t('featurepanel.routes')}
+                  </span>
+                  <PhotoCoverageRing
+                    total={feature.members.length}
+                    withPhoto={countRoutesWithPhoto(feature.memberFeatures)}
+                  />
+                </ChipContent>
               ) : undefined
             }
             typeLabel={showTypeLabel ? t('featurepanel.type_crag') : undefined}
@@ -291,7 +329,19 @@ const AreaItem = ({ feature }: { feature: Feature }) => {
   const routeCount = countRoutesInArea(feature);
   const hasAnyCount = subAreaCount > 0 || cragCount > 0 || routeCount > 0;
   const chipContent = hasAnyCount ? (
-    <CountSummary areas={subAreaCount} crags={cragCount} routes={routeCount} />
+    <ChipContent>
+      <CountSummary
+        areas={subAreaCount}
+        crags={cragCount}
+        routes={routeCount}
+      />
+      {routeCount > 0 && (
+        <PhotoCoverageRing
+          total={routeCount}
+          withPhoto={countRoutesWithPhotoInArea(feature)}
+        />
+      )}
+    </ChipContent>
   ) : undefined;
 
   const getOnClickWithHash = (e) => {
@@ -407,6 +457,7 @@ const NumberOfVisible = (props: {
   crags: number;
   areas: number;
   routes: number;
+  routesWithPhoto: number;
 }) => {
   if (props.areas === 0 && props.crags === 0 && props.routes === 0) {
     return null;
@@ -415,7 +466,21 @@ const NumberOfVisible = (props: {
     <Chip
       size="small"
       variant="outlined"
-      label={<CountSummary {...props} />}
+      label={
+        <ChipContent>
+          <CountSummary
+            crags={props.crags}
+            areas={props.areas}
+            routes={props.routes}
+          />
+          {props.routes > 0 && (
+            <PhotoCoverageRing
+              total={props.routes}
+              withPhoto={props.routesWithPhoto}
+            />
+          )}
+        </ChipContent>
+      }
       sx={{ position: 'relative', top: 2, fontWeight: 'normal' }}
     />
   );
