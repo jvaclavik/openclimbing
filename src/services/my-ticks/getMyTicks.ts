@@ -9,6 +9,12 @@ export type FetchedClimbingTick = {
   grade: string;
   /** Skála/oblast (crag/area v hierarchii), pokud je v datech. */
   cragName: string | null;
+  cragOsmType: string | null;
+  cragOsmId: number | null;
+  /** Druhý crag/area předek nad cragem (typicky vyšší úroveň). */
+  areaName: string | null;
+  areaOsmType: string | null;
+  areaOsmId: number | null;
   center?: number[];
   index: number;
   date: string;

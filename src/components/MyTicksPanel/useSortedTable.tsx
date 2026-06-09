@@ -145,5 +145,13 @@ export const useSortedTable = (
       showActionsColumn={showActionsColumn}
     />
   );
-  return { visibleRows, tableHeader };
+
+  const columnCount = showActionsColumn ? 6 : 5;
+
+  return {
+    visibleRows,
+    tableHeader,
+    groupByDay: orderBy === 'date',
+    columnCount,
+  };
 };

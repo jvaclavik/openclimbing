@@ -67,6 +67,12 @@ export type ClimbingTick = {
    * Jinak fallback na bezprostředního rodiče z DB.
    */
   routeCragName?: string | null;
+  routeCragOsmType?: string | null;
+  routeCragOsmId?: number | null;
+  /** Druhý crag/area předek nad routeCrag (typicky vyšší úroveň — oblast). */
+  routeAreaName?: string | null;
+  routeAreaOsmType?: string | null;
+  routeAreaOsmId?: number | null;
 };
 
 export type ClimbingTickDb = Omit<ClimbingTick, 'shortId'> & {
