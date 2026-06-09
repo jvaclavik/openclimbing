@@ -90,6 +90,11 @@ const tickToFetchedRow = (
     name: fromDbName || fromFeatureName,
     grade: routeDifficulty.grade,
     cragName: cragFromTick || null,
+    cragOsmType: tick.routeCragOsmType ?? null,
+    cragOsmId: tick.routeCragOsmId ?? null,
+    areaName: tick.routeAreaName?.trim() || null,
+    areaOsmType: tick.routeAreaOsmType ?? null,
+    areaOsmId: tick.routeAreaOsmId ?? null,
     center:
       centerFromDb ??
       (feature?.center && feature.center.length >= 2

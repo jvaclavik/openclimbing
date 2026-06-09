@@ -1,6 +1,8 @@
 import { Stack, TableCell, TableRow } from '@mui/material';
+import { keyframes } from '@mui/system';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 import { DEFAULT_DATA_FORMAT } from '../../config.mjs';
 import { getUrlOsmId } from '../../services/helpers';
 import { TickStyleBadge } from '../../services/my-ticks/TickStyleBadge';
@@ -13,21 +15,44 @@ import { t } from '../../services/intl';
 import { TickMoreButton } from '../FeaturePanel/Climbing/TickMoreButton';
 import { useMapStateContext } from '../utils/MapStateContext';
 
+const highlightPulse = keyframes`
+  0% { background-color: rgba(255, 213, 79, 0); }
+  15% { background-color: rgba(255, 213, 79, 0.55); }
+  60% { background-color: rgba(255, 213, 79, 0.35); }
+  100% { background-color: rgba(255, 213, 79, 0); }
+`;
+
 export const MyTicksRow = ({
   fetchedTick,
   readOnly = false,
+  highlighted = false,
 }: {
   fetchedTick: FetchedClimbingTick;
   readOnly?: boolean;
+  highlighted?: boolean;
 }) => {
   const routeDifficulties = getDifficulties(fetchedTick.tags);
   const { view } = useMapStateContext();
   const { name, style, date, apiId } = fetchedTick;
   const partners = getPartnersText(fetchedTick.tick);
   const routeLabel = name?.trim() ? name : t('my_ticks.route_unnamed');
+  const rowRef = useRef<HTMLTableRowElement | null>(null);
+
+  useEffect(() => {
+    if (highlighted && rowRef.current) {
+      rowRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlighted]);
 
   return (
-    <TableRow>
+    <TableRow
+      ref={rowRef}
+      sx={
+        highlighted
+          ? { animation: `${highlightPulse} 2.8s ease-out 1` }
+          : undefined
+      }
+    >
       <TableCell>
         <Stack spacing={0.25} alignItems="flex-start">
           <Link href={`/${getUrlOsmId(apiId)}#${view.join('/')}`}>
@@ -52,7 +77,7 @@ export const MyTicksRow = ({
       </TableCell>
       {readOnly ? null : (
         <TableCell>
-          <TickMoreButton tick={fetchedTick.tick} />
+          <TickMoreButton tick={fetchedTick.tick} fetchedTick={fetchedTick} />
         </TableCell>
       )}
     </TableRow>
