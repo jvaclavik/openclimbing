@@ -27,6 +27,7 @@ import {
   buildTickShareUrl,
   sessionDateFromTimestamp,
 } from '../../services/my-ticks/ticksUrlFilter';
+import { SessionRouteImagesGallery } from './SessionRouteImagesGallery';
 
 export type ShareTickMode = 'session' | 'tick';
 
@@ -203,6 +204,9 @@ export const ShareTickDialog = ({
         </Typography>
         <ShareLinkSection url={url} isMobileMode={isMobileMode} />
         <ShareTextSection shareText={shareText} isMobileMode={isMobileMode} />
+        <SessionRouteImagesGallery
+          ticks={mode === 'session' ? (sessionTicks ?? [tick]) : [tick]}
+        />
         <Alert severity="info" variant="outlined">
           {t('my_ticks.share.strava_hint')}
         </Alert>

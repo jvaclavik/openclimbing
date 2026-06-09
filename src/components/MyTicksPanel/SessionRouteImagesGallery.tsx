@@ -1,0 +1,363 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Box,
+  IconButton,
+  Skeleton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
+import { t } from '../../services/intl';
+import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
+import type { TopoMetaResponse } from '../../../pages/api/topo-meta';
+
+const TILE_HEIGHT = 180;
+/** Placeholder aspect ratio used before an image has loaded. */
+const PLACEHOLDER_ASPECT_RATIO = '16 / 9';
+
+type ImageTileSpec = {
+  imageId: string;
+  photoIndex: number;
+  routeFilter: string[];
+  caption: string;
+  key: string;
+  /** Ticks contributing to this tile (for caption count). */
+  ticks: FetchedClimbingTick[];
+};
+
+const cragShortIdFromTick = (tick: FetchedClimbingTick): string | null => {
+  if (!tick.cragOsmType || tick.cragOsmId == null) return null;
+  return `${tick.cragOsmType.charAt(0)}${tick.cragOsmId}`;
+};
+
+const sanitizeFilename = (input: string): string =>
+  input.replace(/[^a-zA-Z0-9-_]+/g, '_').replace(/^_+|_+$/g, '') || 'topo';
+
+const buildOgImageUrl = (
+  imageId: string,
+  photoIndex: number,
+  routeFilter: string[],
+): string => {
+  const params = new URLSearchParams({ id: imageId, raw: '1' });
+  if (photoIndex > 0) {
+    params.set('photoIndex', String(photoIndex));
+  }
+  if (routeFilter.length > 0) {
+    params.set('routes', routeFilter.join(','));
+  }
+  return `/api/og-image?${params.toString()}`;
+};
+
+const fetchTopoMeta = async (
+  cragShortId: string,
+): Promise<TopoMetaResponse | null> => {
+  try {
+    const res = await fetch(
+      `/api/topo-meta?id=${encodeURIComponent(cragShortId)}`,
+    );
+    if (!res.ok) return null;
+    return (await res.json()) as TopoMetaResponse;
+  } catch {
+    return null;
+  }
+};
+
+const useTopoMeta = (
+  cragShortIds: string[],
+): { meta: Map<string, TopoMetaResponse>; loading: boolean } => {
+  const key = cragShortIds.slice().sort().join(',');
+  const [meta, setMeta] = useState<Map<string, TopoMetaResponse>>(new Map());
+  const [loading, setLoading] = useState(cragShortIds.length > 0);
+
+  useEffect(() => {
+    if (cragShortIds.length === 0) {
+      setMeta(new Map());
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    (async () => {
+      const results = await Promise.all(
+        cragShortIds.map(async (id) => [id, await fetchTopoMeta(id)] as const),
+      );
+      if (cancelled) return;
+      const out = new Map<string, TopoMetaResponse>();
+      for (const [id, data] of results) {
+        if (data) out.set(id, data);
+      }
+      setMeta(out);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  return { meta, loading };
+};
+
+type CragGroup = {
+  cragShortId: string | null;
+  ticks: FetchedClimbingTick[];
+};
+
+const groupTicksByCrag = (ticks: FetchedClimbingTick[]): CragGroup[] => {
+  const order: string[] = [];
+  const map = new Map<string, CragGroup>();
+  const orphans: FetchedClimbingTick[] = [];
+  for (const tick of ticks) {
+    if (!tick.tick.shortId) continue;
+    const cragId = cragShortIdFromTick(tick);
+    if (!cragId) {
+      orphans.push(tick);
+      continue;
+    }
+    if (!map.has(cragId)) {
+      order.push(cragId);
+      map.set(cragId, { cragShortId: cragId, ticks: [] });
+    }
+    map.get(cragId)!.ticks.push(tick);
+  }
+  const groups = order.map((id) => map.get(id)!);
+  if (orphans.length > 0) {
+    groups.push({ cragShortId: null, ticks: orphans });
+  }
+  return groups;
+};
+
+const planTilesForCragGroup = (
+  group: CragGroup,
+  meta: TopoMetaResponse | undefined,
+): ImageTileSpec[] => {
+  const tickShortIds = group.ticks
+    .map((tick) => tick.tick.shortId!)
+    .filter(Boolean);
+  const tickByShortId = new Map(
+    group.ticks.map((tick) => [tick.tick.shortId!, tick] as const),
+  );
+
+  // Orphan group or no metadata available — render single-route tiles per tick.
+  if (!group.cragShortId || !meta) {
+    return group.ticks.map((tick) => ({
+      imageId: tick.tick.shortId!,
+      photoIndex: 0,
+      routeFilter: [tick.tick.shortId!],
+      caption: tick.name,
+      key: `solo-${tick.tick.shortId}`,
+      ticks: [tick],
+    }));
+  }
+
+  const allowedSet = new Set(tickShortIds);
+  const tiles: ImageTileSpec[] = [];
+  const cragRepresentative = group.ticks[0];
+
+  for (const photo of meta.photos) {
+    const intersection = photo.memberShortIds.filter((id) =>
+      allowedSet.has(id),
+    );
+    if (intersection.length === 0) continue;
+    const intersectionTicks = intersection
+      .map((id) => tickByShortId.get(id))
+      .filter((tick): tick is FetchedClimbingTick => !!tick);
+    const cragLabel = cragRepresentative.cragName ?? cragRepresentative.name;
+    const caption =
+      intersectionTicks.length === 1 ? intersectionTicks[0].name : cragLabel;
+    tiles.push({
+      imageId: group.cragShortId,
+      photoIndex: photo.photoIndex,
+      routeFilter: intersection,
+      caption,
+      key: `crag-${group.cragShortId}-photo-${photo.photoIndex}`,
+      ticks: intersectionTicks,
+    });
+  }
+
+  // If no photo in this crag's topos contains any climbed route, fall back to
+  // per-route tiles so the user at least sees a photo per route they climbed.
+  if (tiles.length === 0) {
+    return group.ticks.map((tick) => ({
+      imageId: tick.tick.shortId!,
+      photoIndex: 0,
+      routeFilter: [tick.tick.shortId!],
+      caption: tick.name,
+      key: `solo-${tick.tick.shortId}`,
+      ticks: [tick],
+    }));
+  }
+
+  return tiles;
+};
+
+const planAllTiles = (
+  ticks: FetchedClimbingTick[],
+  meta: Map<string, TopoMetaResponse>,
+): ImageTileSpec[] => {
+  const groups = groupTicksByCrag(ticks);
+  return groups.flatMap((group) =>
+    planTilesForCragGroup(
+      group,
+      group.cragShortId ? meta.get(group.cragShortId) : undefined,
+    ),
+  );
+};
+
+type TileProps = {
+  tile: ImageTileSpec;
+};
+
+const ImageTile = ({ tile }: TileProps) => {
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+  if (errored) return null;
+
+  const url = buildOgImageUrl(tile.imageId, tile.photoIndex, tile.routeFilter);
+  const filename = `${sanitizeFilename(tile.caption)}.png`;
+  const isMulti = tile.ticks.length > 1;
+  const countSuffix = isMulti
+    ? ` · ${t('my_ticks.share.images_group_count', {
+        count: String(tile.ticks.length),
+      })}`
+    : '';
+
+  return (
+    <Box
+      sx={{ flex: '0 0 auto', display: 'inline-flex', flexDirection: 'column' }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          height: TILE_HEIGHT,
+          borderRadius: 1,
+          overflow: 'hidden',
+          bgcolor: 'action.hover',
+          // Reserve a sane placeholder area while the image loads. Once the
+          // image arrives its intrinsic width drives the tile width.
+          ...(loaded ? {} : { aspectRatio: PLACEHOLDER_ASPECT_RATIO }),
+        }}
+      >
+        {!loaded ? (
+          <Skeleton
+            variant="rectangular"
+            sx={{ position: 'absolute', inset: 0 }}
+          />
+        ) : null}
+        <Box
+          component="img"
+          src={url}
+          alt={tile.caption}
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => setErrored(true)}
+          sx={{
+            display: 'block',
+            height: '100%',
+            width: 'auto',
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 200ms',
+          }}
+        />
+      </Box>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={0.5}
+        sx={{ pt: 0.5, width: '100%' }}
+      >
+        <Typography
+          variant="caption"
+          noWrap
+          sx={{ flex: 1, minWidth: 0 }}
+          title={`${tile.caption}${countSuffix}`}
+        >
+          {tile.caption}
+          {countSuffix}
+        </Typography>
+        <Tooltip title={t('my_ticks.share.images_download')}>
+          <IconButton
+            size="small"
+            component="a"
+            href={url}
+            download={filename}
+            aria-label={t('my_ticks.share.images_download')}
+          >
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+    </Box>
+  );
+};
+
+const LoadingTile = ({ tileKey }: { tileKey: string }) => (
+  <Box
+    key={tileKey}
+    sx={{ flex: '0 0 auto', display: 'inline-flex', flexDirection: 'column' }}
+  >
+    <Skeleton
+      variant="rectangular"
+      sx={{
+        height: TILE_HEIGHT,
+        aspectRatio: PLACEHOLDER_ASPECT_RATIO,
+        borderRadius: 1,
+      }}
+    />
+    <Skeleton variant="text" sx={{ mt: 0.5, width: '60%' }} />
+  </Box>
+);
+
+type Props = {
+  ticks: FetchedClimbingTick[];
+};
+
+export const SessionRouteImagesGallery = ({ ticks }: Props) => {
+  const cragShortIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const tick of ticks) {
+      const id = cragShortIdFromTick(tick);
+      if (id) set.add(id);
+    }
+    return [...set];
+  }, [ticks]);
+
+  const { meta, loading } = useTopoMeta(cragShortIds);
+  const tiles = useMemo(() => planAllTiles(ticks, meta), [ticks, meta]);
+
+  if (!loading && tiles.length === 0) return null;
+
+  return (
+    <Box mb={2}>
+      <Typography variant="overline">
+        {t('my_ticks.share.images_label')}
+      </Typography>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          overflowX: 'auto',
+          pb: 1,
+          scrollSnapType: 'x mandatory',
+          '& > *': {
+            scrollSnapAlign: 'start',
+          },
+        }}
+      >
+        {loading ? (
+          <>
+            <LoadingTile tileKey="loading-1" />
+            <LoadingTile tileKey="loading-2" />
+            <LoadingTile tileKey="loading-3" />
+          </>
+        ) : (
+          tiles.map((tile) => <ImageTile key={tile.key} tile={tile} />)
+        )}
+      </Stack>
+      <Typography variant="caption" color="text.secondary">
+        {t('my_ticks.share.images_hint')}
+      </Typography>
+    </Box>
+  );
+};
