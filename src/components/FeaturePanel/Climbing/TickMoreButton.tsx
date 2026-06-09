@@ -29,9 +29,9 @@ const DeleteTickMenuItem = ({ tick, closeMenu }: DeleteTickMenuItemProps) => {
     setLoading(true);
     try {
       await deleteTick(tick.id);
-      showToast('Tick was deleted', 'success');
+      showToast(t('tick.deleted_toast'), 'success');
     } catch (e) {
-      showToast(`Error: ${e}`, 'error');
+      showToast(`${t('error')}: ${e}`, 'error');
     } finally {
       setLoading(false);
       closeMenu(event);
@@ -41,7 +41,7 @@ const DeleteTickMenuItem = ({ tick, closeMenu }: DeleteTickMenuItemProps) => {
   return (
     <MenuItem onClick={onClick} disableRipple>
       <DeleteIcon />
-      Delete tick &nbsp;
+      {t('tick.delete_button')} &nbsp;
       {loading && <CircularProgress size={24} />}
     </MenuItem>
   );
@@ -76,7 +76,7 @@ export const TickMoreButton = ({ tick, fetchedTick }: Props) => {
           disableRipple
         >
           <EditIcon />
-          Edit tick
+          {t('tick.edit_button')}
         </MenuItem>
         {canShare ? (
           <MenuItem

@@ -6,6 +6,7 @@ import { useOsmAuthContext } from '../../../utils/OsmAuthContext';
 import { useTicksContext } from '../../../utils/TicksContext';
 import { useFeatureContext } from '../../../utils/FeatureContext';
 import { getShortId } from '../../../../services/helpers';
+import { t } from '../../../../services/intl';
 
 export const AddTickButton = () => {
   const { addTick, isTicked } = useTicksContext();
@@ -17,7 +18,7 @@ export const AddTickButton = () => {
 
   const onClick = async () => {
     if (!loggedIn) {
-      showToast('Please log in to add tick.', 'warning');
+      showToast(t('tick.login_required_to_add'), 'warning');
       return;
     }
 
@@ -25,7 +26,7 @@ export const AddTickButton = () => {
     try {
       await addTick(getShortId(feature.osmMeta));
     } catch (e) {
-      showToast(`Error: ${e}`, 'error');
+      showToast(`${t('error')}: ${e}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -41,7 +42,7 @@ export const AddTickButton = () => {
         endIcon={<CheckIcon color={ticked ? 'success' : undefined} />}
         loading={loading}
       >
-        Add tick
+        {t('tick.add_button')}
       </Button>
     </>
   );

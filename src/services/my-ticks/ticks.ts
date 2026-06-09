@@ -20,22 +20,29 @@ export const TICK_STYLE_SEGMENT_ORDER: TickStyle[] = [
   null,
 ];
 
-const NAMED_COLOR_HEX: Record<string, string> = {
-  gray: '#9e9e9e',
-  red: '#d32f2f',
-  green: '#2e7d32',
-  pink: '#e91e63',
-  darkred: '#b71c1c',
-  lightgreen: '#66bb6a',
-  blue: '#1976d2',
-  orange: '#ed6c02',
-};
+/**
+ * Centrální paleta pro tick styly. Hex barvy z Tailwind 600/700 shade —
+ * dostatečně syté pro grafy, ale po snížení sytosti přes alpha čitelné v badge
+ * v light i dark režimu. Vybrané tak, aby každý styl měl unikátní odstín.
+ */
+const TICK_STYLE_COLORS = {
+  null: '#64748b', // slate-500: neutral, no style chosen
+  OS: '#059669', // emerald-600: top achievement (clean on sight)
+  FL: '#65a30d', // lime-600: second tier send
+  RP: '#dc2626', // red-600: standard send
+  PP: '#db2777', // pink-600: pinkpoint variant
+  RK: '#92400e', // amber-800: aid involvement (rustic)
+  AF: '#0e7490', // cyan-700: multipitch all free
+  TR: '#2563eb', // blue-600: top rope
+  FS: '#c2410c', // orange-700: free solo, intense
+  PJ: '#7c3aed', // violet-600: project / in progress
+} as const;
+
+const FALLBACK_COLOR = TICK_STYLE_COLORS.null;
 
 export function tickStyleToChartColor(style: TickStyle): string {
-  const config = tickStyles.find((s) => s.key === style) ?? tickStyles[0];
-  const c = config.color ?? 'gray';
-  if (typeof c === 'string' && c.startsWith('#')) return c;
-  return NAMED_COLOR_HEX[c] ?? '#9e9e9e';
+  const key = style === null ? 'null' : style;
+  return (TICK_STYLE_COLORS as Record<string, string>)[key] ?? FALLBACK_COLOR;
 }
 
 export function coerceTickStyleFromDb(
@@ -50,67 +57,67 @@ export const tickStyles: Array<{
   key: TickStyle;
   name: string;
   description?: string;
-  color?: string;
+  color: string;
 }> = [
   {
     key: null,
     name: 'Not selected',
     description: t('tick.style_description_not_selected'),
-    color: 'gray',
+    color: TICK_STYLE_COLORS.null,
   },
   {
     key: 'OS',
     name: 'On sight',
     description: t('tick.style_description_OS'),
-    color: 'red',
+    color: TICK_STYLE_COLORS.OS,
   },
   {
     key: 'FL',
     name: 'Flash',
     description: t('tick.style_description_FL'),
-    color: 'green',
+    color: TICK_STYLE_COLORS.FL,
   },
   {
     key: 'RP',
     name: 'Red point',
     description: t('tick.style_description_RP'),
-    color: 'red',
+    color: TICK_STYLE_COLORS.RP,
   },
   {
     key: 'PP',
     name: 'Pink point',
     description: t('tick.style_description_PP'),
-    color: 'pink',
+    color: TICK_STYLE_COLORS.PP,
   },
   {
     key: 'RK',
     name: 'Red cross',
     description: t('tick.style_description_RK'),
-    color: 'darkred',
+    color: TICK_STYLE_COLORS.RK,
   },
   {
     key: 'AF',
     name: 'All free',
     description: t('tick.style_description_AF'),
-    color: 'lightgreen',
+    color: TICK_STYLE_COLORS.AF,
   },
   {
     key: 'TR',
     name: 'Top rope',
     description: t('tick.style_description_TR'),
-    color: 'blue',
+    color: TICK_STYLE_COLORS.TR,
   },
   {
     key: 'FS',
     name: 'Free solo',
     description: t('tick.style_description_FS'),
-    color: 'orange',
+    color: TICK_STYLE_COLORS.FS,
   },
   {
     key: 'PJ',
     name: 'Project',
     description: t('tick.style_description_PJ'),
-    color: '#9c27b0',
+    color: TICK_STYLE_COLORS.PJ,
   },
 ];
 

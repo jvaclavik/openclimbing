@@ -136,6 +136,13 @@ export default {
   'my_ticks.share.strava_hint':
     'Paste this link into your Strava activity description, social posts, or chat — friends will land directly on this session in your diary.',
 
+  'tick.add_button': 'Add tick',
+  'tick.edit_button': 'Edit tick',
+  'tick.delete_button': 'Delete tick',
+  'tick.added_toast': 'Tick added!',
+  'tick.deleted_toast': 'Tick was deleted',
+  'tick.login_required_to_add': 'Please log in to add a tick.',
+  'tick.migrated_toast': 'Your ticks from browser migrated to the DB.',
   'tick.style_description_not_selected': 'No climbing style selected.',
   'tick.style_description_OS': 'Climbing the route on the first try without any prior knowledge or practice.',
   'tick.style_description_FL': 'Climbing the route on the first try with some prior knowledge or beta.',

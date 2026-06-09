@@ -93,7 +93,17 @@ export const MyTicksContent = ({
   return (
     <>
       {banner}
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          // Bleed past the parent panel's 16px horizontal padding so the table
+          // touches the panel edges.
+          mx: -2,
+          width: 'auto',
+          overflowX: 'auto',
+          borderRadius: 0,
+        }}
+      >
         <Table size="small">
           {tableHeader}
           <TableBody>

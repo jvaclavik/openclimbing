@@ -1,36 +1,57 @@
-import { Tooltip } from '@mui/material';
+import { Box, Tooltip, alpha, darken, lighten } from '@mui/material';
 import { TickStyle } from '../../components/FeaturePanel/Climbing/types';
-import { tickStyles } from './ticks';
-import styled from '@emotion/styled';
+import { tickStyles, tickStyleToChartColor } from './ticks';
 
 type TickStyleBadgeProps = {
   style: TickStyle;
 };
 
-const Container = styled.div<{ $color: string }>`
-  color: ${({ $color }) => $color};
-  display: inline-block;
-  cursor: help;
-  font-weight: 900;
-  font-size: 12px;
-`;
+const NULL_LABEL = '—';
 
 export const TickStyleBadge = ({ style }: TickStyleBadgeProps) => {
   const styleConfig = tickStyles.find((s) => s.key === style) ?? tickStyles[0];
+  const baseColor = tickStyleToChartColor(style);
+  const label = style != null ? style : NULL_LABEL;
+
   return (
     <Tooltip
       arrow
-      enterDelay={1000}
+      enterDelay={400}
       title={
         <>
           <strong>{styleConfig.name}</strong>
-          <p>{styleConfig.description}</p>
+          <p style={{ margin: 0 }}>{styleConfig.description}</p>
         </>
       }
     >
-      <Container $color={styleConfig.color}>
-        {style != null ? style : ''}
-      </Container>
+      <Box
+        component="span"
+        sx={(theme) => {
+          const isDark = theme.palette.mode === 'dark';
+          return {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '2.5em',
+            height: '1.7em',
+            px: 0.75,
+            borderRadius: '999px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            userSelect: 'none',
+            cursor: 'help',
+            color: isDark ? lighten(baseColor, 0.4) : darken(baseColor, 0.15),
+            backgroundColor: alpha(baseColor, isDark ? 0.22 : 0.14),
+            border: `1px solid ${alpha(baseColor, isDark ? 0.55 : 0.4)}`,
+            transition: 'background-color 120ms, border-color 120ms',
+          };
+        }}
+      >
+        {label}
+      </Box>
     </Tooltip>
   );
 };
