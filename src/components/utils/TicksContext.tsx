@@ -15,6 +15,7 @@ import {
 import { useQuery, useQueryClient } from 'react-query';
 import { PROJECT_ID } from '../../services/project';
 import { useOsmAuthContext } from './OsmAuthContext';
+import { t } from '../../services/intl';
 
 const QUERY_KEY = ['climbing-ticks'];
 
@@ -32,7 +33,7 @@ export type TicksContextType = {
 
 const EditTickButton = (props: { onClick: () => void }) => (
   <Button color="inherit" size="small" onClick={props.onClick}>
-    Edit tick
+    {t('tick.edit_button')}
   </Button>
 );
 
@@ -67,7 +68,7 @@ const useMigrateFromLocalStorage = () => {
         localStorage.removeItem('ticks');
 
         await queryClient.invalidateQueries(QUERY_KEY);
-        showToast('Your ticks from browser migrated to the DB.', 'info');
+        showToast(t('tick.migrated_toast'), 'info');
       }
     })();
   }, [loggedIn, queryClient, showToast]);
@@ -84,7 +85,7 @@ const useGetAddTick = (setEditedTickId: Setter<number>) => {
     const id = await postClimbingTick({ shortId, timestamp, style });
     await queryClient.invalidateQueries(QUERY_KEY);
     showToast(
-      'Tick added!',
+      t('tick.added_toast'),
       'success',
       <EditTickButton onClick={() => setEditedTickId(id)} />,
     );

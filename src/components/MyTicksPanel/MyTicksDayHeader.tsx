@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import ShareIcon from '@mui/icons-material/Share';
 import {
   IconButton,
   Stack,
@@ -7,11 +7,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import ShareIcon from '@mui/icons-material/Share';
 import { format, parseISO } from 'date-fns';
+import { useState } from 'react';
 import { t } from '../../services/intl';
-import { useOsmAuthContext } from '../utils/OsmAuthContext';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
+import { useOsmAuthContext } from '../utils/OsmAuthContext';
 import { ShareTickDialog } from './ShareTickDialog';
 
 const DAY_HEADER_FORMAT = 'EEE d.M.yyyy';
@@ -49,8 +49,22 @@ export const MyTicksDayHeader = ({
           backgroundColor: theme.palette.action.hover,
         })}
       >
-        <TableCell colSpan={colSpan} sx={{ py: 0.5 }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+        <TableCell colSpan={colSpan} sx={{ p: 0 }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{
+              // Stick the title + share button to the left edge of the
+              // horizontally scrollable TableContainer so the action stays
+              // reachable even on overflowing tables.
+              position: 'sticky',
+              left: 0,
+              width: 'fit-content',
+              py: 0.5,
+              px: 2,
+            }}
+          >
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {formatDayLabel(sessionDate)}
             </Typography>
@@ -59,7 +73,6 @@ export const MyTicksDayHeader = ({
                 count: String(tickCount),
               })}
             </Typography>
-            <div style={{ flex: 1 }} />
             {showShareAction && osmUser && representativeTick ? (
               <Tooltip title={t('my_ticks.share.share_session_tooltip')}>
                 <IconButton
