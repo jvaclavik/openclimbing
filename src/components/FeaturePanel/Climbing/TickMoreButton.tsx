@@ -10,6 +10,7 @@ import { ClimbingTick } from '../../../types';
 import { useTicksContext } from '../../utils/TicksContext';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { FetchedClimbingTick } from '../../../services/my-ticks/getMyTicks';
+import { synthesizeFetchedTickForShare } from '../../../services/my-ticks/synthesizeFetchedTickForShare';
 import { ShareTickDialog } from '../../MyTicksPanel/ShareTickDialog';
 import { t } from '../../../services/intl';
 
@@ -59,7 +60,9 @@ export const TickMoreButton = ({ tick, fetchedTick }: Props) => {
   const { osmUser } = useOsmAuthContext();
   const [shareOpen, setShareOpen] = useState(false);
 
-  const canShare = Boolean(fetchedTick && osmUser);
+  const effectiveFetchedTick =
+    fetchedTick ?? synthesizeFetchedTickForShare(tick);
+  const canShare = Boolean(effectiveFetchedTick && osmUser);
 
   return (
     <>
@@ -93,11 +96,11 @@ export const TickMoreButton = ({ tick, fetchedTick }: Props) => {
         <DeleteTickMenuItem tick={tick} closeMenu={handleCloseMore} />
       </MoreMenu>
 
-      {shareOpen && fetchedTick && osmUser ? (
+      {shareOpen && effectiveFetchedTick && osmUser ? (
         <ShareTickDialog
           open
           mode="tick"
-          tick={fetchedTick}
+          tick={effectiveFetchedTick}
           displayName={osmUser}
           onClose={() => setShareOpen(false)}
         />

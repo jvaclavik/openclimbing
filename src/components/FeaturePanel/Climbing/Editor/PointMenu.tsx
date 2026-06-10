@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { PointType } from '../types';
 import { useClimbingContext } from '../contexts/ClimbingContext';
+import { t } from '../../../../services/intl';
 
 export const PointMenu = ({ anchorEl, setAnchorEl }) => {
   const {
@@ -58,7 +59,7 @@ export const PointMenu = ({ anchorEl, setAnchorEl }) => {
         onPopoverClose();
       }}
     >
-      <DialogTitle>Choose point type</DialogTitle>
+      <DialogTitle>{t('climbing_editor.choose_point_type')}</DialogTitle>
 
       <MenuList>
         <MenuItem
@@ -67,7 +68,9 @@ export const PointMenu = ({ anchorEl, setAnchorEl }) => {
           selected={!selectedPoint.type}
         >
           <ListItemIcon />
-          <Typography variant="inherit">Nothing</Typography>
+          <Typography variant="inherit">
+            {t('climbing_editor.point_type_none')}
+          </Typography>
         </MenuItem>
         <MenuItem
           dense
@@ -78,7 +81,7 @@ export const PointMenu = ({ anchorEl, setAnchorEl }) => {
             <CloseIcon fontSize="small" />
           </ListItemIcon>
           <Typography variant="inherit" noWrap>
-            Bolt / Ring / Hanger
+            {t('climbing_editor.point_type_bolt')}
           </Typography>
         </MenuItem>
         <MenuItem
@@ -89,7 +92,9 @@ export const PointMenu = ({ anchorEl, setAnchorEl }) => {
           <ListItemIcon>
             <RemoveCircleIcon fontSize="small" />
           </ListItemIcon>
-          <Typography variant="inherit">Belay</Typography>
+          <Typography variant="inherit">
+            {t('climbing_editor.point_type_belay')}
+          </Typography>
         </MenuItem>
         <Divider />
         <MenuItem onClick={onDeletePoint} dense>
@@ -97,7 +102,7 @@ export const PointMenu = ({ anchorEl, setAnchorEl }) => {
             <DeleteIcon fontSize="small" />
           </ListItemIcon>
           <Typography variant="inherit" noWrap>
-            Delete point
+            {t('climbing_editor.delete_point')}
           </Typography>
         </MenuItem>
         <MenuItem
@@ -111,7 +116,7 @@ export const PointMenu = ({ anchorEl, setAnchorEl }) => {
             <CheckIcon fontSize="small" />
           </ListItemIcon>
           <Typography variant="inherit" noWrap>
-            Finish editing
+            {t('climbing_editor.finish_editing')}
           </Typography>
         </MenuItem>
       </MenuList>

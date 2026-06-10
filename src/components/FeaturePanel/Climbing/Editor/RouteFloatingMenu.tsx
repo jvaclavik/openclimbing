@@ -160,7 +160,9 @@ export const RouteFloatingMenu = () => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">Delete point?</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {t('climbing_editor.delete_point_question')}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {t('climbingpanel.delete_point_text')}

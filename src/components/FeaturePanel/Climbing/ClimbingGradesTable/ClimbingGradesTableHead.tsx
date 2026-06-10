@@ -52,7 +52,10 @@ export const ClimbingGradesTableHead = ({
                       {gs.name} {gs.flags}
                     </Typography>
                     {currentGradeSystem === key && (
-                      <Chip size="small" label="selected" />
+                      <Chip
+                        size="small"
+                        label={t('climbing_grades.selected')}
+                      />
                     )}
                   </Stack>
                 </Tooltip>

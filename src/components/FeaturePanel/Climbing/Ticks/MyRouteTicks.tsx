@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Table } from '@mui/material';
+import { Paper, Table, TableContainer } from '@mui/material';
 import { PanelLabel } from '../PanelLabel';
 import { AddTickButton } from './AddTickButton';
 import { DotLoader } from '../../../helpers';
@@ -75,11 +75,21 @@ const MyRouteTicksInner = () => {
         <span>{isFetching && <DotLoader />}</span>
       </PanelLabel>
 
-      <Table size="small">
-        {ticksForRoute.map((tick) => {
-          return <RouteTickRow key={tick.id} tick={tick} />;
-        })}
-      </Table>
+      <TableContainer
+        component={Paper}
+        sx={{
+          mx: -2,
+          width: 'auto',
+          overflowX: 'auto',
+          borderRadius: 0,
+        }}
+      >
+        <Table size="small">
+          {ticksForRoute.map((tick) => {
+            return <RouteTickRow key={tick.id} tick={tick} />;
+          })}
+        </Table>
+      </TableContainer>
     </Container>
   );
 };

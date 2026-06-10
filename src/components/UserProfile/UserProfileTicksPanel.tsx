@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Router from 'next/router';
 import { PanelContent } from '../utils/PanelHelpers';
 import { ClientOnly } from '../helpers';
@@ -10,6 +10,10 @@ import { useUserProfileFetch } from './useUserProfileFetch';
 import { useOsmAuthContext } from '../utils/OsmAuthContext';
 import { useTicksContext } from '../utils/TicksContext';
 import { UserProfileTicksScrollContent } from './UserProfileTicksScrollContent';
+import {
+  applyTicksUrlFilter,
+  useTicksUrlFilter,
+} from '../../services/my-ticks/ticksUrlFilter';
 
 function tryDecodeDisplayName(param: string): string {
   try {
@@ -56,7 +60,12 @@ export const UserProfileTicksPanel = ({
     { enabled: ticksPanelEnabled },
   );
 
-  useAddHeatmap(fetchedTicks);
+  const filter = useTicksUrlFilter();
+  const heatmapTicks = useMemo(
+    () => applyTicksUrlFilter(fetchedTicks, filter),
+    [fetchedTicks, filter],
+  );
+  useAddHeatmap(heatmapTicks);
 
   const handleClose = () => {
     Router.push(`/`);

@@ -6,6 +6,7 @@ import {
 } from '../../services/osm/auth/user';
 import { useSnackbar } from './SnackbarContext';
 import { OSM_USER_COOKIE } from '../../services/osm/consts';
+import { t } from '../../services/intl';
 
 type OsmAuthType = {
   loggedIn: boolean;
@@ -32,7 +33,7 @@ export const OsmAuthProvider = ({ children, cookies }) => {
 
   const successfulLogin = (user: OsmUser) => {
     setOsmUser(user);
-    showToast(`Logged in as ${user.name}`, 'success');
+    showToast(t('osm_auth.logged_in_as', { user: user.name }), 'success');
     setLoading(false);
   };
 

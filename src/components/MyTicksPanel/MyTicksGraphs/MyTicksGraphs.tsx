@@ -4,6 +4,7 @@ import React from 'react';
 import { FormControlLabel, Switch, Typography } from '@mui/material';
 import { PanelSidePadding } from '../../utils/PanelHelpers';
 import { OverpassFeature } from '../../../services/overpass/overpassSearch';
+import { t } from '../../../services/intl';
 
 type MyTicksGraphsProps = {
   features: OverpassFeature[];
@@ -19,7 +20,7 @@ export const MyTicksGraphs = ({ features }: MyTicksGraphsProps) => {
     <>
       <PanelSidePadding>
         <Typography variant="h6" mt={2}>
-          Routes distribution
+          {t('my_ticks.graphs.routes_distribution')}
         </Typography>
       </PanelSidePadding>
       <RouteDistribution
@@ -36,7 +37,7 @@ export const MyTicksGraphs = ({ features }: MyTicksGraphsProps) => {
               onChange={(e) => setIsGrouped(e.target.checked)}
             />
           }
-          label="Grouping"
+          label={t('my_ticks.graphs.grouping')}
         />
       </PanelSidePadding>
     </>

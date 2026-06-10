@@ -633,7 +633,7 @@ export const ClimbingView = () => {
                       size="small"
                       color="secondary"
                       onClick={onSplitPaneSizeReset}
-                      aria-label="Show route list"
+                      aria-label={t('climbing_view.show_route_list')}
                     >
                       {cragViewLayout === 'horizontal' ? (
                         <ArrowUpwardIcon />

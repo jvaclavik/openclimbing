@@ -94,7 +94,9 @@ const MobileResult = ({
               setShowInstructions((x) => !x);
             }}
           >
-            {showInstructions ? 'Hide instructions' : 'Show instructions'}
+            {showInstructions
+              ? t('directions.hide_instructions')
+              : t('directions.show_instructions')}
           </Button>
         )}
         {revealForm && (

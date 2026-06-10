@@ -29,6 +29,7 @@ import { PanelClimbingBadges } from './Climbing/ClimbingBadges';
 import { TestApiWarning } from './helpers/TestApiWarning';
 import { FeaturePanelClimbingGuideInfo } from './Climbing/FeaturePanelClimbingGuideInfo';
 import { FeaturedTag } from './FeaturedTag';
+import { BackChip } from './BackChip';
 
 const Flex = styled.div`
   flex: 1;
@@ -67,6 +68,7 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
     <>
       <PanelContent>
         <PanelSidePadding>
+          <BackChip />
           {!isMobileMode && <ParentLink />}
 
           <FeatureHeading ref={headingRef} />
