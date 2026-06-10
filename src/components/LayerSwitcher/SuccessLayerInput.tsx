@@ -70,10 +70,14 @@ export const SuccessLayerInput: React.FC<SuccessLayerDataInputProps> = ({
       <Autocomplete
         options={allOptions}
         renderInput={(params) => (
-          <TextField {...params} margin="dense" label="Layer" />
+          <TextField
+            {...params}
+            margin="dense"
+            label={t('layerswitcher.layer_label')}
+          />
         )}
         getOptionLabel={(opt) => {
-          if (opt.type === 'custom') return 'Custom URL';
+          if (opt.type === 'custom') return t('layerswitcher.custom_url');
           return getLayerLabel(opt.layer);
         }}
         onChange={(_, val) => {
@@ -94,7 +98,7 @@ export const SuccessLayerInput: React.FC<SuccessLayerDataInputProps> = ({
                   {getLayerLabel(opt.layer)}
                 </>
               ) : (
-                'Custom URL'
+                t('layerswitcher.custom_url')
               )}
             </span>
           </Box>

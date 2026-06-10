@@ -39,14 +39,14 @@ const LoadingLayerInput = () => (
         color: 'gray',
       }}
     >
-      Fetching the layer index...
+      {t('layerswitcher.fetching_index')}
     </p>
   </div>
 );
 
 const ErrorLayerInput = () => (
   <div>
-    <p>An error occured while fetching the layer index</p>
+    <p>{t('layerswitcher.fetching_index_error')}</p>
   </div>
 );
 
@@ -311,20 +311,20 @@ export const AddCustomDialog: React.FC<AddDialogProps> = ({
   return (
     <Dialog open={isOpen} maxWidth="md">
       <DialogTitle>
-        <p>Add a layer</p>
+        <p>{t('layerswitcher.add_layer_title')}</p>
       </DialogTitle>
 
       <DialogContent>
         <Box mb={2}>
           <Typography variant="body1">
-            Layers are sourced from the{' '}
+            {t('layerswitcher.sourced_prefix')}{' '}
             <a
               href="https://github.com/osmlab/editor-layer-index"
               target="_blank"
             >
               editor-layer-index
-            </a>{' '}
-            list.
+            </a>
+            {t('layerswitcher.sourced_suffix')}
           </Typography>
         </Box>
 

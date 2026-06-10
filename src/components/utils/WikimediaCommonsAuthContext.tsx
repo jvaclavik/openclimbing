@@ -6,6 +6,7 @@ import {
   WikimediaCommonsUser,
 } from '../../services/wikimedia/auth/session';
 import { useSnackbar } from './SnackbarContext';
+import { t } from '../../services/intl';
 
 type WikimediaCommonsAuthType = {
   loggedIn: boolean;
@@ -43,12 +44,15 @@ export const WikimediaCommonsAuthProvider: React.FC<Props> = ({
       const loggedInUser = await loginToWikimediaCommons();
       setUser(loggedInUser);
       showToast(
-        `Logged in to Wikimedia Commons as ${loggedInUser.username}`,
+        t('wikimedia.logged_in_as', { user: loggedInUser.username }),
         'success',
       );
       return loggedInUser;
     } catch (e) {
-      showToast(`Wikimedia Commons login failed: ${e?.message ?? e}`, 'error');
+      showToast(
+        t('wikimedia.login_failed', { error: String(e?.message ?? e) }),
+        'error',
+      );
       throw e;
     } finally {
       setLoading(false);
@@ -58,7 +62,7 @@ export const WikimediaCommonsAuthProvider: React.FC<Props> = ({
   const handleLogout = () => {
     logoutFromWikimediaCommons();
     setUser(undefined);
-    showToast('Logged out from Wikimedia Commons', 'info');
+    showToast(t('wikimedia.logged_out'), 'info');
   };
 
   const value: WikimediaCommonsAuthType = {

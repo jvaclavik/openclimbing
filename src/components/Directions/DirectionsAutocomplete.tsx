@@ -26,6 +26,7 @@ import { mapIdlePromise } from '../../services/mapStorage';
 import maplibregl, { LngLatLike, PointLike } from 'maplibre-gl';
 import ReactDOMServer from 'react-dom/server';
 import { AlphabeticalMarker } from './TextMarker';
+import { t } from '../../services/intl';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { DotLoader, useIsClient } from '../helpers';
 import { useSnackbar } from '../utils/SnackbarContext';
@@ -87,13 +88,16 @@ const DirectionsInput = ({
 
     onOptionChange(
       null,
-      getDirectionsCoordsOption([longitude, latitude], 'My location'),
+      getDirectionsCoordsOption(
+        [longitude, latitude],
+        t('directions.my_location'),
+      ),
     );
     setIsLoading(false);
   }
   const handleError = (_error) => {
     setIsLoading(false);
-    showToast("Sorry, we couldn't find your location", 'error');
+    showToast(t('directions.geolocation_error'), 'error');
   };
 
   const handleGetMyPosition = () => {
@@ -125,7 +129,7 @@ const DirectionsInput = ({
                 <DotLoader />
               </DotLoaderContainer>
             ) : (
-              <Tooltip title="Get my location">
+              <Tooltip title={t('directions.get_my_location')}>
                 <MyLocationIcon
                   color="secondary"
                   sx={{ cursor: 'pointer' }}
