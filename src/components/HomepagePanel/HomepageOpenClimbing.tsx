@@ -26,6 +26,8 @@ import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
 import { SupportUs } from './SupportUs';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { PROJECT_NAME } from '../../services/project';
+import { handleDebugActivationClick } from '../App/crashOverlay';
+import { useSnackbar } from '../utils/SnackbarContext';
 const AccordionStyle = {
   '&:before': {
     backgroundColor: 'transparent !important',
@@ -260,6 +262,7 @@ const ImportantLinks = () => (
 
 export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
   const [isTextInfoExpanded, setIsTextInfoExpanded] = useState(false);
+  const { showToast } = useSnackbar();
 
   return (
     <PanelContent>
@@ -285,7 +288,12 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
             <SupportUs />
             <Banners />
             <From>
-              <Typography variant="caption" color="secondary" letterSpacing={1}>
+              <Typography
+                variant="caption"
+                color="secondary"
+                letterSpacing={1}
+                onClick={() => handleDebugActivationClick(showToast)}
+              >
                 Made in Prague with ♥
               </Typography>
             </From>
