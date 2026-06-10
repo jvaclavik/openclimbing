@@ -136,6 +136,8 @@ export default {
   'my_ticks.share.strava_hint':
     'Paste this link into your Strava activity description, social posts, or chat — friends will land directly on this session in your diary.',
 
+  'back.to_diary': 'Back to diary',
+  'back.generic': 'Back',
   'tick.add_button': 'Add tick',
   'tick.edit_button': 'Edit tick',
   'tick.delete_button': 'Delete tick',

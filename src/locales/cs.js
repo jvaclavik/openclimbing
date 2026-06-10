@@ -11,6 +11,8 @@ export default {
 
   'climbing.photos': 'Fotky',
 
+  'back.to_diary': 'Zpět do deníčku',
+  'back.generic': 'Zpět',
   'tick.add_button': 'Přidat přelez',
   'tick.edit_button': 'Upravit přelez',
   'tick.delete_button': 'Smazat přelez',

@@ -2,6 +2,7 @@ import { Stack, TableCell, TableRow } from '@mui/material';
 import { keyframes } from '@mui/system';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_DATA_FORMAT } from '../../config.mjs';
 import { getUrlOsmId } from '../../services/helpers';
@@ -31,6 +32,7 @@ export const MyTicksRow = ({
   readOnly?: boolean;
   highlighted?: boolean;
 }) => {
+  const router = useRouter();
   const routeDifficulties = getDifficulties(fetchedTick.tags);
   const { view } = useMapStateContext();
   const { name, style, date, apiId } = fetchedTick;
@@ -55,7 +57,11 @@ export const MyTicksRow = ({
     >
       <TableCell>
         <Stack spacing={0.25} alignItems="flex-start">
-          <Link href={`/${getUrlOsmId(apiId)}#${view.join('/')}`}>
+          <Link
+            href={`/${getUrlOsmId(apiId)}?back=${encodeURIComponent(
+              router.asPath,
+            )}#${view.join('/')}`}
+          >
             {routeLabel}
           </Link>
           {partners.trim() ? (
