@@ -156,12 +156,33 @@ const planTilesForCragGroup = (
   const tiles: ImageTileSpec[] = [];
   const cragRepresentative = group.ticks[0];
 
-  for (const photo of meta.photos) {
-    const intersection = photo.memberShortIds.filter((id) =>
-      allowedSet.has(id),
+  // Greedy assignment: when the same climbed route appears on multiple topo
+  // photos, the photo carrying the most of *this session's* climbed routes
+  // claims it (ties broken by original photo order). Subsequent photos only
+  // see routes not yet claimed — so each route ends up drawn on exactly one
+  // tile and the user doesn't see duplicate tiles for the same route.
+  const candidates = meta.photos
+    .map((photo, photoOrder) => ({
+      photo,
+      photoOrder,
+      allowedHere: photo.memberShortIds.filter((id) => allowedSet.has(id)),
+    }))
+    .filter((c) => c.allowedHere.length > 0)
+    .sort((a, b) => {
+      if (b.allowedHere.length !== a.allowedHere.length) {
+        return b.allowedHere.length - a.allowedHere.length;
+      }
+      return a.photoOrder - b.photoOrder;
+    });
+
+  const claimed = new Set<string>();
+  for (const { photo } of candidates) {
+    const uniqueIds = photo.memberShortIds.filter(
+      (id) => allowedSet.has(id) && !claimed.has(id),
     );
-    if (intersection.length === 0) continue;
-    const intersectionTicks = intersection
+    if (uniqueIds.length === 0) continue;
+    uniqueIds.forEach((id) => claimed.add(id));
+    const intersectionTicks = uniqueIds
       .map((id) => tickByShortId.get(id))
       .filter((tick): tick is FetchedClimbingTick => !!tick);
     const cragLabel = cragRepresentative.cragName ?? cragRepresentative.name;
@@ -170,7 +191,7 @@ const planTilesForCragGroup = (
     tiles.push({
       imageId: group.cragShortId,
       photoIndex: photo.photoIndex,
-      routeFilter: intersection,
+      routeFilter: uniqueIds,
       caption,
       key: `crag-${group.cragShortId}-photo-${photo.photoIndex}`,
       ticks: intersectionTicks,
