@@ -244,32 +244,31 @@ function UserProfileTicksTab({
   ticksPanelEnabled: boolean;
   fetchedTicks: FetchedClimbingTick[];
 }) {
+  // When ticksPanelEnabled is false, data is still loading (either own ticks
+  // from TicksContext or public profile fetch). Render nothing here — the
+  // parent scroll content shows a loader for the whole panel.
+  if (!ticksPanelEnabled) {
+    return null;
+  }
+
   return (
     <Box sx={{ pt: 1 }}>
-      {ticksPanelEnabled ? (
-        <>
-          <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
-            {t('user_profile.ticks_table_title')}
-          </Typography>
-          <MyTicksContent
-            fetchedTicks={fetchedTicks}
-            readOnly={!own}
-            emptyTicksMessage={
-              own ? (
-                <MyTicksEmptyHint />
-              ) : (
-                <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
-                  {t('user_profile.no_ticks')}
-                </Alert>
-              )
-            }
-          />
-        </>
-      ) : (
-        <Alert severity="info" variant="outlined">
-          {t('user_profile.no_ticks')}
-        </Alert>
-      )}
+      <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
+        {t('user_profile.ticks_table_title')}
+      </Typography>
+      <MyTicksContent
+        fetchedTicks={fetchedTicks}
+        readOnly={!own}
+        emptyTicksMessage={
+          own ? (
+            <MyTicksEmptyHint />
+          ) : (
+            <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
+              {t('user_profile.no_ticks')}
+            </Alert>
+          )
+        }
+      />
     </Box>
   );
 }

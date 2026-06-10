@@ -11,6 +11,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import { t } from '../../services/intl';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import type { TopoMetaResponse } from '../../../pages/api/topo-meta';
+import { useMobileMode } from '../helpers';
 
 const TILE_HEIGHT = 180;
 /** Placeholder aspect ratio used before an image has loaded. */
@@ -253,6 +254,7 @@ const tryShareOrDownload = async (
 };
 
 const ImageTile = ({ tile }: TileProps) => {
+  const isMobileMode = useMobileMode();
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   if (errored) return null;
@@ -320,13 +322,25 @@ const ImageTile = ({ tile }: TileProps) => {
           {countSuffix}
         </Typography>
         <Tooltip title={t('my_ticks.share.images_download')}>
-          <IconButton
-            size="small"
-            onClick={() => tryShareOrDownload(url, filename, tile.caption)}
-            aria-label={t('my_ticks.share.images_download')}
-          >
-            <DownloadIcon fontSize="small" />
-          </IconButton>
+          {isMobileMode ? (
+            <IconButton
+              size="small"
+              onClick={() => tryShareOrDownload(url, filename, tile.caption)}
+              aria-label={t('my_ticks.share.images_download')}
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          ) : (
+            <IconButton
+              size="small"
+              component="a"
+              href={url}
+              download={filename}
+              aria-label={t('my_ticks.share.images_download')}
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          )}
         </Tooltip>
       </Stack>
     </Box>
