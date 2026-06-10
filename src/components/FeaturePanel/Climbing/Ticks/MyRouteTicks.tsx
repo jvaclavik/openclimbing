@@ -11,6 +11,7 @@ import { RouteTickRow } from '../RouteTickRow';
 import { isFeatureClimbingRoute } from '../../../../utils';
 import { useTicksContext } from '../../../utils/TicksContext';
 import { PROJECT_ID } from '../../../../services/project';
+import { t } from '../../../../services/intl';
 
 const Container = styled.div`
   margin-bottom: 20px;
@@ -32,7 +33,7 @@ const ErrorLoadingTicks = () => {
 
   return (
     <Container>
-      <PanelLabel>Route ticks</PanelLabel>
+      <PanelLabel>{t('route_ticks.title')}</PanelLabel>
       Error: {JSON.stringify(error)}
     </Container>
   );
@@ -71,7 +72,7 @@ const MyRouteTicksInner = () => {
   return (
     <Container>
       <PanelLabel addition={<AddTickButton />}>
-        Route ticks
+        {t('route_ticks.title')}
         <span>{isFetching && <DotLoader />}</span>
       </PanelLabel>
 

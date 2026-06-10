@@ -209,6 +209,49 @@ type TileProps = {
   tile: ImageTileSpec;
 };
 
+/**
+ * On supporting browsers (mobile Safari/Chrome) opens the OS share sheet with
+ * the file — user can choose "Save Image" / "Save to Photos" and the PNG goes
+ * directly into the gallery instead of the Downloads folder. Falls back to a
+ * regular download anchor on desktop and unsupported environments.
+ */
+const tryShareOrDownload = async (
+  url: string,
+  filename: string,
+  title: string,
+): Promise<void> => {
+  const canShareFiles =
+    typeof navigator !== 'undefined' &&
+    typeof navigator.share === 'function' &&
+    typeof navigator.canShare === 'function';
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    const file = new File([blob], filename, { type: blob.type || 'image/png' });
+
+    if (canShareFiles && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title });
+      return;
+    }
+
+    // Fallback: programmatic anchor download into Downloads folder.
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch (err) {
+    if ((err as Error)?.name === 'AbortError') return; // user cancelled share
+    // Last resort: open in new tab, user can long-press / right-click to save.
+    window.open(url, '_blank', 'noopener');
+  }
+};
+
 const ImageTile = ({ tile }: TileProps) => {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -279,9 +322,7 @@ const ImageTile = ({ tile }: TileProps) => {
         <Tooltip title={t('my_ticks.share.images_download')}>
           <IconButton
             size="small"
-            component="a"
-            href={url}
-            download={filename}
+            onClick={() => tryShareOrDownload(url, filename, tile.caption)}
             aria-label={t('my_ticks.share.images_download')}
           >
             <DownloadIcon fontSize="small" />

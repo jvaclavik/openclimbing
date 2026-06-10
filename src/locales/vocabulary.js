@@ -302,6 +302,7 @@ export default {
   'wikimedia.logged_in_as': 'Logged in to Wikimedia Commons as __user__',
   'wikimedia.login_failed': 'Wikimedia Commons login failed: __error__',
   'wikimedia.logged_out': 'Logged out from Wikimedia Commons',
+  'route_ticks.title': 'Route ticks',
   'climbing_view.show_route_list': 'Show route list',
   'climbing_grades.selected': 'selected',
   'my_ticks.graphs.routes_distribution': 'Routes distribution',
