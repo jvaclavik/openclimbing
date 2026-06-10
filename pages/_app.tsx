@@ -48,6 +48,12 @@ import {
   fakeStaticExportMapView,
   fakeStaticExportStartup,
 } from '../src/components/App/fakeStaticExportHelpers';
+import {
+  CrashErrorBoundary,
+  initCrashOverlay,
+} from '../src/components/App/crashOverlay';
+
+initCrashOverlay(); // čte chyby na telefonu, kde není konzole (no-op na serveru)
 
 const getInitialToast = (featureFromRouter: Feature | '404') =>
   featureFromRouter === '404'
@@ -92,7 +98,7 @@ const MyApp = (props: Props) => {
   }, []);
 
   return (
-    <>
+    <CrashErrorBoundary>
       <AppCacheProvider emotionCache={emotionCache}>
         <UserThemeProvider userThemeCookie={userThemeCookie}>
           <CssBaseline />
@@ -149,7 +155,7 @@ const MyApp = (props: Props) => {
           <HotJar />
         </>
       )}
-    </>
+    </CrashErrorBoundary>
   );
 };
 
