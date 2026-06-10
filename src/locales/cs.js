@@ -786,6 +786,7 @@ export default {
   'wikimedia.logged_in_as': 'Přihlášen na Wikimedia Commons jako __user__',
   'wikimedia.login_failed': 'Přihlášení na Wikimedia Commons selhalo: __error__',
   'wikimedia.logged_out': 'Odhlášen z Wikimedia Commons',
+  'route_ticks.title': 'Mé přelezy této cesty',
   'climbing_view.show_route_list': 'Zobrazit seznam cest',
   'climbing_grades.selected': 'vybráno',
   'my_ticks.graphs.routes_distribution': 'Rozložení cest',

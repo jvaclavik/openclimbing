@@ -23,6 +23,15 @@ const highlightPulse = keyframes`
   100% { background-color: rgba(255, 213, 79, 0); }
 `;
 
+// Defenzivně: nevalidní timestamp ticku nesmí shodit celou tabulku/profil
+// (date-fns `format` hodí RangeError: Invalid time value).
+const formatTickDate = (value: string): string => {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? (value ?? '')
+    : format(parsed, DEFAULT_DATA_FORMAT);
+};
+
 export const MyTicksRow = ({
   fetchedTick,
   readOnly = false,
@@ -78,9 +87,7 @@ export const MyTicksRow = ({
       <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
         {fetchedTick.tickScore.points}
       </TableCell>
-      <TableCell sx={{ textAlign: 'right' }}>
-        {format(date, DEFAULT_DATA_FORMAT)}
-      </TableCell>
+      <TableCell sx={{ textAlign: 'right' }}>{formatTickDate(date)}</TableCell>
       {readOnly ? null : (
         <TableCell>
           <TickMoreButton tick={fetchedTick.tick} fetchedTick={fetchedTick} />
