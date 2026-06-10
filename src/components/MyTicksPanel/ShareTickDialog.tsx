@@ -28,6 +28,9 @@ import {
   sessionDateFromTimestamp,
 } from '../../services/my-ticks/ticksUrlFilter';
 import { SessionRouteImagesGallery } from './SessionRouteImagesGallery';
+import { buildSessionGpx } from '../../services/my-ticks/buildSessionGpx';
+import DownloadIcon from '@mui/icons-material/Download';
+import { Button } from '@mui/material';
 
 export type ShareTickMode = 'session' | 'tick';
 
@@ -86,6 +89,102 @@ const ShareLinkSection = ({ url, isMobileMode }: LinkSectionProps) => (
     </Stack>
   </Box>
 );
+
+type GpxSectionProps = {
+  sessionDate: string;
+  sessionTicks: FetchedClimbingTick[];
+  shareText: string;
+  commonAreaName: string | null;
+  singleCragName: string | null;
+};
+
+const triggerGpxDownload = (xml: string, filename: string): void => {
+  const blob = new Blob([xml], { type: 'application/gpx+xml' });
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
+};
+
+const triggerGpxShareOrDownload = async (
+  xml: string,
+  filename: string,
+  title: string,
+): Promise<void> => {
+  const canShareFiles =
+    typeof navigator !== 'undefined' &&
+    typeof navigator.share === 'function' &&
+    typeof navigator.canShare === 'function';
+
+  if (canShareFiles) {
+    const file = new File([xml], filename, {
+      type: 'application/gpx+xml',
+    });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title });
+        return;
+      } catch (err) {
+        if ((err as Error)?.name === 'AbortError') return;
+        // Fall through to plain download on share errors.
+      }
+    }
+  }
+  triggerGpxDownload(xml, filename);
+};
+
+const ShareGpxSection = ({
+  sessionDate,
+  sessionTicks,
+  shareText,
+  commonAreaName,
+  singleCragName,
+}: GpxSectionProps) => {
+  const isMobileMode = useMobileMode();
+  const onClick = async () => {
+    const { xml, filename, title } = buildSessionGpx({
+      sessionDate,
+      sessionTicks,
+      description: shareText,
+      commonAreaName,
+      singleCragName,
+    });
+    if (isMobileMode) {
+      await triggerGpxShareOrDownload(xml, filename, title);
+    } else {
+      triggerGpxDownload(xml, filename);
+    }
+  };
+
+  return (
+    <Box mb={2}>
+      <Typography variant="overline">
+        {t('my_ticks.share.gpx_label')}
+      </Typography>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ pt: 0.5 }}>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<DownloadIcon />}
+          onClick={onClick}
+        >
+          {t('my_ticks.share.gpx_button')}
+        </Button>
+      </Stack>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: 'block', mt: 0.5 }}
+      >
+        {t('my_ticks.share.gpx_hint')}
+      </Typography>
+    </Box>
+  );
+};
 
 type TextSectionProps = {
   shareText: string;
@@ -204,6 +303,15 @@ export const ShareTickDialog = ({
         </Typography>
         <ShareLinkSection url={url} isMobileMode={isMobileMode} />
         <ShareTextSection shareText={shareText} isMobileMode={isMobileMode} />
+        {mode === 'session' ? (
+          <ShareGpxSection
+            sessionDate={sessionDateFromTimestamp(tick.date)}
+            sessionTicks={sessionTicks ?? [tick]}
+            shareText={shareText}
+            commonAreaName={tick.areaName ?? null}
+            singleCragName={tick.cragName ?? null}
+          />
+        ) : null}
         <SessionRouteImagesGallery
           ticks={mode === 'session' ? (sessionTicks ?? [tick]) : [tick]}
         />

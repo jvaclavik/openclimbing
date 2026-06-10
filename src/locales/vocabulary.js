@@ -117,6 +117,13 @@ export default {
   'my_ticks.share.text_lead_summary_few_no_grade': '__count__ routes sent',
   'my_ticks.share.text_lead_summary_many_no_grade': '__count__ routes sent',
   'my_ticks.share.text_guide_section_heading': '🗺️ Climbing guide:',
+  'my_ticks.share.gpx_label': 'Import to Strava (GPX)',
+  'my_ticks.share.gpx_button': 'Download GPX',
+  'my_ticks.share.gpx_hint':
+    'Open the file in the Strava app or upload it on the web to create the activity with title, description, duration (~20 min per route) and elevation gain (from OSM rock height) prefilled. You may still need to set the activity type to "Rock Climbing" and add photos manually.',
+  'my_ticks.share.gpx_title_at_area': 'Rock climbing in __area__',
+  'my_ticks.share.gpx_title_at_crag': 'Rock climbing at __crag__',
+  'my_ticks.share.gpx_title_generic': 'Rock climbing',
   'my_ticks.share.text_heading_area_singular': '🧗 1 ascent in __area__:',
   'my_ticks.share.text_heading_area_few': '🧗 __count__ ascents in __area__:',
   'my_ticks.share.text_heading_area_many': '🧗 __count__ ascents in __area__:',

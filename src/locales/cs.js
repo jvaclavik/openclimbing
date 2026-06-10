@@ -100,6 +100,13 @@ export default {
   'my_ticks.share.text_lead_summary_few_no_grade': 'Vylezeny __count__ cesty',
   'my_ticks.share.text_lead_summary_many_no_grade': 'Vylezeno __count__ cest',
   'my_ticks.share.text_guide_section_heading': '🗺️ Lezecký průvodce:',
+  'my_ticks.share.gpx_label': 'Import do Stravy (GPX)',
+  'my_ticks.share.gpx_button': 'Stáhnout GPX',
+  'my_ticks.share.gpx_hint':
+    'Otevři soubor v aplikaci Strava nebo nahraj na webu — předvyplní se titulek, popis, trvání (~20 min na cestu) a převýšení (z výšky skal v OSM). V Stravě možná budeš muset ručně nastavit typ aktivity na „Skalní lezení" a přidat fotky.',
+  'my_ticks.share.gpx_title_at_area': 'Skalní lezení __area__',
+  'my_ticks.share.gpx_title_at_crag': 'Skalní lezení __crag__',
+  'my_ticks.share.gpx_title_generic': 'Skalní lezení',
   'my_ticks.share.text_heading_area_singular': '🧗 Vylezena 1 cesta v oblasti __area__:',
   'my_ticks.share.text_heading_area_few': '🧗 Vylezeny __count__ cesty v oblasti __area__:',
   'my_ticks.share.text_heading_area_many': '🧗 Vylezeno __count__ cest v oblasti __area__:',
