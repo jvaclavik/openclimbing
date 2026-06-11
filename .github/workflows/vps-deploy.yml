@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     environment: VPS
     steps:
       - name: Checkout
@@ -34,14 +34,16 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+          yarn install --frozen-lockfile
 
       - name: Build next.js (standalone)
         run: |
           echo "VERCEL_GIT_COMMIT_SHA=$(git rev-parse HEAD)" >> .env
           echo "VERCEL_GIT_COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> .env
           echo "NEXT_PUBLIC_ENABLE_CLIMBING_TILES=true" >> .env
-          echo "NEXT_PUBLIC_WIKIMEDIA_CLIENT_ID=752676c0bf33c08c9315d2df60eb850c" >> .env
 
           NEXTJS_OUTPUT=standalone yarn build
           mv public .next/standalone
@@ -62,11 +64,10 @@ jobs:
           RUN_ID: ${{ github.run_id }}
         run: |
           mkdir ~/.ssh
-          echo "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          echo "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          echo -e "Host vps\n  HostName $DEPLOY_HOST\n  Port 11122\n  User nodeuser\n  StrictHostKeyChecking accept-new" > ~/.ssh/config && chmod 600 ~/.ssh/config
 
           cd .next/standalone
           zip -q -r "build-$RUN_ID.zip" ./
-          rsync -avz "build-$RUN_ID.zip" nodeuser@"$DEPLOY_HOST":/app/
-          ssh nodeuser@"$DEPLOY_HOST" "/app/deploy.sh $RUN_ID"
+          rsync -avz "build-$RUN_ID.zip" vps:/app/
+          ssh vps "/app/deploy.sh $RUN_ID"
