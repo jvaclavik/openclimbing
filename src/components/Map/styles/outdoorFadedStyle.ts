@@ -127,26 +127,24 @@ const fadeColorValue = (value: unknown): unknown => {
   return value;
 };
 
-// Hiking and cycling route lines should stay vivid (they are the point of the
-// outdoor map), so their layers are excluded from the muting.
 const HIKE_ROUTES = /^(trail)_/;
 
 const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
   const faded = cloneDeep(style);
-  faded.layers.forEach((layer) => {
+  for (const layer of faded.layers) {
     if (HIKE_ROUTES.test(layer.id)) {
-      return;
+      continue;
     }
     const paint = (layer as { paint?: Record<string, unknown> }).paint;
     if (!paint) {
-      return;
+      continue;
     }
     Object.keys(paint)
       .filter((key) => key.endsWith('color'))
       .forEach((key) => {
         paint[key] = fadeColorValue(paint[key]);
       });
-  });
+  }
   return faded;
 };
 
