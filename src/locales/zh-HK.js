@@ -333,6 +333,7 @@ export default {
   'layers.basic': '基本',
   'layers.makina_africa': 'OpenPlaceGuide 非洲',
   'layers.outdoor': '戶外',
+  'layers.outdoor_faded': '戶外淡色',
   'layers.mtb': '山地單車',
   'layers.snow': '雪地',
   'layers.carto': 'OSM Carto',

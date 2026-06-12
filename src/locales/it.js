@@ -197,6 +197,7 @@ solo informazioni che hai verificato di persona o che provengono da fonti attend
   'layers.basic': 'Base',
   'layers.makina_africa': 'OpenPlaceGuide Africa',
   'layers.outdoor': 'Esterno',
+  'layers.outdoor_faded': 'Esterno attenuato',
   'layers.mtb': 'MTB',
   'layers.snow': 'Neve',
   'layers.carto': 'OSM Carto',

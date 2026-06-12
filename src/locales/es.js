@@ -138,6 +138,7 @@ export default {
 
   'layers.basic': 'Básico',
   'layers.outdoor': 'Exteriores',
+  'layers.outdoor_faded': 'Exteriores atenuado',
   'layers.mtb': 'BTT',
   'layers.snow': 'Nieve',
   'layers.carto': 'OSM Carto',

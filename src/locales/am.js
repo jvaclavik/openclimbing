@@ -129,6 +129,7 @@ export default {
 
   'layers.basic': 'መሰረታዊ',
   'layers.outdoor': 'ከቤት ውጭ',
+  'layers.outdoor_faded': 'ከቤት ውጭ ደበዘዘ',
   'layers.mtb': 'MTB',
   'layers.snow': 'በረዶ',
   'layers.carto': 'OSM Carto',
