@@ -6,6 +6,7 @@ import type { StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { createMapEffectHook } from '../../helpers';
 import { basicStyle } from '../styles/basicStyle';
 import { outdoorStyle } from '../styles/outdoorStyle';
+import { outdoorFadedStyle } from '../styles/outdoorFadedStyle';
 import { osmappLayers } from '../../LayerSwitcher/osmappLayers';
 import { getRasterStyle } from '../styles/rasterStyle';
 import { DEFAULT_MAP } from '../../../config.mjs';
@@ -52,6 +53,9 @@ const getBaseStyle = (key: string, currentTheme: Theme): StyleSpecification => {
   }
   if (key === 'outdoor') {
     return outdoorStyle;
+  }
+  if (key === 'outdoorFaded') {
+    return outdoorFadedStyle;
   }
   if (key === 'shortbread') {
     return currentTheme === 'dark'

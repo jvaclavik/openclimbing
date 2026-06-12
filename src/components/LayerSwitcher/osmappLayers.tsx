@@ -84,6 +84,12 @@ export const osmappLayers: Layers = {
     attribution: ['maptiler', 'osm'],
     // https://api.maptiler.com/tiles/outdoor/tiles.json?key=xxx .planettime="1703030400000",
   },
+  outdoorFaded: {
+    name: t('layers.outdoor_faded'),
+    type: 'basemap',
+    Icon: FilterHdrIcon,
+    attribution: ['maptiler', 'osm'],
+  },
   s1: { type: 'spacer' },
   carto: {
     name: t('layers.carto'),

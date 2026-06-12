@@ -515,6 +515,7 @@ export default {
 
   'layers.basic': 'Základní',
   'layers.outdoor': 'Outdoorová',
+  'layers.outdoor_faded': 'Outdoorová tlumená',
   'layers.mtb': 'MTB',
   'layers.snow': 'Zimní',
   'layers.carto': 'OSM Carto',
