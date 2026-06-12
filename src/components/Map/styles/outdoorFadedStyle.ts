@@ -127,7 +127,8 @@ const fadeColorValue = (value: unknown): unknown => {
   return value;
 };
 
-const HIKE_ROUTES = /^(trail)_/;
+// Keep the color-coded hiking trails vivid from zoom 12+ (lesser zooms are "longdistance")
+const HIKE_ROUTES = /^trail_(?!longdistance)/;
 
 const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
   const faded = cloneDeep(style);
