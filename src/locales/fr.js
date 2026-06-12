@@ -141,6 +141,7 @@ export default {
 
   'layers.basic': 'Basique',
   'layers.outdoor': 'Plein Air',
+  'layers.outdoor_faded': 'Plein Air atténué',
   'layers.mtb': 'VTT',
   'layers.snow': 'Neige',
   'layers.carto': 'OSM Carto',
