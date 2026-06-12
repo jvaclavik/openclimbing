@@ -140,6 +140,10 @@ const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
     if (!paint) {
       continue;
     }
+    // Symbol layers with an `icon-color` but no explicit `text-color` render default black
+    if (paint['icon-color'] && !paint['text-color']) {
+      paint['text-color'] = 'rgba(0, 0, 0, 1)';
+    }
     Object.keys(paint)
       .filter((key) => key.endsWith('color'))
       .forEach((key) => {
