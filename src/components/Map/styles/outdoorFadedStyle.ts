@@ -8,14 +8,8 @@ import { outdoorStyle } from './outdoorStyle';
 
 // How strongly to mute: blend each color towards its own gray (desaturate) and
 // then a touch towards white (lighten). 0 = keep original, 1 = full effect.
-type FadeConfig = { desaturate: number; lighten: number };
-
-// Default muting for the basemap so it recedes into the background.
-const DEFAULT_FADE: FadeConfig = { desaturate: 0.7, lighten: 0.4 };
-
-// Hiking trails keep their hue (no desaturation) so the colour coding stays
-// readable – they are only lightened a bit so they don't shout over the map.
-const HIKE_ROUTES_FADE: FadeConfig = { desaturate: 0, lighten: 0.4 };
+const DESATURATE = 0.7;
+const LIGHTEN = 0.4;
 
 type Rgba = { r: number; g: number; b: number; a: number };
 
@@ -97,18 +91,15 @@ const parseColor = (input: string): Rgba | null => {
   return null;
 };
 
-const fadeColorString = (
-  input: string,
-  { desaturate, lighten }: FadeConfig,
-): string => {
+const fadeColorString = (input: string): string => {
   const c = parseColor(input);
   if (!c) {
     return input;
   }
   const gray = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
   const mute = (channel: number) => {
-    const desaturated = channel * (1 - desaturate) + gray * desaturate;
-    return desaturated * (1 - lighten) + 255 * lighten;
+    const desaturated = channel * (1 - DESATURATE) + gray * DESATURATE;
+    return desaturated * (1 - LIGHTEN) + 255 * LIGHTEN;
   };
   const r = clampChannel(mute(c.r));
   const g = clampChannel(mute(c.g));
@@ -121,16 +112,16 @@ const fadeColorString = (
 // whole value and fade any color string we meet; everything else passes through
 // (expression operators, zoom stops, opacities, …) because it won't parse as a
 // color.
-const fadeColorValue = (value: unknown, config: FadeConfig): unknown => {
+const fadeColorValue = (value: unknown): unknown => {
   if (typeof value === 'string') {
-    return fadeColorString(value, config);
+    return fadeColorString(value);
   }
   if (Array.isArray(value)) {
-    return value.map((v) => fadeColorValue(v, config));
+    return value.map(fadeColorValue);
   }
   if (value && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value).map(([k, v]) => [k, fadeColorValue(v, config)]),
+      Object.entries(value).map(([k, v]) => [k, fadeColorValue(v)]),
     );
   }
   return value;
@@ -146,7 +137,9 @@ const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
     if (!paint) {
       continue;
     }
-    const config = HIKE_ROUTES.test(layer.id) ? HIKE_ROUTES_FADE : DEFAULT_FADE;
+    if (HIKE_ROUTES.test(layer.id)) {
+      continue;
+    }
     // Symbol layers with an `icon-color` but no explicit `text-color` render default black
     if (paint['icon-color'] && !paint['text-color']) {
       paint['text-color'] = 'rgba(0, 0, 0, 1)';
@@ -154,7 +147,7 @@ const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
     Object.keys(paint)
       .filter((key) => key.endsWith('color'))
       .forEach((key) => {
-        paint[key] = fadeColorValue(paint[key], config);
+        paint[key] = fadeColorValue(paint[key]);
       });
   }
   return faded;
