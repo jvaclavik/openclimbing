@@ -224,6 +224,7 @@ export default {
   'layers.basic': 'Standard',
   'layers.makina_africa': 'OpenPlaceGuide Afrika',
   'layers.outdoor': 'Outdoor',
+  'layers.outdoor_faded': 'Outdoor gedämpft',
   'layers.mtb': 'MTB',
   'layers.snow': 'Schnee',
   'layers.carto': 'OSM Carto',
