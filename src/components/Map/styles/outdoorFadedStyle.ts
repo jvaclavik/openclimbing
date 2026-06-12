@@ -8,8 +8,8 @@ import { outdoorStyle } from './outdoorStyle';
 
 // How strongly to mute: blend each color towards its own gray (desaturate) and
 // then a touch towards white (lighten). 0 = keep original, 1 = full effect.
-const DESATURATE = 0.6;
-const LIGHTEN = 0.15;
+const DESATURATE = 0.7;
+const LIGHTEN = 0.4;
 
 type Rgba = { r: number; g: number; b: number; a: number };
 
