@@ -27,6 +27,36 @@ const CLIMBING_CLICKABLE_LAYERS = climbingLayers
   .filter((l) => (l.metadata as any)?.clickableWithOsmId)
   .map((l) => l.id);
 
+// Lightweight hover used purely to highlight features via `feature-state`
+// (e.g. fading out routes that light up on hover). Unlike `setUpHover`, it does
+// not change the cursor, so the features don't look clickable.
+export const setUpHoverHighlight = (map: Map, layerIds: string[]) => {
+  let lastHover: FeatureIdentifier | null = null;
+
+  const off = () => {
+    if (lastHover) {
+      map.setFeatureState(lastHover, { hover: false });
+    }
+    lastHover = null;
+  };
+
+  const onMouseMove = (
+    e: MapMouseEvent & { features?: MapGeoJSONFeature[] },
+  ) => {
+    off();
+    const feature = e.features?.[0];
+    if (feature) {
+      map.setFeatureState(feature, { hover: true });
+      lastHover = feature;
+    }
+  };
+
+  layerIds.forEach((layer) => {
+    map.on('mousemove', layer, onMouseMove);
+    map.on('mouseleave', layer, off);
+  });
+};
+
 export const setUpHover = (map: Map, layersWithOsmId: string[]) => {
   let lastHover = null;
 

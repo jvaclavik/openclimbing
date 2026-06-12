@@ -6,7 +6,10 @@ import type { StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { createMapEffectHook } from '../../helpers';
 import { basicStyle } from '../styles/basicStyle';
 import { outdoorStyle } from '../styles/outdoorStyle';
-import { outdoorFadedStyle } from '../styles/outdoorFadedStyle';
+import {
+  outdoorFadedStyle,
+  OUTDOOR_FADED_ROUTE_LAYERS,
+} from '../styles/outdoorFadedStyle';
 import { osmappLayers } from '../../LayerSwitcher/osmappLayers';
 import { getRasterStyle } from '../styles/rasterStyle';
 import { DEFAULT_MAP } from '../../../config.mjs';
@@ -19,7 +22,7 @@ import { EMPTY_GEOJSON_SOURCE, OSMAPP_SPRITE } from '../consts';
 import { fetchCrags } from '../../../services/fetchCrags';
 import { intl } from '../../../services/intl';
 import { Layer } from '../../utils/MapStateContext';
-import { setUpHover } from './featureHover';
+import { setUpHover, setUpHoverHighlight } from './featureHover';
 import { isUrlForRasterLayer, layersWithOsmId } from '../helpers';
 import { Theme } from '../../../helpers/theme';
 import { addIndoorEqual, removeIndoorEqual } from './indoor';
@@ -185,6 +188,10 @@ export const useUpdateStyle = createMapEffectHook(
     map.addControl(languageControl);
 
     setUpHover(map, layersWithOsmId(style));
+
+    if (key === 'outdoorFaded') {
+      setUpHoverHighlight(map, OUTDOOR_FADED_ROUTE_LAYERS);
+    }
 
     if (mapLoaded && overlays.includes('indoor')) {
       addIndoorEqual();

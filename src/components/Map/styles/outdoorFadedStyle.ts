@@ -127,24 +127,42 @@ const fadeColorValue = (value: unknown): unknown => {
   return value;
 };
 
-// Hiking and cycling route lines should stay vivid (they are the point of the
-// outdoor map), so their layers are excluded from the muting.
-const KEEP_ORIGINAL_COLORS = /^(trail|bicycle)_/;
+// Hiking and cycling route lines are the point of the outdoor map. They are
+// muted like everything else by default, but light up to their full original
+// color on hover (see `feature-state` below + `setUpHoverHighlight`).
+const ROUTE_LAYERS = /^(trail|bicycle)_/;
+
+const HOVER = ['boolean', ['feature-state', 'hover'], false];
+
+// Same as a plain color, but driven by hover: full color when hovered, faded
+// otherwise. Only simple color strings get the hover treatment; stops/
+// expressions fall back to a plain fade (routes only use string colors).
+const fadeColorValueWithHover = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    const faded = fadeColorString(value);
+    return faded === value ? value : ['case', HOVER, value, faded];
+  }
+  return fadeColorValue(value);
+};
+
+export const OUTDOOR_FADED_ROUTE_LAYERS = outdoorStyle.layers
+  .filter((layer) => ROUTE_LAYERS.test(layer.id))
+  .map((layer) => layer.id);
 
 const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
   const faded = cloneDeep(style);
   faded.layers.forEach((layer) => {
-    if (KEEP_ORIGINAL_COLORS.test(layer.id)) {
-      return;
-    }
     const paint = (layer as { paint?: Record<string, unknown> }).paint;
     if (!paint) {
       return;
     }
+    const transform = ROUTE_LAYERS.test(layer.id)
+      ? fadeColorValueWithHover
+      : fadeColorValue;
     Object.keys(paint)
       .filter((key) => key.endsWith('color'))
       .forEach((key) => {
-        paint[key] = fadeColorValue(paint[key]);
+        paint[key] = transform(paint[key]);
       });
   });
   return faded;
