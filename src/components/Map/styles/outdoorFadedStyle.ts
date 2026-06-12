@@ -133,11 +133,11 @@ const HIKE_ROUTES = /^trail_(?!longdistance)/;
 const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
   const faded = cloneDeep(style);
   for (const layer of faded.layers) {
-    if (HIKE_ROUTES.test(layer.id)) {
-      continue;
-    }
     const paint = (layer as { paint?: Record<string, unknown> }).paint;
     if (!paint) {
+      continue;
+    }
+    if (HIKE_ROUTES.test(layer.id)) {
       continue;
     }
     // Symbol layers with an `icon-color` but no explicit `text-color` render default black
