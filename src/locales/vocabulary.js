@@ -588,6 +588,7 @@ export default {
   'layers.makina_africa': 'OpenPlaceGuide Africa',
   'layers.outdoor': 'Outdoor',
   'layers.outdoor_faded': 'Outdoor faded',
+  'layers.tourist': 'Tourist',
   'layers.mtb': 'MTB',
   'layers.snow': 'Snow',
   'layers.carto': 'OSM Carto',
