@@ -132,7 +132,8 @@ const HIKE_ROUTES = /^trail_(?!longdistance)/;
 
 // Keep the road network (motorways, major & minor roads incl. their tunnels)
 // at full color so it stays usable for navigating to the crags.
-const ROADS = /^(road_(minor|major|motorway)|tunnel_(road_(minor|major)|motorway))$/;
+const ROADS =
+  /^(road_(minor|major|motorway)|tunnel_(road_(minor|major)|motorway))$/;
 
 const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
   const faded = cloneDeep(style);
