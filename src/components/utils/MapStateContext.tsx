@@ -89,7 +89,7 @@ const useUpdateViewFromHash = (setView: Setter<View>) => {
 const useActiveLayersState = () => {
   const isClimbing = PROJECT_ID === 'openclimbing';
   const initLayers = isClimbing
-    ? ['outdoor', 'climbing']
+    ? ['tourist', 'climbing']
     : [DEFAULT_MAP, 'indoor'];
   return usePersistedState('activeLayers', initLayers);
 };

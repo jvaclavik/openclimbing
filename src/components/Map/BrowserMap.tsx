@@ -133,7 +133,10 @@ const BrowserMap = () => {
 
   return (
     <>
-      <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
+      <div
+        ref={containerRef}
+        style={{ height: '100%', width: '100%', backgroundColor: '#4a463d' }}
+      />
       <PreviewArrow />
     </>
   );

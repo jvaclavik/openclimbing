@@ -46,6 +46,33 @@ const czBbox: Bbox = [
 ];
 
 export const osmappLayers: Layers = {
+  tourist: {
+    name: t('layers.tourist'),
+    type: 'basemap',
+    Icon: FilterHdrIcon,
+    attribution: ['maptiler', 'osm'],
+  },
+  outdoorFull: {
+    name: t('layers.outdoor'),
+    type: 'basemap',
+    Icon: FilterHdrIcon,
+    attribution: ['maptiler', 'osm'],
+  },
+  outdoor: {
+    name: t('layers.outdoor_faded'),
+    type: 'basemap',
+    Icon: FilterHdrIcon,
+    attribution: ['maptiler', 'osm'],
+    // https://api.maptiler.com/tiles/outdoor/tiles.json?key=xxx .planettime="1703030400000",
+  },
+  s1: { type: 'spacer' },
+  carto: {
+    name: t('layers.carto'),
+    type: 'basemap',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    Icon: MapIcon,
+    attribution: ['osm'],
+  },
   basic: {
     name: `${t('layers.basic')} Maptiler`,
     type: 'basemap',
@@ -76,27 +103,6 @@ export const osmappLayers: Layers = {
       'osm',
     ],
     bboxes: [africaBbox],
-  },
-  outdoor: {
-    name: t('layers.outdoor_faded'),
-    type: 'basemap',
-    Icon: FilterHdrIcon,
-    attribution: ['maptiler', 'osm'],
-    // https://api.maptiler.com/tiles/outdoor/tiles.json?key=xxx .planettime="1703030400000",
-  },
-  outdoorFull: {
-    name: t('layers.outdoor'),
-    type: 'basemap',
-    Icon: FilterHdrIcon,
-    attribution: ['maptiler', 'osm'],
-  },
-  s1: { type: 'spacer' },
-  carto: {
-    name: t('layers.carto'),
-    type: 'basemap',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    Icon: MapIcon,
-    attribution: ['osm'],
   },
   sat: {
     name: t('layers.maptilerSat'),
