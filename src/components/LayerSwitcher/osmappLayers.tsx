@@ -78,14 +78,14 @@ export const osmappLayers: Layers = {
     bboxes: [africaBbox],
   },
   outdoor: {
-    name: t('layers.outdoor_faded'),
+    name: t('layers.outdoor'),
     type: 'basemap',
     Icon: FilterHdrIcon,
     attribution: ['maptiler', 'osm'],
     // https://api.maptiler.com/tiles/outdoor/tiles.json?key=xxx .planettime="1703030400000",
   },
   outdoorFull: {
-    name: t('layers.outdoor'),
+    name: t('layers.outdoor_faded'),
     type: 'basemap',
     Icon: FilterHdrIcon,
     attribution: ['maptiler', 'osm'],
