@@ -80,46 +80,66 @@ const pluralForm = (count: number): PluralForm => {
   return 'many';
 };
 
-const HEADING_KEYS: Record<
-  'area' | 'crag' | 'generic',
-  Record<PluralForm, TranslationId>
-> = {
-  area: {
-    singular: 'my_ticks.share.text_heading_area_singular',
-    few: 'my_ticks.share.text_heading_area_few',
-    many: 'my_ticks.share.text_heading_area_many',
-  },
-  crag: {
-    singular: 'my_ticks.share.text_heading_crag_singular',
-    few: 'my_ticks.share.text_heading_crag_few',
-    many: 'my_ticks.share.text_heading_crag_many',
-  },
-  generic: {
-    singular: 'my_ticks.share.text_heading_generic_singular',
-    few: 'my_ticks.share.text_heading_generic_few',
-    many: 'my_ticks.share.text_heading_generic_many',
-  },
+const LEAD_SUMMARY_KEYS: Record<PluralForm, TranslationId> = {
+  singular: 'my_ticks.share.text_lead_summary_singular',
+  few: 'my_ticks.share.text_lead_summary_few',
+  many: 'my_ticks.share.text_lead_summary_many',
 };
 
-const buildHeading = (
-  count: number,
+const LEAD_SUMMARY_KEYS_NO_GRADE: Record<PluralForm, TranslationId> = {
+  singular: 'my_ticks.share.text_lead_summary_singular_no_grade',
+  few: 'my_ticks.share.text_lead_summary_few_no_grade',
+  many: 'my_ticks.share.text_lead_summary_many_no_grade',
+};
+
+const buildLeadActivity = (
   commonAreaName: string | null,
   singleCragName: string | null,
 ): string => {
-  const form = pluralForm(count);
   if (commonAreaName) {
-    return t(HEADING_KEYS.area[form], {
-      count: String(count),
+    return t('my_ticks.share.text_lead_activity_at_area', {
       area: commonAreaName,
     });
   }
   if (singleCragName) {
-    return t(HEADING_KEYS.crag[form], {
-      count: String(count),
+    return t('my_ticks.share.text_lead_activity_at_crag', {
       crag: singleCragName,
     });
   }
-  return t(HEADING_KEYS.generic[form], { count: String(count) });
+  return t('my_ticks.share.text_lead_activity_generic');
+};
+
+/**
+ * Picks the grade label of the hardest sent route in the session, using the
+ * climbing-grades table index when available. Returns null when no tick has a
+ * resolvable grade (e.g. all projects / unknown grades).
+ */
+const findTopGrade = (ticks: FetchedClimbingTick[]): string | null => {
+  let best: FetchedClimbingTick | null = null;
+  let bestIndex = -1;
+  for (const tick of ticks) {
+    const idx = tick.tickScore?.gradeRowIndex;
+    if (idx == null) continue;
+    if (idx > bestIndex) {
+      bestIndex = idx;
+      best = tick;
+    }
+  }
+  const grade = best?.grade?.trim();
+  return grade ? grade : null;
+};
+
+/** Second line of the share text — count + hardest grade in plain prose. */
+const buildLeadSummary = (ticks: FetchedClimbingTick[]): string => {
+  const form = pluralForm(ticks.length);
+  const topGrade = findTopGrade(ticks);
+  if (topGrade) {
+    return t(LEAD_SUMMARY_KEYS[form], {
+      count: String(ticks.length),
+      grade: topGrade,
+    });
+  }
+  return t(LEAD_SUMMARY_KEYS_NO_GRADE[form], { count: String(ticks.length) });
 };
 
 const buildCragUrl = (
@@ -149,23 +169,32 @@ const buildBodyLines = (groups: CragGroup[]): string[] => {
   return lines;
 };
 
+/**
+ * Guide section: heading + per-crag block (label on one line, URL on the
+ * next), blocks separated by a blank line for easier tapping on mobile.
+ * Single-crag sessions collapse to heading + URL pair (no per-crag label).
+ */
 const buildGuideLines = (groups: CragGroup[], baseUrl: string): string[] => {
   const withLinks = groups
     .map((group) => ({
       name: group.cragName,
       url: buildCragUrl(baseUrl, group.cragOsmType, group.cragOsmId),
     }))
-    .filter((entry) => entry.url);
+    .filter((entry) => entry.url) as Array<{
+    name: string | null;
+    url: string;
+  }>;
   if (withLinks.length === 0) return [];
   if (withLinks.length === 1) {
-    const only = withLinks[0];
-    return [t('my_ticks.share.text_guide_single'), only.url!];
+    return [t('my_ticks.share.text_guide_section_heading'), withLinks[0].url];
   }
-  const lines = [t('my_ticks.share.text_guide_many')];
-  for (const entry of withLinks) {
+  const lines: string[] = [t('my_ticks.share.text_guide_section_heading')];
+  withLinks.forEach((entry) => {
+    lines.push('');
     const label = entry.name || t('my_ticks.share.text_unknown_crag');
-    lines.push(`• ${label}: ${entry.url}`);
-  }
+    lines.push(t('my_ticks.share.text_crag_subheading', { crag: label }));
+    lines.push(entry.url);
+  });
   return lines;
 };
 
@@ -187,28 +216,30 @@ export const buildSessionShareText = ({
   const singleCragName =
     groups.length === 1 ? (groups[0].cragName ?? null) : null;
 
-  const heading = buildHeading(
-    sessionTicks.length,
-    commonArea?.name ?? null,
-    singleCragName,
-  );
+  const diaryUrl = buildTickShareUrl(baseUrl, displayName, {
+    session: sessionDate,
+  });
+
+  // First 2 lines — what Strava shows in feed preview. Lead headline + a
+  // prose summary with count and hardest grade.
+  const previewBlock = [
+    buildLeadActivity(commonArea?.name ?? null, singleCragName),
+    buildLeadSummary(sessionTicks),
+  ];
 
   const bodyLines = buildBodyLines(groups);
 
-  const url = buildTickShareUrl(baseUrl, displayName, {
-    session: sessionDate,
-  });
-  const diaryLines = [
+  const diaryDateBlock = [
     t('my_ticks.share.text_diary_heading', { date: formatDate(sessionDate) }),
-    url,
+    diaryUrl,
   ];
 
   const guideLines = buildGuideLines(groups, baseUrl);
 
   const sections = [
-    [heading],
+    previewBlock,
     bodyLines,
-    diaryLines,
+    diaryDateBlock,
     guideLines,
     [t('my_ticks.share.text_footer')],
   ].filter((section) => section.length > 0);
@@ -242,7 +273,7 @@ export const buildSingleTickShareText = ({
   sections.push([url]);
   const cragUrl = buildCragUrl(baseUrl, tick.cragOsmType, tick.cragOsmId);
   if (cragUrl) {
-    sections.push([t('my_ticks.share.text_guide_single'), cragUrl]);
+    sections.push([t('my_ticks.share.text_guide_section_heading'), cragUrl]);
   }
   sections.push([t('my_ticks.share.text_footer')]);
 
