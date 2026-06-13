@@ -130,6 +130,10 @@ const fadeColorValue = (value: unknown): unknown => {
 // Keep the color-coded hiking trails vivid from zoom 12+ (lesser zooms are "longdistance")
 const HIKE_ROUTES = /^trail_(?!longdistance)/;
 
+// Keep the road network (motorways, major & minor roads incl. their tunnels)
+// at full color so it stays usable for navigating to the crags.
+const ROADS = /^(road_(minor|major|motorway)|tunnel_(road_(minor|major)|motorway))$/;
+
 const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
   const faded = cloneDeep(style);
   for (const layer of faded.layers) {
@@ -137,7 +141,7 @@ const fadeStyleColors = (style: StyleSpecification): StyleSpecification => {
     if (!paint) {
       continue;
     }
-    if (HIKE_ROUTES.test(layer.id)) {
+    if (HIKE_ROUTES.test(layer.id) || ROADS.test(layer.id)) {
       continue;
     }
     // Symbol layers with an `icon-color` but no explicit `text-color` render default black
