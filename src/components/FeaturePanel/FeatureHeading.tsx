@@ -1,46 +1,12 @@
-import { useState } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
-import EditIcon from '@mui/icons-material/Edit';
-import { IconButton, Tooltip, useMediaQuery } from '@mui/material';
-import { useEditDialogContext } from './helpers/EditDialogContext';
+import { useMediaQuery } from '@mui/material';
 import { PoiDescription } from './helpers/PoiDescription';
 import { getLabel, getSecondaryLabel } from '../../helpers/featureLabel';
 import { useFeatureContext } from '../utils/FeatureContext';
-import { t } from '../../services/intl';
-import { isMobileDevice } from '../helpers';
 import { QuickActions } from './QuickActions/QuickActions';
 import { PROJECT_ID } from '../../services/project';
 import { css } from '@emotion/react';
-
-const EditNameContainer = styled.div`
-  position: absolute;
-  z-index: 1010000;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  align-items: center;
-  display: flex;
-  margin-top: 3px;
-  background: ${({ theme }) => theme.palette.background.paper};
-`;
-const EditNameButton = () => {
-  const { openWithTag } = useEditDialogContext();
-  const { feature } = useFeatureContext();
-  if (feature?.skeleton || isMobileDevice()) {
-    return null;
-  }
-
-  return (
-    <EditNameContainer>
-      <Tooltip title={t('featurepanel.inline_edit_title')}>
-        <IconButton onClick={() => openWithTag('name')} size="small">
-          <EditIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </EditNameContainer>
-  );
-};
 
 const Container = styled.div<{ isStandalone: boolean }>`
   margin: 20px 0 20px 0;
@@ -57,20 +23,12 @@ const HeadingsWrapper = styled.div`
 
 const Headings = () => {
   const isOpenClimbing = PROJECT_ID === 'openclimbing';
-  const [isHovered, setIsHovered] = useState(false);
-
-  const onMouseEnter = () => {
-    setIsHovered(true);
-  };
-  const onMouseLeave = () => {
-    setIsHovered(false);
-  };
 
   const { feature } = useFeatureContext();
   const label = getLabel(feature);
   const secondaryLabel = getSecondaryLabel(feature);
   return (
-    <HeadingsWrapper onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <HeadingsWrapper>
       <Heading $deleted={feature?.deleted} $isOpenClimbing={isOpenClimbing}>
         {label}
       </Heading>
@@ -82,7 +40,6 @@ const Headings = () => {
           {secondaryLabel}
         </SecondaryHeading>
       )}
-      {isHovered && <EditNameButton />}
     </HeadingsWrapper>
   );
 };

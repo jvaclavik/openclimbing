@@ -5,7 +5,6 @@ import { buildAddress } from '../../../services/helpers';
 import { Feature } from '../../../services/types';
 import { t } from '../../../services/intl';
 import { TagsTableInner } from './TagsTableInner';
-import { InlineEditButton } from '../helpers/InlineEditButton';
 import { renderTag } from './renderTag';
 import { Table } from './Table';
 import { ShowMoreButton } from './helpers';
@@ -108,10 +107,7 @@ const UiFields = ({ fields }: { fields: UiField[] }) => {
             <th title={getTooltip(uiField)} style={{ verticalAlign: 'middle' }}>
               {removeUnits(label)}
             </th>
-            <td>
-              <InlineEditButton k={tagsForField[0].key} />
-              {addUnits(label, render(uiField, feature))}
-            </td>
+            <td>{addUnits(label, render(uiField, feature))}</td>
           </tr>
         );
       })}

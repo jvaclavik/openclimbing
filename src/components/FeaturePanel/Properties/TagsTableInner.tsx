@@ -2,7 +2,6 @@ import React from 'react';
 import truncate from 'lodash/truncate';
 
 import { useToggleState } from '../../helpers';
-import { InlineEditButton } from '../helpers/InlineEditButton';
 import { buildAddress } from '../../../services/helpers';
 import { ToggleButton } from '../helpers/ToggleButton';
 import { getHumanValue, renderTag } from './renderTag';
@@ -56,7 +55,6 @@ const TagsGroup = ({
       <tr>
         <th>{label}</th>
         <td style={{ overflow: 'visible' }}>
-          <InlineEditButton k={tags[0][0]} />
           {value || getTagGroupPreview(tags)}
           {!hideArrow && <ToggleButton onClick={toggle} isShown={isShown} />}
         </td>
@@ -192,10 +190,7 @@ export const TagsTableInner = ({
       {rest.map(([k, v]) => (
         <tr key={k}>
           <th style={{ verticalAlign: 'middle' }}>{k}</th>
-          <td>
-            <InlineEditButton k={k} />
-            {renderTag(k, v)}
-          </td>
+          <td>{renderTag(k, v)}</td>
         </tr>
       ))}
       <TagsGroup tags={brands} label="brand:*" value={tags.brand} />

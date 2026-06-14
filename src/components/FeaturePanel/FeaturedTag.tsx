@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { WebsiteRenderer } from './renderers/WebsiteRenderer';
 import { OpeningHoursRenderer } from './renderers/OpeningHoursRenderer';
 import { PhoneRenderer } from './renderers/PhoneRenderer';
-import { InlineEditButton } from './helpers/InlineEditButton';
 import { FoodHygieneRatingSchemeRenderer } from './renderers/FoodHygieneRatingScheme';
 import { WikipediaRenderer } from './renderers/WikipediaRenderer';
 import { WikidataRenderer } from './renderers/WikidataRenderer';
@@ -84,8 +83,6 @@ export const FeaturedTag = ({ k, renderer }: Props) => {
 
   return (
     <Wrapper>
-      <InlineEditButton k={k} />
-
       <Value title={k}>
         <Renderer k={k} v={value} />
       </Value>
