@@ -42,19 +42,24 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
     isSelected ? config.pathStrokeColorSelected : strokeColor,
   );
   const isOtherSelected = isOtherRouteSelected(routeIndex);
+  const isHovered = !isMobileMode && routeIndexHovered === routeIndex;
 
+  // On hover we only change the route's outline (border) — width and colour —
+  // and keep the inner route stroke (its difficulty colour) untouched.
   const BorderPath = () => (
     <RouteLine
       pathPx={pathPx}
       strokeWidth={
-        isOtherSelected
-          ? 2
-          : isSelected
-            ? config.pathBorderWidthSelected
-            : config.pathBorderWidth
+        isHovered
+          ? config.pathHoverWidth
+          : isOtherSelected
+            ? 2
+            : isSelected
+              ? config.pathBorderWidthSelected
+              : config.pathBorderWidth
       }
-      stroke={contrastColor}
-      opacity={opacity ? opacity : isOtherSelected ? 0 : 1}
+      stroke={isHovered ? config.pathStrokeColorSelected : contrastColor}
+      opacity={opacity ? opacity : isOtherSelected && !isHovered ? 0 : 1}
     />
   );
 
@@ -67,21 +72,10 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
     />
   );
 
-  const HoverPath = () =>
-    !isMobileMode && routeIndexHovered === routeIndex ? (
-      <RouteLine
-        pathPx={pathPx}
-        strokeWidth={config.pathStrokeWidth}
-        stroke={`${config.pathStrokeColorSelected}80`}
-        opacity={opacity}
-      />
-    ) : null;
-
   return (
     <>
       <BorderPath />
       <RoutePath />
-      <HoverPath />
     </>
   );
 };

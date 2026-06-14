@@ -32,6 +32,10 @@ export const useConfig = () => {
     pathBorderWidthSelected: (8.2 / photoZoom.scale) * imageScale,
     pathBorderOpacity: 1,
     pathStrokeWidth: (4.4 / photoZoom.scale) * imageScale,
+    // Hover highlight is drawn on top of the route stroke; making it a bit
+    // wider lets the semi-transparent colour form a halo/border around the
+    // route on mouse hover (photo + route list row).
+    pathHoverWidth: (8.5 / photoZoom.scale) * imageScale,
   };
 };
 

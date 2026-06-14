@@ -279,7 +279,7 @@ export default {
   'support_us.thanks': `Děkujeme`,
   'support_us.bitcoin_dialog_title': `Podpořte nás Bitcoinem`,
 
-  'searchbox.placeholder': 'Prohledat OpenStreetMap',
+  'searchbox.placeholder': 'Hledat',
   'searchbox.category': 'kategorie',
   'searchbox.overpass_success': 'Nalezeno výsledků: __count__',
   'searchbox.overpass_error': 'Chyba při načítání výsledků. __message__',
@@ -565,6 +565,7 @@ export default {
   'climbingpanel.update_route_1': 'Cesta',
   'climbingpanel.update_route_2': 'je už zakreslena, ale můžete ji upravit. Stačí přesunout body nebo přidat nový.',
   'climbingview.description': 'Popis',
+  'climbingview.links': 'Odkazy',
 
   'publictransport.tourism': 'Turistické vlaky',
   'publictransport.night': 'Noční vlaky',
