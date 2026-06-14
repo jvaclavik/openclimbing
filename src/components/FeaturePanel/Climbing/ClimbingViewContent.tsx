@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button, ButtonGroup, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Typography } from '@mui/material';
 import {
   CLIMBING_ROUTE_ROW_HEIGHT,
   DIALOG_TOP_BAR_HEIGHT,
@@ -16,6 +16,7 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { EditButton } from '../EditButton';
 import { EditDialog } from '../EditDialog/EditDialog';
+import { FeaturedTags, getFeaturedTagKeys } from '../FeaturedTags';
 import { PanelLabel } from './PanelLabel';
 import { RouteDistribution } from './RouteDistribution';
 import { useGetCragViewLayout } from './utils/useCragViewLayout';
@@ -102,15 +103,27 @@ export const ClimbingViewContent = ({ isMapVisible }) => {
           <RouteDistribution features={feature.memberFeatures} />
         </HideOnNarrowPanel>
 
-        {feature.tags.description ? (
-          <HideOnNarrowPanel>
-            <PanelLabel>{t('climbingview.description')}</PanelLabel>
+        <ContentContainer>
+          {feature.tags.description ? (
+            <HideOnNarrowPanel>
+              <PanelLabel>{t('climbingview.description')}</PanelLabel>
 
-            <Typography ml={2} mr={2}>
-              {feature.tags.description}
-            </Typography>
-          </HideOnNarrowPanel>
-        ) : null}
+              <Typography ml={2} mr={2}>
+                {feature.tags.description}
+              </Typography>
+            </HideOnNarrowPanel>
+          ) : null}
+
+          {getFeaturedTagKeys(feature).length > 0 && (
+            <HideOnNarrowPanel>
+              <PanelLabel>{t('climbingview.links')}</PanelLabel>
+
+              <Box ml={2} mr={2}>
+                <FeaturedTags />
+              </Box>
+            </HideOnNarrowPanel>
+          )}
+        </ContentContainer>
 
         <EditButton />
         <EditDialog />

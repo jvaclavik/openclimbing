@@ -292,7 +292,7 @@ export default {
   'support_us.thanks': `Thank you!`,
   'support_us.bitcoin_dialog_title': `Support us with Bitcoin`,
 
-  'searchbox.placeholder': 'Search OpenStreetMap',
+  'searchbox.placeholder': 'Search',
   'searchbox.category': 'category',
   'searchbox.overpass_success': 'Results found: __count__',
   'searchbox.overpass_error': 'Error fetching results. __message__',
@@ -628,6 +628,7 @@ export default {
   'climbingpanel.update_route_1': 'Route',
   'climbingpanel.update_route_2': 'is already drawn, but you can update it. Just drag the points or add a new one.',
   'climbingview.description': 'Description',
+  'climbingview.links': 'Links',
 
   'publictransport.tourism': 'Touristic trains',
   'publictransport.night': 'Night trains',
