@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { useFeatureContext } from '../../../utils/FeatureContext';
 import { getApiId, getShortId } from '../../../../services/helpers';
-import { Feature, LonLat } from '../../../../services/types';
+import { Feature, FeatureTags, LonLat } from '../../../../services/types';
 import {
   getDifficulty,
   getDifficultyColor,
@@ -19,6 +19,7 @@ import { RouteDifficulty } from '../types';
 import { t } from '../../../../services/intl';
 import { useEditContext } from '../../EditDialog/context/EditContext';
 import { fetchFreshItem } from '../../EditDialog/context/itemsHelpers';
+import { EditDataItem } from '../../EditDialog/context/types';
 import { findInItems, isInItems } from '../../EditDialog/context/utils';
 import { distributeAlongControlPoints } from './routeMapDistribution';
 
@@ -30,30 +31,67 @@ type EditableRoute = {
   name: string;
   grade: string;
   difficulty: RouteDifficulty | undefined;
-  feature: Feature;
   isNode: boolean;
   originalLonLat: LonLat | undefined;
 };
 
-const getEditableRoutes = (crag: Feature): EditableRoute[] =>
-  (crag?.memberFeatures ?? [])
-    .filter(
-      (member) =>
-        member.tags?.climbing === 'route' ||
-        member.tags?.climbing === 'route_bottom',
-    )
-    .map((member, index) => {
-      const difficulty = getDifficulty(member.tags);
-      return {
-        id: getShortId(member.osmMeta),
-        name: member.tags?.name ?? member.tags?.ref ?? `#${index + 1}`,
-        grade: difficulty?.grade ?? '',
-        difficulty,
-        feature: member,
-        isNode: member.osmMeta.type === 'node',
-        originalLonLat: member.center as LonLat | undefined,
-      };
-    });
+const isRouteTags = (tags: FeatureTags | undefined) =>
+  tags?.climbing === 'route' || tags?.climbing === 'route_bottom';
+
+const routeFromMemberFeature = (
+  member: Feature,
+  index: number,
+): EditableRoute => {
+  const difficulty = getDifficulty(member.tags);
+  return {
+    id: getShortId(member.osmMeta),
+    name: member.tags?.name ?? member.tags?.ref ?? `#${index + 1}`,
+    grade: difficulty?.grade ?? '',
+    difficulty,
+    isNode: member.osmMeta.type === 'node',
+    originalLonLat: member.center as LonLat | undefined,
+  };
+};
+
+const routeFromItem = (item: EditDataItem): EditableRoute => {
+  const difficulty = getDifficulty(item.tags);
+  return {
+    id: item.shortId,
+    name: item.tags?.name ?? item.tags?.ref ?? item.shortId,
+    grade: difficulty?.grade ?? '',
+    difficulty,
+    isNode: getApiId(item.shortId).type === 'node',
+    originalLonLat: item.nodeLonLat,
+  };
+};
+
+const getEditableRoutes = (
+  crag: Feature,
+  items: EditDataItem[],
+): EditableRoute[] => {
+  const fromMembers = (crag?.memberFeatures ?? [])
+    .filter((member) => isRouteTags(member.tags))
+    .map(routeFromMemberFeature);
+
+  // While editing, the relation's member list (incl. reordering and newly
+  // added routes) lives in the EditContext — follow that order when present.
+  const cragItem = crag
+    ? findInItems(items, getShortId(crag.osmMeta))
+    : undefined;
+  if (!cragItem?.members?.length) {
+    return fromMembers;
+  }
+
+  const byId = new Map(fromMembers.map((route) => [route.id, route]));
+  return cragItem.members
+    .map((member) => {
+      const existing = byId.get(member.shortId);
+      if (existing) return existing;
+      const item = findInItems(items, member.shortId);
+      return item && isRouteTags(item.tags) ? routeFromItem(item) : null;
+    })
+    .filter((route): route is EditableRoute => !!route);
+};
 
 const buildControlPointElement = (label: string) => {
   const el = document.createElement('div');
@@ -217,7 +255,17 @@ export const useCragRoutePositionEditor = (
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
 
-  const editableRoutes = useMemo(() => getEditableRoutes(crag), [crag]);
+  const editableRoutes = useMemo(
+    () => getEditableRoutes(crag, items),
+    [crag, items],
+  );
+
+  // A signature that only changes when the *set* of routes (or their labels)
+  // changes — not on every position edit — so the marker layer isn't rebuilt
+  // (and popups closed) on each drag.
+  const routesSignature = editableRoutes
+    .map((route) => `${route.id}:${route.name}:${route.grade}`)
+    .join('|');
 
   const [isGuideMode, setIsGuideMode] = useState(false);
   const [controlPoints, setControlPoints] = useState<LonLat[]>([]);
@@ -622,7 +670,7 @@ export const useCragRoutePositionEditor = (
   }, [
     mapRef,
     isMapLoaded,
-    editableRoutes,
+    routesSignature,
     crag.center,
     themeMode,
     current,
