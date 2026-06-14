@@ -19,6 +19,7 @@ import {
   useExpandedSections,
 } from '../../../context/EditContext';
 import { OSM_WEBSITE } from '../../../../../../services/osm/consts';
+import { useHasCragRoutesMap } from '../CragRoutesLocationEditor';
 
 const EditFeatureMapDynamic = dynamic(() => import('./EditFeatureMap'), {
   ssr: false,
@@ -76,10 +77,18 @@ const Content = () => {
 
 export const LocationEditor = () => {
   const { expanded, toggleExpanded } = useExpandedSections('location');
-  const { shortId } = useCurrentItem();
+  const { shortId, tags } = useCurrentItem();
   const osmId = getApiId(shortId);
+  const hasCragRoutesMap = useHasCragRoutesMap();
+  const isRoute = tags.climbing === 'route' || tags.climbing === 'route_bottom';
 
   if (osmId.type === 'relation') {
+    return null;
+  }
+
+  // Climbing routes inside a crag are positioned in the shared crag map
+  // (CragRoutesLocationEditor), so skip the single-marker location editor.
+  if (isRoute && hasCragRoutesMap) {
     return null;
   }
 

@@ -5,6 +5,7 @@ import { PresetSelect } from './FeatureEditSection/PresetSelect/PresetSelect';
 import { MajorKeysEditor } from './FeatureEditSection/MajorKeysEditor';
 import { TagsEditor } from './FeatureEditSection/TagsEditor/TagsEditor';
 import { LocationEditor } from './FeatureEditSection/LocationEditor/LocationEditor';
+import { CragRoutesLocationEditor } from './FeatureEditSection/CragRoutesLocationEditor';
 import { ParentsEditor } from './FeatureEditSection/ParentsEditor';
 import { MembersEditor } from './FeatureEditSection/MembersEditor/MembersEditor';
 import React from 'react';
@@ -32,6 +33,7 @@ export const ItemEditSection = () => {
       <ParentsEditor />
       <MembersEditor />
       <LocationEditor />
+      <CragRoutesLocationEditor />
       <TagsEditor />
       <Box mt={4} />
     </>
