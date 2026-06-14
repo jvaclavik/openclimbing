@@ -13,12 +13,6 @@ const Container = styled.div`
   width: 100%;
   margin: 0 auto;
 `;
-const Row = styled.div`
-  &:hover {
-    text-decoration: none;
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-`;
 
 const MaxWidthContainer = styled.div`
   width: 100%;
@@ -31,17 +25,23 @@ const MaxWidthContainer = styled.div`
 
 const RowInner = styled.div<{
   isSelected: boolean;
+  isHovered: boolean;
 }>`
   cursor: pointer;
   display: flex;
   justify-content: center;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
-  background: ${({ isSelected, theme }) =>
-    isSelected ? theme.palette.action.selected : 'transparent'};
+  background: ${({ isSelected, isHovered, theme }) =>
+    isSelected
+      ? theme.palette.action.selected
+      : isHovered
+        ? theme.palette.action.hover
+        : 'transparent'};
   position: relative;
   font-size: 16px;
   border-top: dotted 1px ${({ theme }) => theme.palette.divider};
   z-index: ${({ isSelected }) => (isSelected ? '2' : 'auto')};
+  transition: background-color 0.1s;
 `;
 
 const RowContent = styled.div`
@@ -70,8 +70,15 @@ const NameHeader = styled.div`
 `;
 
 export const RouteListDndContent = () => {
-  const { routes, routeSelectedIndex, isRouteSelected, isEditMode, machine } =
-    useClimbingContext();
+  const {
+    routes,
+    routeSelectedIndex,
+    isRouteSelected,
+    isEditMode,
+    machine,
+    routeIndexHovered,
+    setRouteIndexHovered,
+  } = useClimbingContext();
   const { userSettings } = useUserSettingsContext();
   const parentRef = useRef<HTMLDivElement>(null);
   const replacePhotoIfNeeded = useReplacePhotoIfNeeded();
@@ -106,26 +113,28 @@ export const RouteListDndContent = () => {
       {routes.map((route, index) => {
         const isSelected = isRouteSelected(index);
         return (
-          <Row key={route.id ?? index}>
-            <RowInner
-              isSelected={isSelected}
-              onClick={() => {
-                onRowClick(index);
-              }}
-            >
-              <MaxWidthContainer>
-                <RowContent>
-                  <RenderListRow
-                    key={route.id}
-                    routeId={route.id}
-                    stopPropagation={stopPropagation}
-                    parentRef={parentRef}
-                    feature={route.feature}
-                  />
-                </RowContent>
-              </MaxWidthContainer>
-            </RowInner>
-          </Row>
+          <RowInner
+            key={route.id ?? index}
+            isSelected={isSelected}
+            isHovered={routeIndexHovered === index}
+            onMouseEnter={() => setRouteIndexHovered(index)}
+            onMouseLeave={() => setRouteIndexHovered(null)}
+            onClick={() => {
+              onRowClick(index);
+            }}
+          >
+            <MaxWidthContainer>
+              <RowContent>
+                <RenderListRow
+                  key={route.id}
+                  routeId={route.id}
+                  stopPropagation={stopPropagation}
+                  parentRef={parentRef}
+                  feature={route.feature}
+                />
+              </RowContent>
+            </MaxWidthContainer>
+          </RowInner>
         );
       })}
     </Container>

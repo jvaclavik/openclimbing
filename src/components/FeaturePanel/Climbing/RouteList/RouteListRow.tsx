@@ -23,7 +23,6 @@ export const RenderListRow = ({ routeId, parentRef, feature }: Props) => {
     setRouteIndexExpanded,
     setRouteListTopOffset,
     setRouteSelectedIndex,
-    setRouteIndexHovered,
     isEditMode,
   } = useClimbingContext();
 
@@ -73,8 +72,6 @@ export const RenderListRow = ({ routeId, parentRef, feature }: Props) => {
       feature={feature}
       index={index}
       onClick={handleClick}
-      onMouseEnter={() => setRouteIndexHovered(index)}
-      onMouseLeave={() => setRouteIndexHovered(null)}
       ref={ref}
       isSelected={isSelected}
       isHrefLinkVisible={false}
