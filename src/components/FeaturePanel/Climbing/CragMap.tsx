@@ -5,11 +5,15 @@ import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import styled from '@emotion/styled';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import type { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, useTheme } from '@mui/material';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { addFilePrefix } from './utils/photo';
 import ReactDOMServer from 'react-dom/server';
 import { CameraMarker } from './CameraMarker';
+import {
+  getDifficulty,
+  getDifficultyColor,
+} from '../../../services/tagging/climbing/routeGrade';
 
 const Map = styled.div<{ $isVisible: boolean }>`
   visibility: ${({ $isVisible }) => ($isVisible ? 'visible' : 'hidden')};
@@ -50,9 +54,11 @@ export const routes: LayerSpecification[] = [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         '#4150a0',
-        '#ea5540',
+        ['coalesce', ['get', 'color'], '#ea5540'],
       ],
       'circle-radius': 4,
+      'circle-stroke-color': '#f8f4f0',
+      'circle-stroke-width': 1,
     },
   } as LayerSpecification,
   {
@@ -190,6 +196,8 @@ const useInitMap = () => {
 
   const { feature } = useFeatureContext();
   const { photoPaths } = useClimbingContext();
+  const theme = useTheme();
+  const themeMode = theme.palette.mode === 'dark' ? 'dark' : 'light';
 
   const photoExifs = useGetPhotoExifs(photoPaths);
   usePhotoMarkers(photoExifs, mapRef);
@@ -251,7 +259,10 @@ const useInitMap = () => {
 
         getClimbingSource()?.setData({
           type: 'FeatureCollection' as const,
-          features: transformMemberFeaturesToGeojson(feature.memberFeatures),
+          features: transformMemberFeaturesToGeojson(
+            feature.memberFeatures,
+            themeMode,
+          ),
         });
         setIsFirstMapLoad(false);
       }
@@ -261,24 +272,32 @@ const useInitMap = () => {
     feature.memberFeatures,
     getClimbingSource,
     isFirstMapLoad,
+    themeMode,
   ]);
 
-  return { containerRef, isMapLoaded };
+  return { containerRef, isMapLoaded, mapRef };
 };
 
-const transformMemberFeaturesToGeojson = (features) => {
-  return features.map((feature) => ({
-    ...feature,
-    properties: {
-      ...feature.properties,
-      name: feature.tags.name,
-      grade: feature.tags['climbing:grade:uiaa'],
-    },
-    geometry:
-      feature.osmMeta.type === 'node'
-        ? { coordinates: feature.center, type: 'Point' }
-        : undefined,
-  }));
+const transformMemberFeaturesToGeojson = (
+  features,
+  mode: 'light' | 'dark' = 'light',
+) => {
+  return features.map((feature) => {
+    const difficulty = getDifficulty(feature.tags);
+    return {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        name: feature.tags.name,
+        grade: difficulty?.grade ?? feature.tags['climbing:grade:uiaa'] ?? '',
+        color: getDifficultyColor(difficulty, mode),
+      },
+      geometry:
+        feature.osmMeta.type === 'node'
+          ? { coordinates: feature.center, type: 'Point' }
+          : undefined,
+    };
+  });
 };
 
 const CragMap = () => {
