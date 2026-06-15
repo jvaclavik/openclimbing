@@ -52,14 +52,14 @@ export const osmappLayers: Layers = {
     Icon: FilterHdrIcon,
     attribution: ['maptiler', 'osm'],
   },
-  outdoorFull: {
-    name: t('layers.outdoor'),
+  outdoorFaded: {
+    name: t('layers.outdoor_faded'),
     type: 'basemap',
     Icon: FilterHdrIcon,
     attribution: ['maptiler', 'osm'],
   },
   outdoor: {
-    name: t('layers.outdoor_faded'),
+    name: t('layers.outdoor'),
     type: 'basemap',
     Icon: FilterHdrIcon,
     attribution: ['maptiler', 'osm'],
