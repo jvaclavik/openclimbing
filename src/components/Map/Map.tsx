@@ -14,6 +14,7 @@ import { useMapStateContext } from '../utils/MapStateContext';
 import { Weather } from './Weather/Weather';
 import { MapFilter } from './MapFilter/MapFilter';
 import { MyListsLayer } from './MyListsLayer';
+import { SunShadow } from './SunShadow/SunShadow';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
@@ -103,6 +104,7 @@ const Map = () => {
       <BottomRight>
         <Stack direction="row" alignItems="center" gap={1}>
           {hasClimbingLayer && <MapFilter />}
+          <SunShadow />
           <LayerSwitcherDynamic />
         </Stack>
       </BottomRight>

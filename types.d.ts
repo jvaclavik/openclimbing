@@ -58,3 +58,25 @@ declare module '@mui/material/styles' {
 declare module '@emotion/react' {
   export interface Theme extends MaterialUITheme {}
 }
+
+declare module 'suncalc' {
+  export interface SunPositionResult {
+    azimuth: number;
+    altitude: number;
+  }
+  export function getPosition(
+    date: Date,
+    latitude: number,
+    longitude: number,
+  ): SunPositionResult;
+  export function getTimes(
+    date: Date,
+    latitude: number,
+    longitude: number,
+  ): Record<string, Date>;
+  const SunCalc: {
+    getPosition: typeof getPosition;
+    getTimes: typeof getTimes;
+  };
+  export default SunCalc;
+}

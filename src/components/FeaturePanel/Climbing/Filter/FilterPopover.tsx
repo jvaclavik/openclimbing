@@ -4,7 +4,10 @@ import { t, Translation } from '../../../../services/intl';
 import { MinimumRoutesFilter } from './MinimumRoutesFilter';
 import { GradeFilter } from './GradeFilter';
 import { ClimbingTypeFilter } from './ClimbingTypeFilter';
-import { PopperWithArrow } from '../../../utils/PopperWithArrow';
+import {
+  GLASS_PAPER_SX,
+  PopperWithArrow,
+} from '../../../utils/PopperWithArrow';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { Placement } from '@popperjs/core';
 import { Setter } from '../../../../types';
@@ -90,6 +93,7 @@ export const FilterPopover = ({
           placement={placement}
           offset={offset}
           sx={{ minWidth: 350 }}
+          paperSx={GLASS_PAPER_SX}
           addition={
             <Stack direction="row" gap={1} alignItems="center">
               {!isDefaultFilter && <ResetButton onClick={reset} />}
