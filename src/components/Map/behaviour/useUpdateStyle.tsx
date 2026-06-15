@@ -53,10 +53,10 @@ const getBaseStyle = (key: string, currentTheme: Theme): StyleSpecification => {
     return makinaAfricaStyle;
   }
   if (key === 'outdoor') {
-    return outdoorFadedStyle;
-  }
-  if (key === 'outdoorFull') {
     return outdoorStyle;
+  }
+  if (key === 'outdoorFaded') {
+    return outdoorFadedStyle;
   }
   if (key === 'tourist') {
     return touristStyle;
