@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  alpha,
   Box,
   Divider,
   Fade,
@@ -7,6 +8,8 @@ import {
   Paper,
   Popper,
   Stack,
+  SxProps,
+  Theme,
   Typography,
 } from '@mui/material';
 import React from 'react';
@@ -31,6 +34,14 @@ const styles = {
 };
 
 const ELEVATION = 1;
+
+// Translucent, blurred "glass" background for popovers that should let the map
+// shine through (used by the map filter and the sun-shadow popover).
+export const GLASS_PAPER_SX: SxProps<Theme> = {
+  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.6),
+  backdropFilter: 'blur(15px)',
+  WebkitBackdropFilter: 'blur(15px)',
+};
 
 const StyledPopper = styled(Popper)(({ theme }) => {
   const bg = lighten(theme.palette.background.paper, ELEVATION * 0.05);
@@ -89,6 +100,7 @@ type PopperWithArrowProps = {
   placement?: Placement;
   offset?: number[];
   sx?: React.CSSProperties;
+  paperSx?: SxProps<Theme>;
 };
 
 export const PopperWithArrow = ({
@@ -100,6 +112,7 @@ export const PopperWithArrow = ({
   placement,
   offset = [0, 0],
   sx,
+  paperSx,
 }: PopperWithArrowProps) => {
   const [arrowRef, setArrowRef] = useState<HTMLElement | null>(null);
 
@@ -136,7 +149,7 @@ export const PopperWithArrow = ({
               sx={styles.arrow}
             />
 
-            <Paper elevation={ELEVATION}>
+            <Paper elevation={ELEVATION} sx={paperSx}>
               {title && (
                 <>
                   <Stack
