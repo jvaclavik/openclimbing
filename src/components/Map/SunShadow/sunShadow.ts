@@ -471,30 +471,6 @@ class SunShadowLayer implements CustomLayerInterface {
   }
 }
 
-// The basemap (outdoor/tourist) ships its own neutral relief hillshade. While
-// the sun shadow is active we hide it so the cast shadows read clearly, and we
-// remember which layers we touched so they can be restored afterwards.
-const hiddenBaseHillshades = new Set<string>();
-
-const hideBaseHillshades = (map: Map) => {
-  const layers = map.getStyle()?.layers ?? [];
-  layers.forEach((layer) => {
-    if (layer.type === 'hillshade') {
-      map.setLayoutProperty(layer.id, 'visibility', 'none');
-      hiddenBaseHillshades.add(layer.id);
-    }
-  });
-};
-
-const restoreBaseHillshades = (map: Map) => {
-  hiddenBaseHillshades.forEach((id) => {
-    if (map.getLayer(id)) {
-      map.setLayoutProperty(id, 'visibility', 'visible');
-    }
-  });
-  hiddenBaseHillshades.clear();
-};
-
 // Insert the shadow below labels/POIs so they stay readable.
 const firstSymbolLayerId = (map: Map): string | undefined =>
   map.getStyle()?.layers?.find((l) => l.type === 'symbol')?.id;
@@ -519,13 +495,13 @@ export const applySunShadow = (
       firstSymbolLayerId(map),
     );
   }
-  hideBaseHillshades(map);
+  // The basemap's own relief hillshade stays visible underneath: it gives the
+  // terrain its texture while our layer adds the real cast shadows on top.
   activeLayer?.setSun(sun);
   return sun;
 };
 
 export const removeSunShadow = (map: Map) => {
-  restoreBaseHillshades(map);
   if (map.getLayer(SUN_SHADOW_LAYER_ID)) {
     map.removeLayer(SUN_SHADOW_LAYER_ID);
   }
