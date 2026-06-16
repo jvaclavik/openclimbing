@@ -80,6 +80,11 @@ const latToMercY = (lat: number) => {
   return 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI);
 };
 const EARTH_CIRCUMFERENCE = 2 * Math.PI * 6378137; // metres per mercator unit at equator
+// MapLibre converts altitude to mercator-z with its mean Earth radius; match it
+// so our draped mesh lines up with the terrain mesh.
+const MERC_Z_PER_METER = 1 / (2 * Math.PI * 6371008.8);
+// Grid resolution the DEM bounds are tessellated into for terrain draping.
+const GRID_SEGMENTS = 192;
 
 type DemData = {
   /** Mercator bounds of the stitched DEM texture (x east, y south). */
@@ -97,13 +102,41 @@ type DemData = {
 // the height map in the sun's horizontal direction and, if any terrain rises
 // above the straight line of sight to the sun, the pixel is in shadow.
 // ---------------------------------------------------------------------------
+// The quad is tessellated into a grid so each vertex can be lifted onto the 3D
+// terrain surface (when terrain is enabled), keeping the cast shadows draped on
+// the relief when the map is pitched. Elevation comes from the same DEM the
+// MapLibre terrain uses, so the mesh aligns with it.
 const VERTEX_SRC = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+#define PI 3.141592653589793
+
 uniform mat4 u_matrix;
+uniform sampler2D u_dem;
+uniform vec2 u_demMin;
+uniform vec2 u_demMax;
+uniform float u_terrainOn;   // 1.0 when 3D terrain is active
+uniform float u_mercZScale;  // mercator-z units per metre at the equator
 attribute vec2 a_merc;
 varying vec2 v_merc;
+
+float decodeElevationV(vec2 uv) {
+  vec4 c = texture2D(u_dem, uv);
+  return -10000.0 + (c.r * 255.0 * 65536.0 + c.g * 255.0 * 256.0 + c.b * 255.0) * 0.1;
+}
+
 void main() {
   v_merc = a_merc;
-  gl_Position = u_matrix * vec4(a_merc, 0.0, 1.0);
+  vec2 uv = clamp((a_merc - u_demMin) / (u_demMax - u_demMin), 0.0, 1.0);
+  float elev = decodeElevationV(uv);
+  float e = PI * (1.0 - 2.0 * a_merc.y);
+  float lat = atan((exp(e) - exp(-e)) * 0.5);
+  float mercZ = u_terrainOn * elev * u_mercZScale / cos(lat);
+  gl_Position = u_matrix * vec4(a_merc, mercZ, 1.0);
 }
 `;
 
@@ -208,7 +241,7 @@ class SunShadowLayer implements CustomLayerInterface {
 
   type = 'custom' as const;
 
-  renderingMode = '2d' as const;
+  renderingMode = '3d' as const;
 
   private map: Map;
 
@@ -218,11 +251,13 @@ class SunShadowLayer implements CustomLayerInterface {
 
   private quadBuffer: WebGLBuffer | null = null;
 
+  private indexBuffer: WebGLBuffer | null = null;
+
+  private indexCount = 0;
+
   private demTexture: WebGLTexture | null = null;
 
   private dem: DemData | null = null;
-
-  private vertexCount = 0;
 
   private loadToken = 0;
 
@@ -270,11 +305,14 @@ class SunShadowLayer implements CustomLayerInterface {
       'u_shadowColor',
       'u_below',
       'u_maxSteps',
+      'u_terrainOn',
+      'u_mercZScale',
     ].forEach((name) => {
       this.uniforms[name] = gl.getUniformLocation(program, name);
     });
 
     this.quadBuffer = gl.createBuffer();
+    this.indexBuffer = gl.createBuffer();
     this.demTexture = gl.createTexture();
 
     map.on('moveend', this.onMoveEnd);
@@ -286,11 +324,55 @@ class SunShadowLayer implements CustomLayerInterface {
     this.loadToken += 1; // invalidate any in-flight tile loads
     if (this.program) gl.deleteProgram(this.program);
     if (this.quadBuffer) gl.deleteBuffer(this.quadBuffer);
+    if (this.indexBuffer) gl.deleteBuffer(this.indexBuffer);
     if (this.demTexture) gl.deleteTexture(this.demTexture);
     this.program = null;
     this.quadBuffer = null;
+    this.indexBuffer = null;
     this.demTexture = null;
     this.dem = null;
+  }
+
+  // Tessellate the DEM bounds into a triangle grid. The vertex shader lifts each
+  // vertex onto the terrain, so a denser grid follows the relief more closely.
+  private buildGrid(dem: DemData) {
+    const gl = this.gl;
+    if (!gl) return;
+    const n = GRID_SEGMENTS;
+    const verts = new Float32Array((n + 1) * (n + 1) * 2);
+    let v = 0;
+    for (let row = 0; row <= n; row += 1) {
+      const ty = row / n;
+      const my = dem.minY + (dem.maxY - dem.minY) * ty;
+      for (let col = 0; col <= n; col += 1) {
+        const tx = col / n;
+        verts[v] = dem.minX + (dem.maxX - dem.minX) * tx;
+        verts[v + 1] = my;
+        v += 2;
+      }
+    }
+    const indices = new Uint32Array(n * n * 6);
+    let i = 0;
+    for (let row = 0; row < n; row += 1) {
+      for (let col = 0; col < n; col += 1) {
+        const a = row * (n + 1) + col;
+        const b = a + 1;
+        const c = a + (n + 1);
+        const d = c + 1;
+        indices[i] = a;
+        indices[i + 1] = c;
+        indices[i + 2] = b;
+        indices[i + 3] = b;
+        indices[i + 4] = c;
+        indices[i + 5] = d;
+        i += 6;
+      }
+    }
+    this.indexCount = indices.length;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
   }
 
   private pickDemZoom(
@@ -371,6 +453,7 @@ class SunShadowLayer implements CustomLayerInterface {
       maxY: (y1 + 1) / n,
       texelMerc: 1 / n / tileSizePx,
     };
+    this.buildGrid(this.dem);
 
     for (let ty = y0; ty <= y1; ty += 1) {
       for (let tx = x0; tx <= x1; tx += 1) {
@@ -409,25 +492,16 @@ class SunShadowLayer implements CustomLayerInterface {
     gl: WebGLRenderingContext,
     options: { defaultProjectionData: { mainMatrix: Iterable<number> } },
   ) {
-    if (!this.program || !this.dem || !this.demTexture) return;
+    if (!this.program || !this.dem || !this.demTexture || !this.indexCount) {
+      return;
+    }
     const { dem } = this;
 
     gl.useProgram(this.program);
 
-    // Quad covering the DEM mercator bounds (two triangles).
-    const verts = new Float32Array([
-      dem.minX,
-      dem.minY,
-      dem.maxX,
-      dem.minY,
-      dem.minX,
-      dem.maxY,
-      dem.maxX,
-      dem.maxY,
-    ]);
-    this.vertexCount = 4;
+    // Terrain-draped grid covering the DEM mercator bounds.
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, verts, gl.DYNAMIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     const aMerc = gl.getAttribLocation(this.program, 'a_merc');
     gl.enableVertexAttribArray(aMerc);
     gl.vertexAttribPointer(aMerc, 2, gl.FLOAT, false, 0, 0);
@@ -459,6 +533,9 @@ class SunShadowLayer implements CustomLayerInterface {
     gl.uniform1f(this.uniforms.u_circumference, EARTH_CIRCUMFERENCE);
     gl.uniform1i(this.uniforms.u_maxSteps, 256);
     gl.uniform1f(this.uniforms.u_below, below ? 1 : 0);
+    // Drape onto the 3D terrain only when it's actually enabled.
+    gl.uniform1f(this.uniforms.u_terrainOn, this.map.getTerrain() ? 1 : 0);
+    gl.uniform1f(this.uniforms.u_mercZScale, MERC_Z_PER_METER);
 
     const [r, g, b, a] = shadowColor(this.sun.altitudeDeg);
     gl.uniform4f(this.uniforms.u_shadowColor, r, g, b, a);
@@ -467,7 +544,7 @@ class SunShadowLayer implements CustomLayerInterface {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.disable(gl.DEPTH_TEST);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexCount);
+    gl.drawElements(gl.TRIANGLES, this.indexCount, gl.UNSIGNED_INT, 0);
   }
 }
 
