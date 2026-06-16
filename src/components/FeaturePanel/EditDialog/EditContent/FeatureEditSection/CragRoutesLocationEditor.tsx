@@ -12,7 +12,15 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PlaceIcon from '@mui/icons-material/Place';
 import { t } from '../../../../../services/intl';
 import { useFeatureContext } from '../../../../utils/FeatureContext';
-import { useCurrentItem, useExpandedSections } from '../../context/EditContext';
+import {
+  useCurrentItem,
+  useEditContext,
+  useExpandedSections,
+} from '../../context/EditContext';
+import {
+  cragHasRouteMembers,
+  findCragItemForRoutes,
+} from '../../../Climbing/utils/cragRoutesItems';
 
 const CragRoutesPositionMapDynamic = dynamic(
   () => import('../../../Climbing/CragRoutesPositionMap'),
@@ -30,9 +38,20 @@ const isRouteTag = (climbing: string | undefined) =>
 // item — both for the crag itself and for an individual route being edited.
 export const useHasCragRoutesMap = () => {
   const { feature } = useFeatureContext();
-  return (feature?.memberFeatures ?? []).some((member) =>
-    isRouteTag(member.tags?.climbing),
-  );
+  const { items, current } = useEditContext();
+
+  // Persisted OSM data already has route members.
+  if (
+    (feature?.memberFeatures ?? []).some((member) =>
+      isRouteTag(member.tags?.climbing),
+    )
+  ) {
+    return true;
+  }
+
+  // …or the current edit draft does (e.g. a brand-new sector with new routes).
+  const cragItem = findCragItemForRoutes(items, current, feature);
+  return cragHasRouteMembers(items, cragItem);
 };
 
 export const CragRoutesLocationEditor = () => {

@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { useFeatureContext } from '../../../utils/FeatureContext';
 import { getApiId, getShortId } from '../../../../services/helpers';
-import { Feature, FeatureTags, LonLat } from '../../../../services/types';
+import { Feature, LonLat } from '../../../../services/types';
 import {
   getDifficulty,
   getDifficultyColor,
@@ -22,6 +22,7 @@ import { fetchFreshItem } from '../../EditDialog/context/itemsHelpers';
 import { EditDataItem } from '../../EditDialog/context/types';
 import { findInItems, isInItems } from '../../EditDialog/context/utils';
 import { distributeAlongControlPoints } from './routeMapDistribution';
+import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
 
 const LINE_SOURCE_ID = 'route-edit-line';
 const LINE_LAYER_ID = 'route-edit-line-layer';
@@ -34,9 +35,6 @@ type EditableRoute = {
   isNode: boolean;
   originalLonLat: LonLat | undefined;
 };
-
-const isRouteTags = (tags: FeatureTags | undefined) =>
-  tags?.climbing === 'route' || tags?.climbing === 'route_bottom';
 
 const routeFromMemberFeature = (
   member: Feature,
@@ -66,18 +64,16 @@ const routeFromItem = (item: EditDataItem): EditableRoute => {
 };
 
 const getEditableRoutes = (
-  crag: Feature,
+  cragFeature: Feature | undefined,
+  cragItem: EditDataItem | undefined,
   items: EditDataItem[],
 ): EditableRoute[] => {
-  const fromMembers = (crag?.memberFeatures ?? [])
+  const fromMembers = (cragFeature?.memberFeatures ?? [])
     .filter((member) => isRouteTags(member.tags))
     .map(routeFromMemberFeature);
 
   // While editing, the relation's member list (incl. reordering and newly
   // added routes) lives in the EditContext — follow that order when present.
-  const cragItem = crag
-    ? findInItems(items, getShortId(crag.osmMeta))
-    : undefined;
   if (!cragItem?.members?.length) {
     return fromMembers;
   }
@@ -255,9 +251,17 @@ export const useCragRoutePositionEditor = (
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
 
+  // The crag whose routes we draw — resolved from the EditContext so it works
+  // for freshly created sectors too (where the FeatureContext still points at
+  // the original node, not the new relation that holds the routes).
+  const cragItem = useMemo(
+    () => findCragItemForRoutes(items, current, crag),
+    [items, current, crag],
+  );
+
   const editableRoutes = useMemo(
-    () => getEditableRoutes(crag, items),
-    [crag, items],
+    () => getEditableRoutes(crag, cragItem, items),
+    [crag, cragItem, items],
   );
 
   // A signature that only changes when the *set* of routes (or their labels)
