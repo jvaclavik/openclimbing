@@ -19,11 +19,7 @@ import { convertHexToRgba } from '../../utils/colorUtils';
 import { getGlobalMap } from '../../../services/mapStorage';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
-import {
-  applySunHillshade,
-  getSunTimes,
-  removeSunHillshade,
-} from './sunHillshade';
+import { applySunShadow, getSunTimes, removeSunShadow } from './sunShadow';
 
 const StyledIconButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -246,17 +242,17 @@ const useSunHillshadeEffect = (
     const reapply = () => {
       const date = buildDate(day, minutes);
       const { lat, lon } = latLonRef.current;
-      applySunHillshade(map, date, lat, lon);
+      applySunShadow(map, date, lat, lon);
     };
 
-    // setStyle() (e.g. switching base layer) wipes our custom source/layer,
+    // setStyle() (e.g. switching base layer) wipes our custom layer,
     // so re-add it whenever the style finishes (re)loading.
     map.on('styledata', reapply);
     reapply();
 
     return () => {
       map.off('styledata', reapply);
-      removeSunHillshade(map);
+      removeSunShadow(map);
     };
   }, [enabled, day, minutes, latLonRef]);
 };
