@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {
@@ -11,6 +12,7 @@ import {
   Slider,
   Stack,
   Switch,
+  Theme,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -19,7 +21,12 @@ import { convertHexToRgba } from '../../utils/colorUtils';
 import { getGlobalMap } from '../../../services/mapStorage';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
-import { applySunShadow, getSunTimes, removeSunShadow } from './sunShadow';
+import {
+  applySunShadow,
+  getSunTimes,
+  removeSunShadow,
+  SHADOW_MIN_ZOOM,
+} from './sunShadowLayer';
 
 const StyledIconButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -41,6 +48,34 @@ const StyledIconButton = styled(IconButton, {
 const Panel = styled.div`
   width: 240px;
   padding: 4px 8px 0;
+`;
+
+const DateInput = styled.input`
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+  font-size: 0.8rem;
+  width: 100%;
+  padding: 2px 0 5px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  // Make the browser render the native date popup (and its glyph) in the
+  // matching light/dark scheme.
+  color-scheme: ${({ theme }) => theme.palette.mode};
+
+  &:focus {
+    outline: none;
+    border-bottom-color: #f5a623;
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  &:hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+  }
 `;
 
 const QUICK_BTN_SX = {
@@ -86,10 +121,87 @@ const buildDate = (isoDay: string, minutes: number) => {
 
 const dateToMinutes = (d: Date) => d.getHours() * 60 + d.getMinutes();
 
+// Snap slider movement to whole 10-minute marks (14:10, 14:20, …) while letting
+// the two ends rest exactly on sunrise/sunset.
+const snapToTen = (value: number, min: number, max: number) => {
+  if (value <= min) return min;
+  if (value >= max) return max;
+  return Math.min(max, Math.max(min, Math.round(value / 10) * 10));
+};
+
 type SunMark = { value: number; label: React.ReactNode };
 
-const MARK_ICON_SX = { fontSize: 13, verticalAlign: 'middle' } as const;
-const MARK_ARROW_SX = { fontSize: 11, verticalAlign: 'middle' } as const;
+// Warm "sun" amber used to tie the slider, marks and labels together.
+const SUN_COLOR = '#f5a623';
+
+const MARK_ICON_SX = {
+  fontSize: 13,
+  verticalAlign: 'middle',
+  color: SUN_COLOR,
+} as const;
+const MARK_ARROW_SX = {
+  fontSize: 11,
+  verticalAlign: 'middle',
+  color: SUN_COLOR,
+  opacity: 0.8,
+} as const;
+
+const SUN_SLIDER_SX = {
+  color: SUN_COLOR,
+  mt: 1.5,
+  '& .MuiSlider-rail': {
+    opacity: 1,
+    backgroundColor: convertHexToRgba(SUN_COLOR, 0.16),
+  },
+  '& .MuiSlider-track': {
+    border: 'none',
+    backgroundColor: convertHexToRgba(SUN_COLOR, 0.45),
+  },
+  '& .MuiSlider-thumb': {
+    width: 14,
+    height: 14,
+    boxShadow: `0 0 0 4px ${convertHexToRgba(SUN_COLOR, 0.18)}`,
+    '&:hover, &.Mui-focusVisible': {
+      boxShadow: `0 0 0 6px ${convertHexToRgba(SUN_COLOR, 0.24)}`,
+    },
+    '&.Mui-active': {
+      boxShadow: `0 0 0 8px ${convertHexToRgba(SUN_COLOR, 0.28)}`,
+    },
+  },
+  // Sunrise / noon / sunset ticks: solid amber and tall enough to stick out
+  // above the rail so they stay visible over the filled track too.
+  '& .MuiSlider-mark': {
+    backgroundColor: SUN_COLOR,
+    height: 13,
+    width: 2,
+    borderRadius: 1,
+    opacity: 1,
+  },
+  '& .MuiSlider-markActive': {
+    backgroundColor: SUN_COLOR,
+    opacity: 1,
+  },
+  '& .MuiSlider-markLabel': { fontSize: '0.65rem' },
+  '& .MuiSlider-valueLabel': {
+    backgroundColor: SUN_COLOR,
+    color: 'rgba(0, 0, 0, 0.82)',
+    fontWeight: 600,
+  },
+} as const;
+
+const WARNING_BOX_SX = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.75,
+  mb: 1,
+  px: 1,
+  py: 0.6,
+  borderRadius: 1,
+  color: 'warning.main',
+  bgcolor: (theme: Theme) => convertHexToRgba(theme.palette.warning.main, 0.16),
+  border: (theme: Theme) =>
+    `1px solid ${convertHexToRgba(theme.palette.warning.main, 0.4)}`,
+} as const;
 
 const sunriseLabel = (
   <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
@@ -116,6 +228,7 @@ type SunControlsProps = {
   marks: SunMark[];
   min: number;
   max: number;
+  lowZoom: boolean;
 };
 
 const SunControls: React.FC<SunControlsProps> = ({
@@ -129,34 +242,33 @@ const SunControls: React.FC<SunControlsProps> = ({
   marks,
   min,
   max,
+  lowZoom,
 }) => (
   <Panel>
-    <input
+    {lowZoom && (
+      <Box sx={WARNING_BOX_SX}>
+        <WarningAmberIcon sx={{ fontSize: 17, flexShrink: 0 }} />
+        <Typography variant="caption" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+          Přibliž mapu, aby se stíny zobrazily.
+        </Typography>
+      </Box>
+    )}
+    <DateInput
       type="date"
       value={day}
       onChange={(e) => setDay(e.target.value)}
-      style={{
-        background: 'transparent',
-        color: 'inherit',
-        border: 'none',
-        fontSize: '0.8rem',
-        marginBottom: 4,
-      }}
     />
     <Slider
       size="small"
       min={min}
       max={max}
-      step={5}
+      step={10}
       value={Math.min(Math.max(minutes, min), max)}
       marks={marks}
       valueLabelDisplay="auto"
       valueLabelFormat={formatMinutes}
-      onChange={(_, v) => setMinutes(v as number)}
-      sx={{
-        '& .MuiSlider-markLabel': { fontSize: '0.65rem' },
-        '& .MuiSlider-mark': { height: 8, width: 2 },
-      }}
+      onChange={(_, v) => setMinutes(snapToTen(v as number, min, max))}
+      sx={SUN_SLIDER_SX}
     />
     <Stack
       direction="row"
@@ -233,6 +345,14 @@ const useSunHillshadeEffect = (
   minutes: number,
   latLonRef: React.MutableRefObject<{ lat: number; lon: number }>,
 ) => {
+  // Keep the latest time available to the style-reload handler without making it
+  // part of the add/remove effect's dependencies.
+  const timeRef = useRef({ day, minutes });
+  timeRef.current = { day, minutes };
+
+  // Add/remove the custom layer only when toggled on/off (or the style reloads).
+  // Doing this on every time change would tear the layer down and reload the DEM
+  // from scratch, which is exactly the flash we want to avoid.
   useEffect(() => {
     const map = getGlobalMap();
     if (!map || !enabled) {
@@ -240,9 +360,9 @@ const useSunHillshadeEffect = (
     }
 
     const reapply = () => {
-      const date = buildDate(day, minutes);
+      const { day: d, minutes: m } = timeRef.current;
       const { lat, lon } = latLonRef.current;
-      applySunShadow(map, date, lat, lon);
+      applySunShadow(map, buildDate(d, m), lat, lon);
     };
 
     // setStyle() (e.g. switching base layer) wipes our custom layer,
@@ -254,29 +374,62 @@ const useSunHillshadeEffect = (
       map.off('styledata', reapply);
       removeSunShadow(map);
     };
+  }, [enabled, latLonRef]);
+
+  // On a time change just update the sun on the existing layer: it repaints the
+  // shadows in place (no DEM reload), so there's no flicker.
+  useEffect(() => {
+    const map = getGlobalMap();
+    if (!map || !enabled) return;
+    const { lat, lon } = latLonRef.current;
+    applySunShadow(map, buildDate(day, minutes), lat, lon);
   }, [enabled, day, minutes, latLonRef]);
 };
 
 type ShadowButtonProps = {
   open: boolean;
   active: boolean;
+  lowZoom: boolean;
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
-const ShadowButton = ({ open, active, onClick }: ShadowButtonProps) => {
+const ShadowButton = ({
+  open,
+  active,
+  lowZoom,
+  onClick,
+}: ShadowButtonProps) => {
   const isMobileMode = useMobileMode();
+  // Shadows are on but hidden because the map is zoomed too far out.
+  const hiddenByZoom = active && lowZoom;
   return (
-    <Badge color="success" variant="dot" overlap="circular" invisible={!active}>
-      <Tooltip title="Mapa stínů (slunce)" arrow>
+    <Badge
+      color="success"
+      variant="dot"
+      overlap="circular"
+      invisible={!active || hiddenByZoom}
+    >
+      <Tooltip
+        title={
+          hiddenByZoom
+            ? 'Přibliž mapu, aby se stíny zobrazily'
+            : 'Mapa stínů (slunce)'
+        }
+        arrow
+      >
         <StyledIconButton
           onClick={onClick}
           $isOpened={open}
           size={isMobileMode ? 'large' : 'medium'}
         >
-          <WbSunnyIcon
-            fontSize="small"
-            color={active ? 'primary' : 'inherit'}
-          />
+          {hiddenByZoom ? (
+            <WarningAmberIcon fontSize="small" color="warning" />
+          ) : (
+            <WbSunnyIcon
+              fontSize="small"
+              color={active ? 'primary' : 'inherit'}
+            />
+          )}
         </StyledIconButton>
       </Tooltip>
     </Badge>
@@ -326,6 +479,24 @@ const ShadowPopover = ({
   </PopperWithArrow>
 );
 
+const useLowZoom = (enabled: boolean) => {
+  const [lowZoom, setLowZoom] = useState(false);
+  useEffect(() => {
+    const map = getGlobalMap();
+    if (!map || !enabled) {
+      setLowZoom(false);
+      return undefined;
+    }
+    const update = () => setLowZoom(map.getZoom() < SHADOW_MIN_ZOOM);
+    update();
+    map.on('zoom', update);
+    return () => {
+      map.off('zoom', update);
+    };
+  }, [enabled]);
+  return lowZoom;
+};
+
 export const SunShadow = () => {
   const { view } = useMapStateContext();
   const [, latStr, lonStr] = view;
@@ -342,6 +513,7 @@ export const SunShadow = () => {
   latLonRef.current = { lat, lon };
 
   useSunHillshadeEffect(enabled, day, minutes, latLonRef);
+  const lowZoom = useLowZoom(enabled);
 
   const { marks, range, onMorning, onAfternoon } = useSunQuickActions(
     day,
@@ -369,7 +541,12 @@ export const SunShadow = () => {
 
   return (
     <>
-      <ShadowButton open={open} active={enabled} onClick={handleToggle} />
+      <ShadowButton
+        open={open}
+        active={enabled}
+        lowZoom={lowZoom}
+        onClick={handleToggle}
+      />
       <ShadowPopover
         open={open}
         anchorEl={anchorEl}
@@ -387,6 +564,7 @@ export const SunShadow = () => {
             marks={marks}
             min={range.min}
             max={range.max}
+            lowZoom={lowZoom}
           />
         }
       />
