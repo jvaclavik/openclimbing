@@ -71,7 +71,15 @@ export const EditDialogDropZone: React.FC = ({ children }) => {
   }, [debugMode, openUpload]);
 
   return (
-    <Box sx={{ position: 'relative', height: '100%' }}>
+    <Box
+      sx={{
+        position: 'relative',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+      }}
+    >
       {children}
       {debugMode && draggingOver && (
         <Box
