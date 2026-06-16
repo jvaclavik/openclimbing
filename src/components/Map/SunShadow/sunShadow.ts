@@ -1,4 +1,5 @@
-import type { CustomLayerInterface, Map } from 'maplibre-gl';
+import type { CustomLayerInterface, GeoJSONFeature, Map } from 'maplibre-gl';
+import earcut from 'earcut';
 import SunCalc from 'suncalc';
 
 // NOTE: don't import from `../consts` here — that module touches `window` at
@@ -151,6 +152,7 @@ precision mediump float;
 #define PI 3.141592653589793
 
 uniform sampler2D u_dem;
+uniform sampler2D u_buildings; // R = building height (metres) above the terrain
 uniform vec2 u_demMin;        // mercator bounds of the DEM texture
 uniform vec2 u_demMax;
 uniform vec2 u_sunDir;        // unit horizontal direction towards the sun (mercator space)
@@ -167,6 +169,11 @@ varying vec2 v_merc;
 float decodeElevation(vec2 uv) {
   vec4 c = texture2D(u_dem, uv);
   return -10000.0 + (c.r * 255.0 * 65536.0 + c.g * 255.0 * 256.0 + c.b * 255.0) * 0.1;
+}
+
+// Surface = terrain plus any building rasterised on top (height in metres, R*255).
+float surfaceElevation(vec2 uv) {
+  return decodeElevation(uv) + texture2D(u_buildings, uv).r * 255.0;
 }
 
 vec2 toUv(vec2 merc) {
@@ -186,7 +193,7 @@ void main() {
     return;
   }
 
-  float h0 = decodeElevation(uv0);
+  float h0 = surfaceElevation(uv0);
 
   // Ground metres per mercator unit depends on latitude (mercator is conformal).
   // sinh() isn't available in GLSL ES 1.00, so expand it via exp().
@@ -208,7 +215,7 @@ void main() {
     if (outside(uv)) break; // marched off the DEM without being blocked
 
     float rayHeight = h0 + u_tanAlt * groundDist;
-    float terrain = decodeElevation(uv);
+    float terrain = surfaceElevation(uv);
     if (terrain > rayHeight + 1.0) {
       lit = 0.0;
       break;
@@ -236,6 +243,65 @@ const compile = (
   return shader;
 };
 
+// Off-screen pass that rasterises building footprints into a single-channel
+// height map (metres above the terrain), aligned to the DEM bounds. Overlapping
+// footprints (e.g. building + building:part) are merged with MAX blending so the
+// tallest one wins. The main ray-march then treats buildings as terrain.
+const BUILDING_VERTEX_SRC = `
+uniform vec2 u_demMin;
+uniform vec2 u_demMax;
+attribute vec2 a_pos;   // mercator 0..1
+attribute float a_height;
+varying float v_height;
+void main() {
+  vec2 uv = (a_pos - u_demMin) / (u_demMax - u_demMin);
+  v_height = a_height;
+  gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0);
+}
+`;
+
+const BUILDING_FRAGMENT_SRC = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying float v_height;
+void main() {
+  gl_FragColor = vec4(clamp(v_height / 255.0, 0.0, 1.0), 0.0, 0.0, 1.0);
+}
+`;
+
+const compileProgram = (
+  gl: WebGLRenderingContext,
+  vsSrc: string,
+  fsSrc: string,
+): WebGLProgram => {
+  const vs = compile(gl, gl.VERTEX_SHADER, vsSrc);
+  const fs = compile(gl, gl.FRAGMENT_SHADER, fsSrc);
+  const program = gl.createProgram()!;
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    throw new Error(
+      `Sun shadow program failed to link: ${gl.getProgramInfoLog(program)}`,
+    );
+  }
+  gl.deleteShader(vs);
+  gl.deleteShader(fs);
+  return program;
+};
+
+// Vector sources/layers that expose building footprints, tried in order.
+const BUILDING_SOURCES: Array<{ source: string; sourceLayer: string }> = [
+  { source: 'maptiler_planet', sourceLayer: 'building' },
+  { source: 'ofr_planet', sourceLayer: 'building' },
+  { source: 'versatiles-shortbread', sourceLayer: 'buildings' },
+];
+const DEFAULT_BUILDING_HEIGHT = 6; // building=yes without a height -> ~2 storeys
+const MAX_BUILDING_HEIGHT = 255; // texture stores height in one byte (metres)
+
 class SunShadowLayer implements CustomLayerInterface {
   id = SUN_SHADOW_LAYER_ID;
 
@@ -259,13 +325,39 @@ class SunShadowLayer implements CustomLayerInterface {
 
   private dem: DemData | null = null;
 
+  // Building height map (a single-channel DSM rendered off-screen).
+  private buildingProgram: WebGLProgram | null = null;
+
+  private buildingUniforms: Record<string, WebGLUniformLocation | null> = {};
+
+  private buildingTexture: WebGLTexture | null = null;
+
+  private buildingFbo: WebGLFramebuffer | null = null;
+
+  private buildingBuffer: WebGLBuffer | null = null;
+
+  private buildingVerts: Float32Array | null = null;
+
+  private buildingVertexCount = 0;
+
+  private buildingsDirty = false;
+
+  private texWidth = 0;
+
+  private texHeight = 0;
+
   private loadToken = 0;
 
   private sun: SunPosition = { azimuthDeg: 180, altitudeDeg: 0 };
 
   private uniforms: Record<string, WebGLUniformLocation | null> = {};
 
-  private readonly onMoveEnd = () => this.loadDemForView();
+  private readonly onMoveEnd = () => {
+    this.loadDemForView();
+    this.rebuildBuildingGeometry();
+  };
+
+  private readonly onIdle = () => this.rebuildBuildingGeometry();
 
   constructor(map: Map) {
     this.map = map;
@@ -307,29 +399,57 @@ class SunShadowLayer implements CustomLayerInterface {
       'u_maxSteps',
       'u_terrainOn',
       'u_mercZScale',
+      'u_dem',
+      'u_buildings',
     ].forEach((name) => {
       this.uniforms[name] = gl.getUniformLocation(program, name);
+    });
+
+    this.buildingProgram = compileProgram(
+      gl,
+      BUILDING_VERTEX_SRC,
+      BUILDING_FRAGMENT_SRC,
+    );
+    ['u_demMin', 'u_demMax'].forEach((name) => {
+      this.buildingUniforms[name] = gl.getUniformLocation(
+        this.buildingProgram!,
+        name,
+      );
     });
 
     this.quadBuffer = gl.createBuffer();
     this.indexBuffer = gl.createBuffer();
     this.demTexture = gl.createTexture();
+    this.buildingTexture = gl.createTexture();
+    this.buildingFbo = gl.createFramebuffer();
+    this.buildingBuffer = gl.createBuffer();
 
     map.on('moveend', this.onMoveEnd);
+    map.on('idle', this.onIdle);
     this.loadDemForView();
+    this.rebuildBuildingGeometry();
   }
 
   onRemove(_map: Map, gl: WebGLRenderingContext) {
     this.map.off('moveend', this.onMoveEnd);
+    this.map.off('idle', this.onIdle);
     this.loadToken += 1; // invalidate any in-flight tile loads
     if (this.program) gl.deleteProgram(this.program);
+    if (this.buildingProgram) gl.deleteProgram(this.buildingProgram);
     if (this.quadBuffer) gl.deleteBuffer(this.quadBuffer);
     if (this.indexBuffer) gl.deleteBuffer(this.indexBuffer);
+    if (this.buildingBuffer) gl.deleteBuffer(this.buildingBuffer);
     if (this.demTexture) gl.deleteTexture(this.demTexture);
+    if (this.buildingTexture) gl.deleteTexture(this.buildingTexture);
+    if (this.buildingFbo) gl.deleteFramebuffer(this.buildingFbo);
     this.program = null;
+    this.buildingProgram = null;
     this.quadBuffer = null;
     this.indexBuffer = null;
+    this.buildingBuffer = null;
     this.demTexture = null;
+    this.buildingTexture = null;
+    this.buildingFbo = null;
     this.dem = null;
   }
 
@@ -373,6 +493,126 @@ class SunShadowLayer implements CustomLayerInterface {
     gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  }
+
+  // Collect building footprints from the vector tiles and triangulate them into
+  // a flat (x, y, height) vertex list, ready to rasterise into the height map.
+  private rebuildBuildingGeometry() {
+    if (!this.dem) return;
+    const features = this.queryBuildingFeatures();
+    const data: number[] = [];
+
+    const addRings = (rings: number[][][], height: number) => {
+      if (height <= 0 || !rings.length) return;
+      const flat: number[] = [];
+      const holes: number[] = [];
+      rings.forEach((ring, ringIdx) => {
+        if (ringIdx > 0) holes.push(flat.length / 2);
+        ring.forEach(([lng, lat]) => {
+          flat.push(lngToMercX(lng), latToMercY(lat));
+        });
+      });
+      const tri = earcut(flat, holes, 2);
+      for (let k = 0; k < tri.length; k += 1) {
+        const idx = tri[k];
+        data.push(flat[idx * 2], flat[idx * 2 + 1], height);
+      }
+    };
+
+    features.forEach((f) => {
+      const props = f.properties || {};
+      const raw = Number(props.render_height ?? props.height);
+      const height = Math.min(
+        MAX_BUILDING_HEIGHT,
+        Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_BUILDING_HEIGHT,
+      );
+      const geom = f.geometry;
+      if (geom?.type === 'Polygon') {
+        addRings(geom.coordinates, height);
+      } else if (geom?.type === 'MultiPolygon') {
+        geom.coordinates.forEach((poly) => addRings(poly, height));
+      }
+    });
+
+    this.buildingVerts = new Float32Array(data);
+    this.buildingVertexCount = data.length / 3;
+    this.buildingsDirty = true;
+    this.map.triggerRepaint();
+  }
+
+  private queryBuildingFeatures(): GeoJSONFeature[] {
+    const out: GeoJSONFeature[] = [];
+    BUILDING_SOURCES.forEach(({ source, sourceLayer }) => {
+      if (!this.map.getSource(source)) return;
+      try {
+        const feats = this.map.querySourceFeatures(source, { sourceLayer });
+        if (feats.length) out.push(...feats);
+      } catch {
+        // source not ready yet
+      }
+    });
+    return out;
+  }
+
+  // Rasterise the building footprints into the height map (off-screen). MAX
+  // blending keeps the tallest footprint where building parts overlap.
+  private renderBuildingPass(gl: WebGLRenderingContext) {
+    if (
+      !this.buildingProgram ||
+      !this.buildingFbo ||
+      !this.buildingTexture ||
+      !this.dem
+    ) {
+      return;
+    }
+    const prevFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+    const vp = gl.getParameter(gl.VIEWPORT);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.buildingFbo);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.buildingTexture,
+      0,
+    );
+    gl.viewport(0, 0, this.texWidth, this.texHeight);
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    if (this.buildingVertexCount > 0 && this.buildingVerts) {
+      gl.useProgram(this.buildingProgram);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buildingBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, this.buildingVerts, gl.DYNAMIC_DRAW);
+      const aPos = gl.getAttribLocation(this.buildingProgram, 'a_pos');
+      const aHeight = gl.getAttribLocation(this.buildingProgram, 'a_height');
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 12, 0);
+      gl.enableVertexAttribArray(aHeight);
+      gl.vertexAttribPointer(aHeight, 1, gl.FLOAT, false, 12, 8);
+      gl.uniform2f(
+        this.buildingUniforms.u_demMin,
+        this.dem.minX,
+        this.dem.minY,
+      );
+      gl.uniform2f(
+        this.buildingUniforms.u_demMax,
+        this.dem.maxX,
+        this.dem.maxY,
+      );
+
+      gl.enable(gl.BLEND);
+      gl.blendEquation((gl as WebGL2RenderingContext).MAX);
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.drawArrays(gl.TRIANGLES, 0, this.buildingVertexCount);
+      gl.blendEquation(gl.FUNC_ADD);
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, prevFbo);
+    gl.viewport(vp[0], vp[1], vp[2], vp[3]);
+    this.buildingsDirty = false;
   }
 
   private pickDemZoom(
@@ -446,6 +686,27 @@ class SunShadowLayer implements CustomLayerInterface {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
+    // Building height map, same size/bounds so it shares the DEM's uv mapping.
+    this.texWidth = texWidth;
+    this.texHeight = texHeight;
+    gl.bindTexture(gl.TEXTURE_2D, this.buildingTexture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      texWidth,
+      texHeight,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    this.buildingsDirty = true;
+
     this.dem = {
       minX: x0 / n,
       minY: y0 / n,
@@ -497,6 +758,11 @@ class SunShadowLayer implements CustomLayerInterface {
     }
     const { dem } = this;
 
+    // Refresh the building height map if buildings/view changed.
+    if (this.buildingsDirty) {
+      this.renderBuildingPass(gl);
+    }
+
     gl.useProgram(this.program);
 
     // Terrain-draped grid covering the DEM mercator bounds.
@@ -516,6 +782,10 @@ class SunShadowLayer implements CustomLayerInterface {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.demTexture);
     gl.uniform1i(this.uniforms.u_dem, 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.buildingTexture);
+    gl.uniform1i(this.uniforms.u_buildings, 1);
 
     gl.uniform2f(this.uniforms.u_demMin, dem.minX, dem.minY);
     gl.uniform2f(this.uniforms.u_demMax, dem.maxX, dem.maxY);
