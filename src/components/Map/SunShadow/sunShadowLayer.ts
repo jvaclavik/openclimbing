@@ -12,12 +12,21 @@ export const SUN_SHADOW_LAYER_ID = 'osmapp-sun-shadow';
 const DEM_TILE_URL = (z: number, x: number, y: number) =>
   `https://api.maptiler.com/tiles/terrain-rgb-v2/${z}/${x}/${y}.webp?key=${apiKey}`;
 const DEM_MAX_ZOOM = 14;
-const DEM_MIN_ZOOM = 8;
+// Low DEM zoom levels are allowed so pickDemZoom can keep the tile budget at low
+// map zoom too (the relief just gets coarser); below SHADOW_MIN_ZOOM we don't
+// render at all.
+const DEM_MIN_ZOOM = 4;
 // Cap how many DEM tiles we stitch per view so a single overview never tries to
 // download hundreds of tiles. One tile of padding is added on every side so
 // peaks just off-screen still cast shadows into the viewport.
 const MAX_DEM_TILES = 64;
 const TILE_PADDING = 1;
+
+// Below this map zoom shadows are hidden: the DEM we can afford to stitch gets
+// too coarse to cast meaningful relief shadows (peaks flatten out), so instead of
+// drawing nothing useful we hide the layer and the UI shows a "zoom in" hint.
+// Exported so the control panel can warn about it.
+export const SHADOW_MIN_ZOOM = 12;
 
 export type SunPosition = {
   /** Compass bearing of the sun in degrees, 0 = north, 90 = east. */
@@ -65,11 +74,11 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const shadowColor = (altitudeDeg: number): [number, number, number, number] => {
   if (altitudeDeg <= 0) {
     // Night: a uniform cool darkening over the whole terrain.
-    return [22 / 255, 26 / 255, 66 / 255, 0.55];
+    return [14 / 255, 18 / 255, 58 / 255, 0.68];
   }
   const t = clamp01(altitudeDeg / 45); // 0 = horizon, 1 = high sun
-  const alpha = lerp(0.5, 0.32, t);
-  return [38 / 255, 40 / 255, 105 / 255, alpha];
+  const alpha = lerp(0.72, 0.52, t);
+  return [22 / 255, 24 / 255, 92 / 255, alpha];
 };
 
 // ---------------------------------------------------------------------------
@@ -348,6 +357,18 @@ class SunShadowLayer implements CustomLayerInterface {
 
   private loadToken = 0;
 
+  // Double-buffering: the next view decodes into these "pending" resources while
+  // the current DEM stays on screen, so pan/zoom never flashes an empty frame.
+  private pendingDemTexture: WebGLTexture | null = null;
+
+  private pendingDem: DemData | null = null;
+
+  private pendingTexWidth = 0;
+
+  private pendingTexHeight = 0;
+
+  private pendingTilesRemaining = 0;
+
   private sun: SunPosition = { azimuthDeg: 180, altitudeDeg: 0 };
 
   private uniforms: Record<string, WebGLUniformLocation | null> = {};
@@ -440,6 +461,7 @@ class SunShadowLayer implements CustomLayerInterface {
     if (this.indexBuffer) gl.deleteBuffer(this.indexBuffer);
     if (this.buildingBuffer) gl.deleteBuffer(this.buildingBuffer);
     if (this.demTexture) gl.deleteTexture(this.demTexture);
+    if (this.pendingDemTexture) gl.deleteTexture(this.pendingDemTexture);
     if (this.buildingTexture) gl.deleteTexture(this.buildingTexture);
     if (this.buildingFbo) gl.deleteFramebuffer(this.buildingFbo);
     this.program = null;
@@ -448,9 +470,11 @@ class SunShadowLayer implements CustomLayerInterface {
     this.indexBuffer = null;
     this.buildingBuffer = null;
     this.demTexture = null;
+    this.pendingDemTexture = null;
     this.buildingTexture = null;
     this.buildingFbo = null;
     this.dem = null;
+    this.pendingDem = null;
   }
 
   // Tessellate the DEM bounds into a triangle grid. The vertex shader lifts each
@@ -637,9 +661,29 @@ class SunShadowLayer implements CustomLayerInterface {
     return zoom;
   }
 
+  // Drop the current/pending DEM and stop drawing (used when zoomed too far out).
+  private hideShadows() {
+    const gl = this.gl;
+    this.loadToken += 1; // cancel any in-flight load
+    if (gl && this.pendingDemTexture) {
+      gl.deleteTexture(this.pendingDemTexture);
+    }
+    this.pendingDemTexture = null;
+    this.pendingDem = null;
+    this.dem = null;
+    this.map.triggerRepaint();
+  }
+
   private loadDemForView() {
     const gl = this.gl;
     if (!gl || !this.demTexture) return;
+
+    // Too far out: hide the shadows rather than stitching an enormous DEM. The
+    // control panel surfaces a "zoom in" hint instead.
+    if (this.map.getZoom() < SHADOW_MIN_ZOOM) {
+      this.hideShadows();
+      return;
+    }
 
     const bounds = this.map.getBounds();
     const minLng = bounds.getWest();
@@ -664,57 +708,35 @@ class SunShadowLayer implements CustomLayerInterface {
     const texWidth = cols * tileSizePx;
     const texHeight = rows * tileSizePx;
 
-    // Allocate the full texture up-front, then drop tiles in as they decode.
-    gl.bindTexture(gl.TEXTURE_2D, this.demTexture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-    // Keep the raw byte values intact (no browser colour management).
-    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
+    // Decode the new view into a *pending* texture and keep the current DEM on
+    // screen. We only swap once every tile has arrived (see swapPendingDem), so
+    // the shadows never flash through an empty/half-loaded frame on pan/zoom.
+    if (this.pendingDemTexture) gl.deleteTexture(this.pendingDemTexture);
+    this.pendingDemTexture = this.allocEmptyTexture(
+      gl.createTexture(),
       texWidth,
       texHeight,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null,
     );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-    // Building height map, same size/bounds so it shares the DEM's uv mapping.
-    this.texWidth = texWidth;
-    this.texHeight = texHeight;
-    gl.bindTexture(gl.TEXTURE_2D, this.buildingTexture);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      texWidth,
-      texHeight,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null,
-    );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    this.buildingsDirty = true;
-
-    this.dem = {
+    this.pendingTexWidth = texWidth;
+    this.pendingTexHeight = texHeight;
+    this.pendingDem = {
       minX: x0 / n,
       minY: y0 / n,
       maxX: (x1 + 1) / n,
       maxY: (y1 + 1) / n,
       texelMerc: 1 / n / tileSizePx,
     };
-    this.buildGrid(this.dem);
+    this.pendingTilesRemaining = cols * rows;
+    if (this.pendingTilesRemaining <= 0) {
+      this.swapPendingDem();
+      return;
+    }
+
+    const onTileSettled = () => {
+      if (token !== this.loadToken) return; // stale view
+      this.pendingTilesRemaining -= 1;
+      if (this.pendingTilesRemaining <= 0) this.swapPendingDem();
+    };
 
     for (let ty = y0; ty <= y1; ty += 1) {
       for (let tx = x0; tx <= x1; tx += 1) {
@@ -724,9 +746,11 @@ class SunShadowLayer implements CustomLayerInterface {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-          if (token !== this.loadToken || !this.gl) return; // stale view
+          if (token !== this.loadToken || !this.gl || !this.pendingDemTexture) {
+            return; // stale view
+          }
           const g = this.gl;
-          g.bindTexture(g.TEXTURE_2D, this.demTexture);
+          g.bindTexture(g.TEXTURE_2D, this.pendingDemTexture);
           g.pixelStorei(g.UNPACK_FLIP_Y_WEBGL, false);
           g.pixelStorei(g.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
           g.pixelStorei(g.UNPACK_COLORSPACE_CONVERSION_WEBGL, g.NONE);
@@ -739,14 +763,67 @@ class SunShadowLayer implements CustomLayerInterface {
             g.UNSIGNED_BYTE,
             img,
           );
-          this.map.triggerRepaint();
+          onTileSettled();
         };
-        img.onerror = () => {}; // missing DEM tile -> just leave it blank
+        img.onerror = () => onTileSettled(); // missing DEM tile -> leave it blank
         img.src = DEM_TILE_URL(zoom, wrappedX, ty);
       }
     }
+  }
+
+  // Promote the fully decoded pending DEM to the active one in a single frame.
+  private swapPendingDem() {
+    const gl = this.gl;
+    if (!gl || !this.pendingDemTexture || !this.pendingDem) return;
+
+    if (this.demTexture) gl.deleteTexture(this.demTexture);
+    this.demTexture = this.pendingDemTexture;
+    this.dem = this.pendingDem;
+    this.texWidth = this.pendingTexWidth;
+    this.texHeight = this.pendingTexHeight;
+    this.pendingDemTexture = null;
+    this.pendingDem = null;
+
+    this.buildGrid(this.dem);
+
+    // Building height map shares the DEM's size/bounds and uv mapping, so resize
+    // it to the new view and re-rasterise the footprints.
+    this.allocEmptyTexture(this.buildingTexture, this.texWidth, this.texHeight);
+    this.rebuildBuildingGeometry();
+    this.buildingsDirty = true;
 
     this.map.triggerRepaint();
+  }
+
+  // Allocate an empty RGBA texture with the params our DEM/building maps need.
+  private allocEmptyTexture(
+    texture: WebGLTexture | null,
+    width: number,
+    height: number,
+  ): WebGLTexture | null {
+    const gl = this.gl;
+    if (!gl || !texture) return texture;
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    // Keep the raw byte values intact (no browser colour management).
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    return texture;
   }
 
   render(
