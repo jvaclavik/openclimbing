@@ -818,9 +818,31 @@ class SunShadowLayer implements CustomLayerInterface {
   }
 }
 
-// Insert the shadow below labels/POIs so they stay readable.
-const firstSymbolLayerId = (map: Map): string | undefined =>
-  map.getStyle()?.layers?.find((l) => l.type === 'symbol')?.id;
+// Layer types that draw the ground/basemap surface (water, landcover, roads,
+// relief, buildings). The shadow must sit above all of these — otherwise e.g.
+// water fills, which can come after the first label layer, paint over it — but
+// below the text/icon labels so they stay readable.
+const GROUND_LAYER_TYPES = new Set([
+  'background',
+  'fill',
+  'line',
+  'fill-extrusion',
+  'raster',
+  'hillshade',
+  'circle',
+  'heatmap',
+]);
+
+const shadowBeforeId = (map: Map): string | undefined => {
+  const layers = map.getStyle()?.layers ?? [];
+  let lastGround = -1;
+  layers.forEach((l, i) => {
+    if (GROUND_LAYER_TYPES.has(l.type)) lastGround = i;
+  });
+  // Insert right above the last ground layer (i.e. before the first label on
+  // top of it). Undefined -> add on top of everything.
+  return layers[lastGround + 1]?.id;
+};
 
 // Keep a handle to the live layer instance — `map.getLayer()` returns a style
 // wrapper, not our CustomLayerInterface object, so we can't reach setSun() there.
@@ -839,7 +861,7 @@ export const applySunShadow = (
     activeLayer = new SunShadowLayer(map);
     map.addLayer(
       activeLayer as unknown as CustomLayerInterface,
-      firstSymbolLayerId(map),
+      shadowBeforeId(map),
     );
   }
   // The basemap's own relief hillshade stays visible underneath: it gives the
