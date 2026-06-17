@@ -82,6 +82,7 @@ export const recordsFactory = (log: (message: string) => void) => {
           ? JSON.stringify(feature.geometry.coordinates)
           : null,
       histogramCode: encodeHistogram(feature.properties.histogram),
+      feature: JSON.stringify(feature),
     };
 
     records.push(record);
