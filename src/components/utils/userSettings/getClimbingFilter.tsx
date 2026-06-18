@@ -23,6 +23,10 @@ export type ClimbingFilterSettings = {
   gradeInterval: Interval | null;
   minimumRoutes: number;
   poiTypes: Partial<PoiTypes>;
+  climbingTypes: string[];
+  inclinations: string[];
+  materials: string[];
+  familyFriendly: boolean;
 };
 
 type SetFilter = <T extends keyof ClimbingFilterSettings>(
@@ -48,10 +52,23 @@ export type ClimbingFilter = {
   setMinimumRoutes: Setter<number>;
   poiTypes: PoiTypes;
   setPoiTypes: Setter<PoiTypes>;
+  climbingTypes: string[];
+  setClimbingTypes: Setter<string[]>;
+  inclinations: string[];
+  setInclinations: Setter<string[]>;
+  materials: string[];
+  setMaterials: Setter<string[]>;
+  familyFriendly: boolean;
+  setFamilyFriendly: Setter<boolean>;
   isDefaultFilter: boolean;
   isGradeIntervalDefault: boolean;
   isMinimumRoutesDefault: boolean;
   isPoiTypesDefault: boolean;
+  isClimbingTypesDefault: boolean;
+  isInclinationsDefault: boolean;
+  isMaterialsDefault: boolean;
+  isFamilyFriendlyDefault: boolean;
+  numberOfActiveFilters: number;
   reset: () => void;
 };
 
@@ -82,23 +99,62 @@ export const getClimbingFilter = (
   };
   const setPoiTypes = (next: PoiTypes) => setFilter('poiTypes', next);
 
+  const climbingTypes = data?.climbingTypes ?? [];
+  const setClimbingTypes = (next: string[]) => setFilter('climbingTypes', next);
+
+  const inclinations = data?.inclinations ?? [];
+  const setInclinations = (next: string[]) => setFilter('inclinations', next);
+
+  const materials = data?.materials ?? [];
+  const setMaterials = (next: string[]) => setFilter('materials', next);
+
+  const familyFriendly = data?.familyFriendly ?? false;
+  const setFamilyFriendly = (next: boolean) =>
+    setFilter('familyFriendly', next);
+
   const isGradeIntervalDefault = isSameInterval(
     gradeInterval,
     defaultGradeInterval,
   );
   const isMinimumRoutesDefault = minimumRoutes === DEFAULT_MINIMUM_ROUTES;
   const isPoiTypesDefault = isSamePoiTypes(poiTypes, DEFAULT_POI_TYPES);
+  const isClimbingTypesDefault = climbingTypes.length === 0;
+  const isInclinationsDefault = inclinations.length === 0;
+  const isMaterialsDefault = materials.length === 0;
+  const isFamilyFriendlyDefault = !familyFriendly;
 
   const isDefaultFilter =
-    isGradeIntervalDefault && isMinimumRoutesDefault && isPoiTypesDefault;
+    isGradeIntervalDefault &&
+    isMinimumRoutesDefault &&
+    isPoiTypesDefault &&
+    isClimbingTypesDefault &&
+    isInclinationsDefault &&
+    isMaterialsDefault &&
+    isFamilyFriendlyDefault;
 
-  updateMapFilter(
+  const numberOfActiveFilters = [
+    isGradeIntervalDefault,
+    isMinimumRoutesDefault,
+    isPoiTypesDefault,
+    isClimbingTypesDefault,
+    isInclinationsDefault,
+    isMaterialsDefault,
+    isFamilyFriendlyDefault,
+  ].filter((isDefault) => !isDefault).length;
+
+  updateMapFilter({
     userSystem,
     gradeInterval,
     minimumRoutes,
     poiTypes,
+    climbingTypes,
+    inclinations,
+    materials,
+    familyFriendly,
     isDefaultFilter,
-  );
+    isGradeIntervalDefault,
+    isMinimumRoutesDefault,
+  });
 
   return {
     grades,
@@ -108,10 +164,23 @@ export const getClimbingFilter = (
     setMinimumRoutes,
     poiTypes,
     setPoiTypes,
+    climbingTypes,
+    setClimbingTypes,
+    inclinations,
+    setInclinations,
+    materials,
+    setMaterials,
+    familyFriendly,
+    setFamilyFriendly,
     isDefaultFilter,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
     isPoiTypesDefault,
+    isClimbingTypesDefault,
+    isInclinationsDefault,
+    isMaterialsDefault,
+    isFamilyFriendlyDefault,
+    numberOfActiveFilters,
     reset: () => setUserSetting(SETTINGS_KEY, {} as ClimbingFilterSettings),
   };
 };

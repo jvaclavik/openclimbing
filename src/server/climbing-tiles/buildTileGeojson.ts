@@ -46,6 +46,16 @@ const convertOsmIdToMapId = (apiId: OsmId) => {
   return parseInt(`${apiId.id}${osmToMapType[apiId.type]}`, 10);
 };
 
+const decodeList = (value?: string | null): string[] | undefined =>
+  value ? value.split(',') : undefined;
+
+const getAttributeProperties = (record: ClimbingFeaturesRow) => ({
+  materials: decodeList(record.materials),
+  climbingTypes: decodeList(record.climbingTypes),
+  inclinations: decodeList(record.inclinations),
+  familyFriendly: record.familyFriendly ? true : undefined,
+});
+
 const getProperties = (
   record: ClimbingFeaturesRow,
 ): ClimbingTilesProperties => {
@@ -61,12 +71,20 @@ const getProperties = (
       routeCount,
       hasImages: hasImages > 0, // TODO maybe use number as in sqlite?
       histogramCode,
+      ...getAttributeProperties(record),
     };
   }
 
   if (type === 'route' || type === 'route_top') {
     const { gradeId, gradeTxt } = record;
-    return { type, name, parentId, gradeId, gradeTxt };
+    return {
+      type,
+      name,
+      parentId,
+      gradeId,
+      gradeTxt,
+      ...getAttributeProperties(record),
+    };
   }
 
   if (type === 'gym' || type === 'ferrata') {

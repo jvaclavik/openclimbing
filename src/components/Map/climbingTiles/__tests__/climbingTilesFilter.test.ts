@@ -6,6 +6,15 @@ const pt = (lon = 14, lat = 50) => ({
   coordinates: [lon, lat] as [number, number],
 });
 
+const baseParams = {
+  isGradeIntervalDefault: false,
+  isMinimumRoutesDefault: false,
+  climbingTypes: [] as string[],
+  inclinations: [] as string[],
+  materials: [] as string[],
+  familyFriendly: false,
+};
+
 describe('filterClimbingTilesFeatures', () => {
   it('does not drop gym/ferrata when other filters are active', () => {
     const features: ClimbingTilesFeature[] = [
@@ -24,6 +33,7 @@ describe('filterClimbingTilesFeatures', () => {
     ];
 
     const filtered = filterClimbingTilesFeatures(features, {
+      ...baseParams,
       gradeInterval: [0, 10],
       minimumRoutes: 10,
       isDefaultFilter: false, // e.g. user changed any filter
@@ -53,6 +63,7 @@ describe('filterClimbingTilesFeatures', () => {
     ];
 
     const filtered = filterClimbingTilesFeatures(features, {
+      ...baseParams,
       gradeInterval: [0, 10],
       minimumRoutes: 1,
       isDefaultFilter: false,

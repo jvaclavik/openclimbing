@@ -7,6 +7,7 @@ import {
   OsmId,
   Point,
 } from '../../../services/types';
+import { ClimbingAttributes } from '../../../services/tagging/climbing/climbingAttributes';
 
 type OsmType = 'node' | 'way' | 'relation';
 type OverpassStat = {
@@ -56,6 +57,7 @@ export type GeojsonFeature<T extends FeatureGeometry = FeatureGeometry> = {
     hasImages?: boolean;
     histogram?: number[]; // indexed by GRADE_TABLE.uiaa
     parentId?: number;
+    attributes?: ClimbingAttributes;
   };
   geometry: T;
   center?: LonLat;

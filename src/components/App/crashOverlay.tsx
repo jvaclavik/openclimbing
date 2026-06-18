@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import React from 'react';
+import { isDebugModeEnabled } from '../utils/debugStorage';
 
 /**
  * Crash overlay – umožní PŘEČÍST chybu na telefonu, kde není konzole.
@@ -19,7 +20,6 @@ import React from 'react';
  */
 
 const OVERLAY_ID = 'crash-overlay-root';
-const DEBUG_KEY = 'crashOverlay.debug';
 
 type CrashEntry = {
   source: string;
@@ -42,21 +42,9 @@ const safe = <T,>(fn: () => T, fallback: T): T => {
 };
 
 // Overlay je defaultně vypnutý, aby nepodstatné chyby (AbortError, 500 z
-// pomocných API apod.) nepřebíraly obrazovku. Zapíná se na homepage 5×
-// kliknutím na "Made in Prague" (viz handleDebugActivationClick).
-export const isCrashDebugEnabled = (): boolean =>
-  safe(() => localStorage.getItem(DEBUG_KEY) === '1', false);
-
-const setDebugEnabled = (on: boolean) => {
-  safe(() => {
-    if (on) {
-      localStorage.setItem(DEBUG_KEY, '1');
-    } else {
-      localStorage.removeItem(DEBUG_KEY);
-    }
-    return null;
-  }, null);
-};
+// pomocných API apod.) nepřebíraly obrazovku. Řídí se jednotným debug módem
+// (6× klik na avatar v sidebaru, nebo Ctrl+Shift+D) – viz utils/debug.
+export const isCrashDebugEnabled = (): boolean => isDebugModeEnabled();
 
 const buildContext = (): Record<string, unknown> => {
   try {
@@ -252,50 +240,6 @@ export const initCrashOverlay = () => {
   });
 
   startTitleWatcher();
-};
-
-// ---------------------------------------------------------------------------
-// Aktivace debug režimu – 5× klik na "Made in Prague" na homepage
-// ---------------------------------------------------------------------------
-
-let activationClicks = 0;
-let activationTimer: ReturnType<typeof setTimeout> | undefined;
-const ACTIVATION_NEEDED = 5;
-
-type NotifySeverity = 'success' | 'info' | 'warning' | 'error';
-type Notify = (message: string, severity?: NotifySeverity) => void;
-
-export const handleDebugActivationClick = (notify?: Notify) => {
-  if (typeof window === 'undefined') return;
-
-  if (isCrashDebugEnabled()) {
-    setDebugEnabled(false);
-    safe(() => document.getElementById(OVERLAY_ID)?.remove() as unknown, null);
-    notify?.('Crash debug overlay vypnut.', 'info');
-    return;
-  }
-
-  activationClicks += 1;
-  if (activationTimer) clearTimeout(activationTimer);
-  activationTimer = setTimeout(() => {
-    activationClicks = 0;
-  }, 2000);
-
-  const remaining = ACTIVATION_NEEDED - activationClicks;
-  if (remaining > 0) {
-    if (activationClicks >= 2) {
-      notify?.(`Debug overlay: ještě ${remaining}×`, 'info');
-    }
-    return;
-  }
-
-  activationClicks = 0;
-  setDebugEnabled(true);
-  notify?.(
-    'Crash debug overlay zapnut. Chyby se teď zobrazí na stránce. Dalším 5× klikem ho vypneš.',
-    'success',
-  );
-  renderVanillaOverlay(); // ukaž případné už nasbírané chyby
 };
 
 // ---------------------------------------------------------------------------

@@ -32,12 +32,8 @@ type MapFilterButtonProps = {
 };
 const MapFilterButton = ({ open, onClick }: MapFilterButtonProps) => {
   const isMobileMode = useMobileMode();
-  const { isDefaultFilter, isGradeIntervalDefault, isMinimumRoutesDefault } =
+  const { isDefaultFilter, numberOfActiveFilters } =
     useUserSettingsContext().climbingFilter;
-  const numberOfActiveFilters = [
-    isGradeIntervalDefault,
-    isMinimumRoutesDefault,
-  ].filter((item) => !item).length;
 
   return (
     <Badge

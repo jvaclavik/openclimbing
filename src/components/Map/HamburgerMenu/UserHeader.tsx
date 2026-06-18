@@ -15,6 +15,7 @@ import { t } from '../../../services/intl';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { LoginIconButton } from './LoginIconButton';
 import { UserSettingsItem } from './UserSettingsItem';
+import { DebugModeActivator } from '../../utils/debug';
 import { PROJECT_ID } from '../../../services/project';
 import { profilePathForOsmDisplayName } from '../../../services/my-ticks/profilePaths';
 
@@ -112,7 +113,9 @@ const LoggedUserHeader = ({ onClose }: { onClose: () => void }) => {
       mb={2}
     >
       <Stack direction="row" gap={1.5} alignItems="center" ml={0.5}>
-        <LoginIconButton size={32} />
+        <DebugModeActivator sx={{ display: 'inline-flex' }}>
+          <LoginIconButton size={32} />
+        </DebugModeActivator>
         <Stack direction="column" justifyContent="center">
           <OsmUserLink osmUser={osmUser} onClose={onClose} />
           <LogoutButton onClick={handleLogout} />

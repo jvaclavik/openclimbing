@@ -11,6 +11,11 @@ import {
   OsmWay,
 } from './types';
 import { getUrlOsmId } from '../../../services/helpers';
+import {
+  ClimbingAttributes,
+  getClimbingAttributes,
+  mergeClimbingAttributes,
+} from '../../../services/tagging/climbing/climbingAttributes';
 
 const convertOsmIdToMapId = (apiId: OsmId) => {
   const osmToMapType = { node: 0, way: 1, relation: 4 };
@@ -82,8 +87,14 @@ const getCommonFields = (
   };
 };
 
+const getMemberAttributes = (members: GeojsonFeature[]): ClimbingAttributes[] =>
+  members.map(
+    (member) => member.properties.attributes ?? getClimbingAttributes({}),
+  );
+
 const getNodeWayProperties = (element: OsmNode | OsmWay) => {
   const { tags = {} } = element;
+  const attributes = getClimbingAttributes(tags);
 
   if (
     tags.climbing === 'crag' ||
@@ -94,11 +105,13 @@ const getNodeWayProperties = (element: OsmNode | OsmWay) => {
     return {
       hasImages: hasOwnImages(element),
       routeCount: getRouteNumberFromTags(element),
+      attributes,
     };
   }
 
   return {
     hasImages: hasOwnImages(element),
+    attributes,
   };
 };
 
@@ -142,6 +155,10 @@ const getRelationProperties = (
         members.filter(isRoute).length,
         getRouteNumberFromTags(relation),
       ),
+      attributes: mergeClimbingAttributes([
+        getClimbingAttributes(tags),
+        ...getMemberAttributes(members),
+      ]),
     };
   }
 
@@ -152,6 +169,10 @@ const getRelationProperties = (
       routeCount: members
         .map((member) => member?.properties.routeCount ?? 1)
         .reduce((acc, count) => acc + count, 0),
+      attributes: mergeClimbingAttributes([
+        getClimbingAttributes(tags),
+        ...getMemberAttributes(members),
+      ]),
     };
   }
 

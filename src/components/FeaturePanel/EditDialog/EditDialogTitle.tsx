@@ -31,7 +31,7 @@ const useGetDialogTitle = (isAddPlace, isUndelete) => {
 export const EditDialogTitle = () => {
   const { isAddPlace, isUndelete } = useEditDialogFeature();
   const { close } = useEditDialogContext();
-  const { debugMode, registerTitleClick, maximized, toggleMaximized } =
+  const { debugMode, maximized, toggleMaximized } =
     useEditDialogUploadContext();
   const theme = useTheme();
   // The dialog is already fullscreen on mobile, so hiding the toggle there.
@@ -42,7 +42,6 @@ export const EditDialogTitle = () => {
   return (
     <DialogTitle
       id="edit-dialog-title"
-      onClick={registerTitleClick}
       sx={{ cursor: 'default', userSelect: 'none' }}
     >
       <Stack

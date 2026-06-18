@@ -1,6 +1,13 @@
 import { OsmItem, OsmResponse } from '../types';
 import { overpassToGeojsons } from '../overpassToGeojsons';
 
+const noAttributes = {
+  materials: [],
+  climbingTypes: [],
+  inclinations: [],
+  familyFriendly: false,
+};
+
 const otherCrag: OsmItem = {
   type: 'node',
   id: 111,
@@ -81,7 +88,12 @@ test('climbingTiles overpassToGeojson basic', () => {
       geometry: { coordinates: [14.2571299, 49.6601234], type: 'Point' },
       id: 1110,
       osmMeta: { id: 111, type: 'node' },
-      properties: { hasImages: false, routeCount: 50, parentId: 17130099 },
+      properties: {
+        hasImages: false,
+        routeCount: 50,
+        parentId: 17130099,
+        attributes: { ...noAttributes, climbingTypes: ['sport'] },
+      },
       tags: {
         climbing: 'crag',
         'climbing:sport': '50',
@@ -94,7 +106,11 @@ test('climbingTiles overpassToGeojson basic', () => {
       geometry: { coordinates: [14.2573987, 49.6600391], type: 'Point' },
       id: 115800527100,
       osmMeta: { id: 11580052710, type: 'node' },
-      properties: { hasImages: true, parentId: 17130663 },
+      properties: {
+        hasImages: true,
+        parentId: 17130663,
+        attributes: noAttributes,
+      },
       tags: {
         climbing: 'route_bottom',
         'climbing:grade:uiaa': '1+',
@@ -109,7 +125,11 @@ test('climbingTiles overpassToGeojson basic', () => {
       geometry: { coordinates: [14.2571299, 49.6601234], type: 'Point' },
       id: 123610118790,
       osmMeta: { id: 12361011879, type: 'node' },
-      properties: { hasImages: false, parentId: 17130663 },
+      properties: {
+        hasImages: false,
+        parentId: 17130663,
+        attributes: noAttributes,
+      },
       tags: {
         climbing: 'route',
         'climbing:grade:uiaa': '1-',
@@ -147,6 +167,7 @@ test('climbingTiles overpassToGeojson basic', () => {
         hasImages: true,
         histogram: [1, undefined, 1],
         routeCount: 52,
+        attributes: { ...noAttributes, climbingTypes: ['sport'] },
       },
       tags: { climbing: 'area', name: 'Area of areas' },
       type: 'Feature',
@@ -177,6 +198,7 @@ test('climbingTiles overpassToGeojson basic', () => {
         histogram: [1, undefined, 1],
         parentId: 999,
         routeCount: 52,
+        attributes: { ...noAttributes, climbingTypes: ['sport'] },
       },
       tags: { climbing: 'area', name: 'Roviště' },
       type: 'Feature',
@@ -201,6 +223,7 @@ test('climbingTiles overpassToGeojson basic', () => {
         histogram: [1, undefined, 1],
         parentId: 17130099,
         routeCount: 2,
+        attributes: noAttributes,
       },
       tags: {
         climbing: 'crag',
