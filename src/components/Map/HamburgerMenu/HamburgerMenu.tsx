@@ -15,8 +15,6 @@ import {
 import CreateIcon from '@mui/icons-material/Create';
 import HelpIcon from '@mui/icons-material/Help';
 import styled from '@emotion/styled';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import Router from 'next/router';
 import { useBoolState } from '../../helpers';
 import { t } from '../../../services/intl';
 import { useFeatureContext } from '../../utils/FeatureContext';
@@ -130,19 +128,6 @@ const ClimbingLeaderboardLink = ({ closeMenu }) => (
   </MenuItem>
 );
 
-const InstallLink = () => {
-  const handleClick = () => {
-    Router.push('/install');
-  };
-  return (
-    <MenuItem onClick={handleClick} href="/install">
-      <ListItemIcon>
-        <GetAppIcon />
-      </ListItemIcon>
-      <ListItemText>{t('install.button')}</ListItemText>
-    </MenuItem>
-  );
-};
 const themeOptions = {
   system: {
     icon: ContrastIcon,
@@ -216,7 +201,6 @@ export const HamburgerMenu = () => {
           </div>
           <div>
             <AboutLink closeMenu={close} />
-            <InstallLink />
             <Divider />
             <Box mb={2}>
               {isOpenClimbing && <ClimbingForumLink />}

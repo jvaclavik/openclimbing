@@ -52,19 +52,6 @@ export default {
   'project.openclimbing.serpDescription':
     '地形図を備えた Wiki ベースのオープンソース登山地図。OpenStreetMap および Wikipedia プロジェクトに基づいて構築されています。',
 
-  'install.button': 'アプリをインストール',
-  'install.tabs_aria_label': 'プラットフォームを選択',
-  'install.ios_intro': '<strong>Safari ブラウザ</strong>で osmapp.org を開く',
-  'install.ios_share': '<strong>共有アイコン</strong>をタップ',
-  'install.ios_add': '<strong>ホーム画面に追加</strong> をタップ',
-  'install.android_intro': '<strong>Chrome または Firefox ブラウザ</strong>で osmapp.org を開く',
-  'install.android_share': '<strong>三点メニュー</strong>をタップ',
-  'install.android_add': '<strong>アプリをインストール</strong> をタップ',
-  'install.desktop_intro': '<strong>Chrome</strong>、<strong>FirefoxOS</strong>、または  <strong>Opera</strong> で osmapp.org を開く',
-  'install.desktop_install': '<strong>インストール ボタン</strong>をクリック',
-  'install.outro': 'それでおしまい！OsmAPP がホーム画面に表示されるはずです。',
-  'install.note': '注: このアプリは PWA テクノロジーを使用しており、Google Play や​​ App Store を使用せずに簡単にインストールできます。',
-
   'homepage.how_to_start': 'まず、検索ボックスにクエリを入力する。\nまたは、マップ上の任意の項目をクリックする。',
   'homepage.go_to_map_button': '地図へ',
   'homepage.examples.eg': '例えば',

@@ -36,6 +36,12 @@ type EditableRoute = {
   originalLonLat: LonLat | undefined;
 };
 
+const isValidLonLat = (position: unknown): position is LonLat =>
+  Array.isArray(position) &&
+  position.length >= 2 &&
+  Number.isFinite(position[0]) &&
+  Number.isFinite(position[1]);
+
 const routeFromMemberFeature = (
   member: Feature,
   index: number,
@@ -596,12 +602,16 @@ export const useCragRoutePositionEditor = (
         showNames,
         showGrades,
       );
+      const candidatePosition = getEffectivePosition(route) ?? crag.center;
+      const initialPosition = isValidLonLat(candidatePosition)
+        ? candidatePosition
+        : map.getCenter();
       const marker = new maplibregl.Marker({
         element,
         draggable: true,
         anchor: 'left',
       })
-        .setLngLat(getEffectivePosition(route) ?? crag.center)
+        .setLngLat(initialPosition)
         .addTo(map);
 
       const onEdit = async () => {
@@ -695,7 +705,7 @@ export const useCragRoutePositionEditor = (
       const position = useDistribution
         ? distributedPositions[index]
         : getEffectivePosition(route);
-      if (position) marker.setLngLat(position);
+      if (isValidLonLat(position)) marker.setLngLat(position);
 
       // Mark routes that sit off the guide line (manually moved away from it).
       const dot = marker

@@ -11,7 +11,6 @@ const IGNORED = [
   'FaviconsOpenClimbing.tsx',
   'Homepage.tsx',
   'SupportUs.tsx',
-  'InstallDialog.tsx',
   'ourPresets.ts',
   'refreshClimbingTiles.ts',
   'useDragItems.tsx',

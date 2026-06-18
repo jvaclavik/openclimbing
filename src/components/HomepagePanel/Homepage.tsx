@@ -1,6 +1,5 @@
 import { Button, Stack, Typography } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import GetAppIcon from '@mui/icons-material/GetApp';
 import React from 'react';
 import styled from '@emotion/styled';
 import Link from 'next/link';
@@ -142,16 +141,6 @@ export const Homepage = ({ mobileMode, onClick }: Props) => {
               />{' '}
               <Translation id="homepage.github_link" />
             </Typography>
-            <Center $mb $mt>
-              <Button
-                variant="outlined"
-                startIcon={<GetAppIcon />}
-                color="primary"
-                href="/install"
-              >
-                {t('install.button')}
-              </Button>
-            </Center>
             <Spacer />
             <Typography variant="overline" color="textSecondary" component="h2">
               {t('homepage.special_thanks_heading')}
