@@ -2,17 +2,9 @@ import { useRef } from 'react';
 import React from 'react';
 import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router';
-import LanguageIcon from '@mui/icons-material/Language';
-import styled from '@emotion/styled';
 import { useBoolState } from '../../helpers';
 import { changeLang, intl, t } from '../../../services/intl';
-import { LANGUAGES } from '../../../config.mjs';
-
-const StyledLanguageIcon = styled(LanguageIcon)`
-  color: ${({ theme }) => theme.palette.action.active};
-  margin: -2px 6px 0 0;
-  font-size: 17px !important;
-`;
+import { LANGUAGES, LANGUAGE_FLAGS } from '../../../config.mjs';
 
 export const LangSwitcher = () => {
   const { asPath } = useRouter();
@@ -41,7 +33,10 @@ export const LangSwitcher = () => {
             href={`/${lang}${asPath}`}
             onClick={getLangSetter(lang)}
           >
-            {name}
+            <ListItemIcon sx={{ minWidth: 32, fontSize: 18 }}>
+              {LANGUAGE_FLAGS[lang]}
+            </ListItemIcon>
+            <ListItemText>{name}</ListItemText>
           </MenuItem>
         ))}
       </Menu>
@@ -52,10 +47,10 @@ export const LangSwitcher = () => {
         ref={anchorRef}
         title={t('map.language_title')}
       >
-        <ListItemIcon>
-          <LanguageIcon />
+        <ListItemIcon sx={{ minWidth: 32, fontSize: 18 }}>
+          {LANGUAGE_FLAGS[intl.lang]}
         </ListItemIcon>
-        <ListItemText>{LANGUAGES[intl.lang]} </ListItemText>
+        <ListItemText>{LANGUAGES[intl.lang]}</ListItemText>
       </MenuItem>
     </>
   );

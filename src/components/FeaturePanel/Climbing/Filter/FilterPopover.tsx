@@ -11,7 +11,6 @@ import {
   PopperWithArrow,
 } from '../../../utils/PopperWithArrow';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
-import { useDebugMode } from '../../../utils/debug';
 import { Placement } from '@popperjs/core';
 import { Setter } from '../../../../types';
 import { useMapStateContext } from '../../../utils/MapStateContext';
@@ -82,14 +81,11 @@ export const FilterPopover = ({
 }: FilterPopoverProps) => {
   const { reset, isDefaultFilter, poiTypes } =
     useUserSettingsContext().climbingFilter;
-  const { debugMode } = useDebugMode();
 
   // Show difficulty/route filters only for rock POIs (e.g. not for via ferratas)
   const showRockFilters = poiTypes.rock;
   const showFamilyFriendly = poiTypes.rock || poiTypes.ferrata;
-  // Additional filters are experimental (data not fully in tiles yet) -> debug only
-  const showAdvancedFilters =
-    debugMode && (showRockFilters || showFamilyFriendly);
+  const showAdvancedFilters = showRockFilters || showFamilyFriendly;
 
   const handleClose = () => setOpen(false);
 
