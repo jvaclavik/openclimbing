@@ -3,8 +3,10 @@ import { FetchError } from '../helpers';
 
 // TODO add proper overpass types from refreshClimbingTilesHelpers.ts
 
+export const MAIN_OVERPASS_HOST = 'overpass-api.de'; // main instance (minutely synced)
+
 const OVERPASS_HOSTS = [
-  'overpass-api.de', // main instance (minutely synced)
+  MAIN_OVERPASS_HOST,
   'overpass.private.coffee', // alternative instance (minutely synced), we prefer it for bigger HW & less known
   'maps.mail.ru/osm/tools/overpass', // last alternative (minutely synced)
 ];
@@ -26,16 +28,18 @@ const isRetryableError = (e: FetchError) => {
 
 interface FetchOverpassOpts {
   nocache?: boolean;
+  hosts?: string[]; // override the default instances + fallback order
 }
 
 export const fetchOverpass = async (
   query: string,
   opts?: FetchOverpassOpts,
 ) => {
-  const LAST_INDEX = OVERPASS_HOSTS.length - 1;
+  const hosts = opts?.hosts ?? OVERPASS_HOSTS;
+  const LAST_INDEX = hosts.length - 1;
 
-  for (let i = 0; i < OVERPASS_HOSTS.length; i++) {
-    const host = OVERPASS_HOSTS[i];
+  for (let i = 0; i < hosts.length; i++) {
+    const host = hosts[i];
 
     try {
       const url = `https://${host}/api/interpreter?data=${encodeURIComponent(query)}`;
