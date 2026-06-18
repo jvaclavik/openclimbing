@@ -29,6 +29,7 @@ export type UserSettingsType = Partial<{
   'climbing.cragViewLayout': CragViewLayout;
   'climbing.splitPaneSize': null | number;
   'climbing.filter': ClimbingFilterSettings;
+  'debug.enabled': boolean;
 }>;
 
 export type UserSettingsContextType = {

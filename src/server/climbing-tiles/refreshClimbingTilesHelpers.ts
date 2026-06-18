@@ -5,6 +5,7 @@ import { GRADE_TABLE } from '../../services/tagging/climbing/gradeData';
 import { encodeHistogram } from './overpass/histogram';
 import { GeojsonFeature } from './overpass/types';
 import { ClimbingFeaturesRow } from '../db/types';
+import { getClimbingAttributes } from '../../services/tagging/climbing/climbingAttributes';
 
 export const centerGeometry = (
   feature: GeojsonFeature,
@@ -62,6 +63,11 @@ export const recordsFactory = (log: (message: string) => void) => {
     const gradeTxt = getRouteGradeTxt(feature.tags);
     const gradeId = getRouteGradeIndex(feature.tags);
 
+    const attributes =
+      feature.properties.attributes ?? getClimbingAttributes(feature.tags);
+    const encodeList = (list: string[]) =>
+      list.length ? list.join(',') : null;
+
     const name = feature.tags.name;
     const nameRaw = removeDiacritics(name);
     const record: ClimbingFeaturesRow = {
@@ -82,6 +88,10 @@ export const recordsFactory = (log: (message: string) => void) => {
           ? JSON.stringify(feature.geometry.coordinates)
           : null,
       histogramCode: encodeHistogram(feature.properties.histogram),
+      materials: encodeList(attributes.materials),
+      climbingTypes: encodeList(attributes.climbingTypes),
+      inclinations: encodeList(attributes.inclinations),
+      familyFriendly: attributes.familyFriendly ? 1 : 0,
     };
 
     records.push(record);

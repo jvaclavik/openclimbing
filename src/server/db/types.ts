@@ -15,6 +15,10 @@ export type ClimbingFeaturesRow = {
   gradeTxt?: string;
   line?: string; // JSON of type: number[][]
   histogramCode?: string;
+  materials?: string | null; // comma-joined climbing:rock values
+  climbingTypes?: string | null; // comma-joined climbing types
+  inclinations?: string | null; // comma-joined inclinations
+  familyFriendly?: number | null; // bool
 };
 
 export type ClimbingStatsRow = {

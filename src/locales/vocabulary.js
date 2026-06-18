@@ -743,6 +743,8 @@ export default {
   'crag_filter.type_rock': 'Rock climbing',
   'crag_filter.type_ferrata': 'Via ferrata',
   'crag_filter.type_gym': 'Climbing gym',
+  'crag_filter.advanced': 'Advanced filters',
+  'crag_filter.material_placeholder': 'Any material',
 
   'member_features.subitems': 'Subitems',
   'member_features.climbing': 'Climbing routes',

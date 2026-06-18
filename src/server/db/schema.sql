@@ -1,4 +1,4 @@
--- SQLite schema v4 (see db.ts migrations when bumping user_version)
+-- SQLite schema v5 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -16,7 +16,11 @@ CREATE TABLE climbing_features
   "gradeTxt"      TEXT,
   "gradeId"       INTEGER,
   "histogramCode" TEXT,
-  "parentId"      INTEGER
+  "parentId"      INTEGER,
+  materials       TEXT, -- comma-joined climbing:rock values
+  "climbingTypes" TEXT, -- comma-joined climbing types (sport, trad, ...)
+  inclinations    TEXT, -- comma-joined inclinations (slab, vertical, ...)
+  "familyFriendly" INTEGER -- bool
 );
 
 CREATE TABLE climbing_tiles_cache

@@ -1,20 +1,29 @@
 import { Backdrop, Button, Stack, Box, Typography } from '@mui/material';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import React from 'react';
 import { t, Translation } from '../../../../services/intl';
 import { MinimumRoutesFilter } from './MinimumRoutesFilter';
 import { GradeFilter } from './GradeFilter';
 import { ClimbingTypeFilter } from './ClimbingTypeFilter';
+import { AdvancedFilters } from './AdvancedFilters';
 import {
   GLASS_PAPER_SX,
   PopperWithArrow,
 } from '../../../utils/PopperWithArrow';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { useDebugMode } from '../../../utils/debug';
 import { Placement } from '@popperjs/core';
 import { Setter } from '../../../../types';
 import { useMapStateContext } from '../../../utils/MapStateContext';
 
 const ResetButton = (props: { onClick: () => void }) => (
-  <Button onClick={props.onClick} size="small" color="secondary">
+  <Button
+    onClick={props.onClick}
+    size="small"
+    color="secondary"
+    variant="outlined"
+    startIcon={<RestartAltIcon fontSize="small" />}
+  >
     {t('crag_filter.reset')}
   </Button>
 );
@@ -71,7 +80,16 @@ export const FilterPopover = ({
   placement,
   offset,
 }: FilterPopoverProps) => {
-  const { reset, isDefaultFilter } = useUserSettingsContext().climbingFilter;
+  const { reset, isDefaultFilter, poiTypes } =
+    useUserSettingsContext().climbingFilter;
+  const { debugMode } = useDebugMode();
+
+  // Show difficulty/route filters only for rock POIs (e.g. not for via ferratas)
+  const showRockFilters = poiTypes.rock;
+  const showFamilyFriendly = poiTypes.rock || poiTypes.ferrata;
+  // Additional filters are experimental (data not fully in tiles yet) -> debug only
+  const showAdvancedFilters =
+    debugMode && (showRockFilters || showFamilyFriendly);
 
   const handleClose = () => setOpen(false);
 
@@ -92,7 +110,7 @@ export const FilterPopover = ({
           anchorEl={anchorEl}
           placement={placement}
           offset={offset}
-          sx={{ minWidth: 350 }}
+          sx={{ minWidth: 320, maxWidth: 360 }}
           paperSx={GLASS_PAPER_SX}
           addition={
             <Stack direction="row" gap={1} alignItems="center">
@@ -102,9 +120,21 @@ export const FilterPopover = ({
           }
         >
           <Box>
-            <GradeFilter />
-            <MinimumRoutesFilter />
             <ClimbingTypeFilter />
+            {showRockFilters && (
+              <>
+                <GradeFilter />
+                <MinimumRoutesFilter />
+              </>
+            )}
+            {showAdvancedFilters && (
+              <AdvancedFilters
+                showClimbingType={showRockFilters}
+                showInclination={showRockFilters}
+                showMaterial={showRockFilters}
+                showFamilyFriendly={showFamilyFriendly}
+              />
+            )}
             <ZoomWarning />
           </Box>
         </PopperWithArrow>

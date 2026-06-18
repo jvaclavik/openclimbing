@@ -2,35 +2,49 @@ import { GradeSystem } from '../../../services/tagging/climbing/gradeSystems';
 import isEqual from 'lodash/isEqual';
 import { Interval, PoiTypes } from './getClimbingFilter';
 
-export const mapClimbingFilter = {
-  userSystem: undefined as GradeSystem | undefined,
-  gradeInterval: undefined as Interval | undefined,
-  minimumRoutes: undefined as number | undefined,
-  poiTypes: undefined as PoiTypes | undefined,
+export type MapClimbingFilterState = {
+  userSystem: GradeSystem | undefined;
+  gradeInterval: Interval | undefined;
+  minimumRoutes: number | undefined;
+  poiTypes: PoiTypes | undefined;
+  climbingTypes: string[];
+  inclinations: string[];
+  materials: string[];
+  familyFriendly: boolean;
+  isDefaultFilter: boolean;
+  isGradeIntervalDefault: boolean;
+  isMinimumRoutesDefault: boolean;
+};
+
+export const mapClimbingFilter: MapClimbingFilterState & {
+  callback: () => void;
+} = {
+  userSystem: undefined,
+  gradeInterval: undefined,
+  minimumRoutes: undefined,
+  poiTypes: undefined,
+  climbingTypes: [],
+  inclinations: [],
+  materials: [],
+  familyFriendly: false,
   isDefaultFilter: false,
   isGradeIntervalDefault: true,
   isMinimumRoutesDefault: true,
   callback: () => {},
 };
 
-export const updateMapFilter = (
-  userSystem: GradeSystem,
-  gradeInterval: Interval,
-  minimumRoutes: number,
-  poiTypes: PoiTypes,
-  isDefaultFilter: boolean,
-) => {
+export const updateMapFilter = (next: MapClimbingFilterState) => {
   if (
-    mapClimbingFilter.userSystem != userSystem ||
-    !isEqual(mapClimbingFilter.gradeInterval, gradeInterval) ||
-    mapClimbingFilter.minimumRoutes != minimumRoutes ||
-    !isEqual(mapClimbingFilter.poiTypes, poiTypes)
+    mapClimbingFilter.userSystem != next.userSystem ||
+    !isEqual(mapClimbingFilter.gradeInterval, next.gradeInterval) ||
+    mapClimbingFilter.minimumRoutes != next.minimumRoutes ||
+    !isEqual(mapClimbingFilter.poiTypes, next.poiTypes) ||
+    !isEqual(mapClimbingFilter.climbingTypes, next.climbingTypes) ||
+    !isEqual(mapClimbingFilter.inclinations, next.inclinations) ||
+    !isEqual(mapClimbingFilter.materials, next.materials) ||
+    mapClimbingFilter.familyFriendly != next.familyFriendly
   ) {
-    mapClimbingFilter.userSystem = userSystem;
-    mapClimbingFilter.gradeInterval = gradeInterval;
-    mapClimbingFilter.minimumRoutes = minimumRoutes;
-    mapClimbingFilter.poiTypes = poiTypes;
-    mapClimbingFilter.isDefaultFilter = isDefaultFilter;
+    Object.assign(mapClimbingFilter, next);
     mapClimbingFilter.callback();
   }
 };

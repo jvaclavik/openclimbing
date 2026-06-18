@@ -32,6 +32,12 @@ export type ClimbingTilesProperties = {
   gradeId?: number;
   gradeTxt?: string;
   color?: string; // computed on FE - processFeature()
+
+  // attribute filters (crag/area/route):
+  materials?: string[];
+  climbingTypes?: string[];
+  inclinations?: string[];
+  familyFriendly?: boolean;
 };
 
 export type ClimbingSearchRecord = {

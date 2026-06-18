@@ -101,6 +101,30 @@ const runPendingMigrations = (db: Database) => {
 
     console.log(`Database ${DB_PATH} migrated from version 3 to 4`); // eslint-disable-line no-console
   }
+  if (getDbVersion(db) === 4) {
+    db.transaction(() => {
+      const existingColumns = db
+        .prepare<[], { name: string }>(`PRAGMA table_info(climbing_features)`)
+        .all()
+        .map((c) => c.name);
+      const newColumns: [string, string][] = [
+        ['materials', 'TEXT'],
+        ['climbingTypes', 'TEXT'],
+        ['inclinations', 'TEXT'],
+        ['familyFriendly', 'INTEGER'],
+      ];
+      for (const [name, sqlType] of newColumns) {
+        if (!existingColumns.includes(name)) {
+          db.exec(
+            `ALTER TABLE climbing_features ADD COLUMN "${name}" ${sqlType};`,
+          );
+        }
+      }
+      db.pragma('user_version = 5');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 4 to 5`); // eslint-disable-line no-console
+  }
 };
 
 // global to allow hot-reload in dev
@@ -116,10 +140,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 4');
+        db.pragma('user_version = 5');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 4`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 5`); // eslint-disable-line no-console
     }
 
     store.db = db;

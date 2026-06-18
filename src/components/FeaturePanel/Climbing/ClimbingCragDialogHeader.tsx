@@ -202,9 +202,7 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
   const [isUserSettingsOpened, setIsUserSettingsOpened] =
     useState<boolean>(false);
   const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
-  const [clickCounter, setClickCounter] = useState<number>(0);
-  const { photoPath, photoPaths, setShowDebugMenu, isEditMode } =
-    useClimbingContext();
+  const { photoPath, photoPaths, isEditMode } = useClimbingContext();
   const { openWithTag } = useEditDialogContext();
 
   const { feature } = useFeatureContext();
@@ -219,14 +217,6 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
     openWithTag(nextKey);
   };
 
-  const handleOnClick = () => {
-    setClickCounter(clickCounter + 1);
-    if (clickCounter === 4) {
-      setShowDebugMenu(true);
-      setClickCounter(0);
-    }
-  };
-
   return (
     <AppBar position="static" color="transparent">
       <Toolbar variant="dense">
@@ -235,7 +225,6 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
             noWrap
             variant="h5"
             component="div"
-            onClick={handleOnClick}
             fontFamily={'Piazzolla'}
           >
             {label}

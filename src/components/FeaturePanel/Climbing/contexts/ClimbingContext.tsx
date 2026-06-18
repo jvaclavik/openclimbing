@@ -28,6 +28,7 @@ import {
   StateAction,
   useStateMachine,
 } from '../utils/useStateMachine';
+import { useDebugMode } from '../../../utils/debug';
 import { positionUtilsFactory } from '../utils/positionUtilsFactory';
 import { Feature } from '../../../../services/types';
 import { osmToClimbingRoutes } from './osmToClimbingRoutes';
@@ -127,7 +128,6 @@ type ClimbingContextType = {
   svgRef: React.MutableRefObject<any>;
   getAllRoutesPhotos: (cragPhotos: Array<string>) => void;
   showDebugMenu: boolean;
-  setShowDebugMenu: Setter<boolean>;
   isAddingPointBlockedRef: React.MutableRefObject<any>;
   isZoomingRef: React.MutableRefObject<any>;
   arePointerEventsDisabled: boolean; // @TODO do we need it?
@@ -186,7 +186,7 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
   const isZoomingRef = useRef(false);
   const [photoPaths, setPhotoPaths] = useState<Array<string>>(null);
   const [photoPath, setPhotoPath] = useState<string>(null); // photo URL (pathname), should be null
-  const [showDebugMenu, setShowDebugMenu] = useState(false);
+  const { debugMode: showDebugMenu } = useDebugMode();
   const [isEditMode, setIsEditMode] = useState(false);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [imageContainerSize, setImageContainerSize] = useState({
@@ -589,7 +589,6 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     addZoom,
     getAllRoutesPhotos,
     showDebugMenu,
-    setShowDebugMenu,
     isAddingPointBlockedRef,
     isZoomingRef,
     arePointerEventsDisabled,

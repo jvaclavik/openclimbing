@@ -52,6 +52,7 @@ import {
   CrashErrorBoundary,
   initCrashOverlay,
 } from '../src/components/App/crashOverlay';
+import { DebugModeManager } from '../src/components/utils/debug';
 
 initCrashOverlay(); // čte chyby na telefonu, kde není konzole (no-op na serveru)
 
@@ -124,6 +125,7 @@ const MyApp = (props: Props) => {
                                   content="width=device-width, user-scalable=no, initial-scale=1, interactive-widget=resizes-visual"
                                 />
                               </Head>
+                              <DebugModeManager />
                               <Loading />
                               <SearchBox />
                               <ResponsiveFeaturePanel />

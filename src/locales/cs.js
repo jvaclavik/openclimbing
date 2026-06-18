@@ -677,6 +677,8 @@ export default {
   'crag_filter.type_rock': 'Skály',
   'crag_filter.type_ferrata': 'Ferraty',
   'crag_filter.type_gym': 'Lezecké stěny',
+  'crag_filter.advanced': 'Rozšířené filtry',
+  'crag_filter.material_placeholder': 'Libovolný materiál',
 
   'member_features.subitems': 'Položky',
   'member_features.climbing': 'Lezecké cesty',
