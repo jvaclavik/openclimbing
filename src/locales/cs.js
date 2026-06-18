@@ -8,6 +8,8 @@ export default {
   darkmode_off: 'Tmavý režim: vyp.',
   show_more: 'Zobrazit více',
   show_less: 'Zobrazit méně',
+  url_not_found_toast: 'Požadovaná adresa nebyla nalezena, zkontrolujte adresní řádek.',
+  shortcut: 'Klávesová zkratka: __shortcut__',
 
   'climbing.photos': 'Fotky',
 
