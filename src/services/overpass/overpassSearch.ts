@@ -157,12 +157,13 @@ const getQueryBody = (
 export const performOverpassSearch = async (
   bbox: Bbox,
   astOrTagsOrQuery: ASTNode | Record<string, string> | string,
+  opts?: { hosts?: string[]; nocache?: boolean },
 ): Promise<FeatureCollection> => {
   const body = getQueryBody(astOrTagsOrQuery);
   const query = getOverpassQuery(bbox, body);
 
   console.log('seaching overpass for query: ', query); // eslint-disable-line no-console
-  const overpass = await fetchOverpass(query);
+  const overpass = await fetchOverpass(query, opts);
   console.log('overpass result:', overpass); // eslint-disable-line no-console
 
   const features = overpassGeomToGeojson(overpass);
