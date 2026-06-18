@@ -78,7 +78,13 @@ let eventsAdded = false;
 
 export const addNaturalRockSource = (style: StyleSpecification) => {
   style.sources[NATURAL_ROCK_SOURCE] = EMPTY_GEOJSON_SOURCE;
-  style.layers.push(...naturalRockLayers); // also in `layersWithOsmId` for hover/click
+
+  // Insert right after the existing rock landcover so the rocks sit low in the
+  // stack – below trails, labels, POIs and the climbing overlay (which is
+  // appended to the end). Also in `layersWithOsmId` for hover/click.
+  const anchor = style.layers.findIndex((l) => l.id === 'landcover_rock');
+  const insertAt = anchor === -1 ? style.layers.length : anchor + 1;
+  style.layers.splice(insertAt, 0, ...naturalRockLayers);
 
   lastQueryKey = ''; // the rebuilt style starts empty – force a refetch
 

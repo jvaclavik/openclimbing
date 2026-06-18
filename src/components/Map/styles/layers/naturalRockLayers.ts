@@ -38,8 +38,8 @@ export const naturalRockLayers: LayerSpecification[] = [
       'fill-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
-        0.75,
-        1,
+        0.35,
+        0.5,
       ],
     },
   } as LayerSpecification,
