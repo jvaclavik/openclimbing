@@ -23,6 +23,7 @@ import { EditDataItem } from '../../EditDialog/context/types';
 import { findInItems, isInItems } from '../../EditDialog/context/utils';
 import { distributeAlongControlPoints } from './routeMapDistribution';
 import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
+import { getValidCragCenter, isValidLonLat } from './cragCenter';
 
 const LINE_SOURCE_ID = 'route-edit-line';
 const LINE_LAYER_ID = 'route-edit-line-layer';
@@ -35,12 +36,6 @@ type EditableRoute = {
   isNode: boolean;
   originalLonLat: LonLat | undefined;
 };
-
-const isValidLonLat = (position: unknown): position is LonLat =>
-  Array.isArray(position) &&
-  position.length >= 2 &&
-  Number.isFinite(position[0]) &&
-  Number.isFinite(position[1]);
 
 const routeFromMemberFeature = (
   member: Feature,
@@ -269,6 +264,17 @@ export const useCragRoutePositionEditor = (
     () => getEditableRoutes(crag, cragItem, items),
     [crag, cragItem, items],
   );
+
+  // Where to drop a route that has no own position yet (newly added routes, or
+  // crags whose relation has no usable `center`). Prefer the crag center, then
+  // any existing route position, so new markers never snap to [0, 0].
+  const fallbackCenter = useMemo<LonLat | undefined>(() => {
+    const cragCenter = getValidCragCenter(crag);
+    if (cragCenter) return cragCenter;
+    return editableRoutes
+      .map((route) => route.originalLonLat)
+      .find(isValidLonLat);
+  }, [crag, editableRoutes]);
 
   // A signature that only changes when the *set* of routes (or their labels)
   // changes — not on every position edit — so the marker layer isn't rebuilt
@@ -602,7 +608,7 @@ export const useCragRoutePositionEditor = (
         showNames,
         showGrades,
       );
-      const candidatePosition = getEffectivePosition(route) ?? crag.center;
+      const candidatePosition = getEffectivePosition(route) ?? fallbackCenter;
       const initialPosition = isValidLonLat(candidatePosition)
         ? candidatePosition
         : map.getCenter();
@@ -685,7 +691,7 @@ export const useCragRoutePositionEditor = (
     mapRef,
     isMapLoaded,
     routesSignature,
-    crag.center,
+    fallbackCenter,
     themeMode,
     current,
     showNames,
