@@ -22,6 +22,7 @@ import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { t } from '../../../services/intl';
 import { RoutePositionToolbar } from './RoutePositionToolbar';
+import { getValidCragCenter } from './utils/cragCenter';
 
 const Container = styled.div<{ $expanded: boolean }>`
   position: ${({ $expanded }) => ($expanded ? 'fixed' : 'relative')};
@@ -115,6 +116,8 @@ const CragRoutesPositionMap = () => {
     null,
   );
 
+  const cragCenter = getValidCragCenter(feature);
+
   useEffect(() => {
     if (!containerRef.current) return undefined;
     setIsMapLoaded(false);
@@ -124,7 +127,7 @@ const CragRoutesPositionMap = () => {
       style: getStyle('tourist'),
       attributionControl: false,
       refreshExpiredTiles: false,
-      center: feature.center,
+      center: cragCenter,
       zoom: 18.5,
       locale: {
         'NavigationControl.ResetBearing': COMPASS_TOOLTIP,
@@ -149,7 +152,8 @@ const CragRoutesPositionMap = () => {
       map.remove();
       mapRef.current = null;
     };
-  }, [feature.center]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cragCenter?.[0], cragCenter?.[1]]);
 
   useEffect(() => {
     const id = window.setTimeout(() => mapRef.current?.resize(), 60);
