@@ -198,17 +198,23 @@ const planTilesForCragGroup = (
     });
   }
 
-  // If no photo in this crag's topos contains any climbed route, fall back to
-  // per-route tiles so the user at least sees a photo per route they climbed.
-  if (tiles.length === 0) {
-    return group.ticks.map((tick) => ({
+  // Any climbed route not drawn on a topo photo (no `…:path`) was never claimed
+  // above. Without this it would silently vanish from the gallery even though
+  // it has its own photo on the route detail. Add a per-route tile for each so
+  // every climbed route shows a photo. (Also covers the case where no topo
+  // photo contained any climbed route — then all routes fall here.)
+  const leftoverTicks = group.ticks.filter(
+    (tick) => !claimed.has(tick.tick.shortId!),
+  );
+  for (const tick of leftoverTicks) {
+    tiles.push({
       imageId: tick.tick.shortId!,
       photoIndex: 0,
       routeFilter: [tick.tick.shortId!],
       caption: tick.name,
       key: `solo-${tick.tick.shortId}`,
       ticks: [tick],
-    }));
+    });
   }
 
   return tiles;
