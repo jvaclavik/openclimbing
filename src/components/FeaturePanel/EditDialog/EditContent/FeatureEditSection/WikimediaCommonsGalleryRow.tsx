@@ -84,16 +84,16 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   dragHandle,
 }) => {
   const uploadCtx = useOptionalEditDialogUploadContext();
-  const debugMode = Boolean(uploadCtx?.debugMode);
+  const canUpload = Boolean(uploadCtx);
   const handleUploadClick = () =>
     uploadCtx?.openUpload({ targetSlotKey: fileKey });
 
   const isEmpty = !value.trim();
-  // In debug mode the empty row starts as upload CTA; the user can switch to
-  // paste mode to type/paste an existing filename. Outside debug mode behavior
-  // is unchanged (input shown immediately).
-  const [pasteMode, setPasteMode] = useState(!debugMode);
-  const showCta = debugMode && isEmpty && !pasteMode;
+  // When the upload flow is available, the empty row starts as an upload CTA;
+  // the user can switch to paste mode to type/paste an existing filename. If the
+  // upload context isn't mounted, the input is shown immediately.
+  const [pasteMode, setPasteMode] = useState(!canUpload);
+  const showCta = canUpload && isEmpty && !pasteMode;
   const showInput = !showCta;
 
   const label = `${t('tags.wikimedia_commons_photo')}${
@@ -118,7 +118,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
           <WikimediaCommonsThumb
             value={value}
             onPlaceholderClick={
-              debugMode && isEmpty ? handleUploadClick : undefined
+              canUpload && isEmpty ? handleUploadClick : undefined
             }
           />
         </Stack>
@@ -128,7 +128,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
             {label}
           </Typography>
 
-          {showCta && debugMode && isEmpty && (
+          {showCta && canUpload && isEmpty && (
             <EmptyRowCta
               pasteMode={pasteMode}
               onUpload={handleUploadClick}
@@ -155,7 +155,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
                 margin="none"
                 multiline={false}
               />
-              {debugMode && isEmpty && pasteMode && (
+              {canUpload && isEmpty && pasteMode && (
                 <EmptyRowCta
                   pasteMode={pasteMode}
                   onUpload={handleUploadClick}
