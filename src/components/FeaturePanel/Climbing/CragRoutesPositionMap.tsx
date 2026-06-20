@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import maplibregl, { StyleSpecification } from 'maplibre-gl';
 import styled from '@emotion/styled';
+import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
+import LayersIcon from '@mui/icons-material/Layers';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {
   Checkbox,
   Chip,
@@ -12,17 +14,16 @@ import {
   MenuItem,
   Tooltip,
 } from '@mui/material';
-import LayersIcon from '@mui/icons-material/Layers';
-import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
-import SettingsIcon from '@mui/icons-material/Settings';
+import maplibregl, { StyleSpecification } from 'maplibre-gl';
+import { useEffect, useRef, useState } from 'react';
+import { t } from '../../../services/intl';
+import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { touristStyle } from '../../Map/styles/touristStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
-import { useFeatureContext } from '../../utils/FeatureContext';
-import { t } from '../../../services/intl';
 import { RoutePositionToolbar } from './RoutePositionToolbar';
 import { getValidCragCenter } from './utils/cragCenter';
+import { useCragFeatureForRoutes } from './utils/useCragFeatureForRoutes';
 
 const Container = styled.div<{ $expanded: boolean }>`
   position: ${({ $expanded }) => ($expanded ? 'fixed' : 'relative')};
@@ -103,7 +104,7 @@ const getStyleLabel = (name: MapStyleName) => {
 };
 
 const CragRoutesPositionMap = () => {
-  const { feature } = useFeatureContext();
+  const feature = useCragFeatureForRoutes();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
@@ -159,6 +160,8 @@ const CragRoutesPositionMap = () => {
     const id = window.setTimeout(() => mapRef.current?.resize(), 60);
     return () => window.clearTimeout(id);
   }, [isExpanded]);
+
+  usePersistedScaleControl(mapRef, isMapLoaded);
 
   const switchMapStyle = () => {
     const next =
@@ -242,7 +245,11 @@ const CragRoutesPositionMap = () => {
           showGrades={showGrades}
         />
       )}
-      <Map $isVisible={isMapLoaded} ref={containerRef} />
+      <Map
+        $isVisible={isMapLoaded}
+        ref={containerRef}
+        className="edit-feature-map"
+      />
     </Container>
   );
 };

@@ -1,13 +1,20 @@
 import styled from '@emotion/styled';
 import CloseIcon from '@mui/icons-material/Close';
 import PrintIcon from '@mui/icons-material/Print';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {
   Button,
+  Checkbox,
   CircularProgress,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography,
 } from '@mui/material';
+import { QRCodeSVG } from 'qrcode.react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { LogoOpenClimbing } from '../../../assets/LogoOpenClimbing';
@@ -28,7 +35,9 @@ import { ClimbingTick } from '../../../types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useTicksContext } from '../../utils/TicksContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import dynamic from 'next/dynamic';
 import { ClimbingBadges } from './ClimbingBadges';
+import { GradeSystemSelect } from './GradeSystemSelect';
 import { osmToClimbingRoutes } from './contexts/osmToClimbingRoutes';
 import { ConvertedRouteDifficultyBadge } from './ConvertedRouteDifficultyBadge';
 import { ClimbingRoute, PathPoints, PointType, TickStyle } from './types';
@@ -41,6 +50,13 @@ import { getShiftForStartPoint } from './utils/startPoint';
 
 type Dims = { w: number; h: number };
 
+// Loaded client-only: it pulls in MapLibre and map styles that touch `window`
+// at import time, which would break server-side rendering.
+const ClimbingPdfExportMap = dynamic(
+  () => import('./ClimbingPdfExportMap').then((m) => m.ClimbingPdfExportMap),
+  { ssr: false },
+);
+
 const PrintRoot = styled.div`
   background: #fff;
   color: #000;
@@ -51,18 +67,12 @@ const PrintRoot = styled.div`
   }
 `;
 
-const CragTitle = styled.span`
+const GuideTitle = styled.div`
   font-family: 'Piazzolla', serif;
   font-size: 18px;
   font-weight: 700;
-`;
-
-const AreaTitle = styled.span`
-  font-family: 'Piazzolla', serif;
-  font-size: 26px;
-  font-weight: 900;
-  color: #2c5d8a;
   line-height: 1.1;
+  color: #333;
 `;
 
 const FeatureDescription = styled.div`
@@ -113,46 +123,85 @@ const BadgesWrap = styled.div`
   }
 `;
 
-const CragMeta = styled.span`
-  font-size: 11px;
-  color: #555;
+const BrandHeader = styled.div`
+  margin-bottom: 12px;
 `;
 
-const BrandHeader = styled.div`
+const Masthead = styled.div`
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding-bottom: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
   margin-bottom: 10px;
-  border-bottom: 1px solid #ddd;
+`;
+
+const BrandRight = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 `;
 
 const BrandLogoWrap = styled.span`
   display: inline-flex;
-  align-self: center;
-`;
-
-const BrandSpacer = styled.span`
-  flex: 1 1 auto;
+  align-items: center;
 `;
 
 const BrandText = styled.span`
   font-family: 'Piazzolla', serif;
   font-weight: 900;
   font-size: 16px;
+  line-height: 1;
   color: #eb5757;
   letter-spacing: 0.3px;
 `;
 
-const HeaderSep = styled.span`
-  color: #ccc;
+// The feature info block (name on line 1, meta on line 2) on the left, QR right.
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 `;
 
-const GpsLink = styled.a`
-  font-family: monospace;
-  font-size: 11px;
-  color: #2962a6;
+const InfoBlock = styled.div`
+  min-width: 0;
+`;
+
+// Line 1: the sector/area/crag name. The main subject (area / standalone crag)
+// is rendered larger than the per-sector headings inside an area.
+const FeatureName = styled.div<{ $primary?: boolean }>`
+  font-family: 'Piazzolla', serif;
+  font-size: ${({ $primary }) => ($primary ? '34px' : '27px')};
+  font-weight: ${({ $primary }) => ($primary ? 900 : 800)};
+  line-height: 1.12;
+`;
+
+// Line 2: type, route count and GPS in the same visual style as PanelLabel.
+const InfoMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #737373;
+`;
+
+const InfoSep = styled.span`
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: #737373;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+`;
+
+const InfoLink = styled.a`
+  color: inherit;
   text-decoration: none;
 
   &:hover {
@@ -178,28 +227,15 @@ const AllRoutesHeading = styled.div`
 `;
 
 const CragSectionHeading = styled.h2`
-  font-family: 'Piazzolla', serif;
-  font-size: 22px;
-  font-weight: 700;
-  margin: 24px 0 0 0;
-  padding-top: 14px;
-  border-top: 2px solid #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 8px 0;
 
   &:first-of-type {
-    margin-top: 4px;
-    padding-top: 0;
-    border-top: 0;
+    margin-top: 6px;
   }
-`;
-
-const CragSectionMeta = styled.div`
-  font-size: 11px;
-  color: #555;
-  margin: 2px 0 4px 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: baseline;
 `;
 
 const RoutesTable = styled.table`
@@ -244,6 +280,18 @@ const GradeCell = styled.td`
   font-family: monospace;
   font-weight: 700;
   white-space: nowrap;
+`;
+
+const Footer = styled.div`
+  margin-top: 24px;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #888;
+  text-align: center;
+
+  a {
+    color: #888;
+  }
 `;
 
 const RouteName = styled.div``;
@@ -846,6 +894,8 @@ type PhotoExportProps = {
   protectionPoints: PathPoints;
   isTicked: (shortId: string) => boolean;
   ticks: ClimbingTick[] | null;
+  /** Draw protection markers (bolts, anchors…) on the photo. */
+  showProtection: boolean;
   /** Hide the per-photo route table (e.g. when the only crag photo already
    * covers every route — the bottom "All routes" table is enough). */
   hideRoutesSummary?: boolean;
@@ -858,6 +908,7 @@ const PhotoExport = ({
   protectionPoints,
   isTicked,
   ticks,
+  showProtection,
   hideRoutesSummary,
 }: PhotoExportProps) => {
   const { userSettings } = useUserSettingsContext();
@@ -934,34 +985,36 @@ const PhotoExport = ({
                 </>
               )}
 
-              {path.map((p, pi) => {
-                if (!p.type) return null;
-                return (
-                  <PdfMarker
-                    key={`${routeIndex}-marker-${pi}`}
-                    cx={p.x * dims.w}
-                    cy={p.y * dims.h}
-                    type={p.type}
-                    s={markerScale}
-                  />
-                );
-              })}
+              {showProtection &&
+                path.map((p, pi) => {
+                  if (!p.type) return null;
+                  return (
+                    <PdfMarker
+                      key={`${routeIndex}-marker-${pi}`}
+                      cx={p.x * dims.w}
+                      cy={p.y * dims.h}
+                      type={p.type}
+                      s={markerScale}
+                    />
+                  );
+                })}
             </React.Fragment>
           );
         })}
 
-        {protectionPoints?.map((p, idx) =>
-          p.type ? (
-            // eslint-disable-next-line react/no-array-index-key
-            <PdfMarker
-              key={`prot-${idx}`}
-              cx={p.x * dims.w}
-              cy={p.y * dims.h}
-              type={p.type}
-              s={markerScale}
-            />
-          ) : null,
-        )}
+        {showProtection &&
+          protectionPoints?.map((p, idx) =>
+            p.type ? (
+              // eslint-disable-next-line react/no-array-index-key
+              <PdfMarker
+                key={`prot-${idx}`}
+                cx={p.x * dims.w}
+                cy={p.y * dims.h}
+                type={p.type}
+                s={markerScale}
+              />
+            ) : null,
+          )}
 
         {routes.map((route, routeIndex) => {
           const path = route.paths?.[photoPath];
@@ -1140,8 +1193,92 @@ const PhotoExport = ({
 
 const formatCoord = (value: number) => value.toFixed(5);
 
+const formatExportDateTime = (date: Date) => {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+// Kept short on purpose: 5-decimal coords (~1 m) and a raw comma instead of
+// the encoded %2C and the /en locale, so the QR encodes fewer characters and
+// stays simple enough to scan when printed small.
 const buildMapyComUrl = (lon: number, lat: number) =>
-  `https://mapy.com/en/turisticka?source=coor&id=${lon}%2C${lat}`;
+  `https://mapy.com/turisticka?source=coor&id=${lon.toFixed(5)},${lat.toFixed(
+    5,
+  )}`;
+
+// Small QR pointing at the feature's location on Mapy.com, shown to the right of
+// crag/sector names. Low error correction keeps the module count down (simplest
+// pattern, biggest modules) so it stays easy to scan even when printed small.
+const MapyQr = ({
+  lon,
+  lat,
+  size = 64,
+}: {
+  lon: number;
+  lat: number;
+  size?: number;
+}) => (
+  <a
+    href={buildMapyComUrl(lon, lat)}
+    target="_blank"
+    rel="noopener noreferrer"
+    title="Mapy.com"
+    style={{ flex: '0 0 auto', lineHeight: 0, alignSelf: 'center' }}
+  >
+    <QRCodeSVG
+      value={buildMapyComUrl(lon, lat)}
+      size={size}
+      level="L"
+      marginSize={2}
+      bgColor="#ffffff"
+      fgColor="#000000"
+    />
+  </a>
+);
+
+const getFeatureTypeLabel = (feature: Feature) =>
+  feature.tags?.climbing === 'area'
+    ? t('climbingpanel.pdf_export_type_area')
+    : t('climbingpanel.pdf_export_type_crag');
+
+// Line 1: the name. Line 2: "type · route count · GPS" (GPS links to OSM, the
+// type is the generic word "crag"/"area", not the specific name).
+const FeatureInfoLine = ({
+  feature,
+  count,
+  primary = false,
+}: {
+  feature: Feature;
+  count: number;
+  primary?: boolean;
+}) => {
+  const label = getLabel(feature);
+  const [lon, lat] = feature.center ?? [];
+  return (
+    <InfoBlock>
+      <FeatureName $primary={primary}>{label}</FeatureName>
+      <InfoMeta>
+        <span>{getFeatureTypeLabel(feature)}</span>
+        <InfoSep>●</InfoSep>
+        <span>{t('climbingpanel.pdf_export_routes_count', { count })}</span>
+        {lat != null && lon != null && (
+          <>
+            <InfoSep>●</InfoSep>
+            <InfoLink
+              href={getFullOsmappLink(feature)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GPS: {formatCoord(lat)}, {formatCoord(lon)}
+            </InfoLink>
+          </>
+        )}
+      </InfoMeta>
+    </InfoBlock>
+  );
+};
 
 type Props = {
   isOpen: boolean;
@@ -1180,6 +1317,8 @@ type CragPdfSectionProps = {
   ticks: ClimbingTick[] | null;
   /** Show the per-crag heading. False on single-crag exports (brand header covers it). */
   showHeading: boolean;
+  /** Draw protection markers (bolts, anchors…) on the photos. */
+  showProtection: boolean;
 };
 
 const CragPdfSection = ({
@@ -1188,8 +1327,10 @@ const CragPdfSection = ({
   isTicked,
   ticks,
   showHeading,
+  showProtection,
 }: CragPdfSectionProps) => {
   const routes = useMemo(() => osmToClimbingRoutes(feature), [feature]);
+  const label = getLabel(feature);
 
   const protectionPointsByPhoto = useMemo(
     () => parseProtectionPointsByPhoto(feature.tags),
@@ -1211,7 +1352,6 @@ const CragPdfSection = ({
       return p && p.length > 0;
     });
 
-  const label = getLabel(feature);
   const center = feature.center;
   const [lon, lat] = center ?? [];
 
@@ -1219,33 +1359,10 @@ const CragPdfSection = ({
     <>
       {showHeading && (
         <>
-          <CragSectionHeading>{label}</CragSectionHeading>
-          <CragSectionMeta>
-            <span>
-              {t('climbingpanel.pdf_export_routes_count', {
-                count: routes.length,
-              })}
-            </span>
-            {lat != null && lon != null && (
-              <>
-                <HeaderSep>·</HeaderSep>
-                <GpsLink
-                  href={getFullOsmappLink(feature)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {formatCoord(lat)}, {formatCoord(lon)}
-                </GpsLink>
-                <GpsLink
-                  href={buildMapyComUrl(lon, lat)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  (Mapy.com)
-                </GpsLink>
-              </>
-            )}
-          </CragSectionMeta>
+          <CragSectionHeading>
+            <FeatureInfoLine feature={feature} count={routes.length} />
+            {lat != null && lon != null && <MapyQr lon={lon} lat={lat} />}
+          </CragSectionHeading>
           <FeatureExtras feature={feature} />
         </>
       )}
@@ -1262,6 +1379,7 @@ const CragPdfSection = ({
             protectionPoints={protectionPointsByPhoto?.[photoPath] ?? []}
             isTicked={isTicked}
             ticks={ticks}
+            showProtection={showProtection}
             hideRoutesSummary={singlePhotoCoversAllRoutes}
           />
         );
@@ -1287,19 +1405,20 @@ const CragPdfSection = ({
 export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
   const { feature } = useFeatureContext();
   const { isTicked, ticks } = useTicksContext();
+  const { userSettings, setUserSetting } = useUserSettingsContext();
+  const gradesVisible = userSettings['climbing.isGradesOnPhotosVisible'];
 
   // For climbing=area, iterate over its child crags; otherwise treat the
-  // feature itself as a single crag.
-  const isArea = feature.tags.climbing === 'area';
-  const crags: Feature[] = useMemo(
-    () =>
-      isArea
-        ? (feature.memberFeatures ?? []).filter(
-            (f) => f.tags?.climbing === 'crag',
-          )
-        : [feature],
-    [feature, isArea],
-  );
+  // feature itself as a single crag. (feature can be null on the homepage.)
+  const isArea = feature?.tags?.climbing === 'area';
+  const crags: Feature[] = useMemo(() => {
+    if (!feature) return [];
+    return isArea
+      ? (feature.memberFeatures ?? []).filter(
+          (f) => f.tags?.climbing === 'crag',
+        )
+      : [feature];
+  }, [feature, isArea]);
 
   // Aggregate every crag's photos so the loader can preload them all at once
   // and the Print button only enables when everything is ready.
@@ -1313,10 +1432,22 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
   }, [crags]);
 
   const { dims, loading } = useImageDims(allPhotoPaths);
+  const [mapReady, setMapReady] = useState(false);
 
-  const label = getLabel(feature);
-  const center = feature.center;
+  // Export options (next to the Print button).
+  const [showMap, setShowMap] = useState(true);
+  const [showProtection, setShowProtection] = useState(true);
+  const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (loading) setMapReady(false);
+  }, [loading]);
+
+  const center = feature?.center;
   const [lon, lat] = center ?? [];
+  const generatedAt = useMemo(() => formatExportDateTime(new Date()), []);
   const totalRoutesCount = useMemo(
     () =>
       crags.reduce((acc, crag) => acc + osmToClimbingRoutes(crag).length, 0),
@@ -1346,6 +1477,16 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
+  // Re-enabling the map needs a fresh capture, so reset the readiness gate.
+  const toggleShowMap = () => {
+    if (showMap) {
+      setShowMap(false);
+    } else {
+      setMapReady(false);
+      setShowMap(true);
+    }
+  };
+
   const handlePrint = () => {
     // In-page print: PrintStyles' @media print rules unlock body sizing
     // (overriding the global `body { position: fixed }`) so the browser can
@@ -1354,7 +1495,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
     window.print();
   };
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted || !feature) return null;
 
   return ReactDOM.createPortal(
     <Overlay className="pdf-export-overlay pdf-export-print-portal">
@@ -1363,12 +1504,54 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
         <Typography variant="h6" sx={{ flex: 1 }}>
           {t('climbingpanel.pdf_export_title')}
         </Typography>
+        <Tooltip title={t('climbingpanel.pdf_export_settings')}>
+          <IconButton
+            color="primary"
+            onClick={(e) => setSettingsAnchor(e.currentTarget)}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Tooltip>
+        <Menu
+          anchorEl={settingsAnchor}
+          open={Boolean(settingsAnchor)}
+          onClose={() => setSettingsAnchor(null)}
+        >
+          <MenuItem onClick={toggleShowMap}>
+            <ListItemIcon>
+              <Checkbox edge="start" checked={showMap} tabIndex={-1} />
+            </ListItemIcon>
+            <ListItemText primary={t('climbingpanel.pdf_export_show_map')} />
+          </MenuItem>
+          <MenuItem onClick={() => setShowProtection((prev) => !prev)}>
+            <ListItemIcon>
+              <Checkbox edge="start" checked={showProtection} tabIndex={-1} />
+            </ListItemIcon>
+            <ListItemText
+              primary={t('climbingpanel.pdf_export_show_protection')}
+            />
+          </MenuItem>
+          <MenuItem
+            onClick={() =>
+              setUserSetting('climbing.isGradesOnPhotosVisible', !gradesVisible)
+            }
+          >
+            <ListItemIcon>
+              <Checkbox edge="start" checked={!!gradesVisible} tabIndex={-1} />
+            </ListItemIcon>
+            <ListItemText primary={t('climbingpanel.pdf_export_show_grades')} />
+          </MenuItem>
+          <MenuItem disableRipple sx={{ cursor: 'default', gap: 1 }}>
+            <ListItemText primary={t('user_settings.default_grade_system')} />
+            <GradeSystemSelect />
+          </MenuItem>
+        </Menu>
         <Button
           variant="contained"
           color="primary"
           startIcon={<PrintIcon />}
           onClick={handlePrint}
-          disabled={loading}
+          disabled={loading || (showMap && !mapReady)}
           sx={{ mr: 1 }}
         >
           {t('climbingpanel.pdf_export_print')}
@@ -1383,43 +1566,37 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
       <OverlayScroll>
         <PrintRoot ref={printRootRef} className="pdf-export-print-root">
           <BrandHeader>
-            {isArea ? (
-              <AreaTitle>{label}</AreaTitle>
-            ) : (
-              <CragTitle>{label}</CragTitle>
-            )}
-            <CragMeta>
-              {t('climbingpanel.pdf_export_routes_count', {
-                count: totalRoutesCount,
-              })}
-            </CragMeta>
-            {lat != null && lon != null && (
-              <>
-                <HeaderSep>·</HeaderSep>
-                <GpsLink
-                  href={getFullOsmappLink(feature)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {formatCoord(lat)}, {formatCoord(lon)}
-                </GpsLink>
-                <GpsLink
-                  href={buildMapyComUrl(lon, lat)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  (Mapy.com)
-                </GpsLink>
-              </>
-            )}
-            <BrandSpacer />
-            <BrandLogoWrap>
-              <LogoOpenClimbing width={20} />
-            </BrandLogoWrap>
-            <BrandText>openclimbing.org</BrandText>
+            <Masthead>
+              <BrandRight>
+                <BrandLogoWrap>
+                  <LogoOpenClimbing width={20} />
+                </BrandLogoWrap>
+                <BrandText>openclimbing.org</BrandText>
+              </BrandRight>
+              <GuideTitle>{t('climbingpanel.pdf_export_heading')}</GuideTitle>
+            </Masthead>
+            <TitleRow>
+              <FeatureInfoLine
+                feature={feature}
+                count={totalRoutesCount}
+                primary
+              />
+              {lat != null && lon != null && (
+                <MapyQr lon={lon} lat={lat} size={60} />
+              )}
+            </TitleRow>
           </BrandHeader>
 
           <FeatureExtras feature={feature} />
+
+          {showMap && !loading && (
+            <ClimbingPdfExportMap
+              feature={feature}
+              crags={crags}
+              isArea={isArea}
+              onReady={setMapReady}
+            />
+          )}
 
           {loading ? (
             <LoadingWrap>
@@ -1435,9 +1612,24 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
                 isTicked={isTicked}
                 ticks={ticks}
                 showHeading={isArea}
+                showProtection={showProtection}
               />
             ))
           )}
+
+          <Footer>
+            <span
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{
+                __html: t('climbingpanel.pdf_export_footer'),
+              }}
+            />
+            <div>
+              {t('climbingpanel.pdf_export_generated_at', {
+                datetime: generatedAt,
+              })}
+            </div>
+          </Footer>
         </PrintRoot>
       </OverlayScroll>
     </Overlay>,

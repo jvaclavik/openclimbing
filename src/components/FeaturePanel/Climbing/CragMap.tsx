@@ -278,7 +278,7 @@ const useInitMap = () => {
   return { containerRef, isMapLoaded, mapRef };
 };
 
-const transformMemberFeaturesToGeojson = (
+export const transformMemberFeaturesToGeojson = (
   features,
   mode: 'light' | 'dark' = 'light',
 ) => {
