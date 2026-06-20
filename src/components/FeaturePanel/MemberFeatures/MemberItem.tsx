@@ -2,7 +2,8 @@ import { Feature } from '../../../services/types';
 import { useMobileMode } from '../../helpers';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import Router from 'next/router';
-import { getUrlOsmId } from '../../../services/helpers';
+import { getShortId, getUrlOsmId } from '../../../services/helpers';
+import { addFeatureCenterToCache } from '../../../services/osm/featureCenterToCache';
 import { getLabel } from '../../../helpers/featureLabel';
 import React from 'react';
 import styled from '@emotion/styled';
@@ -25,6 +26,10 @@ export const MemberItem = ({ feature }: Props) => {
   const handleClick = (e) => {
     e.preventDefault();
     setPreview(null);
+    if (feature.center) {
+      // seed the center so fetchFeature() skips the slow Overpass center query
+      addFeatureCenterToCache(getShortId(osmId), feature.center);
+    }
     Router.push(`/${getUrlOsmId(osmId)}${window.location.hash}`);
   };
   const handleHover = () => feature.center && setPreview(feature);
