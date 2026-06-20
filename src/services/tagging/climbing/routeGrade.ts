@@ -21,9 +21,11 @@ export const convertGrade = (
 ) => {
   if (!from || !to || !value || !GRADE_TABLE[from]) return null;
 
-  const indexInTable = GRADE_TABLE[from].findIndex((item) =>
-    item.startsWith(value),
-  );
+  const exactIndex = GRADE_TABLE[from].indexOf(value);
+  const indexInTable =
+    exactIndex >= 0
+      ? exactIndex
+      : GRADE_TABLE[from].findIndex((item) => item.startsWith(value));
 
   if (GRADE_TABLE[to][indexInTable]) {
     return GRADE_TABLE[to][indexInTable];
@@ -90,9 +92,16 @@ export function findGradeTableRowIndexForGradeText(
   if (!v) {
     return null;
   }
+  // Nejdřív zkus přesnou shodu ve všech systémech (jinak by `startsWith`
+  // chytlo dřívější variantu s '-', např. "7" → "7-").
   for (const system of Object.keys(GRADE_TABLE) as GradeSystem[]) {
-    const table = GRADE_TABLE[system];
-    const i = table.findIndex((item) => item.startsWith(v));
+    const i = GRADE_TABLE[system].indexOf(v);
+    if (i >= 0) {
+      return i;
+    }
+  }
+  for (const system of Object.keys(GRADE_TABLE) as GradeSystem[]) {
+    const i = GRADE_TABLE[system].findIndex((item) => item.startsWith(v));
     if (i >= 0) {
       return i;
     }
