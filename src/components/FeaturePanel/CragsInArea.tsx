@@ -7,8 +7,10 @@ import { useFeatureContext } from '../utils/FeatureContext';
 import {
   getOsmappLink,
   getReactKey,
+  getShortId,
   getUrlOsmId,
 } from '../../services/helpers';
+import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 import { Feature, isInstant } from '../../services/types';
 import { ClientOnly, isMobileMode, useMobileMode } from '../helpers';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
@@ -269,6 +271,10 @@ const CragItem = ({
 
   const getOnClickWithHash = (e) => {
     e.preventDefault();
+    if (feature.center) {
+      // seed the center so fetchFeature() skips the slow Overpass center query
+      addFeatureCenterToCache(getShortId(feature.osmMeta), feature.center);
+    }
     Router.push(`/${getUrlOsmId(feature.osmMeta)}${window.location.hash}`);
   };
 
@@ -346,6 +352,10 @@ const AreaItem = ({ feature }: { feature: Feature }) => {
 
   const getOnClickWithHash = (e) => {
     e.preventDefault();
+    if (feature.center) {
+      // seed the center so fetchFeature() skips the slow Overpass center query
+      addFeatureCenterToCache(getShortId(feature.osmMeta), feature.center);
+    }
     Router.push(`/${getUrlOsmId(feature.osmMeta)}${window.location.hash}`);
   };
 

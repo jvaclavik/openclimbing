@@ -376,6 +376,7 @@ export default {
   'featurepanel.feature_description_point': 'Map coordinates',
   'featurepanel.show_tags': 'Show tags',
   'featurepanel.show_objects_around': 'Show nearby objects',
+  'featurepanel.reload_fresh_data': 'Reload fresh data from OpenStreetMap',
   'featurepanel.uncertain_image': 'This is the closest street view image from __from__. It may be inaccurate.',
   'featurepanel.image_description': '__provider__ image from __date__',
   'featurepanel.image_license': 'Licensed under __license__',

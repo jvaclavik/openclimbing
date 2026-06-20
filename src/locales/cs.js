@@ -336,6 +336,7 @@ export default {
   'featurepanel.feature_description_point': 'Mapové souřadnice',
   'featurepanel.show_tags': 'Zobrazit tagy',
   'featurepanel.show_objects_around': 'Zobrazit objekty v okolí',
+  'featurepanel.reload_fresh_data': 'Načíst čerstvá data z OpenStreetMap',
   'featurepanel.uncertain_image': 'Je zobrazena nejbližší fotka uliční úrovně. Může ukazovat jiný objekt.',
   'featurepanel.inline_edit_title': 'Upravit',
   'featurepanel.objects_around': 'Objekty v okolí',

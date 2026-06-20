@@ -55,9 +55,16 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   return (
     <AutocompleteConfigured
       open={isOpen}
-      onClose={() => {
+      onClose={(_event, reason) => {
         setIsOpen(false);
-        setUrlQuery('', lastSyncedValue);
+        // On 'selectOption' the user picked a result and onSelected() is
+        // already navigating to it. Re-arming the debounced URL sync here would
+        // fire Router.push('/') ~800 ms later and abort that navigation — the
+        // loader runs, vanishes, and the panel never opens. So only sync the
+        // (cleared) query to the URL when the dropdown closes without a pick.
+        if (reason !== 'selectOption') {
+          setUrlQuery('', lastSyncedValue);
+        }
         setPreview(null);
       }}
       onOpen={() => {
