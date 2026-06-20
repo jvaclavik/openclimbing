@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
 import React from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { getReactKey, getOsmappLink } from '../../services/helpers';
+import { getReactKey, getOsmappLink, getShortId } from '../../services/helpers';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { Chip, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
+import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 
 const ParentItem = styled.div`
   margin: 12px 0 4px 0;
@@ -22,6 +23,13 @@ export const ParentButton = ({
   hasArrow = true,
 }) => {
   const handleLink = (e, parentFeature) => {
+    if (parentFeature.center) {
+      // seed the center so fetchFeature() skips the slow Overpass center query
+      addFeatureCenterToCache(
+        getShortId(parentFeature.osmMeta),
+        parentFeature.center,
+      );
+    }
     Router.push(getOsmappLink(parentFeature));
     e.preventDefault();
   };
