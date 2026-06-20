@@ -136,6 +136,24 @@ export const PopperWithArrow = ({
             element: arrowRef,
           },
         },
+        {
+          name: 'flip',
+          options: {
+            padding: 8,
+          },
+        },
+        {
+          // Keep the popper fully inside the viewport even when the anchor sits
+          // in a screen corner (e.g. the map filter button). Without tether:false
+          // popper.js lets a tall popover overflow off-screen to stay glued to the
+          // anchor, which on mobile hid the whole panel behind the backdrop.
+          name: 'preventOverflow',
+          options: {
+            altAxis: true,
+            tether: false,
+            padding: 8,
+          },
+        },
       ]}
       sx={{ zIndex: 1300, ...sx }}
     >
@@ -149,13 +167,24 @@ export const PopperWithArrow = ({
               sx={styles.arrow}
             />
 
-            <Paper elevation={ELEVATION} sx={paperSx}>
+            <Paper
+              elevation={ELEVATION}
+              sx={{
+                // Never grow taller than the viewport; keep the header pinned
+                // and let the body scroll so tall content stays usable on mobile.
+                maxHeight: 'calc(100dvh - 16px)',
+                display: 'flex',
+                flexDirection: 'column',
+                ...paperSx,
+              }}
+            >
               {title && (
                 <>
                   <Stack
                     direction="row"
                     justifyContent="space-between"
                     alignItems="center"
+                    sx={{ flexShrink: 0 }}
                   >
                     <Typography
                       variant="subtitle1"
@@ -169,10 +198,10 @@ export const PopperWithArrow = ({
                     </Typography>
                     {addition}
                   </Stack>
-                  <Divider />
+                  <Divider sx={{ flexShrink: 0 }} />
                 </>
               )}
-              {children}
+              <Box sx={{ overflowY: 'auto', minHeight: 0 }}>{children}</Box>
             </Paper>
           </div>
         </Fade>
