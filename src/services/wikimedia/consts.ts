@@ -8,12 +8,17 @@ export const WIKIMEDIA_OAUTH_PROFILE_URL =
   'https://meta.wikimedia.org/w/rest.php/oauth2/resource/profile';
 
 /**
- * Wikimedia Commons restricts CORS to wiki / toolforge domains, so the
- * browser cannot call the Action API directly. We route everything through
- * our own Next.js API routes (server-to-server has no CORS).
+ * The browser calls the Wikimedia Commons Action API directly — no server proxy.
+ * This means uploads use the logged-in user's own IP (our server IP is banned on
+ * Commons) and are not subject to any serverless body-size limit.
+ *
+ * CORS: authenticated requests (CSRF token, upload) must pass the `crossorigin`
+ * query parameter together with an `Authorization: Bearer` header and no cookies;
+ * anonymous reads (category search, filename availability) pass `origin=*`.
+ * Requires MediaWiki ≥ 1.44 (Wikimedia runs latest).
+ * See https://www.mediawiki.org/wiki/API:Cross-site_requests
  */
-export const COMMONS_API_PROXY_URL = '/api/wikimedia/commons-api';
-export const COMMONS_UPLOAD_PROXY_URL = '/api/wikimedia/upload';
+export const COMMONS_API_URL = 'https://commons.wikimedia.org/w/api.php';
 
 export const WIKIMEDIA_CLIENT_ID =
   process.env.NEXT_PUBLIC_WIKIMEDIA_CLIENT_ID ?? '';

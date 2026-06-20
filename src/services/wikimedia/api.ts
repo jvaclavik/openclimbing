@@ -1,4 +1,4 @@
-import { COMMONS_API_PROXY_URL, COMMONS_UPLOAD_PROXY_URL } from './consts';
+import { COMMONS_API_URL } from './consts';
 import { getValidAccessToken } from './auth/session';
 
 type ApiError = { code: string; info: string };
@@ -16,8 +16,12 @@ const apiGet = async <T>(params: Record<string, string>): Promise<T> => {
     ...params,
     format: 'json',
     formatversion: '2',
+    // CORS: authenticated requests use `crossorigin` + Bearer header; anonymous
+    // reads use `origin=*`. See API:Cross-site_requests.
+    ...(accessToken ? { crossorigin: '' } : { origin: '*' }),
   });
-  const response = await fetch(`${COMMONS_API_PROXY_URL}?${query}`, {
+  const response = await fetch(`${COMMONS_API_URL}?${query}`, {
+    credentials: 'omit',
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   });
   if (!response.ok) {
@@ -76,7 +80,11 @@ const uploadViaXhr = (
 ): Promise<UploadResult> =>
   new Promise<UploadResult>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', COMMONS_UPLOAD_PROXY_URL, true);
+    // Authenticated CORS write straight to Commons: `crossorigin` in the query
+    // string + Bearer header, no cookies. The file streams from the browser, so
+    // it uses the user's IP and isn't capped by any serverless body-size limit.
+    xhr.open('POST', `${COMMONS_API_URL}?crossorigin=`, true);
+    xhr.withCredentials = false;
     xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
     xhr.upload.onprogress = (e) => {
