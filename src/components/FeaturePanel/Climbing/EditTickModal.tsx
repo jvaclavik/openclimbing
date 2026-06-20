@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Box,
   Button,
   CircularProgress,
   Dialog,
@@ -7,14 +8,18 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  MenuItem,
   Stack,
   Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import clone from 'lodash/clone';
 import { useSnackbar } from '../../utils/SnackbarContext';
 import { ClimbingTick } from '../../../types';
 import { useTicksContext } from '../../utils/TicksContext';
+import { useMoreMenu } from './useMoreMenu';
 import {
   applyDateInputToTickTimestamp,
   isClimbCalendarDateAfterToday,
@@ -56,14 +61,28 @@ const useTempTick = () => {
 };
 
 export const EditTickModal = () => {
-  const { updateTick, editedTickId, setEditedTickId, ticks } =
+  const { updateTick, deleteTick, editedTickId, setEditedTickId, ticks } =
     useTicksContext();
   const { showToast } = useSnackbar();
   const { tempTick, updateTempTick } = useTempTick();
   const [loading, setLoading] = useState<boolean>(false);
+  const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
 
   const onClose = () => {
     setEditedTickId(null);
+  };
+
+  const handleDelete = async (event: React.MouseEvent) => {
+    setLoading(true);
+    try {
+      await deleteTick(tempTick.id);
+      showToast(t('tick.deleted_toast'), 'success');
+      handleCloseMore(event);
+      onClose();
+    } catch (e) {
+      showToast(`${t('error')}: ${e}`, 'error');
+      setLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -136,6 +155,23 @@ export const EditTickModal = () => {
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+        <Tooltip title={t('show_more')}>
+          <IconButton
+            color="secondary"
+            onClick={handleClickMore}
+            disabled={!tempTick || loading}
+          >
+            <MoreHorizIcon color="secondary" />
+          </IconButton>
+        </Tooltip>
+        <MoreMenu>
+          <MenuItem onClick={handleDelete} disableRipple disabled={loading}>
+            <DeleteIcon />
+            {t('tick.delete_button')} &nbsp;
+            {loading && <CircularProgress size={20} />}
+          </MenuItem>
+        </MoreMenu>
+        <Box sx={{ flexGrow: 1 }} />
         <Button onClick={onClose} color="inherit" disabled={loading}>
           {t('editdialog.cancel_button')}
         </Button>
