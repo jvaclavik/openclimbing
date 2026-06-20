@@ -644,7 +644,10 @@ export default {
   'climbingareas.link': 'Seznam všech lezeckých oblastí',
   'climbingareas.title': 'Lezecké oblasti',
   'climbingareas.area': 'Oblast',
+  'climbingareas.country': 'Země',
   'climbingareas.num_of_crags': 'Počet skal',
+  'climbingareas.filter_country': 'Filtrovat podle země',
+  'climbingareas.all_countries': 'Všechny země',
 
   'hamburger_menu.climbing.title': 'Lezení',
   'climbing_grade_table.title': 'Tabulka lezeckých obtížností',

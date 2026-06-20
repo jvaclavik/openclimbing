@@ -707,7 +707,10 @@ export default {
   'climbingareas.link': 'List of all Climbing areas',
   'climbingareas.title': 'Climbing areas',
   'climbingareas.area': 'Area',
+  'climbingareas.country': 'Country',
   'climbingareas.num_of_crags': 'Number of crags',
+  'climbingareas.filter_country': 'Filter by country',
+  'climbingareas.all_countries': 'All countries',
 
   'hamburger_menu.climbing.title': 'Climbing',
   'climbing_grade_table.title': 'Climbing grades table',
