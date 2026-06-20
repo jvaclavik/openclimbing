@@ -95,5 +95,5 @@ export const OsmRow = ({ option: { osm } }: Props) => (
 );
 
 export const osmOptionSelected = ({ osm }: OsmOption) => {
-  Router.push(`${osm.type}/${osm.id}`);
+  Router.push(`/${osm.type}/${osm.id}`);
 };
