@@ -106,7 +106,7 @@ export const getClimbingRouteUpdates = (
 };
 
 export const useSaveCragFactory = (setIsEditMode: Setter<boolean>) => {
-  const { feature: crag } = useFeatureContext();
+  const { feature: crag, reloadFeature } = useFeatureContext();
   const { routes, photoPaths, protectionPointsByPhoto } = useClimbingContext();
   const { showToast } = useSnackbar();
 
@@ -130,6 +130,7 @@ export const useSaveCragFactory = (setIsEditMode: Setter<boolean>) => {
       console.log('All routes saved', { updates, changes, result }); // eslint-disable-line no-console
       showToast('Data saved successfully!', 'success');
       setIsEditMode(false);
+      await reloadFeature(); // saveChanges() already cleared the cache, so this re-fetches fresh data
     } catch (err) {
       console.error('Failed to save climbing crag', err); // eslint-disable-line no-console
       const message =

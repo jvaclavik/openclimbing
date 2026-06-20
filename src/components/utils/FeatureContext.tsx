@@ -1,6 +1,7 @@
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -12,6 +13,8 @@ import { useBoolState } from '../helpers';
 import { publishDbgObject } from '../../utils';
 import { setLastFeature } from '../../services/lastFeatureStorage';
 import { Setter } from '../../types';
+import { clearFeatureCache, fetchFeature } from '../../services/osm/osmApi';
+import { clearFetchCache } from '../../services/fetchCache';
 
 export type FeatureContextType = {
   feature: Feature | null;
@@ -25,6 +28,10 @@ export type FeatureContextType = {
   persistShowHomepage: () => void;
   preview: Feature | null;
   setPreview: Setter<Feature | null>;
+  /** Re-fetches the current feature from the OSM API and updates the panel.
+   *  Pass `hard: true` to drop the whole fetch cache first (truly fresh data). */
+  reloadFeature: (hard?: boolean) => Promise<void>;
+  isReloading: boolean;
 };
 
 export const FeatureContext = createContext<FeatureContextType>(undefined);
@@ -42,7 +49,32 @@ export const FeatureProvider = ({
 }: Props) => {
   const [preview, setPreview] = useState<Feature>(null);
   const [feature, setFeature] = useState<Feature>(featureFromRouter);
+  const [isReloading, setIsReloading] = useState(false);
   const featureShown = feature != null;
+
+  const reloadFeature = useCallback(
+    async (hard = false) => {
+      const apiId = feature?.osmMeta;
+      if (!apiId?.id || feature.point || feature.nonOsmObject) {
+        return;
+      }
+      setIsReloading(true);
+      try {
+        if (hard) {
+          clearFetchCache(); // also drops Overpass / member-feature caches
+        } else {
+          clearFeatureCache(apiId);
+        }
+        const fresh = await fetchFeature(apiId);
+        setFeature(fresh);
+        publishDbgObject('feature', fresh);
+        publishDbgObject('schema', fresh?.schema);
+      } finally {
+        setIsReloading(false);
+      }
+    },
+    [feature],
+  );
 
   useEffect(() => {
     // set feature on next.js router transition
@@ -84,6 +116,8 @@ export const FeatureProvider = ({
     persistHideHomepage,
     preview,
     setPreview,
+    reloadFeature,
+    isReloading,
   };
 
   return (
