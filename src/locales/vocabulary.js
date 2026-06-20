@@ -682,6 +682,17 @@ export default {
   'climbingpanel.pdf_export_grade': 'Grade',
   'climbingpanel.pdf_export_tick_short': '✓',
   'climbingpanel.pdf_export_all_routes': 'All routes',
+  'climbingpanel.pdf_export_map_heading': 'Map',
+  'climbingpanel.pdf_export_settings': 'Export settings',
+  'climbingpanel.pdf_export_show_map': 'Show map',
+  'climbingpanel.pdf_export_show_protection': 'Mark protection (bolts, anchors…)',
+  'climbingpanel.pdf_export_show_grades': 'Show grades on routes',
+  'climbingpanel.pdf_export_heading': 'Climbing guide',
+  'climbingpanel.pdf_export_type_area': 'Area',
+  'climbingpanel.pdf_export_type_crag': 'Crag',
+  'climbingpanel.pdf_export_generated_at': 'Generated __datetime__',
+  'climbingpanel.pdf_export_footer':
+    'Generated with <a href="https://openclimbing.org" target="_blank" rel="noopener noreferrer">openclimbing.org</a> — free and open climbing data that anyone can use, improve and contribute to.',
   'climbingpanel.protection_points_mode': 'Gear placements',
   'climbingpanel.protection_points_hint':
     'Click the photo to add protection points. Pick a type in the bar. When you draw routes, new nodes snap to them and inherit the type.',

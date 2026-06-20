@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useFeatureContext } from '../../../utils/FeatureContext';
+import { useCragFeatureForRoutes } from './useCragFeatureForRoutes';
 import { getApiId, getShortId } from '../../../../services/helpers';
 import { Feature, LonLat } from '../../../../services/types';
 import {
@@ -247,7 +247,7 @@ export const useCragRoutePositionEditor = (
   styleEpoch: number,
   { showNames = true, showGrades = true }: DisplayOptions = {},
 ) => {
-  const { feature: crag } = useFeatureContext();
+  const crag = useCragFeatureForRoutes();
   const { items, addItem, setCurrent, current } = useEditContext();
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
