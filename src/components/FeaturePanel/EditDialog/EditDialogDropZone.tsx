@@ -23,12 +23,10 @@ const pickImage = (event: DragEvent): File | null => {
  * paper can miss drags that start outside the dialog.
  */
 export const EditDialogDropZone: React.FC = ({ children }) => {
-  const { debugMode, openUpload } = useEditDialogUploadContext();
+  const { openUpload } = useEditDialogUploadContext();
   const [draggingOver, setDraggingOver] = useState(false);
 
   useEffect(() => {
-    if (!debugMode) return;
-
     let depth = 0;
 
     const onDragEnter = (e: DragEvent) => {
@@ -68,7 +66,7 @@ export const EditDialogDropZone: React.FC = ({ children }) => {
       window.removeEventListener('drop', onDrop);
       setDraggingOver(false);
     };
-  }, [debugMode, openUpload]);
+  }, [openUpload]);
 
   return (
     <Box
@@ -81,7 +79,7 @@ export const EditDialogDropZone: React.FC = ({ children }) => {
       }}
     >
       {children}
-      {debugMode && draggingOver && (
+      {draggingOver && (
         <Box
           aria-hidden
           sx={{
