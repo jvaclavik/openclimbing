@@ -116,7 +116,7 @@ const buildControlPointElement = (label: string) => {
 };
 
 const buildRouteMarkerElement = (
-  order: number,
+  order: number | string,
   name: string,
   grade: string,
   color: string,
@@ -273,6 +273,21 @@ export const useCragRoutePositionEditor = (
     [crag, cragItem, items],
   );
 
+  // Other items opened in the edit dialog that aren't part of the crag we're
+  // currently positioning (e.g. another sector, or routes from elsewhere). We
+  // show them faded for context; they can be dragged and clicked to switch to,
+  // but they never take part in the guide-line distribution. Only placeable
+  // nodes with a known position are shown.
+  const otherOpenRoutes = useMemo(() => {
+    const excludeIds = new Set(editableRoutes.map((route) => route.id));
+    if (cragItem) excludeIds.add(cragItem.shortId);
+    if (current) excludeIds.add(current);
+    return items
+      .filter((item) => !excludeIds.has(item.shortId))
+      .map(routeFromItem)
+      .filter((route) => route.isNode && isValidLonLat(route.originalLonLat));
+  }, [items, editableRoutes, cragItem, current]);
+
   // Where to drop a route that has no own position yet (newly added routes, or
   // crags whose relation has no usable `center`). Prefer the crag center, then
   // any existing route position, so new markers never snap to [0, 0].
@@ -317,6 +332,11 @@ export const useCragRoutePositionEditor = (
 
   const controlMarkersRef = useRef<maplibregl.Marker[]>([]);
   const routeMarkersRef = useRef<Record<string, maplibregl.Marker>>({});
+  const otherMarkersRef = useRef<Record<string, maplibregl.Marker>>({});
+
+  const otherRoutesSignature = otherOpenRoutes
+    .map((route) => `${route.id}:${route.name}:${route.grade}`)
+    .join('|');
 
   // Keep the latest EditContext data accessible from imperative map handlers.
   const itemsRef = useRef(items);
@@ -753,6 +773,91 @@ export const useCragRoutePositionEditor = (
     items,
     getEffectivePosition,
   ]);
+
+  // Faded markers for the other items open in the edit dialog. Draggable (they
+  // are open in the dialog) and clickable to switch editing to them, but never
+  // part of the guide-line distribution.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !isMapLoaded) return undefined;
+
+    Object.values(otherMarkersRef.current).forEach((marker) => marker.remove());
+    otherMarkersRef.current = {};
+
+    otherOpenRoutes.forEach((route) => {
+      const position = getEffectivePosition(route);
+      if (!isValidLonLat(position)) return;
+
+      const color = getDifficultyColor(route.difficulty, themeMode);
+      const element = buildRouteMarkerElement(
+        '',
+        route.name,
+        route.grade,
+        color,
+        false,
+        showNames,
+        showGrades,
+        false,
+      );
+      element.style.opacity = '0.45';
+
+      const marker = new maplibregl.Marker({
+        element,
+        draggable: true,
+        anchor: 'left',
+      })
+        .setLngLat(position)
+        .addTo(map);
+
+      const popup = new maplibregl.Popup({ offset: 16, closeButton: false });
+      popup.on('open', () => {
+        popup.setDOMContent(
+          buildRoutePopupContent(
+            route,
+            () => {
+              popup.remove();
+              setCurrent(route.id);
+            },
+            null,
+            null,
+          ),
+        );
+      });
+      marker.setPopup(popup);
+
+      marker.on('dragend', () => {
+        const { lng, lat } = marker.getLngLat();
+        persistRoutePosition(route, [lng, lat]);
+      });
+
+      otherMarkersRef.current[route.id] = marker;
+    });
+
+    return () => {
+      Object.values(otherMarkersRef.current).forEach((marker) =>
+        marker.remove(),
+      );
+      otherMarkersRef.current = {};
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    mapRef,
+    isMapLoaded,
+    otherRoutesSignature,
+    themeMode,
+    showNames,
+    showGrades,
+  ]);
+
+  // Keep faded markers at their latest stored positions (e.g. after a drag
+  // elsewhere) without rebuilding them.
+  useEffect(() => {
+    otherOpenRoutes.forEach((route) => {
+      const marker = otherMarkersRef.current[route.id];
+      const position = getEffectivePosition(route);
+      if (marker && isValidLonLat(position)) marker.setLngLat(position);
+    });
+  }, [otherOpenRoutes, items, getEffectivePosition]);
 
   return {
     isGuideMode,
