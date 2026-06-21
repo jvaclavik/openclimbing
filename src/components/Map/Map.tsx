@@ -14,6 +14,7 @@ import { useMapStateContext } from '../utils/MapStateContext';
 import { Weather } from './Weather/Weather';
 import { MapFilter } from './MapFilter/MapFilter';
 import { MyListsLayer } from './MyListsLayer';
+import { CragPhotoMarkers } from './CragPhotoMarkers';
 import { SunShadow } from './SunShadow/SunShadow';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
@@ -90,6 +91,7 @@ const Map = () => {
     <>
       <BrowserMapDynamic />
       {mapLoaded && <MyListsLayer />}
+      {mapLoaded && <CragPhotoMarkers />}
       {!mapLoaded && <Spinner color="secondary" />}
       <NoscriptMessage />
       <TopRight>

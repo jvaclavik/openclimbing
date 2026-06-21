@@ -47,7 +47,7 @@ const HideOnNarrowPanel = styled.div`
   }
 `;
 
-export const ClimbingViewContent = ({ isMapVisible }) => {
+export const ClimbingViewContent = ({ isMapVisible, setIsMapVisible }) => {
   const { showDebugMenu, routes } = useClimbingContext();
   const { feature } = useFeatureContext();
   const cragViewLayout = useGetCragViewLayout();
@@ -79,7 +79,7 @@ export const ClimbingViewContent = ({ isMapVisible }) => {
   };
 
   return isMapVisible ? (
-    <CragMapDynamic />
+    <CragMapDynamic setIsMapVisible={setIsMapVisible} />
   ) : (
     <>
       <RouteList isEditable />

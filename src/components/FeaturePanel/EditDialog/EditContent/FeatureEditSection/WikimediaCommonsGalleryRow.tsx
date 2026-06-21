@@ -21,6 +21,12 @@ const isWikimediaCommonsFileNameInvalid = (value: string) => {
   return Boolean(value) && !regex.test(value);
 };
 
+const getPaperSx = (highlighted?: boolean) => ({
+  p: 1.5,
+  transition: 'border-color 0.2s ease',
+  ...(highlighted && { borderColor: '#ea5540', borderWidth: 2 }),
+});
+
 type Props = {
   fileKey: string;
   index: number;
@@ -29,6 +35,8 @@ type Props = {
   onValueChange: (fileKey: string, raw: string) => void;
   onRemove: () => void;
   dragHandle?: React.ReactNode;
+  highlighted?: boolean;
+  rowRef?: React.Ref<HTMLDivElement>;
 };
 
 type EmptyRowCtaProps = {
@@ -82,6 +90,8 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   onValueChange,
   onRemove,
   dragHandle,
+  highlighted,
+  rowRef,
 }) => {
   const uploadCtx = useOptionalEditDialogUploadContext();
   const canUpload = Boolean(uploadCtx);
@@ -102,7 +112,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   const invalidFile = isWikimediaCommonsFileNameInvalid(value);
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
+    <Paper ref={rowRef} variant="outlined" sx={getPaperSx(highlighted)}>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={1.5}

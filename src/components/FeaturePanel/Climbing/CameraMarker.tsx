@@ -4,40 +4,103 @@ type CameraTopDownMarkerProps = {
   width?: number;
   height?: number;
   index?: number;
-  azimuth?: number;
+  azimuth?: number | null;
+  /** horizontal field of view in degrees (from EXIF focal length) */
+  fov?: number | null;
+  active?: boolean;
   onClick?: () => void;
+};
+
+const ACCENT = '#ea5540';
+
+const CENTER = 24;
+const FUNNEL_RADIUS = 30;
+// fallback opening angle when the focal length is missing from EXIF
+const DEFAULT_FOV = 55;
+
+// point on the funnel arc for a compass bearing (deg, clockwise from north)
+const arcPoint = (bearingDeg: number) => {
+  const rad = (bearingDeg * Math.PI) / 180;
+  return {
+    x: CENTER + FUNNEL_RADIUS * Math.sin(rad),
+    y: CENTER - FUNNEL_RADIUS * Math.cos(rad),
+  };
 };
 
 export const CameraMarker = ({
   width,
   height,
   azimuth = 0,
+  fov,
   index,
+  active = false,
   onClick,
-}: CameraTopDownMarkerProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 55 55"
-    role="img"
-    height={height}
-    width={width}
-  >
-    <g transform="translate(11.5,11.5)" cursor="pointer" onClick={onClick}>
-      <g
-        transform={`rotate(${azimuth},16,16) translate(16,16) scale(2) translate(-16,-16)`}
-      >
-        <polygon points="16,2 10,14 22,14" fill="white" />
-      </g>
+}: CameraTopDownMarkerProps) => {
+  const hasDirection = azimuth !== null && azimuth !== undefined;
+  const ringColor = active ? ACCENT : '#444';
+  const beamColor = active ? ACCENT : '#3a6ea5';
 
-      <path
-        fill="#000"
-        d="M26 7h-3.465l-1.704-2.555A1 1 0 0 0 20 4h-8a1 1 0 0 0-.831.445L9.464 7H6a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h20a3 3 0 0 0 3-3V10a3 3 0 0 0-3-3Z"
+  // funnel is a circular sector centred on the azimuth, opened by the FOV;
+  // a narrower wedge = longer lens / tighter shot, wider = wide-angle.
+  const halfFov = (fov && fov > 0 ? fov : DEFAULT_FOV) / 2;
+  const left = arcPoint(azimuth - halfFov);
+  const right = arcPoint(azimuth + halfFov);
+  const funnelPath = `M ${CENTER} ${CENTER} L ${left.x.toFixed(2)} ${left.y.toFixed(
+    2,
+  )} A ${FUNNEL_RADIUS} ${FUNNEL_RADIUS} 0 0 1 ${right.x.toFixed(2)} ${right.y.toFixed(
+    2,
+  )} Z`;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 48 48"
+      role="img"
+      height={height}
+      width={width}
+      style={{
+        overflow: 'visible',
+        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))',
+        transition: 'transform 0.15s ease',
+        transform: active ? 'scale(1.25)' : 'scale(1)',
+        cursor: 'pointer',
+      }}
+      onClick={onClick}
+    >
+      {hasDirection && (
+        <path
+          d={funnelPath}
+          fill={beamColor}
+          fillOpacity={active ? 0.45 : 0.28}
+          stroke={beamColor}
+          strokeOpacity={active ? 0.9 : 0.55}
+          strokeWidth={1}
+          strokeLinejoin="round"
+        />
+      )}
+
+      {/* white circle badge */}
+      <circle
+        cx={CENTER}
+        cy={CENTER}
+        r={12}
+        fill="#fff"
+        stroke={ringColor}
+        strokeWidth={active ? 2.5 : 2}
       />
 
-      <text fill="white" x={12} y={23} fontWeight="bold">
+      <text
+        x={CENTER}
+        y={CENTER}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontWeight="bold"
+        fontSize={15}
+        fill={active ? ACCENT : '#222'}
+      >
         {index}
       </text>
-    </g>
-  </svg>
-);
+    </svg>
+  );
+};

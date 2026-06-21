@@ -15,15 +15,51 @@ import {
   Tooltip,
 } from '@mui/material';
 import maplibregl, { StyleSpecification } from 'maplibre-gl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { t } from '../../../services/intl';
 import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { touristStyle } from '../../Map/styles/touristStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import { RoutePositionToolbar } from './RoutePositionToolbar';
-import { getValidCragCenter } from './utils/cragCenter';
+import { getValidCragCenter, isValidLonLat } from './utils/cragCenter';
 import { useCragFeatureForRoutes } from './utils/useCragFeatureForRoutes';
+import { useGetPhotoExifs } from './utils/usePhotoExifGps';
+import { usePhotoMarkers } from './utils/usePhotoMarkers';
+import { usePhotoHighlightContext } from './contexts/PhotoHighlightContext';
+import {
+  getWikimediaCommonsPhotoValues,
+  removeFilePrefix,
+} from './utils/photo';
+import {
+  useCurrentItem,
+  useEditContext,
+} from '../EditDialog/context/EditContext';
+import { useFeatureContext } from '../../utils/FeatureContext';
+import { getShortId } from '../../../services/helpers';
+import { Feature, LonLat } from '../../../services/types';
+
+// BFS the (recursively loaded) member tree for the feature with this shortId and
+// return its map position — used to centre the map on the active route even when
+// it lives in a neighbouring sector.
+const findMemberCenterById = (
+  feature: Feature | undefined,
+  shortId: string | undefined,
+): LonLat | undefined => {
+  if (!feature || !shortId) return undefined;
+  const stack = [...(feature.memberFeatures ?? [])];
+  while (stack.length) {
+    const current = stack.shift();
+    if (!current) continue;
+    if (
+      getShortId(current.osmMeta) === shortId &&
+      isValidLonLat(current.center)
+    )
+      return current.center;
+    if (current.memberFeatures?.length) stack.push(...current.memberFeatures);
+  }
+  return undefined;
+};
 
 const Container = styled.div<{ $expanded: boolean }>`
   position: ${({ $expanded }) => ($expanded ? 'fixed' : 'relative')};
@@ -105,8 +141,13 @@ const getStyleLabel = (name: MapStyleName) => {
 
 const CragRoutesPositionMap = () => {
   const feature = useCragFeatureForRoutes();
+  const currentItem = useCurrentItem();
+  const { current } = useEditContext();
+  const { feature: panelFeature } = useFeatureContext();
+  const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleName>('tourist');
   const [styleEpoch, setStyleEpoch] = useState(0);
@@ -118,6 +159,29 @@ const CragRoutesPositionMap = () => {
   );
 
   const cragCenter = getValidCragCenter(feature);
+  const cragLon = cragCenter?.[0];
+  const cragLat = cragCenter?.[1];
+
+  // The map should open on whatever the user has active: the edited node's live
+  // position, else the active item's position in the resolved crag's tree, else
+  // that crag's centre, and only as a last resort the panel feature.
+  const activeCenter = useMemo<LonLat | undefined>(() => {
+    if (isValidLonLat(currentItem?.nodeLonLat)) return currentItem.nodeLonLat;
+    const byMember = findMemberCenterById(feature, current);
+    if (byMember) return byMember;
+    if (isValidLonLat(cragCenter)) return cragCenter;
+    return isValidLonLat(panelFeature?.center)
+      ? panelFeature.center
+      : undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    currentItem?.nodeLonLat,
+    feature,
+    current,
+    panelFeature,
+    cragLon,
+    cragLat,
+  ]);
 
   useEffect(() => {
     if (!containerRef.current) return undefined;
@@ -128,7 +192,7 @@ const CragRoutesPositionMap = () => {
       style: getStyle('tourist'),
       attributionControl: false,
       refreshExpiredTiles: false,
-      center: cragCenter,
+      center: activeCenter ?? cragCenter,
       zoom: 18.5,
       locale: {
         'NavigationControl.ResetBearing': COMPASS_TOOLTIP,
@@ -145,21 +209,48 @@ const CragRoutesPositionMap = () => {
     );
     mapRef.current = map;
 
-    const handleLoad = () => setIsMapLoaded(true);
+    const handleLoad = () => {
+      setIsMapLoaded(true);
+      setMap(map);
+    };
     map.on('load', handleLoad);
 
     return () => {
       map.off('load', handleLoad);
       map.remove();
       mapRef.current = null;
+      setMap(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cragCenter?.[0], cragCenter?.[1]]);
+
+  // photos of the item currently being edited (crag or route), in gallery order
+  const photoNames = useMemo(
+    () =>
+      getWikimediaCommonsPhotoValues(currentItem?.tags ?? {}).map(
+        removeFilePrefix,
+      ),
+    [currentItem?.tags],
+  );
+  const photoExifs = useGetPhotoExifs(photoNames);
+  usePhotoMarkers(map, photoExifs, photoNames, {
+    activePhoto: highlightedPhoto,
+    onPhotoClick: togglePhoto,
+  });
 
   useEffect(() => {
     const id = window.setTimeout(() => mapRef.current?.resize(), 60);
     return () => window.clearTimeout(id);
   }, [isExpanded]);
+
+  // Re-centre on the active item when it changes (e.g. switching to a route in a
+  // neighbouring sector). Keyed on `current` only, so it doesn't fight the user
+  // while they drag a marker (which changes the position but not `current`).
+  useEffect(() => {
+    if (!map || !isValidLonLat(activeCenter)) return;
+    map.flyTo({ center: activeCenter });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, current]);
 
   usePersistedScaleControl(mapRef, isMapLoaded);
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import maplibregl, { GeoJSONSource, LngLatLike, PointLike } from 'maplibre-gl';
+import maplibregl, { GeoJSONSource } from 'maplibre-gl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import styled from '@emotion/styled';
@@ -7,9 +7,10 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import type { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { CircularProgress, useTheme } from '@mui/material';
 import { useClimbingContext } from './contexts/ClimbingContext';
-import { addFilePrefix } from './utils/photo';
-import ReactDOMServer from 'react-dom/server';
-import { CameraMarker } from './CameraMarker';
+import { useGetPhotoExifs } from './utils/usePhotoExifGps';
+import { usePhotoMarkers } from './utils/usePhotoMarkers';
+import { usePhotoHighlightContext } from './contexts/PhotoHighlightContext';
+import { isRouteDrawnOnPhoto } from './utils/photo';
 import {
   getDifficulty,
   getDifficultyColor,
@@ -67,140 +68,66 @@ export const routes: LayerSpecification[] = [
     source: 'climbing',
     layout: {
       'text-padding': 2,
-      'text-font': ['Noto Sans Medium'],
+      // bold the routes drawn on the currently highlighted photo
+      'text-font': [
+        'case',
+        ['boolean', ['get', 'bold'], false],
+        ['literal', ['Noto Sans Bold']],
+        ['literal', ['Noto Sans Medium']],
+      ],
       'text-anchor': 'left',
       'text-field': '{name} {grade}',
       'text-offset': [1, 0],
-      'text-size': 14,
+      'text-size': ['case', ['boolean', ['get', 'bold'], false], 16, 14],
       'text-max-width': 9,
       'text-allow-overlap': false,
       'text-optional': true,
     },
     paint: {
       'text-halo-blur': 0.5,
-      'text-color': '#666',
+      'text-color': [
+        'case',
+        ['boolean', ['get', 'bold'], false],
+        '#222',
+        '#666',
+      ],
       'text-halo-width': 1,
       'text-halo-color': '#ffffff',
     },
   },
 ];
 
-const useGetPhotoExifs = (photoPaths) => {
-  const [photoExifs, setPhotoExifs] = useState<
-    Record<string, Record<string, any>>
-  >({});
-  useEffect(() => {
-    async function fetchExifData(photos) {
-      const encodedTitles = photos.map((t) => addFilePrefix(t)).join('|');
-      const url = `https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=metadata&titles=${encodedTitles}&format=json&origin=*`;
-      const response = await fetch(url);
-      const data = await response.json();
-      return data.query.pages;
-    }
-
-    fetchExifData(photoPaths).then((pages) => {
-      const data = Object.values(pages).reduce<Record<string, any>>(
-        (acc, item: any) => {
-          const metadata = item?.imageinfo?.[0]?.metadata.reduce(
-            (acc2, { name, value }) => ({ ...acc2, [name]: value }),
-            {},
-          );
-
-          return {
-            ...acc,
-            [item.title]: metadata,
-          };
-        },
-        {},
-      );
-      setPhotoExifs(data);
-    });
-  }, [photoPaths]);
-  return photoExifs;
+type Props = {
+  setIsMapVisible?: (visible: boolean) => void;
 };
 
-function parseFractionOrNumber(input) {
-  if (input.includes('/')) {
-    const [numerator, denominator] = input.split('/');
-    return parseFloat(numerator) / parseFloat(denominator);
-  } else {
-    return parseFloat(input);
-  }
-}
-
-const usePhotoMarkers = (photoExifs, mapRef) => {
-  const { feature } = useFeatureContext();
-
-  const getMarker = useCallback((index: number, azimuth: number | null) => {
-    let svgElement;
-    // const photoPath = Object.keys(photoExifs)[index];
-    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-      svgElement = document.createElement('div');
-      svgElement.innerHTML = ReactDOMServer.renderToStaticMarkup(
-        <CameraMarker
-          width={30}
-          index={index}
-          azimuth={azimuth}
-          onClick={() => {
-            // @TODO onclick is not working
-            // Router.push(
-            //   `${getOsmappLink(feature)}/climbing/photo/${photoPath}${window.location.hash}`,
-            // );
-          }}
-        />,
-      );
-    } else svgElement = undefined;
-
-    return {
-      color: 'salmon',
-      element: svgElement,
-      offset: [0, -10] as PointLike,
-    };
-  }, []);
-
-  const markerRef = useRef<maplibregl.Marker>();
-
-  useEffect(() => {
-    Object.keys(photoExifs).map((key, index) => {
-      const exifItems = photoExifs[key];
-
-      if (exifItems && exifItems.GPSLongitude && exifItems.GPSLatitude) {
-        const marker = getMarker(
-          index,
-          exifItems.GPSImgDirection
-            ? parseFractionOrNumber(exifItems.GPSImgDirection)
-            : null,
-        );
-        markerRef.current = new maplibregl.Marker(marker)
-          .setLngLat([
-            exifItems.GPSLongitude,
-            exifItems.GPSLatitude,
-          ] as LngLatLike)
-          .addTo(mapRef.current);
-      }
-    });
-
-    return () => {
-      Object.keys(photoExifs).map((key) => {
-        markerRef.current?.remove();
-      });
-    };
-  }, [getMarker, mapRef, markerRef, photoExifs]);
-};
-
-const useInitMap = () => {
+const useInitMap = ({ setIsMapVisible }: Props) => {
   const containerRef = useRef(null);
   const mapRef = useRef<maplibregl.Map>(null);
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isFirstMapLoad, setIsFirstMapLoad] = useState(true);
 
   const { feature } = useFeatureContext();
-  const { photoPaths } = useClimbingContext();
+  const { photoPaths, photoPath, setPhotoPath } = useClimbingContext();
+  const { highlightedPhoto } = usePhotoHighlightContext();
   const theme = useTheme();
   const themeMode = theme.palette.mode === 'dark' ? 'dark' : 'light';
 
   const photoExifs = useGetPhotoExifs(photoPaths);
-  usePhotoMarkers(photoExifs, mapRef);
+
+  const onPhotoClick = useCallback(
+    (photoName: string) => {
+      setPhotoPath(photoName);
+      setIsMapVisible?.(false);
+    },
+    [setPhotoPath, setIsMapVisible],
+  );
+
+  usePhotoMarkers(map, photoExifs, photoPaths ?? [], {
+    activePhoto: photoPath,
+    onPhotoClick,
+  });
 
   const getClimbingSource = useCallback(
     () => mapRef.current.getSource('climbing') as GeoJSONSource | undefined,
@@ -220,7 +147,7 @@ const useInitMap = () => {
 
     setIsMapLoaded(false);
     if (!containerRef.current) return undefined;
-    const map = new maplibregl.Map({
+    const mapInstance = new maplibregl.Map({
       container: containerRef.current,
       style: {
         ...outdoorStyle,
@@ -234,17 +161,18 @@ const useInitMap = () => {
       },
     });
 
-    map.scrollZoom.setWheelZoomRate(1 / 200); // 1/450 is default, bigger value = faster
-    map.addControl(geolocation);
-    mapRef.current = map;
+    mapInstance.scrollZoom.setWheelZoomRate(1 / 200); // 1/450 is default, bigger value = faster
+    mapInstance.addControl(geolocation);
+    mapRef.current = mapInstance;
 
-    mapRef.current.on('load', () => {
+    mapInstance.on('load', () => {
       setIsMapLoaded(true);
+      setMap(mapInstance);
     });
 
     return () => {
-      if (map) {
-        map.remove();
+      if (mapInstance) {
+        mapInstance.remove();
       }
     };
   }, [containerRef]);
@@ -262,6 +190,7 @@ const useInitMap = () => {
           features: transformMemberFeaturesToGeojson(
             feature.memberFeatures,
             themeMode,
+            highlightedPhoto,
           ),
         });
         setIsFirstMapLoad(false);
@@ -271,9 +200,23 @@ const useInitMap = () => {
     feature.center,
     feature.memberFeatures,
     getClimbingSource,
+    highlightedPhoto,
     isFirstMapLoad,
     themeMode,
   ]);
+
+  // re-bold the routes whenever the highlighted photo changes (after first load)
+  useEffect(() => {
+    if (!map) return;
+    (map.getSource('climbing') as GeoJSONSource | undefined)?.setData({
+      type: 'FeatureCollection' as const,
+      features: transformMemberFeaturesToGeojson(
+        feature.memberFeatures,
+        themeMode,
+        highlightedPhoto,
+      ),
+    });
+  }, [map, feature.memberFeatures, themeMode, highlightedPhoto]);
 
   return { containerRef, isMapLoaded, mapRef };
 };
@@ -281,6 +224,7 @@ const useInitMap = () => {
 export const transformMemberFeaturesToGeojson = (
   features,
   mode: 'light' | 'dark' = 'light',
+  highlightedPhoto: string | null = null,
 ) => {
   return features.map((feature) => {
     const difficulty = getDifficulty(feature.tags);
@@ -291,6 +235,7 @@ export const transformMemberFeaturesToGeojson = (
         name: feature.tags.name,
         grade: difficulty?.grade ?? feature.tags['climbing:grade:uiaa'] ?? '',
         color: getDifficultyColor(difficulty, mode),
+        bold: isRouteDrawnOnPhoto(feature.tags, highlightedPhoto),
       },
       geometry:
         feature.osmMeta.type === 'node'
@@ -300,8 +245,8 @@ export const transformMemberFeaturesToGeojson = (
   });
 };
 
-const CragMap = () => {
-  const { containerRef, isMapLoaded } = useInitMap();
+const CragMap = ({ setIsMapVisible }: Props) => {
+  const { containerRef, isMapLoaded } = useInitMap({ setIsMapVisible });
 
   return (
     <Container>

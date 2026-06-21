@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { Scrollbars } from 'react-custom-scrollbars';
 import { Image } from './Image/Image';
@@ -9,6 +9,9 @@ import { getClickHandler } from './Image/helpers';
 import { PROJECT_ID } from '../../../services/project';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { getHumanPoiType, getLabel } from '../../../helpers/featureLabel';
+import { isTag } from '../../../services/types';
+import { photoNameKey } from '../Climbing/utils/photo';
+import { usePhotoHighlightContext } from '../Climbing/contexts/PhotoHighlightContext';
 
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
 
@@ -38,8 +41,23 @@ export const Slider = ({ children }) => (
 export const FeatureImages = () => {
   const { feature } = useFeatureContext();
   const { loading, images } = useLoadImages();
+  const { highlightedPhoto, highlightToken } = usePhotoHighlightContext();
+  const itemRefs = useRef<Record<string, HTMLDivElement>>({});
   const poiType = getHumanPoiType(feature);
   const alt = `${poiType} ${getLabel(feature)}`;
+
+  // Scroll the requested photo into view whenever a crag photo marker on the
+  // map is clicked (highlightToken changes even when re-clicking the same one).
+  useEffect(() => {
+    if (!highlightedPhoto) return;
+    const el = itemRefs.current[photoNameKey(highlightedPhoto)];
+    el?.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    });
+  }, [highlightedPhoto, highlightToken]);
+
   if (images.length === 0) {
     // CragsInArea condition
     if (feature.memberFeatures?.length && feature.tags.climbing === 'area') {
@@ -49,18 +67,32 @@ export const FeatureImages = () => {
     }
   }
 
+  const highlightedKey = highlightedPhoto
+    ? photoNameKey(highlightedPhoto)
+    : null;
+
   return (
     <Wrapper>
       <Slider>
-        {images.map((item, index) => (
-          <Image
-            key={item.image.imageUrl}
-            def={item.def}
-            image={item.image}
-            onClick={getClickHandler(feature, item.def)}
-            alt={`${alt} ${index + 1}`}
-          />
-        ))}
+        {images.map((item, index) => {
+          const key = isTag(item.def) ? photoNameKey(item.def.v) : null;
+          return (
+            <Image
+              key={item.image.imageUrl}
+              def={item.def}
+              image={item.image}
+              onClick={getClickHandler(feature, item.def)}
+              alt={`${alt} ${index + 1}`}
+              highlighted={!!key && key === highlightedKey}
+              wrapperRef={(el) => {
+                if (key) {
+                  if (el) itemRefs.current[key] = el;
+                  else delete itemRefs.current[key];
+                }
+              }}
+            />
+          );
+        })}
       </Slider>
     </Wrapper>
   );
