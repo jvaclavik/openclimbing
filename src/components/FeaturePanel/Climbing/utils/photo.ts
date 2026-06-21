@@ -35,6 +35,16 @@ export const addFilePrefix = (name: string) => `File:${name}`;
 
 export const removeFilePrefix = (name: string) => name?.replace(/^File:/, '');
 
+// Wikimedia treats spaces and underscores in file titles as equivalent, and
+// the imageinfo API returns titles with spaces while OSM tags often use
+// underscores. This produces a stable key so a photo coming from an EXIF
+// response and the same photo coming from a `wikimedia_commons=*` tag value
+// compare equal.
+export const photoNameKey = (name: string | undefined): string =>
+  removeFilePrefix(name ?? '')
+    .replace(/_/g, ' ')
+    .trim();
+
 export const isWikimediaCommons = (tag: string) =>
   tag.startsWith('wikimedia_commons');
 
@@ -80,6 +90,22 @@ export const hasPathOnPhoto = (tags: FeatureTags) =>
   getWikimediaCommonsPhotoPathKeys(tags).some((key) =>
     Boolean(tags[key]?.trim()),
   );
+
+// True when this route has a drawn line on the given photo, i.e. it owns a
+// `wikimedia_commons[...]` slot whose value is that photo AND the matching
+// `…:path` tag is non-empty.
+export const isRouteDrawnOnPhoto = (
+  tags: FeatureTags,
+  photoName: string | null | undefined,
+): boolean => {
+  if (!photoName) return false;
+  const target = photoNameKey(photoName);
+  return getWikimediaCommonsPhotoTags(tags).some(([fileKey, value]) => {
+    if (photoNameKey(value) !== target) return false;
+    const pathKey = pathKeyForWikimediaCommonsFileKey(fileKey);
+    return Boolean(tags[pathKey]?.trim());
+  });
+};
 
 export const getWikimediaCommonsTags = (tags: FeatureTags) => {
   return naturalSort(

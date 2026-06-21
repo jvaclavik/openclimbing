@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import maplibregl, { StyleSpecification } from 'maplibre-gl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { t } from '../../../services/intl';
 import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
@@ -24,6 +24,14 @@ import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import { RoutePositionToolbar } from './RoutePositionToolbar';
 import { getValidCragCenter } from './utils/cragCenter';
 import { useCragFeatureForRoutes } from './utils/useCragFeatureForRoutes';
+import { useGetPhotoExifs } from './utils/usePhotoExifGps';
+import { usePhotoMarkers } from './utils/usePhotoMarkers';
+import { usePhotoHighlightContext } from './contexts/PhotoHighlightContext';
+import {
+  getWikimediaCommonsPhotoValues,
+  removeFilePrefix,
+} from './utils/photo';
+import { useCurrentItem } from '../EditDialog/context/EditContext';
 
 const Container = styled.div<{ $expanded: boolean }>`
   position: ${({ $expanded }) => ($expanded ? 'fixed' : 'relative')};
@@ -105,8 +113,11 @@ const getStyleLabel = (name: MapStyleName) => {
 
 const CragRoutesPositionMap = () => {
   const feature = useCragFeatureForRoutes();
+  const { tags } = useCurrentItem();
+  const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleName>('tourist');
   const [styleEpoch, setStyleEpoch] = useState(0);
@@ -145,16 +156,31 @@ const CragRoutesPositionMap = () => {
     );
     mapRef.current = map;
 
-    const handleLoad = () => setIsMapLoaded(true);
+    const handleLoad = () => {
+      setIsMapLoaded(true);
+      setMap(map);
+    };
     map.on('load', handleLoad);
 
     return () => {
       map.off('load', handleLoad);
       map.remove();
       mapRef.current = null;
+      setMap(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cragCenter?.[0], cragCenter?.[1]]);
+
+  // photos of the item currently being edited (crag or route), in gallery order
+  const photoNames = useMemo(
+    () => getWikimediaCommonsPhotoValues(tags).map(removeFilePrefix),
+    [tags],
+  );
+  const photoExifs = useGetPhotoExifs(photoNames);
+  usePhotoMarkers(map, photoExifs, photoNames, {
+    activePhoto: highlightedPhoto,
+    onPhotoClick: togglePhoto,
+  });
 
   useEffect(() => {
     const id = window.setTimeout(() => mapRef.current?.resize(), 60);

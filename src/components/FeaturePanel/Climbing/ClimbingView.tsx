@@ -653,7 +653,10 @@ export const ClimbingView = () => {
               setIsMapVisible={setIsMapVisible}
             />
             <BottomPanel onScroll={handleOnScroll}>
-              <ClimbingViewContent isMapVisible={isMapVisible} />
+              <ClimbingViewContent
+                isMapVisible={isMapVisible}
+                setIsMapVisible={setIsMapVisible}
+              />
             </BottomPanel>
           </BottomContainer>
         </SplitPane>
@@ -663,7 +666,10 @@ export const ClimbingView = () => {
             isMapVisible={isMapVisible}
             setIsMapVisible={setIsMapVisible}
           />
-          <ClimbingViewContent isMapVisible={isMapVisible} />
+          <ClimbingViewContent
+            isMapVisible={isMapVisible}
+            setIsMapVisible={setIsMapVisible}
+          />
         </>
       )}
     </Container>

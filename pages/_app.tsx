@@ -37,6 +37,7 @@ import { HomepagePanel } from '../src/components/HomepagePanel/HomepagePanel';
 import { setIntlForSSR, t } from '../src/services/intl';
 import { Feature } from '../src/services/types';
 import { ResponsiveFeaturePanel } from '../src/components/FeaturePanel/ResponsiveFeaturePanel';
+import { PhotoHighlightProvider } from '../src/components/FeaturePanel/Climbing/contexts/PhotoHighlightContext';
 import { Climbing } from '../src/components/Climbing/Climbing';
 import Router from 'next/router';
 import { fetchSchemaTranslations } from '../src/services/tagging/translations';
@@ -128,10 +129,12 @@ const MyApp = (props: Props) => {
                               <DebugModeManager />
                               <Loading />
                               <SearchBox />
-                              <ResponsiveFeaturePanel />
-                              <HomepagePanel />
-                              <Climbing />
-                              <Map />
+                              <PhotoHighlightProvider>
+                                <ResponsiveFeaturePanel />
+                                <HomepagePanel />
+                                <Climbing />
+                                <Map />
+                              </PhotoHighlightProvider>
                               <TitleAndMetaTags />
 
                               {/* eslint-disable-next-line react/jsx-props-no-spreading */}

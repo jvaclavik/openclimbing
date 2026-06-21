@@ -24,6 +24,8 @@ import { findInItems, isInItems } from '../../EditDialog/context/utils';
 import { distributeAlongControlPoints } from './routeMapDistribution';
 import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
 import { getValidCragCenter, isValidLonLat } from './cragCenter';
+import { isRouteDrawnOnPhoto } from './photo';
+import { usePhotoHighlightContext } from '../contexts/PhotoHighlightContext';
 
 const LINE_SOURCE_ID = 'route-edit-line';
 const LINE_LAYER_ID = 'route-edit-line-layer';
@@ -35,6 +37,7 @@ type EditableRoute = {
   difficulty: RouteDifficulty | undefined;
   isNode: boolean;
   originalLonLat: LonLat | undefined;
+  tags: Feature['tags'];
 };
 
 const routeFromMemberFeature = (
@@ -49,6 +52,7 @@ const routeFromMemberFeature = (
     difficulty,
     isNode: member.osmMeta.type === 'node',
     originalLonLat: member.center as LonLat | undefined,
+    tags: member.tags ?? {},
   };
 };
 
@@ -61,6 +65,7 @@ const routeFromItem = (item: EditDataItem): EditableRoute => {
     difficulty,
     isNode: getApiId(item.shortId).type === 'node',
     originalLonLat: item.nodeLonLat,
+    tags: item.tags ?? {},
   };
 };
 
@@ -118,6 +123,7 @@ const buildRouteMarkerElement = (
   isCurrent: boolean,
   showName: boolean,
   showGrade: boolean,
+  bold: boolean,
 ) => {
   const el = document.createElement('div');
   el.className = 'crag-route-marker';
@@ -155,13 +161,14 @@ const buildRouteMarkerElement = (
     .join('  ');
   text.textContent = label;
   text.style.cssText = `
-    font: 600 12px/1.2 sans-serif;
-    color: #222;
-    background: rgba(255,255,255,0.85);
+    font: ${bold ? 800 : 600} ${bold ? 13 : 12}px/1.2 sans-serif;
+    color: ${bold ? '#c0392b' : '#222'};
+    background: rgba(255,255,255,${bold ? 0.95 : 0.85});
     padding: 1px 4px;
     border-radius: 4px;
     white-space: nowrap;
     pointer-events: none;
+    ${bold ? 'box-shadow: 0 0 0 1.5px #ea5540;' : ''}
   `;
   el.appendChild(dot);
   if (label) el.appendChild(text);
@@ -249,6 +256,7 @@ export const useCragRoutePositionEditor = (
 ) => {
   const crag = useCragFeatureForRoutes();
   const { items, addItem, setCurrent, current } = useEditContext();
+  const { highlightedPhoto } = usePhotoHighlightContext();
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
 
@@ -276,11 +284,25 @@ export const useCragRoutePositionEditor = (
       .find(isValidLonLat);
   }, [crag, editableRoutes]);
 
-  // A signature that only changes when the *set* of routes (or their labels)
-  // changes — not on every position edit — so the marker layer isn't rebuilt
-  // (and popups closed) on each drag.
+  // Routes drawn on the currently highlighted photo — their markers render bold.
+  const boldRouteIds = useMemo(
+    () =>
+      new Set(
+        editableRoutes
+          .filter((route) => isRouteDrawnOnPhoto(route.tags, highlightedPhoto))
+          .map((route) => route.id),
+      ),
+    [editableRoutes, highlightedPhoto],
+  );
+
+  // A signature that only changes when the *set* of routes (or their labels,
+  // or which ones are bolded) changes — not on every position edit — so the
+  // marker layer isn't rebuilt (and popups closed) on each drag.
   const routesSignature = editableRoutes
-    .map((route) => `${route.id}:${route.name}:${route.grade}`)
+    .map(
+      (route) =>
+        `${route.id}:${route.name}:${route.grade}:${boldRouteIds.has(route.id) ? 1 : 0}`,
+    )
     .join('|');
 
   const [isGuideMode, setIsGuideMode] = useState(false);
@@ -607,6 +629,7 @@ export const useCragRoutePositionEditor = (
         route.id === current,
         showNames,
         showGrades,
+        boldRouteIds.has(route.id),
       );
       const candidatePosition = getEffectivePosition(route) ?? fallbackCenter;
       const initialPosition = isValidLonLat(candidatePosition)

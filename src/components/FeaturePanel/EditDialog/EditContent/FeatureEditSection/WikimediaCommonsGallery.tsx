@@ -5,6 +5,8 @@ import { useEditDialogContext } from '../../../helpers/EditDialogContext';
 import { useDragItems } from '../../../../utils/useDragItems';
 import { DragHandler } from '../../../../utils/DragHandler';
 import { moveElementToIndex } from '../../../Climbing/utils/array';
+import { photoNameKey } from '../../../Climbing/utils/photo';
+import { usePhotoHighlightContext } from '../../../Climbing/contexts/PhotoHighlightContext';
 import {
   applyWikimediaPhotoSlots,
   remappedFileKeysAfterSlots,
@@ -30,6 +32,8 @@ export const WikimediaCommonsGallery: React.FC<Props> = ({
 }) => {
   const { focusTag } = useEditDialogContext();
   const { tags, setTag, setTagsEntries } = useCurrentItem();
+  const { highlightedPhoto } = usePhotoHighlightContext();
+  const highlightedKey = highlightedPhoto && photoNameKey(highlightedPhoto);
 
   const applySlotsAndSyncKeys = (
     slotList: ReturnType<typeof slotsFromFileKeysOrder>,
@@ -70,6 +74,8 @@ export const WikimediaCommonsGallery: React.FC<Props> = ({
     <Stack spacing={2} mb={2}>
       {fileKeys.map((fileKey, index) => {
         const value = tags[fileKey] ?? '';
+        const rowKey = value ? photoNameKey(value) : null;
+        const highlighted = !!rowKey && rowKey === highlightedKey;
 
         return (
           <ItemContainer key={fileKey} style={{ width: '100%' }}>
@@ -87,6 +93,7 @@ export const WikimediaCommonsGallery: React.FC<Props> = ({
                 index={index}
                 value={value}
                 focusTag={focusTag}
+                highlighted={highlighted}
                 onValueChange={onValueChange}
                 onRemove={() => removeRow(index)}
                 dragHandle={

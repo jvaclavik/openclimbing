@@ -1,11 +1,15 @@
-import React from 'react';
 import styled from '@emotion/styled';
+import React from 'react';
 import {
   getImageDefId,
   ImageType,
 } from '../../../../services/images/getImageDefs';
 import { PathsSvg } from '../PathsSvg';
 
+import { css } from '@emotion/react';
+import { ImageDef, isTag } from '../../../../services/types';
+import { isMobileMode } from '../../../helpers';
+import { PANEL_GAP } from '../../../utils/PanelHelpers';
 import { HEIGHT } from '../helpers';
 import {
   ImageClickHandler,
@@ -14,12 +18,8 @@ import {
   useImgError,
   useImgSizeOnload,
 } from './helpers';
-import { PanoramaImg } from './PanoramaImg';
 import { InfoButton } from './InfoButton';
-import { ImageDef, isTag } from '../../../../services/types';
-import { isMobileMode } from '../../../helpers';
-import { css } from '@emotion/react';
-import { PANEL_GAP } from '../../../utils/PanelHelpers';
+import { PanoramaImg } from './PanoramaImg';
 
 const Img = styled.img<{ $hasPaths: boolean }>`
   margin-left: 50%;
@@ -45,12 +45,16 @@ const CROP_IMAGE_CSS = css`
   }
 `;
 
-const ImageWrapper = styled.div<{ $hasPaths: boolean }>`
+const ImageWrapper = styled.div<{ $hasPaths: boolean; $highlighted?: boolean }>`
   display: inline-block;
   position: relative;
   height: 238px;
   vertical-align: top;
   overflow: hidden;
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease;
+  border: solid 2px transparent;
+  ${({ $highlighted }) => $highlighted && `border: solid 2px #ea5540;`}
 
   margin-right: ${PANEL_GAP};
   &:first-of-type {
@@ -66,9 +70,18 @@ type Props = {
   image: ImageType;
   onClick: ImageClickHandler;
   alt?: string;
+  highlighted?: boolean;
+  wrapperRef?: React.Ref<HTMLDivElement>;
 };
 
-export const Image = ({ def, image, onClick, alt }: Props) => {
+export const Image = ({
+  def,
+  image,
+  onClick,
+  alt,
+  highlighted,
+  wrapperRef,
+}: Props) => {
   const { error, onError } = useImgError();
   const { imgRef, size, onLoad } = useImgSizeOnload();
 
@@ -82,7 +95,12 @@ export const Image = ({ def, image, onClick, alt }: Props) => {
   const isImageLoaded = size !== initialSize;
   const showInfo = image.panoramaUrl || isImageLoaded;
   return (
-    <ImageWrapper $hasPaths={hasPaths} onClick={onClick}>
+    <ImageWrapper
+      ref={wrapperRef}
+      $hasPaths={hasPaths}
+      $highlighted={highlighted}
+      onClick={onClick}
+    >
       {image.panoramaUrl ? (
         <PanoramaImg small={image.imageUrl} large={image.panoramaUrl} />
       ) : (
