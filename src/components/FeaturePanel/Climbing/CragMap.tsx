@@ -3,7 +3,9 @@ import maplibregl, { GeoJSONSource } from 'maplibre-gl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import styled from '@emotion/styled';
+import { useRouter } from 'next/router';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { getOsmappLink } from '../../../services/helpers';
 import type { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { CircularProgress, useTheme } from '@mui/material';
 import { useClimbingContext } from './contexts/ClimbingContext';
@@ -57,9 +59,17 @@ export const routes: LayerSpecification[] = [
         '#4150a0',
         ['coalesce', ['get', 'color'], '#ea5540'],
       ],
-      'circle-radius': 4,
-      'circle-stroke-color': '#f8f4f0',
-      'circle-stroke-width': 1,
+      // highlighted (route on the clicked photo) grows its coloured centre a bit
+      'circle-radius': ['case', ['boolean', ['get', 'bold'], false], 6, 4],
+      'circle-stroke-color': '#ffffff',
+      // routes drawn on the currently highlighted photo keep their difficulty
+      // colour and same-sized centre, but get a bigger white ring around them
+      'circle-stroke-width': [
+        'case',
+        ['boolean', ['get', 'bold'], false],
+        4,
+        1,
+      ],
     },
   } as LayerSpecification,
   {
@@ -101,7 +111,7 @@ type Props = {
   setIsMapVisible?: (visible: boolean) => void;
 };
 
-const useInitMap = ({ setIsMapVisible }: Props) => {
+const useInitMap = () => {
   const containerRef = useRef(null);
   const mapRef = useRef<maplibregl.Map>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
@@ -109,23 +119,29 @@ const useInitMap = ({ setIsMapVisible }: Props) => {
   const [isFirstMapLoad, setIsFirstMapLoad] = useState(true);
 
   const { feature } = useFeatureContext();
-  const { photoPaths, photoPath, setPhotoPath } = useClimbingContext();
-  const { highlightedPhoto } = usePhotoHighlightContext();
+  const { photoPaths } = useClimbingContext();
+  const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
+  const router = useRouter();
   const theme = useTheme();
   const themeMode = theme.palette.mode === 'dark' ? 'dark' : 'light';
 
   const photoExifs = useGetPhotoExifs(photoPaths);
 
+  // clicking a photo marker highlights that photo (marker + the routes drawn on
+  // it) and switches the photo opened in the climbing view, while keeping the
+  // map open instead of jumping back to the route list. Switching the photo
+  // goes through the URL (like scroll/route-selection) so the dialog's photo
+  // sync effect doesn't revert it.
   const onPhotoClick = useCallback(
     (photoName: string) => {
-      setPhotoPath(photoName);
-      setIsMapVisible?.(false);
+      togglePhoto(photoName);
+      router.replace(`${getOsmappLink(feature)}/climbing/photo/${photoName}`);
     },
-    [setPhotoPath, setIsMapVisible],
+    [togglePhoto, router, feature],
   );
 
   usePhotoMarkers(map, photoExifs, photoPaths ?? [], {
-    activePhoto: photoPath,
+    activePhoto: highlightedPhoto,
     onPhotoClick,
   });
 
@@ -245,8 +261,8 @@ export const transformMemberFeaturesToGeojson = (
   });
 };
 
-const CragMap = ({ setIsMapVisible }: Props) => {
-  const { containerRef, isMapLoaded } = useInitMap({ setIsMapVisible });
+const CragMap = (_props: Props) => {
+  const { containerRef, isMapLoaded } = useInitMap();
 
   return (
     <Container>

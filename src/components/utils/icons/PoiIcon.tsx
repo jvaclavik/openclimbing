@@ -9,9 +9,14 @@ import styled from '@emotion/styled';
 import { FeatureTags } from '../../../services/types';
 import { getPoiClass } from '../../../services/getPoiClass';
 
-const Container = styled.span`
+// Shared accent used to highlight a route (its line is drawn on the active
+// photo) across all surfaces — map dots, the route-number badge and this icon.
+export const ROUTE_HIGHLIGHT_COLOR = '#4150a0';
+
+const Container = styled.span<{ $highlighted?: boolean }>`
   margin-right: 6px;
-  font-size: 12px;
+  font-size: ${({ $highlighted }) => ($highlighted ? '19px' : '12px')};
+  transition: font-size 0.15s ease;
 `;
 
 const ClimbingAreaIcon = (props: { size: number }) => {
@@ -42,9 +47,13 @@ const ClimbingCragIcon = (props: { size: number }) => {
   );
 };
 
-const ClimbingRouteIcon = () => (
-  <Container>
-    <ShowChartIcon fontSize="inherit" color="secondary" />
+const ClimbingRouteIcon = ({ highlighted }: { highlighted?: boolean }) => (
+  <Container $highlighted={highlighted}>
+    <ShowChartIcon
+      fontSize="inherit"
+      color={highlighted ? undefined : 'secondary'}
+      sx={highlighted ? { color: ROUTE_HIGHLIGHT_COLOR } : undefined}
+    />
   </Container>
 );
 
@@ -55,6 +64,8 @@ type Props = {
   title?: string;
   middle?: boolean;
   themed?: boolean;
+  /** Emphasize a climbing route icon (e.g. its line is drawn on the highlighted photo). */
+  highlighted?: boolean;
 };
 
 export const PoiIcon = ({
@@ -64,6 +75,7 @@ export const PoiIcon = ({
   title,
   middle,
   themed,
+  highlighted,
 }: Props) => {
   const { currentTheme } = useUserThemeContext();
 
@@ -75,7 +87,7 @@ export const PoiIcon = ({
 
     if (isClimbingArea) return <ClimbingAreaIcon size={size} />;
     if (isClimbingCrag) return <ClimbingCragIcon size={size} />;
-    if (isClimbingRoute) return <ClimbingRouteIcon />;
+    if (isClimbingRoute) return <ClimbingRouteIcon highlighted={highlighted} />;
   }
 
   const finalIco = ico ? ico : getPoiClass(tags).class;
@@ -84,8 +96,13 @@ export const PoiIcon = ({
     <Maki
       ico={finalIco}
       invert={currentTheme === 'dark'}
-      size={size}
-      style={{ opacity: '0.3', position: 'relative', top: 3 }}
+      size={highlighted ? size + 4 : size}
+      style={{
+        opacity: highlighted ? '1' : '0.3',
+        position: 'relative',
+        top: 3,
+        transition: 'opacity 0.15s ease',
+      }}
       title={title}
       middle={middle}
       themed={themed}

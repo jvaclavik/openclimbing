@@ -21,9 +21,23 @@ export const routesPoints: LayerSpecification[] = [
         '#000',
         ['coalesce', ['get', 'color'], '#999'],
       ],
-      'circle-radius': linear(16, 1, 21, 6),
-      'circle-stroke-color': '#f8f4f0',
-      'circle-stroke-width': linear(16, 0.4, 21, 1.2),
+      // highlighted (route on the clicked photo) grows its coloured centre a bit
+      'circle-radius': linear(
+        16,
+        ['case', ['boolean', ['feature-state', 'highlighted'], false], 2, 1],
+        21,
+        ['case', ['boolean', ['feature-state', 'highlighted'], false], 8, 6],
+      ),
+      'circle-stroke-color': '#ffffff',
+      // routes drawn on the currently highlighted photo keep their difficulty
+      // colour and same-sized centre, but get a bigger white ring around them.
+      // zoom must stay top-level, so the highlighted `case` goes in the outputs
+      'circle-stroke-width': linear(
+        16,
+        ['case', ['boolean', ['feature-state', 'highlighted'], false], 2, 0.4],
+        21,
+        ['case', ['boolean', ['feature-state', 'highlighted'], false], 5, 1.2],
+      ),
     },
   },
   {
@@ -46,8 +60,18 @@ export const routesPoints: LayerSpecification[] = [
     },
     paint: {
       'text-halo-blur': 0.5,
-      'text-color': '#666',
-      'text-halo-width': 1,
+      'text-color': [
+        'case',
+        ['boolean', ['feature-state', 'highlighted'], false],
+        '#222',
+        '#666',
+      ],
+      'text-halo-width': [
+        'case',
+        ['boolean', ['feature-state', 'highlighted'], false],
+        2,
+        1,
+      ],
       'text-halo-color': '#ffffff',
     },
   },

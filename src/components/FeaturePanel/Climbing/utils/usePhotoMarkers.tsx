@@ -38,6 +38,8 @@ const createMarkerElement = (
 const DEFAULT_MIN_ZOOM = 17.5;
 // how long to hover a marker before its photo preview pops up
 const HOVER_DELAY_MS = 500;
+// horizontal gap (px) between markers that share the same GPS spot
+const SAME_SPOT_SPACING_PX = 30;
 
 type Options = {
   /** photo name (without `File:`) that should be rendered as active/highlighted */
@@ -133,30 +135,60 @@ export const usePhotoMarkers = (
     };
 
     const buildMarkers = () => {
+      // photos with GPS, in strip order
+      const withGps: Array<{
+        photoName: string;
+        number: number;
+        gps: NonNullable<ReturnType<typeof getPhotoGps>>;
+      }> = [];
       photoNames.forEach((photoName, i) => {
         const gps = getPhotoGps(exifByName[photoNameKey(photoName)]);
-        if (!gps) return;
+        if (gps) withGps.push({ photoName, number: i + 1, gps });
+      });
 
-        const number = i + 1;
-        const active =
-          !!activePhoto &&
-          photoNameKey(photoName) === photoNameKey(activePhoto);
+      // group photos taken from (nearly) the same spot so we can fan their
+      // markers out side by side — otherwise they overlap and only the top one
+      // is clickable
+      const groups = new Map<string, typeof withGps>();
+      withGps.forEach((entry) => {
+        const key = `${entry.gps.lng.toFixed(6)},${entry.gps.lat.toFixed(6)}`;
+        const group = groups.get(key) ?? [];
+        group.push(entry);
+        groups.set(key, group);
+      });
 
-        const element = createMarkerElement(
-          number,
-          gps.azimuth,
-          gps.fov,
-          active,
-          () => onPhotoClick?.(photoName),
-        );
-        if (!element) return;
+      groups.forEach((group) => {
+        group.forEach(({ photoName, number, gps }, posInGroup) => {
+          const active =
+            !!activePhoto &&
+            photoNameKey(photoName) === photoNameKey(activePhoto);
 
-        const lngLat = [gps.lng, gps.lat] as LngLatLike;
-        const marker = new maplibregl.Marker({ element, anchor: 'center' })
-          .setLngLat(lngLat)
-          .addTo(map);
-        addHoverPreview(element, photoName, lngLat);
-        markersRef.current.push(marker);
+          const element = createMarkerElement(
+            number,
+            gps.azimuth,
+            gps.fov,
+            active,
+            () => onPhotoClick?.(photoName),
+          );
+          if (!element) return;
+
+          // centre the fanned-out row on the shared spot (no offset when alone)
+          const offsetX =
+            group.length > 1
+              ? (posInGroup - (group.length - 1) / 2) * SAME_SPOT_SPACING_PX
+              : 0;
+
+          const lngLat = [gps.lng, gps.lat] as LngLatLike;
+          const marker = new maplibregl.Marker({
+            element,
+            anchor: 'center',
+            offset: [offsetX, 0],
+          })
+            .setLngLat(lngLat)
+            .addTo(map);
+          addHoverPreview(element, photoName, lngLat);
+          markersRef.current.push(marker);
+        });
       });
     };
 

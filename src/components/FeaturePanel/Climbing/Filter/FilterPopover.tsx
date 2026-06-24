@@ -1,4 +1,4 @@
-import { Backdrop, Button, Stack, Box, Typography } from '@mui/material';
+import { Button, Stack, Box, Typography } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import React from 'react';
 import { t, Translation } from '../../../../services/intl';
@@ -90,51 +90,39 @@ export const FilterPopover = ({
   const handleClose = () => setOpen(false);
 
   return (
-    <Backdrop
-      sx={(theme) => ({
-        color: '#fff',
-        zIndex: theme.zIndex.drawer + 1,
-        pointerEvents: 'all',
-      })}
-      open={open}
-      onClick={handleClose}
+    <PopperWithArrow
+      title={t('crag_filter.title')}
+      isOpen={open}
+      anchorEl={anchorEl}
+      placement={placement}
+      offset={offset}
+      sx={{ minWidth: 320, maxWidth: 360 }}
+      paperSx={GLASS_PAPER_SX}
+      addition={
+        <Stack direction="row" gap={1} alignItems="center">
+          {!isDefaultFilter && <ResetButton onClick={reset} />}
+          <DoneButton onClick={handleClose} />
+        </Stack>
+      }
     >
-      <Box onClick={(e) => e.stopPropagation()}>
-        <PopperWithArrow
-          title={t('crag_filter.title')}
-          isOpen={open}
-          anchorEl={anchorEl}
-          placement={placement}
-          offset={offset}
-          sx={{ minWidth: 320, maxWidth: 360 }}
-          paperSx={GLASS_PAPER_SX}
-          addition={
-            <Stack direction="row" gap={1} alignItems="center">
-              {!isDefaultFilter && <ResetButton onClick={reset} />}
-              <DoneButton onClick={handleClose} />
-            </Stack>
-          }
-        >
-          <Box>
-            <ClimbingTypeFilter />
-            {showRockFilters && (
-              <>
-                <GradeFilter />
-                <MinimumRoutesFilter />
-              </>
-            )}
-            {showAdvancedFilters && (
-              <AdvancedFilters
-                showClimbingType={showRockFilters}
-                showInclination={showRockFilters}
-                showMaterial={showRockFilters}
-                showFamilyFriendly={showFamilyFriendly}
-              />
-            )}
-            <ZoomWarning />
-          </Box>
-        </PopperWithArrow>
+      <Box>
+        <ClimbingTypeFilter />
+        {showRockFilters && (
+          <>
+            <GradeFilter />
+            <MinimumRoutesFilter />
+          </>
+        )}
+        {showAdvancedFilters && (
+          <AdvancedFilters
+            showClimbingType={showRockFilters}
+            showInclination={showRockFilters}
+            showMaterial={showRockFilters}
+            showFamilyFriendly={showFamilyFriendly}
+          />
+        )}
+        <ZoomWarning />
       </Box>
-    </Backdrop>
+    </PopperWithArrow>
   );
 };

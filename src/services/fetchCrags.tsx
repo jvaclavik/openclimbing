@@ -15,7 +15,7 @@ import { join, publishDbgObject } from '../utils';
 
 // inspired by overpassSearch - but this computes all geometries (doesnt fetch them by 'geom' modifier)
 
-const convertOsmIdToMapId = (apiId: OsmId) => {
+export const convertOsmIdToMapId = (apiId: OsmId) => {
   const osmToMapType = { node: 0, way: 1, relation: 4 };
   return parseInt(`${apiId.id}${osmToMapType[apiId.type]}`, 10);
 };

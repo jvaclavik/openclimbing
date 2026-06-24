@@ -68,6 +68,14 @@ const BottomRight = styled.div`
   z-index: 998;
 `;
 
+// Keep the filter / shadow buttons above the (desktop, persistent) layer
+// switcher drawer paper so they stay visible and clickable over the sidebar.
+const ControlAboveDrawer = styled.div`
+  position: relative;
+  z-index: 1300;
+  display: inline-flex;
+`;
+
 const BugReportButton = () => (
   <Button size="small">
     <BugReport width="10" height="10" />
@@ -105,8 +113,14 @@ const Map = () => {
       </BottomLeft>
       <BottomRight>
         <Stack direction="row" alignItems="center" gap={1}>
-          {hasClimbingLayer && <MapFilter />}
-          <SunShadow />
+          {hasClimbingLayer && (
+            <ControlAboveDrawer>
+              <MapFilter />
+            </ControlAboveDrawer>
+          )}
+          <ControlAboveDrawer>
+            <SunShadow />
+          </ControlAboveDrawer>
           <LayerSwitcherDynamic />
         </Stack>
       </BottomRight>

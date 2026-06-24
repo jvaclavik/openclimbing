@@ -1,9 +1,17 @@
 import React, { useEffect } from 'react';
+import styled from '@emotion/styled';
 import { SwipeableDrawer, useMediaQuery } from '@mui/material';
 import { isDesktop, useBoolState } from '../helpers';
 import { LayerSwitcherButton } from './LayerSwitcherButton';
 import { LayerSwitcherContent } from './LayerSwitcherContent';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
+
+// Keep the toggle button above the (desktop, persistent) drawer paper so it
+// stays visible and clickable to close the sidebar again.
+const ButtonAboveDrawer = styled.div`
+  position: relative;
+  z-index: 1300;
+`;
 
 export const useLayerSwitcherShortcuts = (onClose: () => void) => {
   useEffect(() => {
@@ -28,7 +36,12 @@ const LayerSwitcher = () => {
 
   return (
     <div>
-      <LayerSwitcherButton onClick={opened ? close : open} isOpened={opened} />
+      <ButtonAboveDrawer>
+        <LayerSwitcherButton
+          onClick={opened ? close : open}
+          isOpened={opened}
+        />
+      </ButtonAboveDrawer>
       <SwipeableDrawer
         anchor="right"
         open={opened}
