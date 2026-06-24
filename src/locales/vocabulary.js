@@ -75,6 +75,12 @@ export default {
   'leaderboard.empty': 'No ranked activity in this period yet.',
   'leaderboard.load_error': 'Could not load the leaderboard.',
 
+  'add_new_crag.menu_link': 'Add new crag',
+  'add_new_crag.banner_text':
+    'Move the marker to the position of the crag, routes can be added later.',
+  'add_new_crag.continue_button': 'Continue',
+  'add_new_crag.zoom_in': 'Please zoom in to add a crag.',
+
   'user_settings.general': 'General',
   'user_settings.show_weather_widget': 'Show the weather widget',
   'user_settings.climbing': 'Climbing',
