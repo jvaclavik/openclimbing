@@ -71,8 +71,7 @@ export default {
   'leaderboard.load_error': 'Die Rangliste konnte nicht geladen werden.',
 
   'add_new_crag.menu_link': 'Neuen Fels hinzufügen',
-  'add_new_crag.banner_text':
-    'Verschiebe den Marker auf die Position des Felsens, Routen können später hinzugefügt werden.',
+  'add_new_crag.banner_text': 'Verschiebe den Marker auf die Position des Felsens, Routen können später hinzugefügt werden.',
   'add_new_crag.continue_button': 'Weiter',
   'add_new_crag.zoom_in': 'Bitte zoome heran, um einen Fels hinzuzufügen.',
 

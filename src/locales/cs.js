@@ -175,8 +175,7 @@ export default {
   'leaderboard.load_error': 'Žebříček se nepodařilo načíst.',
 
   'add_new_crag.menu_link': 'Přidat novou skálu',
-  'add_new_crag.banner_text':
-    'Posuňte marker na pozici skály, cesty lze přidat později.',
+  'add_new_crag.banner_text': 'Posuňte marker na pozici skály, cesty lze přidat později.',
   'add_new_crag.continue_button': 'Pokračovat',
   'add_new_crag.zoom_in': 'Prosím, zazoomujte pro přidání skály.',
 
