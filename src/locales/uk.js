@@ -69,6 +69,13 @@ export default {
   'leaderboard.column_ticks': 'Проходження',
   'leaderboard.empty': 'Поки що немає врахованої активності за цей період.',
   'leaderboard.load_error': 'Не вдалося завантажити рейтинг.',
+
+  'add_new_crag.menu_link': 'Додати нову скелю',
+  'add_new_crag.banner_text':
+    'Перемістіть маркер на позицію скелі, маршрути можна додати пізніше.',
+  'add_new_crag.continue_button': 'Продовжити',
+  'add_new_crag.zoom_in': 'Будь ласка, збільшіть масштаб, щоб додати скелю.',
+
   'user_settings.general': 'Загальні',
   'user_settings.show_weather_widget': 'Показувати віджет погоди',
   'user_settings.climbing': 'Лазіння',
