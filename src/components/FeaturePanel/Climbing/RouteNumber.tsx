@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 
 import { Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { ROUTE_HIGHLIGHT_COLOR } from '../../utils/icons/PoiIcon';
 
 const Container = styled.div`
   position: relative;
@@ -16,6 +17,7 @@ const TickCheckContainer = styled.div`
 
 const Circle = styled.div<{
   $hasCircle: boolean;
+  $highlighted?: boolean;
 }>`
   width: 20px;
   height: 20px;
@@ -29,6 +31,10 @@ const Circle = styled.div<{
   justify-content: center;
   align-items: center;
   font-size: 12px;
+  transition: all 0.15s ease;
+  transform: ${({ $highlighted }) => ($highlighted ? 'scale(1.25)' : 'none')};
+  box-shadow: ${({ $highlighted }) =>
+    $highlighted ? `0 0 0 3px ${ROUTE_HIGHLIGHT_COLOR}` : 'none'};
 `;
 
 export const RouteNumber = ({
@@ -36,6 +42,7 @@ export const RouteNumber = ({
   hasCircle = false,
   hasTick = false,
   hasTooltip = true,
+  highlighted = false,
 }) => {
   const getTitle = () => {
     if (hasTick) {
@@ -50,7 +57,9 @@ export const RouteNumber = ({
   return (
     <Tooltip arrow title={hasTooltip ? getTitle() : null}>
       <Container>
-        <Circle $hasCircle={hasCircle}>{children}</Circle>
+        <Circle $hasCircle={hasCircle} $highlighted={highlighted}>
+          {children}
+        </Circle>
         {hasTick && (
           <TickCheckContainer>
             <CheckCircleIcon color="success" fontSize="inherit" />

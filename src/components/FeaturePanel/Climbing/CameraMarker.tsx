@@ -15,15 +15,17 @@ const ACCENT = '#ea5540';
 
 const CENTER = 24;
 const FUNNEL_RADIUS = 30;
+// the active photo's funnel reaches further, hinting at a longer focal length
+const ACTIVE_FUNNEL_RADIUS = 52;
 // fallback opening angle when the focal length is missing from EXIF
 const DEFAULT_FOV = 55;
 
 // point on the funnel arc for a compass bearing (deg, clockwise from north)
-const arcPoint = (bearingDeg: number) => {
+const arcPoint = (bearingDeg: number, radius: number) => {
   const rad = (bearingDeg * Math.PI) / 180;
   return {
-    x: CENTER + FUNNEL_RADIUS * Math.sin(rad),
-    y: CENTER - FUNNEL_RADIUS * Math.cos(rad),
+    x: CENTER + radius * Math.sin(rad),
+    y: CENTER - radius * Math.cos(rad),
   };
 };
 
@@ -43,11 +45,12 @@ export const CameraMarker = ({
   // funnel is a circular sector centred on the azimuth, opened by the FOV;
   // a narrower wedge = longer lens / tighter shot, wider = wide-angle.
   const halfFov = (fov && fov > 0 ? fov : DEFAULT_FOV) / 2;
-  const left = arcPoint(azimuth - halfFov);
-  const right = arcPoint(azimuth + halfFov);
+  const funnelRadius = active ? ACTIVE_FUNNEL_RADIUS : FUNNEL_RADIUS;
+  const left = arcPoint(azimuth - halfFov, funnelRadius);
+  const right = arcPoint(azimuth + halfFov, funnelRadius);
   const funnelPath = `M ${CENTER} ${CENTER} L ${left.x.toFixed(2)} ${left.y.toFixed(
     2,
-  )} A ${FUNNEL_RADIUS} ${FUNNEL_RADIUS} 0 0 1 ${right.x.toFixed(2)} ${right.y.toFixed(
+  )} A ${funnelRadius} ${funnelRadius} 0 0 1 ${right.x.toFixed(2)} ${right.y.toFixed(
     2,
   )} Z`;
 

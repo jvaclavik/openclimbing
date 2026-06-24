@@ -134,7 +134,9 @@ const buildRouteMarkerElement = (
     cursor: pointer;
     transform: translateX(6px);
   `;
-  const size = isCurrent ? 24 : 18;
+  // the highlight (route drawn on the active photo) grows the coloured centre
+  // a bit and adds a bigger white ring, consistent with the other maps
+  const size = isCurrent ? 24 : bold ? 22 : 18;
   const dot = document.createElement('div');
   dot.className = 'crag-route-dot';
   dot.style.cssText = `
@@ -142,7 +144,13 @@ const buildRouteMarkerElement = (
     height: ${size}px;
     border-radius: 50%;
     background: ${color};
-    border: ${isCurrent ? '3px solid #4150a0' : '2px solid #f8f4f0'};
+    border: ${
+      isCurrent
+        ? '3px solid #4150a0'
+        : bold
+          ? '5px solid #ffffff'
+          : '2px solid #f8f4f0'
+    };
     box-shadow: 0 0 0 1px rgba(0,0,0,0.35)${
       isCurrent ? ', 0 0 0 4px rgba(65,80,160,0.35)' : ''
     };

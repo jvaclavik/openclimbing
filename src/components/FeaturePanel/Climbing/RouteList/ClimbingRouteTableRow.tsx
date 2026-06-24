@@ -36,7 +36,11 @@ import { ClimbingBadges } from '../ClimbingBadges';
 import { ConvertedRouteDifficultyBadge } from '../ConvertedRouteDifficultyBadge';
 import { RouteNumber } from '../RouteNumber';
 import { useMoreMenu } from '../useMoreMenu';
-import { getWikimediaCommonsPhotoPathKeys } from '../utils/photo';
+import {
+  getWikimediaCommonsPhotoPathKeys,
+  isRouteDrawnOnPhoto,
+} from '../utils/photo';
+import { usePhotoHighlightContext } from '../contexts/PhotoHighlightContext';
 
 const Container = styled.div`
   width: 100%;
@@ -287,11 +291,19 @@ const RouteAuthor = ({ feature }: { feature: Feature }) =>
     <RouteAuthorContainer>{feature.tags?.author}</RouteAuthorContainer>
   ) : null;
 
-const RouteName = (props: { feature: Feature; selected: boolean }) => {
+const RouteName = (props: {
+  feature: Feature;
+  selected: boolean;
+  highlighted?: boolean;
+}) => {
   const isMobileMode = useMobileMode();
   return (
     <RouteNameContainer>
-      <Typography variant="inherit" component="h3">
+      <Typography
+        variant="inherit"
+        component="h3"
+        fontWeight={props.highlighted ? 700 : undefined}
+      >
         {props.feature.tags?.name}
       </Typography>
       <ClimbingBadges feature={props.feature} />
@@ -335,12 +347,17 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
   ) => {
     const { isTicked } = useTicksContext();
     const { climbingFilter } = useUserSettingsContext();
+    const { highlightedPhoto } = usePhotoHighlightContext();
     const { gradeInterval } = climbingFilter;
     const [minIndex, maxIndex] = gradeInterval;
     if (!feature) {
       return null;
     }
 
+    const isDrawnOnHighlightedPhoto = isRouteDrawnOnPhoto(
+      feature.tags,
+      highlightedPhoto,
+    );
     const photoPathsCount = getWikimediaCommonsPhotoPathKeys(
       feature.tags,
     ).length;
@@ -368,13 +385,21 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
             locale={isHrefLinkVisible ? intl.lang : undefined}
           >
             <RouteNumberContainer>
-              <RouteNumber hasCircle={photoPathsCount > 0} hasTick={hasTick}>
+              <RouteNumber
+                hasCircle={photoPathsCount > 0}
+                hasTick={hasTick}
+                highlighted={isDrawnOnHighlightedPhoto}
+              >
                 {index + 1}
               </RouteNumber>
             </RouteNumberContainer>
             <NameColumn justifyContent="stretch" flex={1}>
               <Stack direction="row" gap={1}>
-                <RouteName feature={feature} selected={isSelected} />
+                <RouteName
+                  feature={feature}
+                  selected={isSelected}
+                  highlighted={isDrawnOnHighlightedPhoto}
+                />
                 <RouteListBadges shortId={shortId} />
               </Stack>
               <RouteDescription feature={feature} />

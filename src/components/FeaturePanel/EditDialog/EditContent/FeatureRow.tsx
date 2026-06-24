@@ -20,6 +20,8 @@ import { isDesktop } from '../../../helpers';
 import { findInItems } from '../context/utils';
 import { getDifficulties } from '../../../../services/tagging/climbing/routeGrade';
 import { ConvertedRouteDifficultyBadge } from '../../Climbing/ConvertedRouteDifficultyBadge';
+import { usePhotoHighlightContext } from '../../Climbing/contexts/PhotoHighlightContext';
+import { isRouteDrawnOnPhoto } from '../../Climbing/utils/photo';
 
 const StyledListItem = styled(ListItem)`
   &:hover {
@@ -45,7 +47,7 @@ const StyledPresetLabel = styled(Typography)`
   }
 `;
 
-const getLabel = (dataItem: EditDataItem) => {
+const getLabel = (dataItem: EditDataItem, highlighted?: boolean) => {
   if (dataItem) {
     const hasGrade = dataItem.tagsEntries.find(([k]) =>
       k.startsWith('climbing:grade:'),
@@ -61,7 +63,9 @@ const getLabel = (dataItem: EditDataItem) => {
         mr={1}
       >
         <Stack direction="column">
-          <Typography>{dataItem.tags.name} </Typography>
+          <Typography fontWeight={highlighted ? 700 : undefined}>
+            {dataItem.tags.name}{' '}
+          </Typography>
           <StyledPresetLabel color="secondary" variant="caption">
             {dataItem.presetLabel}
           </StyledPresetLabel>
@@ -77,13 +81,20 @@ const getLabel = (dataItem: EditDataItem) => {
   return undefined;
 };
 
-const PoiIconForItem = ({ dataItem }: { dataItem: EditDataItem }) =>
+const PoiIconForItem = ({
+  dataItem,
+  highlighted,
+}: {
+  dataItem: EditDataItem;
+  highlighted?: boolean;
+}) =>
   dataItem ? (
     <PoiIcon
       tags={allPresets[dataItem.presetKey]?.tags}
       size={16}
       middle
       themed
+      highlighted={highlighted}
     />
   ) : (
     <StyledDownloadIcon color="secondary" />
@@ -104,7 +115,10 @@ export const FeatureRow = ({
 }: Props) => {
   const { isLoading, startLoading, stopLoading } = useLoadingState();
   const { items } = useEditContext();
+  const { highlightedPhoto } = usePhotoHighlightContext();
   const dataItem = findInItems(items, shortId);
+  const highlighted =
+    !!dataItem && isRouteDrawnOnPhoto(dataItem.tags, highlightedPhoto);
   const handleClick = (e: React.MouseEvent) => {
     startLoading();
     onClick(e).then(() => {
@@ -123,8 +137,8 @@ export const FeatureRow = ({
         >
           <ListItemText>
             <Stack direction="row" gap={2} alignItems="center">
-              <PoiIconForItem dataItem={dataItem} />
-              {getLabel(dataItem) || originalLabel || shortId}
+              <PoiIconForItem dataItem={dataItem} highlighted={highlighted} />
+              {getLabel(dataItem, highlighted) || originalLabel || shortId}
               <NwrIcon shortId={shortId} hideNode />
               {role && (
                 <>

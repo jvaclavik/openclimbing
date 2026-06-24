@@ -57,9 +57,17 @@ export const routes: LayerSpecification[] = [
         '#4150a0',
         ['coalesce', ['get', 'color'], '#ea5540'],
       ],
-      'circle-radius': 4,
-      'circle-stroke-color': '#f8f4f0',
-      'circle-stroke-width': 1,
+      // highlighted (route on the clicked photo) grows its coloured centre a bit
+      'circle-radius': ['case', ['boolean', ['get', 'bold'], false], 6, 4],
+      'circle-stroke-color': '#ffffff',
+      // routes drawn on the currently highlighted photo keep their difficulty
+      // colour and same-sized centre, but get a bigger white ring around them
+      'circle-stroke-width': [
+        'case',
+        ['boolean', ['get', 'bold'], false],
+        4,
+        1,
+      ],
     },
   } as LayerSpecification,
   {
