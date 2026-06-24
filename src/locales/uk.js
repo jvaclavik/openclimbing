@@ -71,7 +71,7 @@ export default {
   'leaderboard.load_error': 'Не вдалося завантажити рейтинг.',
 
   'add_new_crag.menu_link': 'Додати нову скелю',
-  'add_new_crag.banner_text': 'Перемістіть маркер на позицію скелі, маршрути можна додати пізніше.',
+  'add_new_crag.banner_text': 'Перемістіть маркер на позицію скелі, маршрути можна додати на наступному кроці.',
   'add_new_crag.continue_button': 'Продовжити',
   'add_new_crag.zoom_in': 'Будь ласка, збільшіть масштаб, щоб додати скелю.',
 

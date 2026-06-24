@@ -76,7 +76,7 @@ export default {
   'leaderboard.load_error': 'Could not load the leaderboard.',
 
   'add_new_crag.menu_link': 'Add new crag',
-  'add_new_crag.banner_text': 'Move the marker to the position of the crag, routes can be added later.',
+  'add_new_crag.banner_text': 'Move the marker to the position of the crag, routes can be added in the next step.',
   'add_new_crag.continue_button': 'Continue',
   'add_new_crag.zoom_in': 'Please zoom in to add a crag.',
 

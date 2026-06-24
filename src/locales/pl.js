@@ -70,7 +70,7 @@ export default {
   'leaderboard.load_error': 'Nie udało się wczytać rankingu.',
 
   'add_new_crag.menu_link': 'Dodaj nową skałę',
-  'add_new_crag.banner_text': 'Przesuń znacznik na pozycję skały, drogi można dodać później.',
+  'add_new_crag.banner_text': 'Przesuń znacznik na pozycję skały, drogi można dodać w następnym kroku.',
   'add_new_crag.continue_button': 'Kontynuuj',
   'add_new_crag.zoom_in': 'Przybliż mapę, aby dodać skałę.',
 
