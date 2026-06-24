@@ -71,7 +71,7 @@ const EditDialogFetcher = () => {
 
     (async () => {
       if (feature.osmMeta.id < 0) {
-        const newItem = getNewNodeItem(feature.center);
+        const newItem = getNewNodeItem(feature.center, feature.tags);
         addItem(newItem);
         setCurrent(newItem.shortId);
       } else {

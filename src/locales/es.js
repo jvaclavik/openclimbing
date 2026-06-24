@@ -69,6 +69,12 @@ export default {
   'leaderboard.column_ticks': 'Ascensiones',
   'leaderboard.empty': 'Aún no hay actividad clasificada en este periodo.',
   'leaderboard.load_error': 'No se pudo cargar la clasificación.',
+
+  'add_new_crag.menu_link': 'Añadir nueva roca',
+  'add_new_crag.banner_text': 'Mueve el marcador a la posición de la roca, las vías se pueden añadir en el siguiente paso.',
+  'add_new_crag.continue_button': 'Continuar',
+  'add_new_crag.zoom_in': 'Por favor, acércate para añadir una roca.',
+
   'user_settings.general': 'General',
   'user_settings.show_weather_widget': 'Mostrar el widget del tiempo',
   'user_settings.climbing': 'Escalada',

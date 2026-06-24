@@ -174,6 +174,11 @@ export default {
   'leaderboard.empty': 'V tomto období zatím nikdo nezískal body.',
   'leaderboard.load_error': 'Žebříček se nepodařilo načíst.',
 
+  'add_new_crag.menu_link': 'Přidat novou skálu',
+  'add_new_crag.banner_text': 'Posuňte marker na pozici skály, cesty lze přidat v dalším kroku.',
+  'add_new_crag.continue_button': 'Pokračovat',
+  'add_new_crag.zoom_in': 'Prosím, zazoomujte pro přidání skály.',
+
   'my_ticks.route_points': 'Body',
 
   'tick_scoring.page_title': 'Bodování přelezů',

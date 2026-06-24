@@ -123,4 +123,9 @@ export default {
   'layers.maptilerSat': 'Maptiler ሳተላይት (z<14)',
   'layers.bingSat': 'Bing ሳተላይት',
   'layers.bike': 'ሳይክል',
+
+  'add_new_crag.menu_link': 'አዲስ ቋጥኝ ጨምር',
+  'add_new_crag.banner_text': 'ምልክቱን ወደ ቋጥኙ ቦታ ያንቀሳቅሱ፣ መንገዶች በሚቀጥለው ደረጃ ሊጨመሩ ይችላሉ።',
+  'add_new_crag.continue_button': 'ቀጥል',
+  'add_new_crag.zoom_in': 'እባክዎ ቋጥኝ ለማስቀመጥ ካርታውን አቅርቡ።',
 };

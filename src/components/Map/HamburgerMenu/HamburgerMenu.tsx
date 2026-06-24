@@ -35,6 +35,7 @@ import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import { MyListsSection } from './MyListsSection';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import ContrastIcon from '@mui/icons-material/Contrast';
+import { AddNewCragMenuItem } from './AddNewCrag/AddNewCragMenuItem';
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
@@ -194,7 +195,10 @@ export const HamburgerMenu = () => {
                 <ClimbingGradesTableLink closeMenu={close} />
                 <TickScoringLink closeMenu={close} />
                 {isOpenClimbing && (
-                  <ClimbingLeaderboardLink closeMenu={close} />
+                  <>
+                    <ClimbingLeaderboardLink closeMenu={close} />
+                    <AddNewCragMenuItem closeMenu={close} />
+                  </>
                 )}
               </>
             )}

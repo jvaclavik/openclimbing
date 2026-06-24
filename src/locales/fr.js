@@ -69,6 +69,12 @@ export default {
   'leaderboard.column_ticks': 'Croix',
   'leaderboard.empty': "Aucune activité classée pour cette période pour l'instant.",
   'leaderboard.load_error': 'Impossible de charger le classement.',
+
+  'add_new_crag.menu_link': 'Ajouter un nouveau site',
+  'add_new_crag.banner_text': "Déplacez le marqueur sur la position du site, les voies peuvent être ajoutées à l'étape suivante.",
+  'add_new_crag.continue_button': 'Continuer',
+  'add_new_crag.zoom_in': "Veuillez zoomer pour ajouter un site d'escalade.",
+
   'user_settings.general': 'Général',
   'user_settings.show_weather_widget': 'Afficher le widget météo',
   'user_settings.climbing': 'Escalade',

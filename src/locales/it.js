@@ -69,6 +69,12 @@ export default {
   'leaderboard.column_ticks': 'Vie',
   'leaderboard.empty': 'Nessuna attività classificata in questo periodo.',
   'leaderboard.load_error': 'Impossibile caricare la classifica.',
+
+  'add_new_crag.menu_link': 'Aggiungi nuova falesia',
+  'add_new_crag.banner_text': 'Sposta il marcatore sulla posizione della falesia, le vie possono essere aggiunte nel passaggio successivo.',
+  'add_new_crag.continue_button': 'Continua',
+  'add_new_crag.zoom_in': 'Per favore, ingrandisci per aggiungere una falesia.',
+
   'user_settings.general': 'Generale',
   'user_settings.show_weather_widget': 'Mostra il widget meteo',
   'user_settings.climbing': 'Arrampicata',

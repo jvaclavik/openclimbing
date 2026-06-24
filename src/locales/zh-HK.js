@@ -556,4 +556,9 @@ export default {
 
   yes: '係',
   no: '唔係',
+
+  'add_new_crag.menu_link': '新增岩場',
+  'add_new_crag.banner_text': '將標記移到岩場位置，路線可以喺下一步新增。',
+  'add_new_crag.continue_button': '繼續',
+  'add_new_crag.zoom_in': '請放大地圖以新增岩場。',
 };
