@@ -3,7 +3,9 @@ import maplibregl, { GeoJSONSource } from 'maplibre-gl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import styled from '@emotion/styled';
+import { useRouter } from 'next/router';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { getOsmappLink } from '../../../services/helpers';
 import type { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { CircularProgress, useTheme } from '@mui/material';
 import { useClimbingContext } from './contexts/ClimbingContext';
@@ -119,18 +121,23 @@ const useInitMap = () => {
   const { feature } = useFeatureContext();
   const { photoPaths } = useClimbingContext();
   const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
+  const router = useRouter();
   const theme = useTheme();
   const themeMode = theme.palette.mode === 'dark' ? 'dark' : 'light';
 
   const photoExifs = useGetPhotoExifs(photoPaths);
 
   // clicking a photo marker highlights that photo (marker + the routes drawn on
-  // it) and keeps the map open, instead of jumping back to the route list
+  // it) and switches the photo opened in the climbing view, while keeping the
+  // map open instead of jumping back to the route list. Switching the photo
+  // goes through the URL (like scroll/route-selection) so the dialog's photo
+  // sync effect doesn't revert it.
   const onPhotoClick = useCallback(
     (photoName: string) => {
       togglePhoto(photoName);
+      router.replace(`${getOsmappLink(feature)}/climbing/photo/${photoName}`);
     },
-    [togglePhoto],
+    [togglePhoto, router, feature],
   );
 
   usePhotoMarkers(map, photoExifs, photoPaths ?? [], {

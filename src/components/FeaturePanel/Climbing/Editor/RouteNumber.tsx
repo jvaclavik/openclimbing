@@ -7,7 +7,10 @@ import { useTicksContext } from '../../../utils/TicksContext';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { getShiftForStartPoint } from '../utils/startPoint';
-import { useRouteNumberColors } from '../utils/useRouteNumberColors';
+import {
+  getDifficulty,
+  getDifficultyColor,
+} from '../../../../services/tagging/climbing/routeGrade';
 import { RouteDifficulty } from './RouteDifficulty';
 
 const Text = styled.text<{ $scale: number }>`
@@ -46,10 +49,12 @@ type Props = {
   x: number;
   y: number;
   shortId: string;
+  color: string;
 };
 
-const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
+const RouteNumberBadge = ({ routeIndex, x, y, shortId, color }: Props) => {
   const { isTicked } = useTicksContext();
+  const theme = useTheme();
   const isMobileMode = useMobileMode();
   const {
     photoZoom,
@@ -60,12 +65,12 @@ const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
     setRouteIndexHovered,
   } = useClimbingContext();
   const digits = String(routeIndex).length;
-  const RECT_WIDTH = ((digits > 2 ? digits : 0) * 3 + 18) / photoZoom.scale;
-  const RECT_HEIGHT = 18 / photoZoom.scale;
+  const RECT_WIDTH = ((digits > 2 ? digits : 0) * 3 + 20) / photoZoom.scale;
+  const RECT_HEIGHT = 20 / photoZoom.scale;
   const RECT_Y_OFFSET = 8 / photoZoom.scale;
-  const OUTLINE_WIDTH = 2 / photoZoom.scale;
+  const OUTLINE_WIDTH = 1 / photoZoom.scale;
   const HOVER_WIDTH = 10 / photoZoom.scale;
-  const TEXT_Y_SHIFT = 13 / photoZoom.scale;
+  const TEXT_Y_SHIFT = 14 / photoZoom.scale;
 
   const onMouseEnter = isMobileMode
     ? undefined
@@ -99,11 +104,15 @@ const RouteNumberBadge = ({ routeIndex, x, y, shortId }: Props) => {
     onMouseLeave,
   };
   const isSelected = isRouteSelected(routeIndex);
+  const isActive = isSelected || routeIndexHovered === routeIndex;
 
-  const colors = useRouteNumberColors({
-    isSelected: isSelected || routeIndexHovered === routeIndex,
-    hasPathOnThisPhoto: true,
-  });
+  // Match the position-editor markers: a difficulty-coloured circle with a
+  // white border (accent border when selected/hovered) and a white number.
+  const colors = {
+    background: color,
+    text: theme.palette.getContrastText(color),
+    border: isActive ? '#4150a0' : theme.palette.getContrastText(color),
+  };
 
   return (
     <>
@@ -162,10 +171,16 @@ export const RouteNumber = ({ routeIndex }: { routeIndex: number }) => {
     imageSize,
   } = useClimbingContext();
   const { userSettings } = useUserSettingsContext();
+  const theme = useTheme();
 
   const route = routes[routeIndex];
   const path = getPathForRoute(route);
   if (!route || !path || path?.length === 0) return null;
+
+  const difficultyColor = getDifficultyColor(
+    getDifficulty(route.feature?.tags),
+    theme.palette.mode === 'dark' ? 'dark' : 'light',
+  );
 
   const { x, y } = getPixelPosition({
     ...path[0],
@@ -216,7 +231,7 @@ export const RouteNumber = ({ routeIndex }: { routeIndex: number }) => {
     : null;
 
   const digits = String(routeIndex).length;
-  const rectWidth = ((digits > 2 ? digits : 0) * 3 + 18) / photoZoom.scale;
+  const rectWidth = ((digits > 2 ? digits : 0) * 3 + 20) / photoZoom.scale;
   const gradeGap = 6 / photoZoom.scale;
   const gradeHalfWidth = 20 / photoZoom.scale;
 
@@ -239,8 +254,8 @@ export const RouteNumber = ({ routeIndex }: { routeIndex: number }) => {
   // Compute the combined badge + grade bounding box and shift everything by a
   // single delta if it spills off any image edge. This keeps the badge and its
   // grade visually attached even when their start point sits near the corner.
-  const outlinePad = 2 / photoZoom.scale;
-  const rectHeight = 18 / photoZoom.scale;
+  const outlinePad = 1 / photoZoom.scale;
+  const rectHeight = 20 / photoZoom.scale;
   const rectYOffset = 8 / photoZoom.scale;
   const gradeFullWidth = 40 / photoZoom.scale;
   const gradeAscent = 11 / photoZoom.scale;
@@ -286,6 +301,7 @@ export const RouteNumber = ({ routeIndex }: { routeIndex: number }) => {
         x={badgeX}
         y={badgeY}
         shortId={shortId}
+        color={difficultyColor}
       />
       {gradesVisible && (
         <RouteDifficulty

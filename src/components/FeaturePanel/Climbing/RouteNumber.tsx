@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 
 import { Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { ROUTE_HIGHLIGHT_COLOR } from '../../utils/icons/PoiIcon';
 
 const Container = styled.div`
   position: relative;
@@ -15,34 +14,47 @@ const TickCheckContainer = styled.div`
   font-size: 12px;
 `;
 
+// Matches the route markers in the position editor / on the photo: a circle
+// filled with the route's difficulty colour, a white border, and the order
+// number inside. `$color` is the difficulty colour (falls back to grey when the
+// route has no grade).
 const Circle = styled.div<{
-  $hasCircle: boolean;
+  $color?: string;
   $highlighted?: boolean;
 }>`
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
   border-radius: 50%;
-  background: ${({ theme, $hasCircle }) =>
-    $hasCircle ? theme.palette.climbing.primary : undefined};
-  color: ${({ theme, $hasCircle }) =>
-    $hasCircle ? theme.palette.climbing.secondary : '#999'};
+  box-sizing: border-box;
+  background: ${({ $color }) => $color ?? '#555'};
+  color: ${({ theme, $color }) =>
+    theme.palette.getContrastText($color ?? '#555')};
+  border: 1px solid
+    ${({ theme, $color }) => theme.palette.getContrastText($color ?? '#555')};
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 12px;
+  font-weight: 700;
   transition: all 0.15s ease;
   transform: ${({ $highlighted }) => ($highlighted ? 'scale(1.25)' : 'none')};
-  box-shadow: ${({ $highlighted }) =>
-    $highlighted ? `0 0 0 3px ${ROUTE_HIGHLIGHT_COLOR}` : 'none'};
 `;
 
 export const RouteNumber = ({
   children,
+  color,
   hasCircle = false,
   hasTick = false,
   hasTooltip = true,
   highlighted = false,
+}: {
+  children: React.ReactNode;
+  color?: string;
+  hasCircle?: boolean;
+  hasTick?: boolean;
+  hasTooltip?: boolean;
+  highlighted?: boolean;
 }) => {
   const getTitle = () => {
     if (hasTick) {
@@ -57,7 +69,7 @@ export const RouteNumber = ({
   return (
     <Tooltip arrow title={hasTooltip ? getTitle() : null}>
       <Container>
-        <Circle $hasCircle={hasCircle} $highlighted={highlighted}>
+        <Circle $color={color} $highlighted={highlighted}>
           {children}
         </Circle>
         {hasTick && (

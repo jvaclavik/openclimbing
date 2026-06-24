@@ -19,8 +19,11 @@ import { featureToItem } from '../../../../services/my-lists/featureToItem';
 import { PROJECT_ID } from '../../../../services/project';
 import {
   getDifficulties,
+  getDifficulty,
+  getDifficultyColor,
   getGradeIndexFromTags,
 } from '../../../../services/tagging/climbing/routeGrade';
+import { useTheme } from '@mui/material';
 import { Feature, LonLat } from '../../../../services/types';
 import { useMobileMode } from '../../../helpers';
 import { ListBadges } from '../../../MyLists/ListBadges';
@@ -348,6 +351,7 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
     const { isTicked } = useTicksContext();
     const { climbingFilter } = useUserSettingsContext();
     const { highlightedPhoto } = usePhotoHighlightContext();
+    const theme = useTheme();
     const { gradeInterval } = climbingFilter;
     const [minIndex, maxIndex] = gradeInterval;
     if (!feature) {
@@ -361,6 +365,10 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
     const photoPathsCount = getWikimediaCommonsPhotoPathKeys(
       feature.tags,
     ).length;
+    const difficultyColor = getDifficultyColor(
+      getDifficulty(feature.tags),
+      theme.palette.mode === 'dark' ? 'dark' : 'light',
+    );
     const shortId = getShortId(feature.osmMeta);
     const hasTick = isTicked(shortId);
     const gradeIndex = getGradeIndexFromTags(feature.tags);
@@ -386,6 +394,7 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
           >
             <RouteNumberContainer>
               <RouteNumber
+                color={difficultyColor}
                 hasCircle={photoPathsCount > 0}
                 hasTick={hasTick}
                 highlighted={isDrawnOnHighlightedPhoto}
