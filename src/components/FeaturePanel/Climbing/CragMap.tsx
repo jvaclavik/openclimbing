@@ -109,7 +109,7 @@ type Props = {
   setIsMapVisible?: (visible: boolean) => void;
 };
 
-const useInitMap = ({ setIsMapVisible }: Props) => {
+const useInitMap = () => {
   const containerRef = useRef(null);
   const mapRef = useRef<maplibregl.Map>(null);
   const [map, setMap] = useState<maplibregl.Map | null>(null);
@@ -117,23 +117,24 @@ const useInitMap = ({ setIsMapVisible }: Props) => {
   const [isFirstMapLoad, setIsFirstMapLoad] = useState(true);
 
   const { feature } = useFeatureContext();
-  const { photoPaths, photoPath, setPhotoPath } = useClimbingContext();
-  const { highlightedPhoto } = usePhotoHighlightContext();
+  const { photoPaths } = useClimbingContext();
+  const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
   const theme = useTheme();
   const themeMode = theme.palette.mode === 'dark' ? 'dark' : 'light';
 
   const photoExifs = useGetPhotoExifs(photoPaths);
 
+  // clicking a photo marker highlights that photo (marker + the routes drawn on
+  // it) and keeps the map open, instead of jumping back to the route list
   const onPhotoClick = useCallback(
     (photoName: string) => {
-      setPhotoPath(photoName);
-      setIsMapVisible?.(false);
+      togglePhoto(photoName);
     },
-    [setPhotoPath, setIsMapVisible],
+    [togglePhoto],
   );
 
   usePhotoMarkers(map, photoExifs, photoPaths ?? [], {
-    activePhoto: photoPath,
+    activePhoto: highlightedPhoto,
     onPhotoClick,
   });
 
@@ -253,8 +254,8 @@ export const transformMemberFeaturesToGeojson = (
   });
 };
 
-const CragMap = ({ setIsMapVisible }: Props) => {
-  const { containerRef, isMapLoaded } = useInitMap({ setIsMapVisible });
+const CragMap = (_props: Props) => {
+  const { containerRef, isMapLoaded } = useInitMap();
 
   return (
     <Container>
