@@ -54,6 +54,18 @@ export type ClimbingTilesFeature = GeojsonFeature<
   ClimbingTilesProperties
 >;
 
+// Full single feature returned by GET /api/climbing-tiles/get
+export type ClimbingFeatureFull = {
+  type: 'Feature';
+  id: number; // mapId
+  osmMeta: { type: OsmType; id: number };
+  tags: Record<string, string>;
+  members?: { type: OsmType; ref: number; role: string }[]; // relations only
+  center: [number, number];
+  geometry: Geometry;
+  properties: ClimbingTilesProperties & { histogram?: number[] };
+};
+
 export type ClimbingTick = {
   id: number;
   osmUserId: number;

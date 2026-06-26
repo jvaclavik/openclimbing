@@ -1,4 +1,4 @@
--- SQLite schema v5 (see db.ts migrations when bumping user_version)
+-- SQLite schema v6 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -20,7 +20,9 @@ CREATE TABLE climbing_features
   materials       TEXT, -- comma-joined climbing:rock values
   "climbingTypes" TEXT, -- comma-joined climbing types (sport, trad, ...)
   inclinations    TEXT, -- comma-joined inclinations (slab, vertical, ...)
-  "familyFriendly" INTEGER -- bool
+  "familyFriendly" INTEGER, -- bool
+  tags            TEXT, -- JSON object of all OSM tags
+  members         TEXT -- JSON array of relation members (relations only)
 );
 
 CREATE TABLE climbing_tiles_cache

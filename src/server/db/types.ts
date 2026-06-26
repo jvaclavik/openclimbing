@@ -19,6 +19,8 @@ export type ClimbingFeaturesRow = {
   climbingTypes?: string | null; // comma-joined climbing types
   inclinations?: string | null; // comma-joined inclinations
   familyFriendly?: number | null; // bool
+  tags?: string | null; // JSON object of all OSM tags
+  members?: string | null; // JSON array of relation members (relations only)
 };
 
 export type ClimbingStatsRow = {

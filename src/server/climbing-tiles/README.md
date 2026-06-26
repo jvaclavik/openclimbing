@@ -34,9 +34,14 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 
 - download overpass query – all `climbing=*` or `sport=climbing` elements and all relation members
 - contruct full geometries from OSM elements - `overpassToGeojsons()`
-- filter only relevant data + create SQL records
+- filter only relevant data + create SQL records (each record also stores the raw OSM `tags` as JSON, and for relations the `members` array as JSON)
 - insert the records them in `climbing_features` table
 - clear `climbing_tiles_cache` table
+
+`/api/climbing-tiles/get`:
+
+- returns a single full feature as a GeoJSON `Feature` (`type: 'Feature'`, with `geometry`, `center`, `osmMeta`, raw `tags`, relation `members` and all computable `properties` - decoded histogram, attributes, grade, etc.)
+- identify the feature either by `?osmType=<node|way|relation>&osmId=<id>` or by `?id=<mapId>`
 
 `/api/climbing-tiles/tile`:
 
