@@ -63,10 +63,6 @@ export const addStats = (
     groups_with_name_count: groups.filter((r) => r.name).length,
   };
 
-  db.prepare(
-    `DELETE FROM climbing_tiles_stats WHERE DATE(timestamp) = DATE('now')`,
-  ).run();
-
   const columns = Object.keys(statsRow);
   const columnNames = columns.join(', ');
   const placeholders = columns.map((c) => `@${c}`).join(', ');
@@ -74,6 +70,15 @@ export const addStats = (
   db.prepare(
     `INSERT INTO climbing_tiles_stats (${columnNames}) VALUES (${placeholders})`,
   ).run(statsRow);
+
+  db.prepare(`
+    DELETE FROM climbing_tiles_stats
+    WHERE id NOT IN (
+      SELECT MAX(id)
+      FROM climbing_tiles_stats
+      GROUP BY DATE(timestamp)
+    )
+  `).run();
 };
 
 export const removeDiacritics = (str: string) =>
