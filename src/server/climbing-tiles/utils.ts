@@ -78,6 +78,7 @@ export const addStats = (
       FROM climbing_tiles_stats
       GROUP BY DATE(timestamp)
     )
+    AND DATE(timestamp) < DATE('now', '-2 days')
   `).run();
 };
 
