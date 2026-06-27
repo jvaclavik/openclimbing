@@ -1,4 +1,4 @@
--- SQLite schema v5 (see db.ts migrations when bumping user_version)
+-- SQLite schema v6 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (

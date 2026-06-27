@@ -125,6 +125,21 @@ const runPendingMigrations = (db: Database) => {
 
     console.log(`Database ${DB_PATH} migrated from version 4 to 5`); // eslint-disable-line no-console
   }
+  if (getDbVersion(db) === 5) {
+    db.transaction(() => {
+      db.exec(`
+        DELETE FROM climbing_tiles_stats
+        WHERE id NOT IN (
+          SELECT MAX(id)
+          FROM climbing_tiles_stats
+          GROUP BY DATE(timestamp)
+        );
+      `);
+      db.pragma('user_version = 6');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 5 to 6`); // eslint-disable-line no-console
+  }
 };
 
 // global to allow hot-reload in dev
@@ -140,10 +155,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 5');
+        db.pragma('user_version = 6');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 5`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 6`); // eslint-disable-line no-console
     }
 
     store.db = db;
