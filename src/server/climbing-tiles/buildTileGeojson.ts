@@ -41,7 +41,7 @@ const optimizeFeaturesToGrid = (
   return grid.flat().filter((f) => f !== null);
 };
 
-const convertOsmIdToMapId = (apiId: OsmId) => {
+export const convertOsmIdToMapId = (apiId: OsmId) => {
   const osmToMapType = { node: 0, way: 1, relation: 4 };
   return parseInt(`${apiId.id}${osmToMapType[apiId.type]}`, 10);
 };
@@ -56,7 +56,7 @@ const getAttributeProperties = (record: ClimbingFeaturesRow) => ({
   familyFriendly: record.familyFriendly ? true : undefined,
 });
 
-const getProperties = (
+export const getProperties = (
   record: ClimbingFeaturesRow,
 ): ClimbingTilesProperties => {
   const { type, parentId } = record;
