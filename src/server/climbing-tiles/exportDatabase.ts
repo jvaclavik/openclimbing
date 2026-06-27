@@ -35,13 +35,14 @@ const pruneOldExports = () => {
   }
 };
 
-const createExport = async (): Promise<string> => {
+const createExport = (): string => {
   mkdirSync(EXPORT_DIR, { recursive: true });
   const fileName = `${FILE_PREFIX}${format(new Date(), 'yyyy-MM-dd_HHmmss')}${FILE_SUFFIX}`;
 
-  // Online backup – produces one consistent .sqlite file with all WAL data merged in,
+  // VACUUM INTO produces a compact copy (skips free pages) with WAL data merged in,
   // so we don't have to deal with the separate -wal / -shm files.
-  await getDb().backup(path.join(EXPORT_DIR, fileName));
+  const exportPath = path.join(EXPORT_DIR, fileName);
+  getDb().exec(`VACUUM INTO '${exportPath.replace(/'/g, "''")}'`);
 
   pruneOldExports();
   return fileName;
