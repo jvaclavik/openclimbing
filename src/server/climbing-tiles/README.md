@@ -40,8 +40,9 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 
 `/api/climbing-tiles/get`:
 
-- returns a single full feature as a GeoJSON `Feature` (`type: 'Feature'`, with `geometry`, `center`, `osmMeta`, raw `tags`, relation `members` and all computable `properties` - decoded histogram, attributes, grade, etc.)
-- identify the feature either by `?osmType=<node|way|relation>&osmId=<id>` or by `?id=<mapId>`
+- returns a single full feature as a GeoJSON `Feature` (`type: 'Feature'`) built only from the local SQLite DB - no overpass/OSM call
+- identify the feature by `?id=<id>` where `id` is an OSM url id (`way/123`), a short id (`w123`) or a mapId (`1231`); or by `?osmType=<node|way|relation>&osmId=<id>`
+- computed/included fields: `geometry`, `center`, `osmMeta`, raw `tags`, relation `members`, resolved `memberFeatures` (recursive tree from DB) and `parentFeatures` (parentId chain), `imageDefs` (photos / topo paths, merged from members), `countryCode` (root feature) and `properties` (decoded histogram, attributes, grade, routeCount, ...)
 
 `/api/climbing-tiles/tile`:
 

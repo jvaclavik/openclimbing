@@ -1,14 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { addCorsAndCache } from '../../../src/server/climbing-tiles/addCorsAndCache';
 import {
-  decodeMapId,
   getClimbingFeature,
+  parseFeatureId,
 } from '../../../src/server/climbing-tiles/getClimbingFeature';
 import { OsmType } from '../../../src/services/types';
 
 const OSM_TYPES: OsmType[] = ['node', 'way', 'relation'];
 
-// Accepts either ?osmType=node&osmId=123 or ?id=<mapId> (e.g. from the map tiles)
+// Accepts ?id=<id> where id is an OSM URL id (`way/123`), a short id (`w123`)
+// or a mapId (`1231`). Alternatively ?osmType=node&osmId=123.
 const parseParams = (
   query: NextApiRequest['query'],
 ): { osmType: OsmType; osmId: number } => {
@@ -23,12 +24,14 @@ const parseParams = (
   }
 
   if (id) {
-    const { type, id: osm } = decodeMapId(Number(id));
+    const { type, id: osm } = parseFeatureId(id);
     return { osmType: type, osmId: osm };
   }
 
   if (!osmType || !osmId) {
-    throw new Error('Provide either `id` (mapId) or `osmType` + `osmId`');
+    throw new Error(
+      'Provide `id` (OSM url id `way/123`, short id `w123` or mapId) or `osmType` + `osmId`',
+    );
   }
   if (!OSM_TYPES.includes(osmType as OsmType)) {
     throw new Error(`Invalid osmType: ${osmType}`);
@@ -42,7 +45,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { osmType, osmId } = parseParams(req.query);
 
-    const feature = getClimbingFeature(osmType, osmId);
+    const feature = await getClimbingFeature(osmType, osmId);
 
     res.status(200).setHeader('Content-Type', 'application/json').send(feature);
   } catch (err) {

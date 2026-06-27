@@ -1,5 +1,5 @@
 import { Feature as GeojsonFeature, Geometry } from 'geojson';
-import { OsmType } from './services/types';
+import { ImageDef, OsmType } from './services/types';
 
 export type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
 
@@ -55,12 +55,18 @@ export type ClimbingTilesFeature = GeojsonFeature<
 >;
 
 // Full single feature returned by GET /api/climbing-tiles/get
+// Shaped as a GeoJSON Feature, aligned with the osmapp `Feature` type
+// (src/services/types.ts) for the fields computable from the tiles SQLite DB.
 export type ClimbingFeatureFull = {
   type: 'Feature';
   id: number; // mapId
   osmMeta: { type: OsmType; id: number };
   tags: Record<string, string>;
   members?: { type: OsmType; ref: number; role: string }[]; // relations only
+  memberFeatures?: ClimbingFeatureFull[]; // children resolved from DB (tree)
+  parentFeatures?: ClimbingFeatureFull[]; // parent chain resolved from DB
+  imageDefs?: ImageDef[]; // photos / topo image definitions from tags + center
+  countryCode?: string; // ISO 3166-1 lowercase (root feature only)
   center: [number, number];
   geometry: Geometry;
   properties: ClimbingTilesProperties & { histogram?: number[] };
