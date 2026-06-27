@@ -71,7 +71,8 @@ export const addStats = (
     `INSERT INTO climbing_tiles_stats (${columnNames}) VALUES (${placeholders})`,
   ).run(statsRow);
 
-  db.prepare(`
+  db.prepare(
+    `
     DELETE FROM climbing_tiles_stats
     WHERE id NOT IN (
       SELECT MAX(id)
@@ -79,7 +80,8 @@ export const addStats = (
       GROUP BY DATE(timestamp)
     )
     AND DATE(timestamp) < DATE('now', '-2 days')
-  `).run();
+  `,
+  ).run();
 };
 
 export const removeDiacritics = (str: string) =>
