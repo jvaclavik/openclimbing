@@ -63,6 +63,10 @@ export const addStats = (
     groups_with_name_count: groups.filter((r) => r.name).length,
   };
 
+  db.prepare(
+    `DELETE FROM climbing_tiles_stats WHERE DATE(timestamp) = DATE('now')`,
+  ).run();
+
   const columns = Object.keys(statsRow);
   const columnNames = columns.join(', ');
   const placeholders = columns.map((c) => `@${c}`).join(', ');
