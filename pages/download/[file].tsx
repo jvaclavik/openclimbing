@@ -6,7 +6,10 @@ const CACHE_MAX_AGE_SECONDS = 5 * 60; // matches the export regeneration interva
 
 const Download = () => null;
 
-export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  query,
+  res,
+}) => {
   const raw = query.file;
   const fileName = Array.isArray(raw) ? raw[0] : raw;
 

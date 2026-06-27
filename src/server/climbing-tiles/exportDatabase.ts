@@ -1,10 +1,4 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  statSync,
-  unlinkSync,
-} from 'fs';
+import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
 import path from 'path';
 import { format } from 'date-fns';
 import { getDb } from '../db/db';
@@ -17,7 +11,8 @@ const MAX_AGE_MS = 5 * 60 * 1000; // regenerate only if the newest export is old
 const KEEP_FILES = 3; // keep only the last 3 exports, delete the rest
 
 // only filenames we produce ourselves – also guards the download route against path traversal
-export const EXPORT_FILE_REGEX = /^openclimbing_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{6}\.sqlite$/;
+export const EXPORT_FILE_REGEX =
+  /^openclimbing_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{6}\.sqlite$/;
 
 type ExportFile = { name: string; path: string; mtimeMs: number };
 
