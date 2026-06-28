@@ -1,12 +1,12 @@
-import React from 'react';
-import { Feature, TranslationId } from '../../../services/types';
 import styled from '@emotion/styled';
-import { Chip, Stack, Tooltip } from '@mui/material';
-import { t } from '../../../services/intl';
-import { useFeatureContext } from '../../utils/FeatureContext';
 import ChildFriendlyIcon from '@mui/icons-material/ChildFriendly';
 import TerrainIcon from '@mui/icons-material/Terrain';
+import { Chip, Stack, Tooltip } from '@mui/material';
+import React from 'react';
+import { t } from '../../../services/intl';
 import { CLIMBING_ROCK_OPTIONS } from '../../../services/tagging/climbing/climbingRockData';
+import { Feature, TranslationId } from '../../../services/types';
+import { useFeatureContext } from '../../utils/FeatureContext';
 
 const StyledChip = styled(Chip)`
   font-size: 10px;
@@ -193,7 +193,7 @@ const MaterialBadge = ({ feature }) => {
 
 export const ClimbingBadges = ({ feature, hasTooltip }: Props) => {
   return (
-    <Stack direction="row" spacing={0.5} flexWrap="wrap">
+    <Stack direction="row" spacing={0.5} flexWrap="wrap" paddingBottom={2}>
       {Object.entries(climbingTypes).map(
         ([_key, { value, label, description }]) =>
           feature.tags?.[value] === 'yes' ? (

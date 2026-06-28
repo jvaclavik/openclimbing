@@ -1,13 +1,13 @@
-import React from 'react';
 import styled from '@emotion/styled';
+import { Typography } from '@mui/material';
 import { getHumanPoiType } from '../../../helpers/featureLabel';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { Typography } from '@mui/material';
 import { PoiIcon } from '../../utils/icons/PoiIcon';
 
-const PoiType = styled.div<{ $isSkeleton: Boolean }>`
+const PoiType = styled.div`
   position: relative;
   display: flex;
+  gap: 8px;
 
   img {
     position: relative;
@@ -25,16 +25,7 @@ export const PoiDescription = () => {
   const poiType = getHumanPoiType(feature);
 
   return (
-    <PoiType $isSkeleton={feature.skeleton}>
-      <PoiIcon
-        tags={feature.tags}
-        ico={
-          feature.skeleton || feature.point
-            ? feature.properties.class
-            : undefined
-        }
-        middle
-      />
+    <PoiType>
       <Typography
         variant="caption"
         color="secondary"
@@ -43,6 +34,11 @@ export const PoiDescription = () => {
       >
         {poiType}
       </Typography>
+      <PoiIcon
+        tags={feature.tags}
+        ico={feature.point ? feature.properties.class : undefined}
+        middle
+      />
     </PoiType>
   );
 };

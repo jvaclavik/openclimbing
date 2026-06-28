@@ -1,7 +1,7 @@
-import React from 'react';
 import styled from '@emotion/styled';
-import { iconsLookup } from './iconsLookup';
+import React from 'react';
 import { useUserThemeContext } from '../../../helpers/theme';
+import { iconsLookup } from './iconsLookup';
 
 const MakiImg = styled.img<{ $invert: boolean; $withMarginRight?: boolean }>`
   line-height: 14px;

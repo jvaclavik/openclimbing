@@ -1,12 +1,13 @@
-import React from 'react';
-import styled from '@emotion/styled';
-import { useMediaQuery } from '@mui/material';
-import { PoiDescription } from './helpers/PoiDescription';
-import { getLabel, getSecondaryLabel } from '../../helpers/featureLabel';
-import { useFeatureContext } from '../utils/FeatureContext';
-import { QuickActions } from './QuickActions/QuickActions';
-import { PROJECT_ID } from '../../services/project';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { Stack, Typography, useMediaQuery } from '@mui/material';
+import React from 'react';
+import { getLabel, getSecondaryLabel } from '../../helpers/featureLabel';
+import { PROJECT_ID } from '../../services/project';
+import { useMobileMode } from '../helpers';
+import { useFeatureContext } from '../utils/FeatureContext';
+import { PoiDescription } from './helpers/PoiDescription';
+import { QuickActions } from './QuickActions/QuickActions';
 
 const Container = styled.div<{ isStandalone: boolean }>`
   margin: 20px 0 20px 0;
@@ -29,9 +30,12 @@ const Headings = () => {
   const secondaryLabel = getSecondaryLabel(feature);
   return (
     <HeadingsWrapper>
-      <Heading $deleted={feature?.deleted} $isOpenClimbing={isOpenClimbing}>
+      <Typography
+        variant="h1"
+        sx={{ textDecoration: feature?.deleted ? 'line-through' : 'none' }}
+      >
         {label}
-      </Heading>
+      </Typography>
       {secondaryLabel && (
         <SecondaryHeading
           $deleted={feature?.deleted}
@@ -44,19 +48,6 @@ const Headings = () => {
   );
 };
 
-const Heading = styled.h1<{ $deleted: boolean; $isOpenClimbing: boolean }>`
-  font-size: 36px;
-  line-height: 1.1;
-  ${({ $isOpenClimbing }) =>
-    $isOpenClimbing &&
-    css`
-      font-family: 'Piazzolla', sans-serif;
-      font-weight: 900;
-      font-size: 46px;
-    `}
-  margin: 0;
-  ${({ $deleted }) => $deleted && 'text-decoration: line-through;'}
-`;
 const SecondaryHeading = styled.h2<{
   $deleted: boolean;
   $isOpenClimbing: boolean;
@@ -77,11 +68,17 @@ export const FeatureHeading = React.forwardRef<HTMLDivElement>((_, ref) => {
   // thw pwa needs space at the bottom
   const isStandalone = useMediaQuery('(display-mode: standalone)');
 
+  const isMobileMode = useMobileMode();
+
   return (
     <Container ref={ref} isStandalone={isStandalone}>
-      <Headings />
-      <PoiDescription />
-
+      <Stack
+        direction={isMobileMode ? 'column-reverse' : 'column'}
+        marginTop={4}
+      >
+        <PoiDescription />
+        <Headings />
+      </Stack>
       <QuickActions />
     </Container>
   );
