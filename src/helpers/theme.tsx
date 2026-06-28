@@ -1,11 +1,15 @@
-import Cookies from 'js-cookie';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { grey, red } from '@mui/material/colors';
-import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useMediaQuery } from '@mui/material';
+import { grey, red } from '@mui/material/colors';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Cookies from 'js-cookie';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { Setter } from '../types';
 
 const lightTheme = createTheme({
+  typography: {
+    fontFamily: `"Source Sans 3", "Helvetica", "Arial", sans-serif`,
+    fontSize: 14,
+  },
   palette: {
     divider: 'rgba(0, 0, 0, 0.04)',
     primary: {
@@ -47,6 +51,10 @@ const lightTheme = createTheme({
 });
 
 const darkTheme = createTheme({
+  typography: {
+    fontFamily: `"Source Sans 3", "Helvetica", "Arial", sans-serif`,
+    fontSize: 14,
+  },
   palette: {
     mode: 'dark',
     divider: 'rgba(255, 255, 255, 0.04)',

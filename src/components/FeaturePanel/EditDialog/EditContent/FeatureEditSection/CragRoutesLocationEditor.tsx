@@ -21,6 +21,7 @@ import {
   cragHasRouteMembers,
   findCragItemForRoutes,
 } from '../../../Climbing/utils/cragRoutesItems';
+import { useCragFeatureForRoutes } from '../../../Climbing/utils/useCragFeatureForRoutes';
 
 const CragRoutesPositionMapDynamic = dynamic(
   () => import('../../../Climbing/CragRoutesPositionMap'),
@@ -40,9 +41,18 @@ export const useHasCragRoutesMap = () => {
   const { feature } = useFeatureContext();
   const { items, current } = useEditContext();
 
+  // The crag whose routes the map shows — resolved (and its members fetched on
+  // demand) even when we reached the crag from a parent area. As soon as those
+  // members arrive the whole crag's routes should show, without waiting for the
+  // user to click into an individual route first.
+  const cragForRoutes = useCragFeatureForRoutes();
+
   // Persisted OSM data already has route members.
   if (
     (feature?.memberFeatures ?? []).some((member) =>
+      isRouteTag(member.tags?.climbing),
+    ) ||
+    (cragForRoutes?.memberFeatures ?? []).some((member) =>
       isRouteTag(member.tags?.climbing),
     )
   ) {

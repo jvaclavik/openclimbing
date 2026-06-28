@@ -1,31 +1,29 @@
-import { useState } from 'react';
-import {
-  Button,
-  Stack,
-  Typography,
-  Link as LinkMui,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Box,
-} from '@mui/material';
-import React from 'react';
 import styled from '@emotion/styled';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import Link from 'next/link';
-import { PanelContent, PanelScrollbars } from '../utils/PanelHelpers';
-import { ClosePanelButton } from '../utils/ClosePanelButton';
-import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { intl, t, Translation } from '../../services/intl';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Link as LinkMui,
+  Stack,
+  Typography,
+} from '@mui/material';
+import Link from 'next/link';
+import { useState } from 'react';
 import GithubIcon from '../../assets/GithubIcon';
 import { LogoMaptiler } from '../../assets/LogoMaptiler';
-import { DividerOpenClimbing } from './DividerOpenClimbing';
+import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
+import { intl, t, Translation } from '../../services/intl';
 import { useMobileMode } from '../helpers';
+import { ClosePanelButton } from '../utils/ClosePanelButton';
+import { PanelContent, PanelScrollbars } from '../utils/PanelHelpers';
+import { DividerOpenClimbing } from './DividerOpenClimbing';
 import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
 import { SupportUs } from './SupportUs';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import { PROJECT_NAME } from '../../services/project';
 const AccordionStyle = {
   '&:before': {
     backgroundColor: 'transparent !important',
@@ -84,7 +82,7 @@ const Header = () => {
           color="inherit"
           fontWeight={900}
         >
-          {PROJECT_NAME}
+          OpenClimbing
         </Typography>
       </Stack>
     </Stack>

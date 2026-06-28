@@ -36,6 +36,7 @@ type EditableRoute = {
   grade: string;
   difficulty: RouteDifficulty | undefined;
   isNode: boolean;
+  isRoute: boolean;
   originalLonLat: LonLat | undefined;
   tags: Feature['tags'];
 };
@@ -51,6 +52,7 @@ const routeFromMemberFeature = (
     grade: difficulty?.grade ?? '',
     difficulty,
     isNode: member.osmMeta.type === 'node',
+    isRoute: isRouteTags(member.tags),
     originalLonLat: member.center as LonLat | undefined,
     tags: member.tags ?? {},
   };
@@ -64,6 +66,7 @@ const routeFromItem = (item: EditDataItem): EditableRoute => {
     grade: difficulty?.grade ?? '',
     difficulty,
     isNode: getApiId(item.shortId).type === 'node',
+    isRoute: isRouteTags(item.tags),
     originalLonLat: item.nodeLonLat,
     tags: item.tags ?? {},
   };
@@ -93,6 +96,29 @@ const getEditableRoutes = (
       return item && isRouteTags(item.tags) ? routeFromItem(item) : null;
     })
     .filter((route): route is EditableRoute => !!route);
+};
+
+// Handle for moving the whole crag (all its routes together).
+const buildCragMoveHandleElement = () => {
+  const el = document.createElement('div');
+  el.title = t('editdialog.move_whole_crag');
+  el.style.cssText = `
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #4150a0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    cursor: move;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4150a0;
+    font: 700 12px/1 sans-serif;
+    z-index: 10;
+  `;
+  el.textContent = '✥';
+  return el;
 };
 
 const buildControlPointElement = (label: string) => {
@@ -223,7 +249,11 @@ const buildRoutePopupContent = (
 
   container.appendChild(title);
   container.appendChild(
-    buildPopupButton(t('climbing.edit_this_route'), '#4150a0', onEdit),
+    buildPopupButton(
+      route.isRoute ? t('climbing.edit_this_route') : t('editdialog.edit_item'),
+      '#4150a0',
+      onEdit,
+    ),
   );
   if (onReturnToLine) {
     container.appendChild(
@@ -353,6 +383,9 @@ export const useCragRoutePositionEditor = (
   controlPointsRef.current = controlPoints;
   const manualRoutePositionsRef = useRef(manualRoutePositions);
   manualRoutePositionsRef.current = manualRoutePositions;
+  // Latest editable routes, for the imperative crag-move handlers below.
+  const editableRoutesRef = useRef(editableRoutes);
+  editableRoutesRef.current = editableRoutes;
 
   const getEffectivePosition = useCallback(
     (route: EditableRoute): LonLat | undefined => {
@@ -781,6 +814,127 @@ export const useCragRoutePositionEditor = (
     items,
     getEffectivePosition,
   ]);
+
+  // ── Move the whole crag ──────────────────────────────────────────────────
+  // A distinct handle at the centroid of the crag's routes; dragging it shifts
+  // every route by the same offset (and the guide line, if any), preserving the
+  // relative layout. Individual routes remain draggable on their own.
+  const cragHandleRef = useRef<maplibregl.Marker | null>(null);
+  const cragMoveRef = useRef<{
+    startHandle: LonLat;
+    startPositions: Record<string, LonLat>;
+    startControlPoints: LonLat[];
+  } | null>(null);
+
+  const routesCentroid = useMemo<LonLat | undefined>(() => {
+    const positions = editableRoutes
+      .map((route) => getEffectivePosition(route))
+      .filter(isValidLonLat) as LonLat[];
+    if (!positions.length) return undefined;
+    const sum = positions.reduce<[number, number]>(
+      (acc, [lon, lat]) => [acc[0] + lon, acc[1] + lat],
+      [0, 0],
+    );
+    return [sum[0] / positions.length, sum[1] / positions.length];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editableRoutes, getEffectivePosition, items, manualRoutePositions]);
+
+  const hasCentroid = isValidLonLat(routesCentroid);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !isMapLoaded || !isValidLonLat(routesCentroid))
+      return undefined;
+
+    const element = buildCragMoveHandleElement();
+    // Park the handle a little below the centroid (pixel offset, so it's
+    // zoom-independent) so it doesn't sit right on top of a route marker at the
+    // routes' centre of mass. Dragging still reads the marker's lngLat, which
+    // the offset doesn't affect.
+    const marker = new maplibregl.Marker({
+      element,
+      draggable: true,
+      offset: [0, 34],
+    })
+      .setLngLat(routesCentroid)
+      .addTo(map);
+    cragHandleRef.current = marker;
+
+    const applyDelta = (persist: boolean) => {
+      const state = cragMoveRef.current;
+      if (!state) return;
+      const { lng, lat } = marker.getLngLat();
+      const delta: LonLat = [
+        lng - state.startHandle[0],
+        lat - state.startHandle[1],
+      ];
+      const updates: Record<string, LonLat> = {};
+      editableRoutesRef.current.forEach((route) => {
+        const start = state.startPositions[route.id];
+        if (!start) return;
+        const next: LonLat = [start[0] + delta[0], start[1] + delta[1]];
+        updates[route.id] = next;
+        routeMarkersRef.current[route.id]?.setLngLat(next);
+      });
+      const shiftedLine = state.startControlPoints.map(
+        ([lon, la]) => [lon + delta[0], la + delta[1]] as LonLat,
+      );
+      const source = map.getSource(LINE_SOURCE_ID) as
+        | maplibregl.GeoJSONSource
+        | undefined;
+      if (source && shiftedLine.length >= 2) {
+        source.setData({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: { type: 'LineString', coordinates: shiftedLine },
+            },
+          ],
+        });
+      }
+      if (persist) {
+        setManualRoutePositions((prev) => ({ ...prev, ...updates }));
+        editableRoutesRef.current.forEach((route) => {
+          if (updates[route.id]) persistRoutePosition(route, updates[route.id]);
+        });
+        if (shiftedLine.length >= 2) setControlPoints(shiftedLine);
+        cragMoveRef.current = null;
+      }
+    };
+
+    marker.on('dragstart', () => {
+      const startPositions: Record<string, LonLat> = {};
+      editableRoutesRef.current.forEach((route) => {
+        const pos = getEffectivePosition(route);
+        if (isValidLonLat(pos)) startPositions[route.id] = pos as LonLat;
+      });
+      const { lng, lat } = marker.getLngLat();
+      cragMoveRef.current = {
+        startHandle: [lng, lat],
+        startPositions,
+        startControlPoints: controlPointsRef.current,
+      };
+    });
+    marker.on('drag', () => applyDelta(false));
+    marker.on('dragend', () => applyDelta(true));
+
+    return () => {
+      marker.remove();
+      cragHandleRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapRef, isMapLoaded, hasCentroid]);
+
+  // Park the handle at the routes' centroid as they move — but never while the
+  // user is dragging the handle itself.
+  useEffect(() => {
+    if (cragMoveRef.current) return;
+    if (cragHandleRef.current && isValidLonLat(routesCentroid)) {
+      cragHandleRef.current.setLngLat(routesCentroid);
+    }
+  }, [routesCentroid]);
 
   // Faded markers for the other items open in the edit dialog. Draggable (they
   // are open in the dialog) and clickable to switch editing to them, but never

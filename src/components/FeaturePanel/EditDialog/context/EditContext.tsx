@@ -22,6 +22,11 @@ type EditContextType = {
   setCurrent: Setter<string>;
   validate: boolean;
   setValidate: Setter<boolean>;
+  // shortId of the crag whose routes are currently shown on the edit map; kept
+  // sticky so the routes/markers stay visible when switching to an unrelated
+  // item (a peak, cliff, …) within the same dialog session.
+  activeCragId: string;
+  setActiveCragId: Setter<string>;
 };
 
 const EditContext = createContext<EditContextType>(undefined);
@@ -34,6 +39,7 @@ export const EditContextProvider: React.FC = ({ children }) => {
   const [validate, setValidate] = useState(false);
   const { items, addItem, removeItem } = useEditItems();
   const [current, setCurrent] = useState<ShortId>(''); // to get currentItem - use `useCurrentItem()`
+  const [activeCragId, setActiveCragId] = useState<ShortId>('');
 
   const value: EditContextType = {
     successInfo,
@@ -51,6 +57,8 @@ export const EditContextProvider: React.FC = ({ children }) => {
     setCurrent,
     validate,
     setValidate,
+    activeCragId,
+    setActiveCragId,
   };
 
   return <EditContext.Provider value={value}>{children}</EditContext.Provider>;

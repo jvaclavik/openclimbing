@@ -5,6 +5,7 @@ import { useEditContext } from '../../EditDialog/context/EditContext';
 import { useFeatureContext } from '../../../utils/FeatureContext';
 import { fetchWithMemberFeatures } from '../../../../services/osm/fetchWithMemberFeatures';
 import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
+import { findInItems } from '../../EditDialog/context/utils';
 
 const eachCragInTree = function* (
   feature: Feature | undefined,
@@ -18,23 +19,31 @@ const eachCragInTree = function* (
   }
 };
 
-// The crag in the member tree matching `targetShortId` (exact), or — when no
-// target is known — the first crag found.
+// The crag in the member tree matching `targetShortId` (exact). When no target
+// is known (e.g. a climbing=area is selected, whose members are crag relations)
+// we deliberately resolve nothing — the map should stay empty until the user
+// actually selects a crag or a route, rather than guessing the first crag.
 const findCragFeature = (
   feature: Feature | undefined,
   targetShortId: string | undefined,
 ): Feature | undefined => {
-  let firstCrag: Feature | undefined;
+  if (!targetShortId) return undefined;
   for (const crag of eachCragInTree(feature)) {
-    if (!targetShortId) return crag;
     if (getShortId(crag.osmMeta) === targetShortId) return crag;
-    if (!firstCrag) firstCrag = crag;
   }
-  return targetShortId ? undefined : firstCrag;
+  return undefined;
 };
 
 const hasRouteMembers = (feature: Feature | undefined) =>
   (feature?.memberFeatures ?? []).some((member) => isRouteTags(member.tags));
+
+// Module-level cache shared across all hook instances, so the several places
+// that resolve the crag-for-routes (the map, `useHasCragRoutesMap`, the
+// location editor…) don't each fire their own Overpass/OSM member fetch for
+// the same crag. Keyed by the crag's shortId; the in-flight promise is cached
+// too, to dedupe concurrent requests.
+const cragMembersCache = new Map<string, Feature>();
+const cragMembersPromises = new Map<string, Promise<Feature>>();
 
 /**
  * Resolves the crag feature whose routes the position map should show. When the
@@ -50,31 +59,47 @@ const hasRouteMembers = (feature: Feature | undefined) =>
  */
 export const useCragFeatureForRoutes = (): Feature => {
   const { feature } = useFeatureContext();
-  const { items, current } = useEditContext();
+  const { items, current, activeCragId, setActiveCragId } = useEditContext();
   const [fetchedCrags, setFetchedCrags] = useState<Record<string, Feature>>({});
 
-  const { target, treeCrag } = useMemo(() => {
+  const { target, treeCrag, liveTarget } = useMemo(() => {
     const cragItem = findCragItemForRoutes(items, current, feature);
-    // Only a real crag is a valid target; otherwise (e.g. the area is selected)
-    // we leave it undefined so the first crag in the tree is shown, as before.
-    const targetShortId =
+    // The crag the current selection itself points at: the crag being edited,
+    // or the parent crag of the edited route. An area resolves to nothing.
+    const live =
       cragItem?.tags?.climbing === 'crag'
         ? cragItem.shortId
         : feature?.tags?.climbing === 'crag'
           ? getShortId(feature.osmMeta)
           : undefined;
 
+    // When the current item is unrelated to climbing (a peak, cliff, …) keep
+    // the previously shown crag on the map. But the area itself must clear it.
+    const currentItem = findInItems(items, current);
+    const currentIsArea = currentItem?.tags?.climbing === 'area';
+    const effectiveTarget =
+      live ?? (currentIsArea ? undefined : activeCragId || undefined);
+
     if (
       feature?.tags?.climbing === 'crag' &&
-      (!targetShortId || getShortId(feature.osmMeta) === targetShortId)
+      (!effectiveTarget || getShortId(feature.osmMeta) === effectiveTarget)
     ) {
-      return { target: targetShortId, treeCrag: feature };
+      return { target: effectiveTarget, treeCrag: feature, liveTarget: live };
     }
     return {
-      target: targetShortId,
-      treeCrag: findCragFeature(feature, targetShortId),
+      target: effectiveTarget,
+      treeCrag: findCragFeature(feature, effectiveTarget),
+      liveTarget: live,
     };
-  }, [feature, items, current]);
+  }, [feature, items, current, activeCragId]);
+
+  // Remember the crag the current selection points at, so it stays visible when
+  // the user later switches to an unrelated item within the same dialog.
+  useEffect(() => {
+    if (liveTarget && liveTarget !== activeCragId) {
+      setActiveCragId(liveTarget);
+    }
+  }, [liveTarget, activeCragId, setActiveCragId]);
 
   // Fetch the target crag's own members when the copy we have lacks routes.
   useEffect(() => {
@@ -84,21 +109,36 @@ export const useCragFeatureForRoutes = (): Feature => {
     const apiId = getApiId(target);
     if (apiId.type !== 'relation' || apiId.id < 0) return undefined;
 
+    const cached = cragMembersCache.get(target);
+    if (cached) {
+      setFetchedCrags((prev) => ({ ...prev, [target]: cached }));
+      return undefined;
+    }
+
     let cancelled = false;
-    fetchWithMemberFeatures(apiId)
+    let promise = cragMembersPromises.get(target);
+    if (!promise) {
+      promise = fetchWithMemberFeatures(apiId);
+      cragMembersPromises.set(target, promise);
+    }
+    promise
       .then((full) => {
+        cragMembersCache.set(target, full);
         if (!cancelled) {
           setFetchedCrags((prev) => ({ ...prev, [target]: full }));
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        cragMembersPromises.delete(target); // allow a retry later
+      });
     return () => {
       cancelled = true;
     };
   }, [target, treeCrag, fetchedCrags]);
 
-  if (target && fetchedCrags[target] && !hasRouteMembers(treeCrag)) {
-    return fetchedCrags[target];
+  if (target && !hasRouteMembers(treeCrag)) {
+    const resolved = fetchedCrags[target] ?? cragMembersCache.get(target);
+    if (resolved) return resolved;
   }
   return treeCrag ?? feature;
 };

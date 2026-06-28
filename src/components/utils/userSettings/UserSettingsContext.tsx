@@ -29,6 +29,8 @@ export type UserSettingsType = Partial<{
   'climbing.cragViewLayout': CragViewLayout;
   'climbing.splitPaneSize': null | number;
   'climbing.filter': ClimbingFilterSettings;
+  'editdialog.splitPaneSize': null | number;
+  'editdialog.mapFullscreen': boolean;
   'debug.enabled': boolean;
 }>;
 
@@ -58,6 +60,8 @@ const initialUserSettings: UserSettingsType = {
   ).reduce((acc, { key }) => ({ ...acc, [key]: true }), {}),
   'climbing.cragViewLayout': 'auto',
   'climbing.splitPaneSize': null,
+  'editdialog.splitPaneSize': null,
+  'editdialog.mapFullscreen': false,
 };
 
 export const UserSettingsContext =
