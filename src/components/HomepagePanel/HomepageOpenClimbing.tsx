@@ -77,10 +77,10 @@ const Header = () => {
 
         <Typography
           variant={isMobileMode ? 'h5' : 'h4'}
-          fontFamily="Piazzolla"
           component="h2"
           color="inherit"
-          fontWeight={900}
+          fontWeight={600}
+          fontSize={40}
         >
           OpenClimbing
         </Typography>

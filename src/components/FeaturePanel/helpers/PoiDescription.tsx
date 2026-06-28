@@ -4,7 +4,7 @@ import { getHumanPoiType } from '../../../helpers/featureLabel';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { PoiIcon } from '../../utils/icons/PoiIcon';
 
-const PoiType = styled.div<{ $isSkeleton: Boolean }>`
+const PoiType = styled.div`
   position: relative;
   display: flex;
   gap: 8px;
@@ -25,7 +25,7 @@ export const PoiDescription = () => {
   const poiType = getHumanPoiType(feature);
 
   return (
-    <PoiType $isSkeleton={feature.skeleton}>
+    <PoiType>
       <Typography
         variant="caption"
         color="secondary"
@@ -36,11 +36,7 @@ export const PoiDescription = () => {
       </Typography>
       <PoiIcon
         tags={feature.tags}
-        ico={
-          feature.skeleton || feature.point
-            ? feature.properties.class
-            : undefined
-        }
+        ico={feature.point ? feature.properties.class : undefined}
         middle
       />
     </PoiType>

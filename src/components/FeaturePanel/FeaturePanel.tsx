@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, Stack } from '@mui/material';
+import { Box, Skeleton, Stack } from '@mui/material';
 import React, { useState } from 'react';
 import { getReactKey } from '../../services/helpers';
 import { isPublictransportRoute } from '../../utils';
@@ -72,21 +72,29 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
           {!isMobileMode && <ParentLink />}
 
           <FeatureHeading ref={headingRef} />
-          <Stack spacing={1} alignItems="flex-start">
-            <ClimbingRouteGrade />
-            <PanelClimbingBadges />
-          </Stack>
 
           <ClimbingRestriction />
 
           <OsmError />
           <TestApiWarning />
           <FeaturedTag k="description" renderer="DescriptionRenderer" />
+          <Stack spacing={1} alignItems="flex-start">
+            <ClimbingRouteGrade />
+            <PanelClimbingBadges />
+          </Stack>
           {isMobileMode && <ParentLink />}
         </PanelSidePadding>
 
         <Flex>
-          {!skeleton && (
+          {skeleton ? (
+            <PanelSidePadding>
+              <Stack direction="column" spacing={1} alignItems="flex-start">
+                <Skeleton variant="rounded" width="100%" height={14} />
+                <Skeleton variant="rounded" width="100%" height={14} />
+                <Skeleton variant="rounded" width={50} height={14} />
+              </Stack>
+            </PanelSidePadding>
+          ) : (
             <>
               <CragsInArea />
 

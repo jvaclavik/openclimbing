@@ -1,15 +1,40 @@
 import { useMediaQuery } from '@mui/material';
 import { grey, red } from '@mui/material/colors';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles';
 import Cookies from 'js-cookie';
 import { createContext, useContext, useMemo, useState } from 'react';
 import { Setter } from '../types';
 
-const lightTheme = createTheme({
+const sharedThemeOptions: ThemeOptions = {
+  shape: {
+    borderRadius: '12px',
+  },
   typography: {
     fontFamily: `"Source Sans 3", "Helvetica", "Arial", sans-serif`,
     fontSize: 14,
+    h1: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 500,
+      fontSize: 55,
+      lineHeight: 1,
+    },
+
+    h2: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 500,
+      fontSize: 38,
+    },
+
+    h3: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 700,
+      fontSize: 32,
+    },
   },
+};
+
+const lightTheme = createTheme({
+  ...sharedThemeOptions,
   palette: {
     divider: 'rgba(0, 0, 0, 0.04)',
     primary: {
@@ -51,28 +76,7 @@ const lightTheme = createTheme({
 });
 
 const darkTheme = createTheme({
-  typography: {
-    fontFamily: `"Source Sans 3", "Helvetica", "Arial", sans-serif`,
-    fontSize: 14,
-    h1: {
-      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
-      fontWeight: 500,
-      fontSize: 55,
-      lineHeight: 1,
-    },
-
-    h2: {
-      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
-      fontWeight: 500,
-      fontSize: 38,
-    },
-
-    h3: {
-      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
-      fontWeight: 700,
-      fontSize: 32,
-    },
-  },
+  ...sharedThemeOptions,
   palette: {
     mode: 'dark',
     divider: 'rgba(255, 255, 255, 0.04)',
