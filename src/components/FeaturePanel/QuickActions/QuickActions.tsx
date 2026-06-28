@@ -33,7 +33,23 @@ export const QuickActions = () => {
   const { feature } = useFeatureContext();
   // Show PDF export for both crags and areas — area exports iterate over all
   // child crags and produce a combined PDF.
-  const showPdfButton = isClimbingRelation(feature);
+  //
+  // While the feature is still a skeleton (loading), `tags` only holds the
+  // name, so `isClimbingRelation` (which reads `tags.climbing`) is false. Fall
+  // back to the vector-tile properties that the skeleton keeps, so the button
+  // shows immediately and the user doesn't have to wait for the panel to
+  // finish loading to re-open the PDF export. The climbing-tiles source
+  // exposes the kind via `properties.type`, the legacy OSM POI source via
+  // `properties.climbing`.
+  const props = feature.properties;
+  const isClimbingCragOrAreaByTile =
+    feature.osmMeta?.type === 'relation' &&
+    (props?.type === 'crag' ||
+      props?.type === 'area' ||
+      props?.climbing === 'crag' ||
+      props?.climbing === 'area');
+  const showPdfButton =
+    isClimbingRelation(feature) || isClimbingCragOrAreaByTile;
 
   return (
     <Wrapper>
@@ -52,7 +68,14 @@ export const QuickActions = () => {
             icon={PictureAsPdfIcon}
             label={t('climbingpanel.pdf_export_button')}
             onClick={() => {
-              Router.push(`${getOsmappLink(feature)}/climbing/pdf`);
+              // Shallow routing so the navigation doesn't re-run
+              // `getInitialProps`/`getInitialFeature` (a full feature fetch)
+              // before the route changes — otherwise the dialog can't mount
+              // until that fetch resolves. The feature is already in context,
+              // and the dialog shows a spinner while it finishes loading.
+              Router.push(`${getOsmappLink(feature)}/climbing/pdf`, undefined, {
+                shallow: true,
+              });
             }}
           />
         )}

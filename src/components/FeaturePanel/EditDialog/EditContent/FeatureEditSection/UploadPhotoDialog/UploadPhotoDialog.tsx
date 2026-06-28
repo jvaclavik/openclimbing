@@ -58,6 +58,30 @@ const PreparingStage: React.FC = () => (
   </Stack>
 );
 
+const UploadActionsProgress: React.FC<{
+  progress: { loaded: number; total: number } | null;
+}> = ({ progress }) => {
+  const percent =
+    progress && progress.total > 0
+      ? Math.min(100, Math.round((progress.loaded / progress.total) * 100))
+      : undefined;
+  return (
+    <Stack
+      direction="row"
+      spacing={1}
+      alignItems="center"
+      sx={{ mr: 'auto', pl: 1 }}
+    >
+      <CircularProgress size={20} />
+      <Typography variant="body2" color="text.secondary">
+        {percent !== undefined
+          ? t('uploaddialog.uploading_percent', { percent })
+          : t('uploaddialog.uploading')}
+      </Typography>
+    </Stack>
+  );
+};
+
 const UploadDialogActions: React.FC<{
   stage: string;
   uploading: boolean;
@@ -172,6 +196,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
       </DialogContent>
 
       <DialogActions>
+        {uploading && <UploadActionsProgress progress={progress} />}
         <UploadDialogActions
           stage={stage}
           uploading={uploading}

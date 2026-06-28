@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import { t } from '../../../services/intl';
@@ -17,6 +17,83 @@ const pickImage = (event: DragEvent): File | null => {
 };
 
 /**
+ * Multiple EditDialog instances can be mounted at once (e.g. the FeaturePanel
+ * and the climbing crag dialog both render one, driven by the same global
+ * "opened" state). Each would otherwise attach its own document-level drop
+ * listeners, so a single file drop opened two upload dialogs at once.
+ *
+ * To avoid that, the window listeners are installed once at module scope and
+ * the drop is routed to a single active drop zone — the most recently mounted
+ * one, which is the top-most/visible dialog.
+ */
+type Subscriber = {
+  openUpload: (file: File) => void;
+  setDraggingOver: (value: boolean) => void;
+};
+
+const subscribers: Subscriber[] = [];
+let listenersInstalled = false;
+let dragDepth = 0;
+
+const activeSubscriber = (): Subscriber | undefined =>
+  subscribers[subscribers.length - 1];
+
+const onDragEnter = (e: DragEvent) => {
+  if (!containsFiles(e)) return;
+  e.preventDefault();
+  dragDepth += 1;
+  activeSubscriber()?.setDraggingOver(true);
+};
+const onDragOver = (e: DragEvent) => {
+  if (!containsFiles(e)) return;
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+};
+const onDragLeave = (e: DragEvent) => {
+  if (!containsFiles(e)) return;
+  e.preventDefault();
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) activeSubscriber()?.setDraggingOver(false);
+};
+const onDrop = (e: DragEvent) => {
+  if (!containsFiles(e)) return;
+  e.preventDefault();
+  dragDepth = 0;
+  const active = activeSubscriber();
+  active?.setDraggingOver(false);
+  const file = pickImage(e);
+  if (file && active) active.openUpload(file);
+};
+
+const installListeners = () => {
+  if (listenersInstalled) return;
+  window.addEventListener('dragenter', onDragEnter);
+  window.addEventListener('dragover', onDragOver);
+  window.addEventListener('dragleave', onDragLeave);
+  window.addEventListener('drop', onDrop);
+  listenersInstalled = true;
+};
+const uninstallListeners = () => {
+  if (!listenersInstalled) return;
+  window.removeEventListener('dragenter', onDragEnter);
+  window.removeEventListener('dragover', onDragOver);
+  window.removeEventListener('dragleave', onDragLeave);
+  window.removeEventListener('drop', onDrop);
+  listenersInstalled = false;
+  dragDepth = 0;
+};
+
+const registerDropZone = (subscriber: Subscriber) => {
+  subscribers.push(subscriber);
+  installListeners();
+  return () => {
+    const index = subscribers.indexOf(subscriber);
+    if (index >= 0) subscribers.splice(index, 1);
+    if (subscribers.length === 0) uninstallListeners();
+  };
+};
+
+/**
  * Catches file drops anywhere on the page while the EditDialog is open, then
  * forwards the first image to the upload flow. Document-level listeners are
  * used because MUI Dialog content lives in a portal and React events on the
@@ -26,47 +103,21 @@ export const EditDialogDropZone: React.FC = ({ children }) => {
   const { openUpload } = useEditDialogUploadContext();
   const [draggingOver, setDraggingOver] = useState(false);
 
+  // Keep the latest openUpload without re-registering (and re-ordering) the
+  // subscriber on every render.
+  const openUploadRef = useRef(openUpload);
+  openUploadRef.current = openUpload;
+
   useEffect(() => {
-    let depth = 0;
-
-    const onDragEnter = (e: DragEvent) => {
-      if (!containsFiles(e)) return;
-      e.preventDefault();
-      depth += 1;
-      setDraggingOver(true);
-    };
-    const onDragOver = (e: DragEvent) => {
-      if (!containsFiles(e)) return;
-      e.preventDefault();
-      if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-    };
-    const onDragLeave = (e: DragEvent) => {
-      if (!containsFiles(e)) return;
-      e.preventDefault();
-      depth = Math.max(0, depth - 1);
-      if (depth === 0) setDraggingOver(false);
-    };
-    const onDrop = (e: DragEvent) => {
-      if (!containsFiles(e)) return;
-      e.preventDefault();
-      depth = 0;
-      setDraggingOver(false);
-      const file = pickImage(e);
-      if (file) openUpload({ initialFile: file });
-    };
-
-    window.addEventListener('dragenter', onDragEnter);
-    window.addEventListener('dragover', onDragOver);
-    window.addEventListener('dragleave', onDragLeave);
-    window.addEventListener('drop', onDrop);
+    const unregister = registerDropZone({
+      openUpload: (file) => openUploadRef.current({ initialFile: file }),
+      setDraggingOver,
+    });
     return () => {
-      window.removeEventListener('dragenter', onDragEnter);
-      window.removeEventListener('dragover', onDragOver);
-      window.removeEventListener('dragleave', onDragLeave);
-      window.removeEventListener('drop', onDrop);
+      unregister();
       setDraggingOver(false);
     };
-  }, [openUpload]);
+  }, []);
 
   return (
     <Box
