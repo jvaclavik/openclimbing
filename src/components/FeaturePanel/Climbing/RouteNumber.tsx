@@ -41,6 +41,25 @@ const Circle = styled.div<{
   transform: ${({ $highlighted }) => ($highlighted ? 'scale(1.25)' : 'none')};
 `;
 
+// Routes that are not drawn on any photo get just the bare number — no circle,
+// no colour — but keep the exact size, position and font of the circled badge
+// so the list stays aligned.
+const PlainNumber = styled.div<{
+  $highlighted?: boolean;
+}>`
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  transform: ${({ $highlighted }) => ($highlighted ? 'scale(1.25)' : 'none')};
+`;
+
 export const RouteNumber = ({
   children,
   color,
@@ -69,9 +88,13 @@ export const RouteNumber = ({
   return (
     <Tooltip arrow title={hasTooltip ? getTitle() : null}>
       <Container>
-        <Circle $color={color} $highlighted={highlighted}>
-          {children}
-        </Circle>
+        {hasCircle ? (
+          <Circle $color={color} $highlighted={highlighted}>
+            {children}
+          </Circle>
+        ) : (
+          <PlainNumber $highlighted={highlighted}>{children}</PlainNumber>
+        )}
         {hasTick && (
           <TickCheckContainer>
             <CheckCircleIcon color="success" fontSize="inherit" />

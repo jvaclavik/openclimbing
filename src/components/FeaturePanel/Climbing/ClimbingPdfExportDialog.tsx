@@ -838,15 +838,18 @@ const RoutesSummary = ({
           return (
             <tr key={`${route.id}-${displayNumber}`}>
               <NumCell>
+                {/* Routes not drawn on a photo get just the bare number — no
+                    rounded fill, no colour — keeping the same size, position
+                    and font so the column stays aligned. */}
                 <span
                   style={{
                     display: 'inline-block',
                     minWidth: 22,
                     padding: '2px 6px',
-                    borderRadius: 10,
-                    background: color,
-                    color: '#fff',
                     fontSize: 12,
+                    ...(isDrawn
+                      ? { borderRadius: 10, background: color, color: '#fff' }
+                      : {}),
                   }}
                 >
                   {displayNumber}
@@ -855,7 +858,7 @@ const RoutesSummary = ({
               <td>
                 <RouteName
                   style={{
-                    fontWeight: isDrawn ? '900' : '400',
+                    fontWeight: '900',
                     color: isDrawn ? '#000' : '#666',
                   }}
                 >
@@ -1431,7 +1434,12 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
     return Array.from(new Set(paths));
   }, [crags]);
 
-  const { dims, loading } = useImageDims(allPhotoPaths);
+  const { dims, loading: imagesLoading } = useImageDims(allPhotoPaths);
+  // The feature is still a skeleton until its member routes/photos finish
+  // loading. Treat that as "not ready" too, so the user sees a spinner instead
+  // of an empty export while the feature loads (the button can now be clicked
+  // before the panel has finished loading).
+  const loading = imagesLoading || !!feature?.skeleton;
   const [mapReady, setMapReady] = useState(false);
 
   // Export options (next to the Print button).
