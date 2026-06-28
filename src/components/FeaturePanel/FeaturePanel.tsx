@@ -1,35 +1,35 @@
-import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { FeatureHeading } from './FeatureHeading';
-import { useMobileMode, useToggleState } from '../helpers';
+import { Box, Stack } from '@mui/material';
+import React, { useState } from 'react';
 import { getReactKey } from '../../services/helpers';
-import { PanelContent, PanelSidePadding } from '../utils/PanelHelpers';
+import { isPublictransportRoute } from '../../utils';
+import { useMobileMode, useToggleState } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
-import { OsmError } from './OsmError';
-import { Members } from './Members';
-import { PublicTransport } from './PublicTransport/PublicTransport';
-import { Properties } from './Properties/Properties';
-import { MemberFeatures } from './MemberFeatures/MemberFeatures';
-import { ParentLink } from './ParentLink';
-import { FeatureImages } from './FeatureImages/FeatureImages';
-import { FeatureOpenPlaceGuideLink } from './FeatureOpenPlaceGuideLink';
-import { CragsInArea } from './CragsInArea';
+import { PanelContent, PanelSidePadding } from '../utils/PanelHelpers';
+import { BackChip } from './BackChip';
+import { PanelClimbingBadges } from './Climbing/ClimbingBadges';
 import { ClimbingRestriction } from './Climbing/ClimbingRestriction';
-import { Runways } from './Runways/Runways';
+import { ClimbingStructuredData } from './Climbing/ClimbingStructuredData';
+import { FeaturePanelClimbingGuideInfo } from './Climbing/FeaturePanelClimbingGuideInfo';
+import { RouteDistributionInFeaturePanel } from './Climbing/RouteDistribution';
+import { ClimbingRouteGrade } from './ClimbingRouteGrade';
+import { CragsInArea } from './CragsInArea';
 import { EditButton } from './EditButton';
 import { EditDialog } from './EditDialog/EditDialog';
-import { RouteDistributionInFeaturePanel } from './Climbing/RouteDistribution';
-import { FeaturePanelFooter } from './FeaturePanelFooter';
-import { ClimbingRouteGrade } from './ClimbingRouteGrade';
-import { Box, Stack } from '@mui/material';
-import { ClimbingStructuredData } from './Climbing/ClimbingStructuredData';
-import { isPublictransportRoute } from '../../utils';
-import { Sockets } from './Sockets/Sockets';
-import { PanelClimbingBadges } from './Climbing/ClimbingBadges';
-import { TestApiWarning } from './helpers/TestApiWarning';
-import { FeaturePanelClimbingGuideInfo } from './Climbing/FeaturePanelClimbingGuideInfo';
 import { FeaturedTag } from './FeaturedTag';
-import { BackChip } from './BackChip';
+import { FeatureHeading } from './FeatureHeading';
+import { FeatureImages } from './FeatureImages/FeatureImages';
+import { FeatureOpenPlaceGuideLink } from './FeatureOpenPlaceGuideLink';
+import { FeaturePanelFooter } from './FeaturePanelFooter';
+import { TestApiWarning } from './helpers/TestApiWarning';
+import { MemberFeatures } from './MemberFeatures/MemberFeatures';
+import { Members } from './Members';
+import { OsmError } from './OsmError';
+import { ParentLink } from './ParentLink';
+import { Properties } from './Properties/Properties';
+import { PublicTransport } from './PublicTransport/PublicTransport';
+import { Runways } from './Runways/Runways';
+import { Sockets } from './Sockets/Sockets';
 
 const Flex = styled.div`
   flex: 1;
@@ -72,7 +72,7 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
           {!isMobileMode && <ParentLink />}
 
           <FeatureHeading ref={headingRef} />
-          <Stack spacing={1} alignItems="flex-start" sx={{ marginBottom: 1 }}>
+          <Stack spacing={1} alignItems="flex-start">
             <ClimbingRouteGrade />
             <PanelClimbingBadges />
           </Stack>

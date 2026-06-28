@@ -119,13 +119,10 @@ const Header = ({
     <CragName>
       <Box display="flex" alignItems="baseline" gap={1} overflow="hidden">
         <Typography
+          variant="h3"
           component="h3"
           overflow="hidden"
           textOverflow="ellipsis"
-          fontFamily={isOpenClimbing ? "'Piazzolla', sans-serif" : undefined}
-          fontWeight={900}
-          fontSize={32}
-          lineHeight={1.2}
           color="primary"
         >
           {label}

@@ -1,13 +1,12 @@
-import { useUserThemeContext } from '../../../helpers/theme';
+import styled from '@emotion/styled';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { useTheme } from '@mui/material';
+import { useUserThemeContext } from '../../../helpers/theme';
+import { getPoiClass } from '../../../services/getPoiClass';
+import { FeatureTags } from '../../../services/types';
 import { AreaIcon } from '../../FeaturePanel/Climbing/AreaIcon';
 import { CragIcon } from '../../FeaturePanel/Climbing/CragIcon';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { Maki } from './Maki';
-import React from 'react';
-import styled from '@emotion/styled';
-import { FeatureTags } from '../../../services/types';
-import { getPoiClass } from '../../../services/getPoiClass';
 
 // Shared accent used to highlight a route (its line is drawn on the active
 // photo) across all surfaces — map dots, the route-number badge and this icon.
@@ -85,6 +84,7 @@ export const PoiIcon = ({
     const isClimbingCrag = tags.climbing === 'crag';
     const isClimbingRoute = ['route_bottom', 'route'].includes(tags.climbing);
 
+    if (isClimbingArea || isClimbingCrag || isClimbingRoute) return null;
     if (isClimbingArea) return <ClimbingAreaIcon size={size} />;
     if (isClimbingCrag) return <ClimbingCragIcon size={size} />;
     if (isClimbingRoute) return <ClimbingRouteIcon highlighted={highlighted} />;
@@ -95,7 +95,6 @@ export const PoiIcon = ({
   return (
     <Maki
       ico={finalIco}
-      invert={currentTheme === 'dark'}
       size={highlighted ? size + 4 : size}
       style={{
         opacity: highlighted ? '1' : '0.3',

@@ -54,6 +54,24 @@ const darkTheme = createTheme({
   typography: {
     fontFamily: `"Source Sans 3", "Helvetica", "Arial", sans-serif`,
     fontSize: 14,
+    h1: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 500,
+      fontSize: 55,
+      lineHeight: 1,
+    },
+
+    h2: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 500,
+      fontSize: 38,
+    },
+
+    h3: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 700,
+      fontSize: 32,
+    },
   },
   palette: {
     mode: 'dark',

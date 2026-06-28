@@ -1,7 +1,6 @@
-import React from 'react';
 import { Alert, AlertTitle } from '@mui/material';
-import { useFeatureContext } from '../../utils/FeatureContext';
 import { t } from '../../../services/intl';
+import { useFeatureContext } from '../../utils/FeatureContext';
 
 export const ClimbingRestriction = () => {
   const { feature } = useFeatureContext();

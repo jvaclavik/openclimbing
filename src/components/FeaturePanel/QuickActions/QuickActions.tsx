@@ -1,19 +1,19 @@
 import styled from '@emotion/styled';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import Router from 'next/router';
+import { getOsmappLink } from '../../../services/helpers';
+import { t } from '../../../services/intl';
+import { isClimbingRelation } from '../../../utils';
+import { useFeatureContext } from '../../utils/FeatureContext';
 import { QuickActionButton } from './QuickActionButton';
 import { SaveButton } from './SaveButton';
-import Router from 'next/router';
 import { ShareButton } from './ShareDialog/ShareButton';
-import { t } from '../../../services/intl';
-import { useFeatureContext } from '../../utils/FeatureContext';
-import { isClimbingRelation } from '../../../utils';
-import { getOsmappLink } from '../../../services/helpers';
 
 const Wrapper = styled.div`
   max-width: 100%;
   width: fit-content;
-  margin-top: 24px;
+  margin-top: 12px;
 
   overflow-x: auto;
   scroll-behavior: smooth;
