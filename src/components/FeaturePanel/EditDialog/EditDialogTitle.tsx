@@ -1,18 +1,9 @@
-import {
-  DialogTitle,
-  IconButton,
-  Stack,
-  Tooltip,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { DialogTitle, IconButton, Stack, Tooltip } from '@mui/material';
 import React from 'react';
 import { useEditDialogFeature } from './utils';
 import { t } from '../../../services/intl';
 import EditIcon from '@mui/icons-material/Edit';
 import BugReportOutlined from '@mui/icons-material/BugReportOutlined';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { useEditContext } from './context/EditContext';
 import CloseIcon from '@mui/icons-material/Close';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
@@ -31,11 +22,7 @@ const useGetDialogTitle = (isAddPlace, isUndelete) => {
 export const EditDialogTitle = () => {
   const { isAddPlace, isUndelete } = useEditDialogFeature();
   const { close } = useEditDialogContext();
-  const { debugMode, maximized, toggleMaximized } =
-    useEditDialogUploadContext();
-  const theme = useTheme();
-  // The dialog is already fullscreen on mobile, so hiding the toggle there.
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { debugMode } = useEditDialogUploadContext();
 
   const dialogTitle = useGetDialogTitle(isAddPlace, isUndelete);
 
@@ -65,31 +52,6 @@ export const EditDialogTitle = () => {
         </Stack>
 
         <Stack direction="row" gap={0.5} alignItems="center">
-          {!isMobile && (
-            <Tooltip
-              title={t(
-                maximized ? 'editdialog.restore_size' : 'editdialog.maximize',
-              )}
-            >
-              <IconButton
-                color="secondary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMaximized();
-                }}
-                aria-label={t(
-                  maximized ? 'editdialog.restore_size' : 'editdialog.maximize',
-                )}
-              >
-                {maximized ? (
-                  <FullscreenExitIcon fontSize="small" />
-                ) : (
-                  <FullscreenIcon fontSize="small" />
-                )}
-              </IconButton>
-            </Tooltip>
-          )}
-
           <IconButton
             color="secondary"
             edge="end"

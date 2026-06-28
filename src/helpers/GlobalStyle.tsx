@@ -1,5 +1,4 @@
-import React from 'react';
-import { Global, css, Theme } from '@emotion/react';
+import { css, Global, Theme } from '@emotion/react';
 import {
   isDesktopResolution,
   isMobileMode,
@@ -17,7 +16,7 @@ const globalStyle = (theme: Theme) => css`
     padding: 0;
     height: 100%;
     border: 0;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     background-color: ${theme.palette.background.default};
 
     // disable pulling the page around on mobile (pull-to-refresh),

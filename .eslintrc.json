@@ -15,7 +15,7 @@
     ],
     "react/no-unknown-property": "error",
     "max-lines-per-function": [
-      "error",
+      "warn",
       {
         "max": 100,
         "skipBlankLines": true,

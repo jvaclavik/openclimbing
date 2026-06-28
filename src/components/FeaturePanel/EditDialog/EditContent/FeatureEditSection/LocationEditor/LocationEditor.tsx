@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import {
   Accordion,
   AccordionDetails,
@@ -20,11 +19,7 @@ import {
 } from '../../../context/EditContext';
 import { OSM_WEBSITE } from '../../../../../../services/osm/consts';
 import { useHasCragRoutesMap } from '../CragRoutesLocationEditor';
-
-const EditFeatureMapDynamic = dynamic(() => import('./EditFeatureMap'), {
-  ssr: false,
-  loading: () => <div style={{ height: 500 }} />,
-});
+import { LocationInputs } from './LocationInputs';
 
 const NotYetEditableWarning = () => {
   const { shortId } = useCurrentItem();
@@ -55,11 +50,12 @@ const useNodeEditableCheck = (osmId: OsmId) => {
   return isNew || isNodeWithoutWay;
 };
 
+// The interactive map moved to the shared split-pane map (EditDialogMap); this
+// section now just keeps the manual lat/lon inputs for editable nodes.
 const Content = () => {
   const { shortId } = useCurrentItem();
   const osmId = getApiId(shortId);
   const isNodeEditable = useNodeEditableCheck(osmId);
-  const [mapStyle, setMapStyle] = useState<'outdoor' | 'satellite'>('outdoor');
 
   if (osmId.type === 'way') {
     return <NotYetEditableWarning />;
@@ -70,9 +66,7 @@ const Content = () => {
   if (!isNodeEditable) {
     return <NotYetEditableWarning />;
   }
-  return (
-    <EditFeatureMapDynamic mapStyle={mapStyle} setMapStyle={setMapStyle} />
-  );
+  return <LocationInputs key={shortId} />;
 };
 
 export const LocationEditor = () => {

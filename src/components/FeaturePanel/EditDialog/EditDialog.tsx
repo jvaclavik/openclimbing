@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Dialog, useMediaQuery, useTheme } from '@mui/material';
+import { Dialog } from '@mui/material';
 import styled from '@emotion/styled';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
 import { useEditDialogClose, useEditDialogFeature } from './utils';
@@ -10,16 +10,9 @@ import {
   EditDialogContent,
   EditDialogLoadingSkeleton,
 } from './EditDialogContent';
-import {
-  EditDialogUploadProvider,
-  useEditDialogUploadContext,
-} from './EditDialogUploadContext';
+import { EditDialogUploadProvider } from './EditDialogUploadContext';
 import { EditDialogDropZone } from './EditDialogDropZone';
 
-const useIsFullScreen = () => {
-  const theme = useTheme();
-  return useMediaQuery(theme.breakpoints.down('md'));
-};
 const StyledDialog = styled(Dialog)`
   .MuiDialog-container.MuiDialog-scrollPaper {
     align-items: start;
@@ -29,27 +22,20 @@ const StyledDialog = styled(Dialog)`
 const CustomizedDialog: React.FC = ({ children }) => {
   const handleClose = useEditDialogClose();
   const { opened } = useEditDialogContext();
-  const mobileFullScreen = useIsFullScreen();
-  const { maximized } = useEditDialogUploadContext();
-  const fullScreen = mobileFullScreen || maximized;
   const { items } = useEditContext();
-  const hasMoreItems = items.length > 1;
   const { successInfo } = useEditContext();
   const isModified = items.some(({ modified }) => modified);
 
   return (
     <StyledDialog
-      fullScreen={fullScreen}
+      fullScreen // the edit dialog always opens fullscreen (shared map needs the room)
       open={opened}
       onClose={handleClose}
       disableEscapeKeyDown={isModified && !successInfo}
       aria-labelledby="edit-dialog-title"
       slotProps={{
         paper: {
-          sx: {
-            height: '100%',
-            maxWidth: maximized ? '100%' : hasMoreItems ? 1100 : 900,
-          },
+          sx: { height: '100%' },
           elevation: 0,
         },
       }}

@@ -29,9 +29,16 @@ type Args = {
 };
 
 const useResetOnClose = (open: boolean, reset: () => void) => {
+  // `reset` is a fresh closure every render, so it must not be an effect
+  // dependency — otherwise the effect re-runs on every commit and, because
+  // resetForm sets state (e.g. a new [] for categories), loops forever
+  // ("Maximum update depth exceeded"). Keep the latest reset in a ref and only
+  // react to `open` actually changing.
+  const resetRef = useRef(reset);
+  resetRef.current = reset;
   useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
+    if (!open) resetRef.current();
+  }, [open]);
 };
 
 const useRevokeOnUnmount = (url: string | null) => {

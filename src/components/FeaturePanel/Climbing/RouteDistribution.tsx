@@ -1,27 +1,26 @@
-import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
-import React from 'react';
+import styled from '@emotion/styled';
+import { Tooltip } from '@mui/material';
+import { t } from '../../../services/intl';
+import { OverpassFeature } from '../../../services/overpass/overpassSearch';
+import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
+import {
+  getGradeSystemName,
+  GradeSystem,
+} from '../../../services/tagging/climbing/gradeSystems';
 import {
   convertGrade,
   getDifficulty,
   getDifficultyColor,
 } from '../../../services/tagging/climbing/routeGrade';
-import { ContentContainer } from './ContentContainer';
-import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
-import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
-import {
-  getGradeSystemName,
-  GradeSystem,
-} from '../../../services/tagging/climbing/gradeSystems';
 import { Feature } from '../../../services/types';
-import { convertHexToRgba } from '../../utils/colorUtils';
-import { Tooltip } from '@mui/material';
-import { t } from '../../../services/intl';
 import { isClimbingCrag } from '../../../utils';
+import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { ContentContainer } from './ContentContainer';
 import { GradeSystemSelect } from './GradeSystemSelect';
 import { PanelLabel } from './PanelLabel';
-import { OverpassFeature } from '../../../services/overpass/overpassSearch';
 
 const MAX_COLUMN_HEIGHT = 40;
 const NUMBER_OF_ROUTES_HEIGHT = 14;
@@ -58,7 +57,7 @@ const GraphItems = styled.div`
 `;
 const GradeSystemName = styled.div`
   color: ${({ theme }) => theme.palette.secondary.main};
-  font-size: 10px;
+  font-size: 12px;
   flex: 1;
   text-align: right;
   display: flex;
