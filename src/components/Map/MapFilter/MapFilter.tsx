@@ -8,6 +8,7 @@ import FilterListAltIcon from '@mui/icons-material/FilterListAlt';
 import { t } from '../../../services/intl';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { useMobileMode } from '../../helpers';
+import { useExclusiveMapControl } from '../mapControlsRegistry';
 
 const StyledIconButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -57,10 +58,10 @@ const MapFilterButton = ({ open, onClick }: MapFilterButtonProps) => {
 
 export const MapFilter = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [open, setOpen] = useState(false);
+  const { open, setOpen, toggle } = useExclusiveMapControl('filter');
   const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
-    setOpen(!open);
     setAnchorEl(event.currentTarget);
+    toggle();
   };
 
   if (!process.env.NEXT_PUBLIC_ENABLE_CLIMBING_TILES) {
