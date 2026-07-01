@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 // Ids of the mutually-exclusive map-control popovers (bottom-right).
-export type MapControlId = 'radar' | 'shadow' | 'filter';
+export type MapControlId = 'radar' | 'accum' | 'shadow' | 'filter';
 
 type Listener = (openId: MapControlId | null) => void;
 

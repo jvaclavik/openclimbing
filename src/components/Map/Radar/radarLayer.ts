@@ -1,12 +1,10 @@
 import type { ImageSource, Map } from 'maplibre-gl';
 
-export const RADAR_SOURCE_ID = 'chmu-radar';
-export const RADAR_LAYER_ID = 'chmu-radar-layer';
-
-// Whole-image geographic extent of the ČHMÚ masked MAX_Z composite (EPSG:3857):
-// E 11.267°–20.770°, N 48.047°–52.167° (radar_description_en.pdf, product #23).
-// The PNG is already web-mercator, so mapping these lng/lat corners onto
-// MapLibre's mercator plane lines the image up 1:1.
+// Whole-image geographic extent shared by the ČHMÚ `pacz2gmaps3` composites
+// (EPSG:3857): E 11.267°–20.770°, N 48.047°–52.167° (radar_description_en.pdf,
+// products #23 radar MAX_Z and #25 MERGE 1h). The PNGs are already
+// web-mercator, so mapping these lng/lat corners onto MapLibre's mercator plane
+// lines the image up 1:1.
 export const RADAR_BOUNDS = {
   west: 11.267,
   east: 20.77,
@@ -14,8 +12,8 @@ export const RADAR_BOUNDS = {
   north: 52.167,
 };
 
-// The button is only offered when the map centre sits within the radar coverage
-// (Czechia + a bit of the surrounding countries). A small margin keeps it
+// The overlays are only offered when the map centre sits within the coverage
+// (Czechia + a bit of the surrounding countries). A small margin keeps them
 // available right at the border.
 export const isInRadarCoverage = (lat: number, lon: number, margin = 0.5) =>
   !Number.isNaN(lat) &&
@@ -25,20 +23,40 @@ export const isInRadarCoverage = (lat: number, lon: number, margin = 0.5) =>
   lat >= RADAR_BOUNDS.south - margin &&
   lat <= RADAR_BOUNDS.north + margin;
 
-type Corners = [
+export type Corners = [
   [number, number],
   [number, number],
   [number, number],
   [number, number],
 ];
-const RADAR_COORDINATES: Corners = [
+
+// Corners of the padded whole-image PNG canvas (radar MAX_Z, MERGE 1h PNG).
+export const RADAR_COORDINATES: Corners = [
   [RADAR_BOUNDS.west, RADAR_BOUNDS.north], // top-left
   [RADAR_BOUNDS.east, RADAR_BOUNDS.north], // top-right
   [RADAR_BOUNDS.east, RADAR_BOUNDS.south], // bottom-right
   [RADAR_BOUNDS.west, RADAR_BOUNDS.south], // bottom-left
 ];
 
-export const radarFrameUrl = (ts: string) => `/api/radar-chmu?ts=${ts}`;
+// The MERGE HDF5 grids (used for our own accumulation maps) cover only the
+// data extent, which is smaller than the padded PNG canvas
+// (where@LL/UL/UR/LR in the ODIM files): E 11.267°–19.624°, N 48.047°–51.458°.
+export const MERGE_DATA_COORDINATES: Corners = [
+  [11.266869, 51.458369], // top-left (UL)
+  [19.623974, 51.458369], // top-right (UR)
+  [19.623974, 48.047275], // bottom-right (LR)
+  [11.266869, 48.047275], // bottom-left (LL)
+];
+
+export type OverlayProductKey = 'maxz' | 'merge1h';
+
+export type OverlayIds = {
+  sourceId: string;
+  layerId: string;
+};
+
+export const overlayFrameUrl = (product: OverlayProductKey, ts: string) =>
+  `/api/radar-chmu?product=${product}&ts=${ts}`;
 
 const CLIMBING_SOURCES = new Set(['climbing', 'climbing-tiles']);
 
@@ -47,48 +65,53 @@ const isClimbingLayer = (layer: { id: string; source?: string }) =>
   layer.id.startsWith('climbing') ||
   (layer.source != null && CLIMBING_SOURCES.has(layer.source));
 
-// Stacking wanted: climbing areas on top → radar → everything else. So the
-// radar is inserted right below the first climbing layer (i.e. above the whole
-// basemap incl. its labels). With no climbing overlay it goes on top.
-const radarBeforeId = (map: Map): string | undefined =>
+// Stacking wanted: climbing areas on top → weather overlay → everything else.
+// So the overlay is inserted right below the first climbing layer (i.e. above
+// the whole basemap incl. its labels). With no climbing overlay it goes on top.
+const overlayBeforeId = (map: Map): string | undefined =>
   map.getStyle()?.layers?.find(isClimbingLayer)?.id;
 
-export const applyRadar = (map: Map, ts: string, opacity: number) => {
-  const url = radarFrameUrl(ts);
-  const source = map.getSource(RADAR_SOURCE_ID) as ImageSource | undefined;
+export const applyOverlay = (
+  map: Map,
+  { sourceId, layerId }: OverlayIds,
+  url: string,
+  coordinates: Corners,
+  opacity: number,
+) => {
+  const source = map.getSource(sourceId) as ImageSource | undefined;
 
   if (!source) {
-    map.addSource(RADAR_SOURCE_ID, {
+    map.addSource(sourceId, {
       type: 'image',
       url,
-      coordinates: RADAR_COORDINATES,
+      coordinates,
     });
     map.addLayer(
       {
-        id: RADAR_LAYER_ID,
+        id: layerId,
         type: 'raster',
-        source: RADAR_SOURCE_ID,
+        source: sourceId,
         paint: {
           'raster-opacity': opacity,
           'raster-fade-duration': 0, // no cross-fade → clean frame swaps
         },
       },
-      radarBeforeId(map),
+      overlayBeforeId(map),
     );
     return;
   }
 
-  source.updateImage({ url, coordinates: RADAR_COORDINATES });
-  if (map.getLayer(RADAR_LAYER_ID)) {
-    map.setPaintProperty(RADAR_LAYER_ID, 'raster-opacity', opacity);
+  source.updateImage({ url, coordinates });
+  if (map.getLayer(layerId)) {
+    map.setPaintProperty(layerId, 'raster-opacity', opacity);
   }
 };
 
-export const removeRadar = (map: Map) => {
-  if (map.getLayer(RADAR_LAYER_ID)) {
-    map.removeLayer(RADAR_LAYER_ID);
+export const removeOverlay = (map: Map, { sourceId, layerId }: OverlayIds) => {
+  if (map.getLayer(layerId)) {
+    map.removeLayer(layerId);
   }
-  if (map.getSource(RADAR_SOURCE_ID)) {
-    map.removeSource(RADAR_SOURCE_ID);
+  if (map.getSource(sourceId)) {
+    map.removeSource(sourceId);
   }
 };
