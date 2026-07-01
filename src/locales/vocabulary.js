@@ -659,6 +659,7 @@ export default {
   'layerswitcher.shadows': 'Sun shadows',
   'layerswitcher.radar': 'Rain radar',
   'layerswitcher.radar_unavailable': 'Available in Czechia and nearby',
+  'layerswitcher.precip_accum': 'Precipitation total',
   'layerswitcher.overlays': 'Overlays',
   'layerswitcher.not_all_work': 'Please note that some layers may not work in OsmAPP.',
   'layerswitcher.license': 'License',

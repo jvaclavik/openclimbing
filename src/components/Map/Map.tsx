@@ -12,6 +12,7 @@ import { useMapStateContext } from '../utils/MapStateContext';
 import { MapFilter } from './MapFilter/MapFilter';
 import { SunShadowMapButton, SunShadowProvider } from './SunShadow/SunShadow';
 import { RadarMapButton, RadarProvider } from './Radar/Radar';
+import { PrecipAccumMapButton, PrecipAccumProvider } from './Radar/PrecipAccum';
 import { DRAWER_MOTION, QUARTER_PEEK_PX } from '../utils/drawerSnap';
 import {
   BOTTOM_RIGHT_Z_DEFAULT,
@@ -112,19 +113,22 @@ const Map = () => {
       {/* providers only wrap controls that need them – pan/zoom must not re-render the map tree */}
       <SunShadowProvider>
         <RadarProvider>
-          <BottomRight
-            $zIndex={
-              layersOpen ? BOTTOM_RIGHT_Z_RAISED : BOTTOM_RIGHT_Z_DEFAULT
-            }
-            $bottom={drawerPeek ? QUARTER_PEEK_PX + 8 : 6}
-          >
-            <Stack direction="row" alignItems="center" gap={1}>
-              <RadarMapButton />
-              <SunShadowMapButton />
-              {hasClimbingLayer && <MapFilter />}
-              <LayerSwitcherDynamic />
-            </Stack>
-          </BottomRight>
+          <PrecipAccumProvider>
+            <BottomRight
+              $zIndex={
+                layersOpen ? BOTTOM_RIGHT_Z_RAISED : BOTTOM_RIGHT_Z_DEFAULT
+              }
+              $bottom={drawerPeek ? QUARTER_PEEK_PX + 8 : 6}
+            >
+              <Stack direction="row" alignItems="center" gap={1}>
+                <RadarMapButton />
+                <PrecipAccumMapButton />
+                <SunShadowMapButton />
+                {hasClimbingLayer && <MapFilter />}
+                <LayerSwitcherDynamic />
+              </Stack>
+            </BottomRight>
+          </PrecipAccumProvider>
         </RadarProvider>
       </SunShadowProvider>
     </>

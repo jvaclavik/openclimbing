@@ -608,6 +608,7 @@ export default {
   'layerswitcher.shadows': 'Stíny',
   'layerswitcher.radar': 'Srážkový radar',
   'layerswitcher.radar_unavailable': 'Dostupné v Česku a okolí',
+  'layerswitcher.precip_accum': 'Úhrn srážek',
   'layerswitcher.overlays': 'Překryvné vrstvy',
 
   'layers.basic': 'Základní',

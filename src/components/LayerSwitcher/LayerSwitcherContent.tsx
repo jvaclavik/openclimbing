@@ -9,6 +9,7 @@ import { Box, Divider, Typography } from '@mui/material';
 import { t } from '../../services/intl';
 import { SunShadowPanel } from '../Map/SunShadow/SunShadow';
 import { RadarPanel } from '../Map/Radar/Radar';
+import { PrecipAccumPanel } from '../Map/Radar/PrecipAccum';
 
 type AllLayers = {
   basemapLayers: Layer[];
@@ -52,6 +53,7 @@ const MapExtras = () => (
     <StyledList dense>
       <SunShadowPanel />
       <RadarPanel />
+      <PrecipAccumPanel />
     </StyledList>
   </>
 );

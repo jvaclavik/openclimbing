@@ -59,6 +59,22 @@ declare module '@emotion/react' {
   export interface Theme extends MaterialUITheme {}
 }
 
+declare module 'jsfive' {
+  export class File {
+    constructor(buffer: ArrayBuffer, filename?: string);
+    keys: string[];
+    attrs: Record<string, unknown>;
+    get(path: string): {
+      value: number[];
+      shape?: number[];
+      dtype?: string;
+      keys?: string[];
+      attrs?: Record<string, unknown>;
+      get(path: string): unknown;
+    } | null;
+  }
+}
+
 declare module 'suncalc' {
   export interface SunPositionResult {
     azimuth: number;

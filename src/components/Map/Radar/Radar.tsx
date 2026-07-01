@@ -10,6 +10,7 @@ import React, {
 import styled from '@emotion/styled';
 import { useQuery } from 'react-query';
 import RadarIcon from '@mui/icons-material/Radar';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import {
@@ -22,6 +23,7 @@ import {
   Slider,
   Stack,
   Switch,
+  Theme,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -32,10 +34,17 @@ import { t } from '../../../services/intl';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
-import { applyRadar, isInRadarCoverage, removeRadar } from './radarLayer';
+import {
+  applyOverlay,
+  isInRadarCoverage,
+  overlayFrameUrl,
+  RADAR_COORDINATES,
+  removeOverlay,
+} from './radarLayer';
 
 type RadarFrame = { ts: string; time: string };
 
+const RADAR_IDS = { sourceId: 'chmu-radar', layerId: 'chmu-radar-layer' };
 const RADAR_COLOR = '#f5a623';
 const FRAME_INTERVAL_MS = 450;
 const DEFAULT_OPACITY = 0.75;
@@ -83,8 +92,32 @@ const RADAR_SLIDER_SX = {
   },
 } as const;
 
+const WARNING_BOX_SX = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0.75,
+  px: 1,
+  py: 0.6,
+  borderRadius: 1,
+  color: 'warning.main',
+  bgcolor: (theme: Theme) => convertHexToRgba(theme.palette.warning.main, 0.16),
+  border: (theme: Theme) =>
+    `1px solid ${convertHexToRgba(theme.palette.warning.main, 0.4)}`,
+} as const;
+
+const OutOfCoverageWarning = () => (
+  <Panel>
+    <Box sx={WARNING_BOX_SX}>
+      <WarningAmberIcon sx={{ fontSize: 17, flexShrink: 0 }} />
+      <Typography variant="caption" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+        {t('layerswitcher.radar_unavailable')}
+      </Typography>
+    </Box>
+  </Panel>
+);
+
 const fetchFrames = async (): Promise<RadarFrame[]> => {
-  const res = await fetch('/api/radar-chmu-frames');
+  const res = await fetch('/api/radar-chmu-frames?product=maxz');
   if (!res.ok) {
     throw new Error(`frames ${res.status}`);
   }
@@ -254,7 +287,7 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
   const active = enabled && inCoverage;
 
   const { data: frames, isLoading } = useQuery(
-    ['chmu-radar-frames'],
+    ['chmu-frames', 'maxz'],
     fetchFrames,
     {
       enabled: active,
@@ -285,14 +318,20 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
       const f = framesRef.current;
       if (f?.length) {
         const i = Math.min(indexRef.current, f.length - 1);
-        applyRadar(map, f[i].ts, opacityRef.current);
+        applyOverlay(
+          map,
+          RADAR_IDS,
+          overlayFrameUrl('maxz', f[i].ts),
+          RADAR_COORDINATES,
+          opacityRef.current,
+        );
       }
     };
     map.on('styledata', reapply);
     reapply();
     return () => {
       map.off('styledata', reapply);
-      removeRadar(map);
+      removeOverlay(map, RADAR_IDS);
     };
   }, [active]);
 
@@ -301,7 +340,13 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
     if (!map || !active || !frames?.length) {
       return;
     }
-    applyRadar(map, frames[Math.min(index, frames.length - 1)].ts, opacity);
+    applyOverlay(
+      map,
+      RADAR_IDS,
+      overlayFrameUrl('maxz', frames[Math.min(index, frames.length - 1)].ts),
+      RADAR_COORDINATES,
+      opacity,
+    );
   }, [active, frames, index, opacity]);
 
   useEffect(() => {
@@ -313,14 +358,6 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
     }, FRAME_INTERVAL_MS);
     return () => clearInterval(id);
   }, [playing, active, frames]);
-
-  // Leaving the coverage area should not leave a stale overlay behind.
-  useEffect(() => {
-    if (!inCoverage && enabled) {
-      setEnabled(false);
-      setPlaying(false);
-    }
-  }, [inCoverage, enabled]);
 
   const onSliderIndex = useCallback(
     (v: number) => {
@@ -375,26 +412,17 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
 export const RadarPanel = () => {
   const { inCoverage, enabled, setEnabled } = useRadarContext();
 
-  if (!inCoverage) {
-    return (
-      <ListItemButton disabled sx={{ py: 0.5 }}>
-        <ListItemIcon sx={{ minWidth: 45 }}>
-          <RadarIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText
-          primary={t('layerswitcher.radar')}
-          secondary={t('layerswitcher.radar_unavailable')}
-        />
-      </ListItemButton>
-    );
-  }
-
   return (
     <ListItemButton onClick={() => setEnabled(!enabled)} sx={{ py: 0.5 }}>
       <ListItemIcon sx={{ minWidth: 45 }}>
         <RadarIcon fontSize="small" color={enabled ? 'primary' : 'inherit'} />
       </ListItemIcon>
-      <ListItemText primary={t('layerswitcher.radar')} />
+      <ListItemText
+        primary={t('layerswitcher.radar')}
+        secondary={
+          inCoverage ? undefined : t('layerswitcher.radar_unavailable')
+        }
+      />
       <Switch
         edge="end"
         size="small"
@@ -425,12 +453,24 @@ export const RadarMapButton = () => {
     setOpacity,
   } = useRadarContext();
 
-  if (!enabled || !inCoverage) return null;
+  if (!enabled) return null;
 
   return (
     <>
-      <Badge color="success" variant="dot" overlap="circular">
-        <Tooltip title={t('layerswitcher.radar')} arrow>
+      <Badge
+        color="success"
+        variant="dot"
+        overlap="circular"
+        invisible={!inCoverage}
+      >
+        <Tooltip
+          title={
+            inCoverage
+              ? t('layerswitcher.radar')
+              : t('layerswitcher.radar_unavailable')
+          }
+          arrow
+        >
           <MapControlButton
             $isOpened={open}
             size={isMobileMode ? 'large' : 'medium'}
@@ -439,7 +479,11 @@ export const RadarMapButton = () => {
               toggle();
             }}
           >
-            <RadarIcon fontSize="small" color="primary" />
+            {inCoverage ? (
+              <RadarIcon fontSize="small" color="primary" />
+            ) : (
+              <WarningAmberIcon fontSize="small" color="warning" />
+            )}
           </MapControlButton>
         </Tooltip>
       </Badge>
@@ -463,16 +507,20 @@ export const RadarMapButton = () => {
         }
       >
         <Box sx={{ p: 1, pt: 0.5, pointerEvents: 'all' }}>
-          <RadarControls
-            frames={frames}
-            isLoading={isLoading}
-            index={index}
-            setIndex={onSliderIndex}
-            playing={playing}
-            togglePlay={togglePlay}
-            opacity={opacity}
-            setOpacity={setOpacity}
-          />
+          {inCoverage ? (
+            <RadarControls
+              frames={frames}
+              isLoading={isLoading}
+              index={index}
+              setIndex={onSliderIndex}
+              playing={playing}
+              togglePlay={togglePlay}
+              opacity={opacity}
+              setOpacity={setOpacity}
+            />
+          ) : (
+            <OutOfCoverageWarning />
+          )}
         </Box>
       </PopperWithArrow>
     </>
