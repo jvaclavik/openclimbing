@@ -21,6 +21,7 @@ import { convertHexToRgba } from '../../utils/colorUtils';
 import { getGlobalMap } from '../../../services/mapStorage';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
+import { useExclusiveMapControl } from '../mapControlsRegistry';
 import {
   applySunShadow,
   getSunTimes,
@@ -503,7 +504,7 @@ export const SunShadow = () => {
   const lat = parseFloat(latStr);
   const lon = parseFloat(lonStr);
 
-  const [open, setOpen] = useState(false);
+  const { open, toggle } = useExclusiveMapControl('shadow');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [day, setDay] = useState(todayIso);
@@ -536,7 +537,7 @@ export const SunShadow = () => {
 
   const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-    setOpen((o) => !o);
+    toggle();
   };
 
   return (

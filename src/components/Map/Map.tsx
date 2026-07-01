@@ -16,6 +16,7 @@ import { MapFilter } from './MapFilter/MapFilter';
 import { MyListsLayer } from './MyListsLayer';
 import { CragPhotoMarkers } from './CragPhotoMarkers';
 import { SunShadow } from './SunShadow/SunShadow';
+import { Radar } from './Radar/Radar';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
@@ -113,14 +114,17 @@ const Map = () => {
       </BottomLeft>
       <BottomRight>
         <Stack direction="row" alignItems="center" gap={1}>
+          <ControlAboveDrawer>
+            <Radar />
+          </ControlAboveDrawer>
+          <ControlAboveDrawer>
+            <SunShadow />
+          </ControlAboveDrawer>
           {hasClimbingLayer && (
             <ControlAboveDrawer>
               <MapFilter />
             </ControlAboveDrawer>
           )}
-          <ControlAboveDrawer>
-            <SunShadow />
-          </ControlAboveDrawer>
           <LayerSwitcherDynamic />
         </Stack>
       </BottomRight>
