@@ -16,7 +16,9 @@ import { MapFilter } from './MapFilter/MapFilter';
 import { MyListsLayer } from './MyListsLayer';
 import { CragPhotoMarkers } from './CragPhotoMarkers';
 import { SunShadow } from './SunShadow/SunShadow';
-import { Radar } from './Radar/Radar';
+import { PrecipitationOverlay } from './Radar/PrecipitationOverlay';
+import { PrecipAccumControl } from './Radar/PrecipAccumControl';
+import { RADAR_PRODUCT } from './Radar/precipitationProducts';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
@@ -115,7 +117,10 @@ const Map = () => {
       <BottomRight>
         <Stack direction="row" alignItems="center" gap={1}>
           <ControlAboveDrawer>
-            <Radar />
+            <PrecipitationOverlay product={RADAR_PRODUCT} />
+          </ControlAboveDrawer>
+          <ControlAboveDrawer>
+            <PrecipAccumControl />
           </ControlAboveDrawer>
           <ControlAboveDrawer>
             <SunShadow />
