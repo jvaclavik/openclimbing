@@ -300,6 +300,36 @@ export default {
   'support_us.thanks': `Thank you!`,
   'support_us.bitcoin_dialog_title': `Support us with Bitcoin`,
 
+  'topbar.climbing_areas': 'Climbing areas',
+  'topbar.community': 'Community',
+  'topbar.about': 'About',
+  'topbar.add_climbing': 'Add climbing',
+  'topbar.my_profile': 'My profile',
+
+  'about.title': 'About',
+  'about.intro':
+    'OpenClimbing is an open, community-built platform for mapping climbing areas and creating interactive climbing guides. All data is open and anyone can edit it – just like Wikipedia.',
+  'about.different_heading': 'What makes us different',
+  'about.different_p':
+    'Most climbing guides are closed, paid and quickly out of date. OpenClimbing is the opposite: every crag, route and photo lives in open databases (OpenStreetMap & Wikimedia Commons), so the data is free forever, can never be locked behind a paywall, and improves with every contribution.',
+  'about.why_heading': 'Why add your data here',
+  'about.why_p':
+    "When you add a crag or route here, it instantly becomes part of a worldwide open dataset that anyone can build on – apps, maps and printed guides alike. Your work isn't trapped in one company's product; it stays useful to the whole climbing community and to you, no matter which app you use next.",
+  'about.features_heading': 'What you get',
+  'about.feature_open_data_title': 'Open data',
+  'about.feature_open_data_desc': 'Crags, routes and grades stored in OpenStreetMap – free, editable and yours forever.',
+  'about.feature_guides_title': 'Interactive guides',
+  'about.feature_guides_desc': 'Topos drawn straight onto real photos, with routes, grades and details linked to the map.',
+  'about.feature_photos_title': 'Community photos',
+  'about.feature_photos_desc': 'Photos shared via Wikimedia Commons so everyone can illustrate the rock together.',
+  'about.feature_ticks_title': 'Ticks & leaderboard',
+  'about.feature_ticks_desc': 'Log your ascents, build your climbing profile and compare on the leaderboard.',
+  'about.feature_map_title': 'Powerful map',
+  'about.feature_map_desc': 'Outdoor vector maps, weather, sun & shadow and offline-ready guide export.',
+  'about.feature_free_title': 'Free & open source',
+  'about.feature_free_desc': 'No ads, no paywalls. The whole app is open source and made by climbers.',
+  'about.cta_contribute': 'How to contribute',
+
   'searchbox.placeholder': 'Search',
   'searchbox.category': 'category',
   'searchbox.overpass_success': 'Results found: __count__',

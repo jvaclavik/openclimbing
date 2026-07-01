@@ -177,7 +177,11 @@ const ThemeSelection = () => {
 // https://github.com/mui-org/material-ui/issues/22912
 // https://github.com/mui-org/material-ui/issues?q=is%3Aissue+is%3Aopen+menuitem+keyboard
 
-export const HamburgerMenu = () => {
+export const HamburgerMenu = ({
+  forceMenuIcon = false,
+}: {
+  forceMenuIcon?: boolean;
+}) => {
   const anchorRef = useRef();
   const [opened, open, close] = useBoolState(false);
   const isOpenClimbing = PROJECT_ID === 'openclimbing';
@@ -232,7 +236,11 @@ export const HamburgerMenu = () => {
         </Stack>
       </Drawer>
 
-      <HamburgerMenuButton anchorRef={anchorRef} onClick={open} />
+      <HamburgerMenuButton
+        anchorRef={anchorRef}
+        onClick={open}
+        forceMenuIcon={forceMenuIcon}
+      />
     </>
   );
 };

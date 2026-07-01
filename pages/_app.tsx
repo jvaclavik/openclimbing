@@ -32,7 +32,7 @@ import { FeatureProvider } from '../src/components/utils/FeatureContext';
 import { MyListsProvider } from '../src/components/utils/MyListsContext';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Loading } from '../src/components/App/Loading';
-import { SearchBox } from '../src/components/SearchBox/SearchBox';
+import { TopBar } from '../src/components/TopBar/TopBar';
 import { HomepagePanel } from '../src/components/HomepagePanel/HomepagePanel';
 import { setIntlForSSR, t } from '../src/services/intl';
 import { Feature } from '../src/services/types';
@@ -131,7 +131,7 @@ const MyApp = (props: Props) => {
                                 </Head>
                                 <DebugModeManager />
                                 <Loading />
-                                <SearchBox />
+                                <TopBar />
                                 <PhotoHighlightProvider>
                                   <ResponsiveFeaturePanel />
                                   <HomepagePanel />

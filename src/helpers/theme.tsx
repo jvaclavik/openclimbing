@@ -6,6 +6,19 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { Setter } from '../types';
 
 const sharedThemeOptions: ThemeOptions = {
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 900,
+        },
+      },
+    },
+  },
   shape: {
     borderRadius: '12px',
   },
@@ -30,6 +43,11 @@ const sharedThemeOptions: ThemeOptions = {
       fontWeight: 700,
       fontSize: 32,
     },
+    h4: {
+      fontFamily: `"Piazzolla", "Helvetica", "Arial", sans-serif`,
+      fontWeight: 900,
+      fontSize: 20,
+    },
   },
 };
 
@@ -38,7 +56,7 @@ const lightTheme = createTheme({
   palette: {
     divider: 'rgba(0, 0, 0, 0.04)',
     primary: {
-      main: '#556cd6',
+      main: '#ae2f0c',
     },
     secondary: {
       main: '#737373',
@@ -81,10 +99,10 @@ const darkTheme = createTheme({
     mode: 'dark',
     divider: 'rgba(255, 255, 255, 0.04)',
     primary: {
-      main: '#ffb74d',
+      main: '#f37553',
     },
     secondary: {
-      main: '#737373',
+      main: '#ffffff96',
     },
     tertiary: {
       main: '#00b6ff', // links
@@ -94,9 +112,9 @@ const darkTheme = createTheme({
     },
 
     background: {
-      default: '#303030',
-      elevation: '#333333',
-      paper: '#424242',
+      default: '#000000bb',
+      elevation: '#1d1d1ddd',
+      paper: '#111',
       hover: grey['700'],
       searchBox: '#963838',
       searchInput: 'rgba(0,0,0,0.5)',

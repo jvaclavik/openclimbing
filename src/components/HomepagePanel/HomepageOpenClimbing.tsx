@@ -9,7 +9,6 @@ import Link from 'next/link';
 import React, { ReactNode } from 'react';
 import GithubIcon from '../../assets/GithubIcon';
 import { LogoMaptiler } from '../../assets/LogoMaptiler';
-import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
 import { intl, t } from '../../services/intl';
 import { useMobileMode } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
@@ -45,40 +44,32 @@ const SectionHeading = ({ children }: { children: ReactNode }) => (
 const Header = () => {
   const isMobileMode = useMobileMode();
 
-  const iconWidth = isMobileMode ? 44 : 64;
   return (
     <Stack
-      direction={isMobileMode ? 'row' : 'column'}
-      alignItems="center"
-      spacing={isMobileMode ? 2 : 2.5}
+      component="section"
+      alignItems={isMobileMode ? 'flex-start' : 'center'}
       sx={{
         mt: isMobileMode ? 1 : 4,
         mb: 2,
       }}
     >
-      <LogoOpenClimbing width={iconWidth} style={{ minWidth: iconWidth }} />
-      <Stack
-        component="section"
-        alignItems={isMobileMode ? 'flex-start' : 'center'}
+      <Typography
+        component="h1"
+        variant="h2"
+        color="inherit"
+        fontWeight={600}
+        lineHeight={1.1}
       >
-        <Typography
-          component="h1"
-          variant="h2"
-          color="inherit"
-          fontWeight={600}
-          lineHeight={1.1}
-        >
-          OpenClimbing
-        </Typography>
-        <Typography
-          component="p"
-          variant="subtitle2"
-          color="secondary"
-          textTransform="lowercase"
-        >
-          {t('project.openclimbing.description')}
-        </Typography>
-      </Stack>
+        OpenClimbing
+      </Typography>
+      <Typography
+        component="p"
+        variant="subtitle2"
+        color="secondary"
+        textTransform="lowercase"
+      >
+        {t('project.openclimbing.description')}
+      </Typography>
     </Stack>
   );
 };

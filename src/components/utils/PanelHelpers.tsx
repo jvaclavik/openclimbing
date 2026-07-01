@@ -1,12 +1,12 @@
-import React, { LegacyRef, useRef } from 'react';
 import styled from '@emotion/styled';
-import { Scrollbars } from 'react-custom-scrollbars';
 import { useTheme } from '@mui/material';
-import { isDesktop, useMobileMode } from '../helpers';
+import React, { LegacyRef, useRef } from 'react';
+import { Scrollbars } from 'react-custom-scrollbars';
 import { useScrollShadow } from '../FeaturePanel/Climbing/utils/useScrollShadow';
+import { isDesktop, useMobileMode } from '../helpers';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 
-export const FEATURE_PANEL_WIDTH = 460;
+export const FEATURE_PANEL_WIDTH = 480;
 
 // custom scrollbar
 // better: https://github.com/rommguy/react-custom-scroll
@@ -15,21 +15,20 @@ const EffectiveHeight = styled.main`
   height: calc(100% - ${SEARCH_BOX_HEIGHT}px);
 `;
 
-const SearchBoxBackground = styled.div`
-  height: ${SEARCH_BOX_HEIGHT}px;
-  background-color: ${({ theme }) => theme.palette.background.searchBox};
-  position: relative;
-  z-index: 1;
-`;
+const MARGIN = 0;
+
 const Container = styled.div`
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  background: ${({ theme }) => theme.palette.background.paper};
+  left: ${MARGIN}px;
+  bottom: ${MARGIN}px;
+  top: ${SEARCH_BOX_HEIGHT + MARGIN}px;
+  background: ${({ theme }) => theme.palette.background.default};
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   color: ${({ theme }) => theme.palette.text.primary};
   overflow: hidden;
   z-index: 1100;
+  //border-radius: 20px;
+  backdrop-filter: blur(50px);
 
   width: 100%;
   @media ${isDesktop} {
@@ -46,7 +45,6 @@ const Container = styled.div`
 
 export const PanelWrapper = ({ children }) => (
   <Container>
-    <SearchBoxBackground />
     <EffectiveHeight>{children}</EffectiveHeight>
   </Container>
 );

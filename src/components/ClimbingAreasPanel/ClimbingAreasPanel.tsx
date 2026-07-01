@@ -5,8 +5,10 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  CircularProgress,
   FormControlLabel,
   MenuItem,
+  Stack,
   Switch,
   Table,
   TableBody,
@@ -17,18 +19,21 @@ import {
   Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Link from 'next/link';
+import { useQuery } from 'react-query';
+import {
+  ClimbingArea,
+  getClimbingAreas,
+} from '../../services/climbing-areas/getClimbingAreas';
 import { intl, t } from '../../services/intl';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
+import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import {
   PanelContent,
   PanelScrollbars,
   PanelSidePadding,
 } from '../utils/PanelHelpers';
-import { MobilePageDrawer } from '../utils/MobilePageDrawer';
-import { ClimbingArea } from '../../services/climbing-areas/getClimbingAreas';
 import { Feature, TranslationId } from '../../services/types';
-import Link from 'next/link';
-import { ClimbingGuideInfo } from '../FeaturePanel/Climbing/ClimbingGuideInfo';
 import { getCountryFlag, getCountryName } from '../../services/getCountryFlag';
 import { PhotoCoverageRing } from '../FeaturePanel/Climbing/PhotoCoverageRing';
 import { useFeatureContext } from '../utils/FeatureContext';
@@ -36,7 +41,7 @@ import { useMobileMode } from '../helpers';
 import { Bbox, useMapStateContext } from '../utils/MapStateContext';
 
 type ClimbingAreasPanelProps = {
-  areas: ClimbingArea[];
+  areas?: ClimbingArea[] | null;
 };
 
 type SortBy = 'photos' | 'routes' | 'sectors' | 'alphabetical';
@@ -239,6 +244,19 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
   const { setPreview } = useFeatureContext();
   const [sortBy, setSortBy] = useState<SortBy>('photos');
   const [filterViewport, setFilterViewport] = useState(false);
+
+  // `areas` is filled on SSR (direct visit / crawlers) and passed as initialData
+  // so the list is rendered straight into the HTML. On in-app navigation `areas`
+  // is null and react-query fetches it on the client (and caches it).
+  const { data, isLoading, isError } = useQuery(
+    ['climbingAreas'],
+    getClimbingAreas,
+    {
+      initialData: areas ?? undefined,
+      staleTime: 1000 * 60 * 60, // 1h – the list changes rarely
+    },
+  );
+
   const handleClose = () => {
     Router.push(`/`);
   };
@@ -247,9 +265,10 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
   useEffect(() => () => setPreview(null), [setPreview]);
 
   const visibleAreas = useMemo(() => {
-    if (!filterViewport || !bbox) return areas;
-    return areas.filter((area) => isInViewport(area, bbox));
-  }, [areas, filterViewport, bbox]);
+    const allAreas = data ?? [];
+    if (!filterViewport || !bbox) return allAreas;
+    return allAreas.filter((area) => isInViewport(area, bbox));
+  }, [data, filterViewport, bbox]);
 
   const groups = useMemo(
     () => groupByCountry(visibleAreas, sortBy),
@@ -261,50 +280,72 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
     <MobilePageDrawer className="climbing-areas-drawer">
       <PanelContent>
         <PanelScrollbars>
-          <ClimbingGuideInfo />
           <PanelSidePadding>
             <ClosePanelButton right onClick={handleClose} />
             <h1>{t('climbingareas.title')}</h1>
-            <TextField
-              select
-              size="small"
-              fullWidth
-              label={t('climbingareas.sort_label')}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortBy)}
-              sx={{ mb: 1 }}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {t(option.labelId)}
-                </MenuItem>
-              ))}
-            </TextField>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={filterViewport}
-                  onChange={(e) => setFilterViewport(e.target.checked)}
+            {data && (
+              <>
+                <TextField
+                  select
+                  size="small"
+                  fullWidth
+                  label={t('climbingareas.sort_label')}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortBy)}
+                  sx={{ mb: 1 }}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {t(option.labelId)}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={filterViewport}
+                      onChange={(e) => setFilterViewport(e.target.checked)}
+                    />
+                  }
+                  label={t('climbingareas.filter_viewport')}
+                  sx={{ mb: 1, display: 'block' }}
                 />
-              }
-              label={t('climbingareas.filter_viewport')}
-              sx={{ mb: 1, display: 'block' }}
-            />
-            {groups.length === 0 && (
-              <Typography color="text.secondary" sx={{ mb: 2 }}>
-                {t('climbingareas.no_areas_in_viewport')}
-              </Typography>
+                {groups.length === 0 && (
+                  <Typography color="text.secondary" sx={{ mb: 2 }}>
+                    {t('climbingareas.no_areas_in_viewport')}
+                  </Typography>
+                )}
+              </>
             )}
           </PanelSidePadding>
 
-          {groups.map((group) => (
-            <CountryAccordion
-              key={group.countryCode ?? 'unknown'}
-              group={group}
-              defaultExpanded={false}
-              backTarget={backTarget}
-            />
-          ))}
+          {data ? (
+            groups.map((group) => (
+              <CountryAccordion
+                key={group.countryCode ?? 'unknown'}
+                group={group}
+                defaultExpanded={false}
+                backTarget={backTarget}
+              />
+            ))
+          ) : isError ? (
+            <PanelSidePadding>
+              <Typography color="error" variant="body2">
+                {t('error')}
+              </Typography>
+            </PanelSidePadding>
+          ) : (
+            isLoading && (
+              <Box display="flex" justifyContent="center" p={4}>
+                <Stack alignItems="center" spacing={2}>
+                  <CircularProgress color="secondary" />
+                  <Typography variant="body2" color="text.secondary">
+                    {t('loading')}
+                  </Typography>
+                </Stack>
+              </Box>
+            )
+          )}
         </PanelScrollbars>
       </PanelContent>
     </MobilePageDrawer>

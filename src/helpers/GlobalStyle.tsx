@@ -1,9 +1,5 @@
 import { css, Global, Theme } from '@emotion/react';
-import {
-  isDesktopResolution,
-  isMobileMode,
-  isTabletResolution,
-} from '../components/helpers';
+import { isMobileMode } from '../components/helpers';
 import { convertHexToRgba } from '../components/utils/colorUtils';
 
 // This function doesn't contain any logic - so no extraction needed.
@@ -136,16 +132,9 @@ const globalStyle = (theme: Theme) => css`
     }
   }
 
+  /* Push the native map controls below the global TopBar (68px) */
   .maplibregl-ctrl-top-right {
-    top: 60px !important;
-
-    @media ${isTabletResolution} {
-      top: 0px !important;
-    }
-
-    @media ${isDesktopResolution} {
-      top: 64px !important;
-    }
+    top: 76px !important;
   }
 
   .edit-feature-map .maplibregl-ctrl-top-right {

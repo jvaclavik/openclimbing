@@ -290,6 +290,36 @@ export default {
   'support_us.thanks': `Děkujeme`,
   'support_us.bitcoin_dialog_title': `Podpořte nás Bitcoinem`,
 
+  'topbar.climbing_areas': 'Lezecké oblasti',
+  'topbar.community': 'Komunita',
+  'topbar.about': 'O projektu',
+  'topbar.add_climbing': 'Přidat lezení',
+  'topbar.my_profile': 'Můj profil',
+
+  'about.title': 'O projektu',
+  'about.intro':
+    'OpenClimbing je otevřená, komunitně tvořená platforma pro mapování skalních oblastí a tvorbu interaktivních lezeckých průvodců. Všechna data jsou otevřená a každý je může upravovat – podobně jako na Wikipedii.',
+  'about.different_heading': 'V čem jsme jiní',
+  'about.different_p':
+    'Většina lezeckých průvodců je uzavřená, placená a rychle zastará. OpenClimbing je přesný opak: každá skála, cesta i fotka žije v otevřených databázích (OpenStreetMap a Wikimedia Commons), takže data jsou navždy zdarma, nikdy se nezamknou za paywall a s každým příspěvkem se zlepšují.',
+  'about.why_heading': 'Proč přidávat data sem',
+  'about.why_p':
+    'Když sem přidáš skálu nebo cestu, okamžitě se stane součástí celosvětového otevřeného datasetu, na kterém může stavět kdokoli – aplikace, mapy i tištění průvodci. Tvoje práce není uvězněná v produktu jedné firmy; zůstává užitečná celé lezecké komunitě i tobě, ať příště použiješ jakoukoli aplikaci.',
+  'about.features_heading': 'Co tu najdeš',
+  'about.feature_open_data_title': 'Otevřená data',
+  'about.feature_open_data_desc': 'Skály, cesty i obtížnosti uložené v OpenStreetMap – zdarma, editovatelné a navždy tvoje.',
+  'about.feature_guides_title': 'Interaktivní průvodci',
+  'about.feature_guides_desc': 'Topa zakreslená přímo do reálných fotek, s cestami, obtížnostmi a detaily propojenými s mapou.',
+  'about.feature_photos_title': 'Komunitní fotky',
+  'about.feature_photos_desc': 'Fotky sdílené přes Wikimedia Commons, aby skály mohl ilustrovat každý společně.',
+  'about.feature_ticks_title': 'Přelezy a žebříček',
+  'about.feature_ticks_desc': 'Zapisuj si přelezy, buduj svůj lezecký profil a porovnej se v žebříčku.',
+  'about.feature_map_title': 'Šikovná mapa',
+  'about.feature_map_desc': 'Outdoorové vektorové mapy, počasí, slunce a stín i export průvodce pro offline.',
+  'about.feature_free_title': 'Zdarma a open source',
+  'about.feature_free_desc': 'Žádné reklamy, žádné paywally. Celá aplikace je open source a tvoří ji lezci.',
+  'about.cta_contribute': 'Jak přispívat',
+
   'searchbox.placeholder': 'Hledat',
   'searchbox.category': 'kategorie',
   'searchbox.overpass_success': 'Nalezeno výsledků: __count__',

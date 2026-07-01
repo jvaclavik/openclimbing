@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Box, Chip, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import React from 'react';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
@@ -38,7 +38,7 @@ import { MemberItem } from './MemberFeatures/MemberItem';
 
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
 
-const StyledPaper = styled(Paper)`
+const StyledPaper = styled(Box)`
   position: sticky;
   top: 0;
   z-index: 1;
@@ -521,7 +521,7 @@ const AllCragsDistribution = ({ crags }: { crags: Feature[] }) => {
 };
 
 const FilterRow: React.FC = ({ children }) => (
-  <StyledPaper elevation={0} square>
+  <StyledPaper>
     <Stack
       direction="row"
       spacing={0.5}

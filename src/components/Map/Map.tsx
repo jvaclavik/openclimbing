@@ -4,12 +4,10 @@ import styled from '@emotion/styled';
 import dynamic from 'next/dynamic';
 import BugReport from '@mui/icons-material/BugReport';
 import { Button, CircularProgress, Stack } from '@mui/material';
-import { isDesktop } from '../helpers';
 import { MapFooter } from './MapFooter/MapFooter';
 import { SHOW_PROTOTYPE_UI } from '../../config.mjs';
 import { LayerSwitcherButton } from '../LayerSwitcher/LayerSwitcherButton';
 import { MaptilerLogo } from './MapFooter/MaptilerLogo';
-import { TopMenu } from './HamburgerMenu/TopMenu';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { Weather } from './Weather/Weather';
 import { MapFilter } from './MapFilter/MapFilter';
@@ -46,18 +44,6 @@ const Spinner = styled(CircularProgress)`
   left: 50%;
   top: 50%;
   margin: -20px 0 0 -20px;
-`;
-
-const TopRight = styled.div`
-  position: absolute;
-  z-index: 100;
-  padding: 10px;
-  right: -4px;
-  top: 62px;
-
-  @media ${isDesktop} {
-    top: 0;
-  }
 `;
 
 const BottomLeft = styled.div`
@@ -113,9 +99,6 @@ const Map = () => {
       {mapLoaded && <CragPhotoMarkers />}
       {!mapLoaded && <Spinner color="secondary" />}
       <NoscriptMessage />
-      <TopRight>
-        <TopMenu />
-      </TopRight>
       <BottomLeft>
         {SHOW_PROTOTYPE_UI && <BugReportButton />}
         <MaptilerLogo />

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import React, { useEffect } from 'react';
 import { AutocompleteRenderInputParams } from '@mui/material/Autocomplete/Autocomplete';
-import { useFocusOnSlash } from '../../helpers/hooks';
+import { useFocusOnCmdK, useFocusOnSlash } from '../../helpers/hooks';
 import { InputBase } from '@mui/material';
 import { t } from '../../services/intl';
 import { Setter } from '../../types';
@@ -19,6 +19,7 @@ const SearchBoxInput = ({
 }: SearchBoxInputProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   useFocusOnSlash(inputRef);
+  useFocusOnCmdK(inputRef);
 
   const { InputLabelProps, InputProps, ...restParams } = params;
 

@@ -75,7 +75,21 @@ const useOnClosePanel = () => {
   };
 };
 
-const SearchBoxInner = ({ withoutPanel }) => {
+type SearchFieldProps = {
+  withShadow?: boolean;
+  showDirections?: boolean;
+  showHamburger?: boolean;
+};
+
+/**
+ * The bare search input (rounded Paper with autocomplete). It carries no
+ * positioning so it can be dropped into the TopBar layout (or any flex slot).
+ */
+export const SearchField = ({
+  withShadow = false,
+  showDirections = true,
+  showHamburger = false,
+}: SearchFieldProps) => {
   const isMobileMode = useMobileMode();
   const { featureShown } = useFeatureContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -83,29 +97,35 @@ const SearchBoxInner = ({ withoutPanel }) => {
   const onClosePanel = useOnClosePanel();
 
   return (
+    <StyledPaper $withShadow={withShadow} elevation={1} ref={autocompleteRef}>
+      <SearchIconButton disabled aria-label={t('searchbox.placeholder')}>
+        <SearchIcon />
+      </SearchIconButton>
+
+      <AutocompleteInput
+        autocompleteRef={autocompleteRef}
+        setIsLoading={setIsLoading}
+      />
+
+      {isLoading && <LoadingSpinner />}
+      {!isMobileMode && featureShown && (
+        <ClosePanelButton onClick={onClosePanel} />
+      )}
+
+      {showDirections && (!featureShown || isMobileMode) && (
+        <DirectionsButton />
+      )}
+      {showHamburger && isMobileMode && <HamburgerMenu />}
+    </StyledPaper>
+  );
+};
+
+const SearchBoxInner = ({ withoutPanel }) => {
+  const isMobileMode = useMobileMode();
+
+  return (
     <TopPanel>
-      <StyledPaper
-        $withShadow={isMobileMode || withoutPanel}
-        elevation={1}
-        ref={autocompleteRef}
-      >
-        <SearchIconButton disabled aria-label={t('searchbox.placeholder')}>
-          <SearchIcon />
-        </SearchIconButton>
-
-        <AutocompleteInput
-          autocompleteRef={autocompleteRef}
-          setIsLoading={setIsLoading}
-        />
-
-        {isLoading && <LoadingSpinner />}
-        {!isMobileMode && featureShown && (
-          <ClosePanelButton onClick={onClosePanel} />
-        )}
-
-        {(!featureShown || isMobileMode) && <DirectionsButton />}
-        {isMobileMode && <HamburgerMenu />}
-      </StyledPaper>
+      <SearchField withShadow={isMobileMode || withoutPanel} showHamburger />
     </TopPanel>
   );
 };

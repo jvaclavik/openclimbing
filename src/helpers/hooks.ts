@@ -85,6 +85,28 @@ export const useFocusOnSlash = (
 };
 
 /**
+ * Focuses the given input on the Cmd+K (macOS) / Ctrl+K (Win/Linux) shortcut.
+ * Works even while typing in another field, so the user can always jump to search.
+ */
+export const useFocusOnCmdK = (
+  inputRef: React.MutableRefObject<HTMLInputElement>,
+) => {
+  useEffect(() => {
+    const onKeydown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', onKeydown);
+    return () => {
+      window.removeEventListener('keydown', onKeydown);
+    };
+  }, [inputRef]);
+};
+
+/**
  * A custom hook that console.logs the params on every change.
  * Usefull for debugging
  */

@@ -38,11 +38,11 @@ const MenuIconButton = styled(IconButton)`
   }
 `;
 
-export const HamburgerMenuButton = ({ anchorRef, onClick }) => {
+export const HamburgerMenuButton = ({ anchorRef, onClick, forceMenuIcon }) => {
   const { osmUser } = useOsmAuthContext();
   const isMobileMode = useMobileMode();
 
-  if (osmUser) {
+  if (osmUser && !forceMenuIcon) {
     return (
       <UserIconButton ref={anchorRef} color="primary" onClick={onClick}>
         <LoginIconButton size={isMobileMode ? 32 : 36} />
