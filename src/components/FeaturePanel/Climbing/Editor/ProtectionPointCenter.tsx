@@ -1,7 +1,6 @@
 import React, { useState, type TouchEventHandler } from 'react';
 import styled from '@emotion/styled';
 import { useClimbingContext } from '../contexts/ClimbingContext';
-import { useConfig } from '../config';
 import { useMobileMode } from '../../../helpers';
 import { useProtectionPointClickHandler } from './utils';
 import { PointType } from '../types';
@@ -23,22 +22,18 @@ const PointElement = styled.circle<{
     }`}
 `;
 
-const usePointColor = (type: PointType | undefined, isHovered: boolean) => {
-  const config = useConfig();
+const PROTECTION_POINT_YELLOW = '#ffd60a';
+
+const usePointColor = (type: PointType | undefined) => {
   const invisiblePointsForTypes: PointType[] = [];
 
   if (type && invisiblePointsForTypes.includes(type))
     return { pointColor: 'transparent', pointStroke: 'transparent' };
 
-  if (isHovered)
-    return {
-      pointColor: config.pathBorderColor,
-      pointStroke: config.pathBorderColorSelected,
-    };
-
+  // Unfilled yellow circles.
   return {
-    pointColor: config.pathBorderColor,
-    pointStroke: config.pathBorderColorSelected,
+    pointColor: 'transparent',
+    pointStroke: PROTECTION_POINT_YELLOW,
   };
 };
 
@@ -71,7 +66,7 @@ export const ProtectionPointCenter = ({
     setIsProtectionPointClicked,
   } = useClimbingContext();
   const isMobileMode = useMobileMode();
-  const { pointColor, pointStroke } = usePointColor(type, isHovered);
+  const { pointColor, pointStroke } = usePointColor(type);
   const onPointMouseUp = useProtectionPointClickHandler();
 
   const onPointClick = (e: React.MouseEvent) => {
@@ -122,8 +117,8 @@ export const ProtectionPointCenter = ({
 
   const title = type ? <title>{type}</title> : null;
   const isTouchDevice = 'ontouchstart' in window;
-  const pointRadius = shouldHighlight ? 6 : 4;
-  const highlightRingRadius = shouldHighlight ? 8 : 0;
+  const pointRadius = shouldHighlight ? 12 : 8;
+  const highlightRingRadius = shouldHighlight ? 16 : 0;
 
   return (
     <g transform={`translate(${x},${y}) scale(${1 / photoZoom.scale})`}>
@@ -131,7 +126,7 @@ export const ProtectionPointCenter = ({
         <>
           <ClickableArea
             fill="transparent"
-            r={isTouchDevice ? 16 : 10}
+            r={isTouchDevice ? 20 : 16}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...commonProps}
           >
@@ -152,6 +147,7 @@ export const ProtectionPointCenter = ({
           <PointElement
             fill={pointColor}
             stroke={pointStroke}
+            strokeWidth={2}
             r={pointRadius}
             $isHovered={isHovered}
             $isPointSelected={isSelected}
@@ -178,6 +174,7 @@ export const ProtectionPointCenter = ({
           <PointElement
             fill={pointColor}
             stroke={pointStroke}
+            strokeWidth={2}
             r={pointRadius}
             $isHovered={false}
             $isPointSelected={isSelected}
