@@ -25,6 +25,7 @@ import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PointType } from '../types';
 import { LineTypeButtons } from './LineTypeButtons';
 import { PointTypeButtons } from './PointTypeButtons';
+import { RecognizeBoltsButton } from './RecognizeBoltsButton';
 import { useFloatingMenuShortcuts } from './useFloatingMenuShortcuts';
 import { addShortcutUnderline } from './utils';
 
@@ -234,6 +235,7 @@ export const RouteFloatingMenu = () => {
                   </IconButton>
                 </Tooltip>
               )}
+              {isEditMode && <RecognizeBoltsButton />}
               {isPointMenuLike && (
                 <>
                   <Button

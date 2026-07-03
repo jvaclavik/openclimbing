@@ -711,6 +711,12 @@ export default {
     'Click the photo to add protection points. Pick a type in the bar. When you draw routes, new nodes snap to them and inherit the type.',
   'climbingpanel.protection_points_tooltip': 'Place bolts and other gear on the photo before drawing routes; route points snap to them.',
   'climbingpanel.delete_protection_point': 'Delete gear point',
+  'climbingpanel.recognize_bolts': 'Recognize bolts',
+  'climbingpanel.recognize_bolts_tooltip':
+    'This uses machine learning (AI) to estimate location of bolts in this photo. Check the result, as it can make mistakes. Especially non-existent bolts. The computation runs locally in your browser. More info at',
+  'climbingpanel.recognize_bolts_error': 'Bolt recognition failed. Please try again.',
+  'climbingpanel.recognize_bolts_result': 'Recognized __count__ bolts. Please check them, as the AI can make mistakes.',
+  'climbingpanel.recognize_bolts_none': 'No bolts recognized in this photo. Please mark them precisely by hand, and report it <a>here</a>.',
 
   'runway.information': 'Runway information',
   'runway.runway': 'Runway',
