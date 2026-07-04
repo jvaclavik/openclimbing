@@ -32,7 +32,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const osmId = getApiId(idRaw);
-    const feature = await fetchWithMemberFeatures(osmId);
+    const nocache = req.query.fresh === '1' || req.query.fresh === 'true';
+    const feature = await fetchWithMemberFeatures(osmId, { nocache });
     const photos: TopoMetaPhoto[] = (feature.imageDefs ?? []).map(
       (def, idx) => {
         if (!isTag(def)) {
@@ -62,7 +63,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res
       .status(200)
       .setHeader('Content-Type', 'application/json')
-      .setHeader('Cache-Control', 'public, max-age=300')
+      .setHeader('Cache-Control', nocache ? 'no-store' : 'public, max-age=300')
       .send(body);
   } catch (err) {
     console.error(err); // eslint-disable-line no-console

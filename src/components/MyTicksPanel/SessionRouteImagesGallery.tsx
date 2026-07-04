@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { t } from '../../services/intl';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import type { TopoMetaResponse } from '../../../pages/api/topo-meta';
@@ -39,6 +40,7 @@ const buildOgImageUrl = (
   imageId: string,
   photoIndex: number,
   routeFilter: string[],
+  refreshNonce = 0,
 ): string => {
   const params = new URLSearchParams({ id: imageId, raw: '1' });
   if (photoIndex > 0) {
@@ -47,16 +49,26 @@ const buildOgImageUrl = (
   if (routeFilter.length > 0) {
     params.set('routes', routeFilter.join(','));
   }
+  // Bust browser/CDN cache and tell the API to skip its server-side OSM cache,
+  // so freshly drawn paths show up instead of a stale render.
+  if (refreshNonce > 0) {
+    params.set('fresh', '1');
+    params.set('v', String(refreshNonce));
+  }
   return `/api/og-image?${params.toString()}`;
 };
 
 const fetchTopoMeta = async (
   cragShortId: string,
+  refreshNonce = 0,
 ): Promise<TopoMetaResponse | null> => {
   try {
-    const res = await fetch(
-      `/api/topo-meta?id=${encodeURIComponent(cragShortId)}`,
-    );
+    const params = new URLSearchParams({ id: cragShortId });
+    if (refreshNonce > 0) {
+      params.set('fresh', '1');
+      params.set('v', String(refreshNonce));
+    }
+    const res = await fetch(`/api/topo-meta?${params.toString()}`);
     if (!res.ok) return null;
     return (await res.json()) as TopoMetaResponse;
   } catch {
@@ -66,8 +78,9 @@ const fetchTopoMeta = async (
 
 const useTopoMeta = (
   cragShortIds: string[],
+  refreshNonce = 0,
 ): { meta: Map<string, TopoMetaResponse>; loading: boolean } => {
-  const key = cragShortIds.slice().sort().join(',');
+  const key = `${cragShortIds.slice().sort().join(',')}|${refreshNonce}`;
   const [meta, setMeta] = useState<Map<string, TopoMetaResponse>>(new Map());
   const [loading, setLoading] = useState(cragShortIds.length > 0);
 
@@ -81,7 +94,9 @@ const useTopoMeta = (
     setLoading(true);
     (async () => {
       const results = await Promise.all(
-        cragShortIds.map(async (id) => [id, await fetchTopoMeta(id)] as const),
+        cragShortIds.map(
+          async (id) => [id, await fetchTopoMeta(id, refreshNonce)] as const,
+        ),
       );
       if (cancelled) return;
       const out = new Map<string, TopoMetaResponse>();
@@ -235,6 +250,7 @@ const planAllTiles = (
 
 type TileProps = {
   tile: ImageTileSpec;
+  refreshNonce: number;
 };
 
 /**
@@ -280,13 +296,18 @@ const tryShareOrDownload = async (
   }
 };
 
-const ImageTile = ({ tile }: TileProps) => {
+const ImageTile = ({ tile, refreshNonce }: TileProps) => {
   const isMobileMode = useMobileMode();
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   if (errored) return null;
 
-  const url = buildOgImageUrl(tile.imageId, tile.photoIndex, tile.routeFilter);
+  const url = buildOgImageUrl(
+    tile.imageId,
+    tile.photoIndex,
+    tile.routeFilter,
+    refreshNonce,
+  );
   const filename = `${sanitizeFilename(tile.caption)}.png`;
   const isMulti = tile.ticks.length > 1;
   const countSuffix = isMulti
@@ -396,6 +417,7 @@ type Props = {
 };
 
 export const SessionRouteImagesGallery = ({ ticks }: Props) => {
+  const [refreshNonce, setRefreshNonce] = useState(0);
   const cragShortIds = useMemo(() => {
     const set = new Set<string>();
     for (const tick of ticks) {
@@ -405,16 +427,27 @@ export const SessionRouteImagesGallery = ({ ticks }: Props) => {
     return [...set];
   }, [ticks]);
 
-  const { meta, loading } = useTopoMeta(cragShortIds);
+  const { meta, loading } = useTopoMeta(cragShortIds, refreshNonce);
   const tiles = useMemo(() => planAllTiles(ticks, meta), [ticks, meta]);
 
   if (!loading && tiles.length === 0) return null;
 
   return (
     <Box mb={2}>
-      <Typography variant="overline">
-        {t('my_ticks.share.images_label')}
-      </Typography>
+      <Stack direction="row" alignItems="center" spacing={0.5}>
+        <Typography variant="overline" sx={{ flex: 1 }}>
+          {t('my_ticks.share.images_label')}
+        </Typography>
+        <Tooltip title={t('my_ticks.share.images_refresh')}>
+          <IconButton
+            size="small"
+            onClick={() => setRefreshNonce(Date.now())}
+            aria-label={t('my_ticks.share.images_refresh')}
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       <Stack
         direction="row"
         spacing={1}
@@ -434,7 +467,13 @@ export const SessionRouteImagesGallery = ({ ticks }: Props) => {
             <LoadingTile tileKey="loading-3" />
           </>
         ) : (
-          tiles.map((tile) => <ImageTile key={tile.key} tile={tile} />)
+          tiles.map((tile) => (
+            <ImageTile
+              key={`${tile.key}-${refreshNonce}`}
+              tile={tile}
+              refreshNonce={refreshNonce}
+            />
+          ))
         )}
       </Stack>
       <Typography variant="caption" color="text.secondary">

@@ -22,8 +22,10 @@ interface FetchOpts extends RequestInit {
 
 export const fetchText = async (url: string, opts: FetchOpts = {}) => {
   const key = getKey(url, opts);
-  const item = getCache(key); // TODO store promise in the cache to prevent additional request until first one finishes
-  if (item) return item;
+  if (!opts?.nocache) {
+    const item = getCache(key); // TODO store promise in the cache to prevent additional request until first one finishes
+    if (item) return item;
+  }
 
   const queueName = isBrowser() ? opts?.abortableQueueName : undefined;
   if (queueName) {
