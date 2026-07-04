@@ -139,6 +139,7 @@ export default {
   'my_ticks.share.text_at_crag': '📍 __crag__',
   'my_ticks.share.text_footer': '✨ Logged via openclimbing.org',
   'my_ticks.share.images_label': 'Route photos with topo',
+  'my_ticks.share.images_refresh': 'Reload images',
   'my_ticks.share.images_download': 'Download',
   'my_ticks.share.images_hint': 'Only routes with drawn topo are shown. Download and attach to your Strava activity, Instagram or chat.',
   'my_ticks.share.images_group_count': '__count__ routes',

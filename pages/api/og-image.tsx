@@ -157,7 +157,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     mockSchemaTranslations(translations); // local is fine, TODO remove the need for translations in this case
 
     const osmId = getApiId(req.query.id as string);
-    const feature = await fetchWithMemberFeatures(osmId); // TODO
+    const nocache = req.query.fresh === '1' || req.query.fresh === 'true';
+    const feature = await fetchWithMemberFeatures(osmId, { nocache }); // TODO
     const photoIndex = parsePhotoIndex(req.query.photoIndex);
     const selectedDef = feature.imageDefs?.[photoIndex];
     if (!selectedDef) {

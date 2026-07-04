@@ -119,6 +119,7 @@ export default {
   'my_ticks.share.text_at_crag': '📍 __crag__',
   'my_ticks.share.text_footer': '✨ Zaznamenáno přes openclimbing.org',
   'my_ticks.share.images_label': 'Fotky s zakresleným topem',
+  'my_ticks.share.images_refresh': 'Znovu načíst obrázky',
   'my_ticks.share.images_download': 'Stáhnout',
   'my_ticks.share.images_hint': 'Zobrazují se jen cesty s nakresleným topem. Stáhni si je a přidej k aktivitě na Stravě, na Instagram nebo do chatu.',
   'my_ticks.share.images_group_count': '__count__ cest',
