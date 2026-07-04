@@ -12,6 +12,13 @@ const hasTrailingColon = (s: string) => s.includes(':');
 const stripTrailingColon = (s: string) =>
   hasTrailingColon(s) ? s.slice(0, -1) : s;
 
+// Coordinates are stored as percentage fractions (0..1). Even the largest
+// Commons photos are only a few thousand px wide, so 5 decimals already means
+// sub-pixel precision – anything more just bloats the tag value.
+const COORD_DECIMAL_PLACES = 5;
+
+const roundCoord = (n: number) => parseFloat(n.toFixed(COORD_DECIMAL_PLACES));
+
 const encodePoint = ({
   x,
   y,
@@ -20,7 +27,7 @@ const encodePoint = ({
   x: number;
   y: number;
   type?: PointType;
-}) => `${x},${y}${type ? T2B[type] : ''}`;
+}) => `${roundCoord(x)},${roundCoord(y)}${type ? T2B[type] : ''}`;
 
 const decodePointToken = (token: string): PathPoint => {
   const [xStr, yWithMaybeCode = ''] = token.split(',', 2);
