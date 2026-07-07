@@ -1,6 +1,10 @@
 import { Feature, LonLat } from '../../types';
 import { WikimediaCommonsUser } from '../auth/session';
-import { uploadFile, UploadProgressEvent } from '../api';
+import {
+  CommonsUploadWarningError,
+  uploadFile,
+  UploadProgressEvent,
+} from '../api';
 import { extractExifData } from './exif';
 import { convertHeicToJpeg, isHeicFile } from './heic';
 import { buildUploadWikitext, LicenseId } from './wikitext';
@@ -8,6 +12,7 @@ import {
   buildSuggestedFilenameParts,
   FilenameParts,
   findAvailableFilename,
+  MAX_FILENAME_ATTEMPTS,
 } from './filename';
 
 export type PreparedUpload = {
@@ -61,10 +66,10 @@ export const uploadPhotoToCommons = async ({
   license,
   onProgress,
 }: UploadPhotoArgs): Promise<UploadPhotoResult> => {
-  const finalFilename = await findAvailableFilename({
+  const parts: FilenameParts = {
     stem: filenameStem,
     ext: prepared.filenameParts.ext,
-  });
+  };
   const text = buildUploadWikitext({
     feature,
     user,
@@ -74,21 +79,41 @@ export const uploadPhotoToCommons = async ({
     date: prepared.exifDate,
     photoLocation: prepared.exifLocation,
   });
+  const comment =
+    `Uploaded from OpenClimbing.org for ${feature.tags?.name ?? ''}`.trim();
 
-  const result = await uploadFile({
-    file: prepared.file,
-    filename: finalFilename,
-    text,
-    comment:
-      `Uploaded from OpenClimbing.org for ${feature.tags?.name ?? ''}`.trim(),
-    onProgress,
-  });
+  // The exact-title availability check can't detect normalized collisions
+  // (`exists-normalized`), so the upload may still clash. When it does, bump the
+  // numeric suffix and retry with the next free name instead of failing.
+  let startIndex = 0;
+  for (let attempt = 0; attempt < MAX_FILENAME_ATTEMPTS; attempt++) {
+    const { filename, index } = await findAvailableFilename(parts, startIndex);
+    try {
+      const result = await uploadFile({
+        file: prepared.file,
+        filename,
+        text,
+        comment,
+        onProgress,
+      });
 
-  const returnedFilename = result.upload?.filename ?? finalFilename;
-  // Commons returns underscores in filenames; normalize back to spaces for the OSM tag.
-  const normalized = returnedFilename.replace(/_/g, ' ');
-  return {
-    fileTagValue: `File:${normalized}`,
-    descriptionUrl: result.upload?.imageinfo?.descriptionurl,
-  };
+      const returnedFilename = result.upload?.filename ?? filename;
+      // Commons returns underscores in filenames; normalize back to spaces for the OSM tag.
+      const normalized = returnedFilename.replace(/_/g, ' ');
+      return {
+        fileTagValue: `File:${normalized}`,
+        descriptionUrl: result.upload?.imageinfo?.descriptionurl,
+      };
+    } catch (e) {
+      if (e instanceof CommonsUploadWarningError && e.isFilenameCollision) {
+        startIndex = index + 1;
+        continue;
+      }
+      throw e;
+    }
+  }
+
+  throw new Error(
+    `Could not upload photo: too many filename collisions for "${filenameStem}"`,
+  );
 };
