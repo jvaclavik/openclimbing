@@ -1,4 +1,4 @@
--- SQLite schema v6 (see db.ts migrations when bumping user_version)
+-- SQLite schema v7 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -24,6 +24,11 @@ CREATE TABLE climbing_features
   tags            TEXT, -- JSON object of all OSM tags
   members         TEXT -- JSON array of relation members (relations only)
 );
+
+-- speeds up single feature lookups by (osmType, osmId) - used heavily by
+-- /api/climbing-tiles/get when it recursively resolves relation members and
+-- walks the parentId chain (getRow() in getClimbingFeature.ts)
+CREATE INDEX idx_climbing_features_osm ON climbing_features ("osmType", "osmId");
 
 CREATE TABLE climbing_tiles_cache
 (
