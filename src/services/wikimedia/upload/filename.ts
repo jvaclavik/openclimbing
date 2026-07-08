@@ -55,18 +55,30 @@ export const buildSuggestedFilenameParts = (
 export const composeFilename = ({ stem, ext }: FilenameParts): string =>
   `${stem.trim()}.${ext}`;
 
-const withSuffix = (parts: FilenameParts, n: number): string => {
+export const MAX_FILENAME_ATTEMPTS = 30;
+
+/** Numbered filename variant: index 0 is the plain name, 1 → "(2)", 2 → "(3)"… */
+export const withSuffix = (parts: FilenameParts, n: number): string => {
   if (n === 0) return composeFilename(parts);
   return composeFilename({ stem: `${parts.stem} (${n + 1})`, ext: parts.ext });
 };
 
+export type AvailableFilename = { filename: string; index: number };
+
+/**
+ * Finds the first numbered filename variant whose exact title is free on
+ * Commons, starting at `startIndex`. Returns the chosen index so callers can
+ * resume the search past it if the upload itself later reports a collision
+ * (e.g. `exists-normalized`, which the exact-title check can't detect upfront).
+ */
 export const findAvailableFilename = async (
   parts: FilenameParts,
-): Promise<string> => {
-  for (let n = 0; n < 30; n++) {
+  startIndex = 0,
+): Promise<AvailableFilename> => {
+  for (let n = startIndex; n < MAX_FILENAME_ATTEMPTS; n++) {
     const candidate = withSuffix(parts, n);
     if (await isTitleAvailable(`File:${candidate}`)) {
-      return candidate;
+      return { filename: candidate, index: n };
     }
   }
   throw new Error(

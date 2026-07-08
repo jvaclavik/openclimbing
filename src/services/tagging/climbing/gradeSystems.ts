@@ -91,6 +91,13 @@ export const GRADE_SYSTEMS = [
     minor: true,
     description: 'Polish grading system.',
   },
+  {
+    key: 'fb',
+    name: 'Fontainebleau',
+    flags: '🇪🇺',
+    minor: true,
+    description: 'Fontainebleau grading system for bouldering.',
+  },
 ];
 
 export type GradeSystem = (typeof GRADE_SYSTEMS)[number]['key'];

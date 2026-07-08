@@ -64,6 +64,38 @@ export type UploadProgressEvent = {
   total: number;
 };
 
+// Warnings that mean "a file already occupies this name" — retrying with a
+// different filename (e.g. a numeric suffix) can succeed. `exists-normalized`
+// fires when a file with the same name but different extension case/spelling
+// exists (e.g. `Foo.JPG`/`Foo.jpeg`), which the exact-title availability check
+// can't catch beforehand.
+const FILENAME_COLLISION_WARNING_KEYS = new Set([
+  'exists',
+  'exists-normalized',
+  'page-exists',
+]);
+
+// Renaming can't help these — the exact file content is already on Commons.
+const NON_RETRYABLE_WARNING_KEYS = new Set(['duplicate', 'duplicate-archive']);
+
+export class CommonsUploadWarningError extends Error {
+  readonly warningKeys: string[];
+
+  constructor(message: string, warningKeys: string[]) {
+    super(message);
+    this.name = 'CommonsUploadWarningError';
+    this.warningKeys = warningKeys;
+  }
+
+  /** True when the only issue is a name clash that a rename could resolve. */
+  get isFilenameCollision(): boolean {
+    if (this.warningKeys.some((k) => NON_RETRYABLE_WARNING_KEYS.has(k))) {
+      return false;
+    }
+    return this.warningKeys.some((k) => FILENAME_COLLISION_WARNING_KEYS.has(k));
+  }
+}
+
 type UploadArgs = {
   file: Blob;
   filename: string;
@@ -143,10 +175,11 @@ export const uploadFile = async ({
   }
   if (result.upload?.result !== 'Success') {
     const warningKeys = Object.keys(result.upload?.warnings ?? {});
-    throw new Error(
+    throw new CommonsUploadWarningError(
       `Wikimedia Commons upload not successful: ${result.upload?.result}${
         warningKeys.length ? ` (warnings: ${warningKeys.join(', ')})` : ''
       }`,
+      warningKeys,
     );
   }
   return result;
