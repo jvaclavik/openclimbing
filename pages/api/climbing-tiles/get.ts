@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { addCorsAndCache } from '../../../src/server/climbing-tiles/addCorsAndCache';
 import {
+  ClimbingFeatureNotFoundError,
   getClimbingFeature,
   parseFeatureId,
 } from '../../../src/server/climbing-tiles/getClimbingFeature';
@@ -49,6 +50,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.status(200).setHeader('Content-Type', 'application/json').send(feature);
   } catch (err) {
+    if (err instanceof ClimbingFeatureNotFoundError) {
+      res.status(404).send(String(err));
+      return;
+    }
     console.error(err); // eslint-disable-line no-console
     res.status(500).send(String(err));
   }
