@@ -72,6 +72,38 @@ const getRow = (osmType: OsmType, osmId: number) =>
     >(`SELECT * FROM climbing_features WHERE "osmType" = ? AND "osmId" = ?`)
     .get(osmType, osmId);
 
+// Batch variant of getRow() - fetches all members of one relation level with a
+// single query per osmType (`osmId IN (...)`) instead of one query per member.
+// Returns a map keyed by `${osmType}/${osmId}`.
+const getRows = (
+  members: ClimbingFeatureFull['members'],
+): Map<string, ClimbingFeaturesRow> => {
+  const result = new Map<string, ClimbingFeaturesRow>();
+  if (!members?.length) {
+    return result;
+  }
+
+  const idsByType = new Map<OsmType, Set<number>>();
+  for (const { type, ref } of members) {
+    (idsByType.get(type) ?? idsByType.set(type, new Set()).get(type)!).add(ref);
+  }
+
+  for (const [osmType, idSet] of idsByType) {
+    const ids = [...idSet];
+    const placeholders = ids.map(() => '?').join(',');
+    const rows = getDb()
+      .prepare<[OsmType, ...number[]], ClimbingFeaturesRow>(
+        `SELECT * FROM climbing_features WHERE "osmType" = ? AND "osmId" IN (${placeholders})`,
+      )
+      .all(osmType, ...ids);
+    for (const row of rows) {
+      result.set(`${row.osmType}/${row.osmId}`, row);
+    }
+  }
+
+  return result;
+};
+
 const buildGeometry = (row: ClimbingFeaturesRow): Geometry =>
   row.line
     ? { type: 'LineString', coordinates: JSON.parse(row.line) }
@@ -104,8 +136,9 @@ const buildMemberTree = (
   visited: Set<string>,
 ): ClimbingFeatureFull[] => {
   const result: ClimbingFeatureFull[] = [];
+  const rows = getRows(members); // one query per osmType, not per member
   for (const { type, ref } of members ?? []) {
-    const row = getRow(type, ref);
+    const row = rows.get(`${type}/${ref}`);
     if (!row) continue; // member not in climbing DB (e.g. geometry-only node)
 
     const feature = buildBaseFeature(row);
