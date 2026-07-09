@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { useQuery } from 'react-query';
-import RadarIcon from '@mui/icons-material/Radar';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import {
@@ -21,6 +20,7 @@ import { useMobileMode } from '../../helpers';
 import { useMapStateContext } from '../../utils/MapStateContext';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
 import { applyRadar, isInRadarCoverage, removeRadar } from './radarLayer';
+import { CloudRainIcon } from './CloudRainIcon';
 
 type RadarFrame = { ts: string; time: string };
 
@@ -99,7 +99,10 @@ const RadarButton = ({ open, active, onClick }: RadarButtonProps) => {
           $isOpened={open}
           size={isMobileMode ? 'large' : 'medium'}
         >
-          <RadarIcon fontSize="small" color={active ? 'primary' : 'inherit'} />
+          <CloudRainIcon
+            fontSize="small"
+            color={active ? 'primary' : 'inherit'}
+          />
         </StyledIconButton>
       </Tooltip>
     </Badge>
