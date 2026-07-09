@@ -92,10 +92,9 @@ const getRows = (
     const ids = [...idSet];
     const placeholders = ids.map(() => '?').join(',');
     const rows = getDb()
-      .prepare<
-        [OsmType, ...number[]],
-        ClimbingFeaturesRow
-      >(`SELECT * FROM climbing_features WHERE "osmType" = ? AND "osmId" IN (${placeholders})`)
+      .prepare<[OsmType, ...number[]], ClimbingFeaturesRow>(
+        `SELECT * FROM climbing_features WHERE "osmType" = ? AND "osmId" IN (${placeholders})`,
+      )
       .all(osmType, ...ids);
     for (const row of rows) {
       result.set(`${row.osmType}/${row.osmId}`, row);
