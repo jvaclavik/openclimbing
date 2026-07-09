@@ -21,6 +21,24 @@ const nextConfig = {
     defaultLocale: 'default',
     localeDetection: false,
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // fetchFeatureFromTiles() dynamically imports the climbing-tiles SQLite
+      // code behind an isServer() guard. Webpack still emits that async chunk
+      // for the browser build, so null out the node-only deps to keep it
+      // compiling (the chunk is never executed client-side).
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'better-sqlite3': false,
+      };
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default withSentryConfig(nextConfig, {
