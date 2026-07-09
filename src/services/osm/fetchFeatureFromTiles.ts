@@ -7,6 +7,7 @@ import { fetchSchemaTranslations } from '../tagging/translations';
 import { getShortId } from '../helpers';
 import { CLIMBING_TILES_HOST } from './consts';
 import { fetchFeature } from './osmApi';
+import { wasRecentlyEdited } from './recentlyEditedFeatures';
 
 /**
  * The GET /api/climbing-tiles/get response is already shaped as a GeoJSON
@@ -48,6 +49,12 @@ const getFromApi = async (apiId: OsmId): Promise<ClimbingFeatureFull> => {
  * using fetchFeature() directly so they always get up-to-date OSM data.
  */
 export const fetchFeatureFromTiles = async (apiId: OsmId): Promise<Feature> => {
+  // A feature edited in this session must always come fresh from OSM - the
+  // climbing-tiles DB only refreshes nightly and would show the pre-edit state.
+  if (wasRecentlyEdited(apiId)) {
+    return fetchFeature(apiId);
+  }
+
   try {
     const full = isServer()
       ? await getFromSqlite(apiId)
