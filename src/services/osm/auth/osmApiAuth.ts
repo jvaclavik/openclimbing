@@ -11,6 +11,7 @@ import { getApiId, getFullOsmappLink, getUrlOsmId } from '../../helpers';
 import { Feature, FeatureTags, LonLat, OsmId, SuccessInfo } from '../../types';
 import { OSM_WEBSITE } from '../consts';
 import { getFirstExistingId } from '../getFirstExistingId';
+import { markFeatureAsRecentlyEdited } from '../recentlyEditedFeatures';
 import * as api from './api';
 import { getDiffXml } from './getDIffXml';
 import { xmljsBuildOsm } from './xmlHelpers';
@@ -123,6 +124,14 @@ export const saveChanges = async (
 
   // TODO invalidate all changed also in server (?)
   clearFetchCache();
+
+  // Skip the (nightly) climbing-tiles DB for everything we just touched, so the
+  // FeaturePanel shows fresh OSM data right after the edit. See fetchFeatureFromTiles().
+  markFeatureAsRecentlyEdited(original.osmMeta);
+  markFeatureAsRecentlyEdited(firstId);
+  changes.forEach(({ shortId }) =>
+    markFeatureAsRecentlyEdited(getApiId(shortId)),
+  );
 
   return {
     type: 'edit',
