@@ -8,7 +8,6 @@ import {
   ImageDefFromCenter,
   ImageDefFromTag,
   isTag,
-  OsmId,
 } from '../../src/services/types';
 import { getImageFromApi } from '../../src/services/images/getImageFromApi';
 import { getLogo, ProjectLogo } from '../../src/server/images/logo';
@@ -24,7 +23,6 @@ import { Size } from '../../src/components/FeaturePanel/FeatureImages/types';
 import { getApiId, getShortId } from '../../src/services/helpers';
 import { renderStyledHtml } from '../../src/server/images/renderStyledHtml';
 import { fetchWithMemberFeatures } from '../../src/services/osm/fetchWithMemberFeatures';
-import { getClimbingFeature } from '../../src/server/climbing-tiles/getClimbingFeature';
 import { mockSchemaTranslations } from '../../src/services/tagging/translations';
 import translations from '@openstreetmap/id-tagging-schema/dist/translations/en.json';
 import { intl } from '../../src/services/intl';
@@ -149,33 +147,6 @@ const renderSvg = async (
   };
 };
 
-/**
- * Loads the feature for the OG image. Fast path reads it from the local
- * climbing-tiles SQLite DB (no OSM/Overpass round-trip). Falls back to the OSM
- * full fetch when the feature is not in the DB, on any error, or when the
- * caller explicitly asks for fresh data (`?fresh=1`).
- */
-const getOgFeature = async (
-  osmId: OsmId,
-  nocache: boolean,
-): Promise<Feature> => {
-  if (!nocache) {
-    try {
-      return (await getClimbingFeature(
-        osmId.type,
-        osmId.id,
-      )) as unknown as Feature;
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(
-        'og-image: climbing-tiles miss, falling back to OSM:',
-        e instanceof Error ? e.message : e,
-      );
-    }
-  }
-  return fetchWithMemberFeatures(osmId, { nocache });
-};
-
 // on vercel node ~800ms in total
 // - api/image: 838ms; fetchFeature: 496ms, getImage: 102ms, renderSvg: 38ms, svg2png: 202ms
 // - api/image: 953ms; fetchFeature: 765ms, getImage: 0ms, renderSvg: 23ms, svg2png: 165ms
@@ -187,7 +158,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const osmId = getApiId(req.query.id as string);
     const nocache = req.query.fresh === '1' || req.query.fresh === 'true';
-    const feature = await getOgFeature(osmId, nocache);
+    const feature = await fetchWithMemberFeatures(osmId, { nocache }); // TODO
     const photoIndex = parsePhotoIndex(req.query.photoIndex);
     const selectedDef = feature.imageDefs?.[photoIndex];
     if (!selectedDef) {
