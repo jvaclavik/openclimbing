@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
 import nextCookies from 'next-cookies';
 import Cookies from 'js-cookie';
-import { clearFeatureCache, fetchFeature } from '../../services/osm/osmApi';
+import { clearFeatureCache } from '../../services/osm/osmApi';
+import { fetchFeatureFromTiles } from '../../services/osm/fetchFeatureFromTiles';
 import { fetchJson } from '../../services/fetch';
 import { isServer } from '../helpers';
 import { getCoordsFeature } from '../../services/getCoordsFeature';
@@ -109,13 +110,16 @@ export const getInitialFeature = async (
 
   if (isServer()) {
     // we need always fresh OSM element, b/c user can edit a feature and refresh the page
-    // (other requests like overpass may be cached)
+    // (other requests like overpass may be cached) - only matters for the OSM fallback
     clearFeatureCache(apiId);
   }
 
   const t1 = new Date().getTime();
 
-  const initialFeature = await fetchFeature(apiId);
+  // Fast path: read the feature from the climbing-tiles SQLite DB (server) or
+  // the /api/climbing-tiles/get endpoint (browser). Falls back to OSM/Overpass
+  // when the feature is not in the DB (e.g. non-climbing POI) or on any error.
+  const initialFeature = await fetchFeatureFromTiles(apiId);
   saveLastUrl(initialFeature, ctx);
 
   const t2 = new Date().getTime();
