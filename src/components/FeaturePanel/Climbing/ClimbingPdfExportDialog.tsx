@@ -865,7 +865,7 @@ const RoutesSummary = ({
                   {name}
                 </RouteName>
                 <RouteBadgesWrap>
-                  <ClimbingBadges feature={route.feature} />
+                  <ClimbingBadges feature={route.feature} dense />
                 </RouteBadgesWrap>
                 {description ? (
                   <RouteDescription>{description}</RouteDescription>

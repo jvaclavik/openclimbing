@@ -812,6 +812,13 @@ export default {
   'climbing_rock.trachyandesite': 'znělec',
   'climbing_rock.tuff': 'sopečný tuf',
 
+  'climbing_start.label': 'Start',
+  'climbing_start.sit': 'ze sedu',
+  'climbing_start.stand': 'ze stoje',
+  'climbing_start.low': 'z nízké pozice',
+  'climbing_start.crouch': 'z podřepu',
+  'climbing_start.jump': 'ze skoku',
+
   'editdialog.add_value': 'Přidat',
   'editdialog.all_values_added': 'Všechny hodnoty byly přidány',
   'editdialog.custom_value': 'Vlastní hodnota',
