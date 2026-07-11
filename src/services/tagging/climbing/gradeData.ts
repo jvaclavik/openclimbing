@@ -11,7 +11,7 @@ type GradeTable = Record<GradeSystem, Array<string>>;
 //               Saxon                          UK Tech                 Norwegian               Polish
 export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_class, V Grade, UK Tech, UK ADJ, FB|French British, Norwegian|Scandinavian, WI,   Mixed, Polish,  Fontainebleau
 1-,           1,      I,           4,             VB-,     1,       M,      1,                 1-,                     WI2,  M2,    I-,      2-
-1,            1,      I,           5,             VB-,     1,       M,      1,                 1,                      WI2,  M2,    I,       2-
+1,            1,      I,           5.0,           VB-,     1,       M,      1,                 1,                      WI2,  M2,    I,       2-
 1+,           1,      I,           5.0,           VB-,     1,       M,      1,                 1+,                     WI2,  M2,    I+,      2-
 2-,           2,      II,          5.1,           VB-,     2,       M/D,    1,                 2-,                     WI2,  M2,    II-,     2-
 2,            2,      II,          5.1,           VB-,     2,       M/D,    1,                 2,                      WI2,  M2,    II,      2
@@ -37,9 +37,9 @@ export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_clas
 6+,           5c+,    VIIc,        5.10-,         V0,      5a/5b,   E1,     4c,                6-,                     WI6,  M6,    VI,      4+
 6+/7-,        6a,     VIIc/VIIIa,  5.10a/b,       V0,      5a/5b,   E1,     4c,                6-,                     WI6,  M6,    VI/VI+,  5-
 7-,           6a/6a+, VIII,        5.10b,         V0+,     5b,      E1/E2,  5a,                6-/6,                   WI6,  M6,    VI+,     5-
-7-,           6a+,    VIII,        5.10,          V0+,     5b,      E1/E2,  5a,                6-/6,                   WI6,  M6,    VI+,     5-
-7-,           6a+,    VIIIa,       5.10,          V0+,     5b,      E1/E2,  5a,                6-/6,                   WI6,  M6,    VI+,     5-
-7-/7,         6a+/6b, VIIIa/VIIIb, 5.10b/c,       V0,      5a/5b,   E1,     4c,                6,                      WI6,  M6,    VI+/1,   5-
+7-,           6a+,    VIII,        5.10,          V0+,     5b,      E1/E2,  5a,                6-/6,                   WI6,  M6,    VI+,     5
+7-,           6a+,    VIIIa,       5.10,          V0+,     5b,      E1/E2,  5a,                6-/6,                   WI6,  M6,    VI+,     5
+7-/7,         6a+/6b, VIIIa/VIIIb, 5.10b/c,       V0,      5a/5b,   E1,     4c,                6,                      WI6,  M6,    VI+/1,   5
 7,            6b,     VIIIb,       5.10b/c,       V1,      5b/5c,   E2,     5b,                6,                      WI7,  M7,    VI.1,    5+
 7,            6b,     VIIIb,       5.10c,         V1,      5b/5c,   E2,     5b,                6,                      WI7,  M7,    VI.1/1+, 5+
 7/7+,         6b/6b+, VIIIb/VIIIc, 5.10+,         V1,      5b/5c,   E2,     5b,                6,                      WI7,  M7,    VI.1+,   5+
@@ -62,12 +62,12 @@ export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_clas
 9-,           7b/7b+, IXc/Xa,      5.12b/c,       V4,      6b,      E5,     6c,                8,                      WI8,  M8,    VI.4,    6B
 9-,           7b+,    Xa,          5.12c,         V4,      6b,      E5,     6c,                8,                      WI8,  M8,    VI.4/4+, 6B
 9-/9,         7b+/7c, Xa/Xb,       5.12c,         V4,      6b,      E5,     6c,                8,                      WI8,  M8,    VI.4+,   6B
-9,            7c,     Xb,          5.12+,         V4/V5,   6b/6c,   E6,     6c+,               8/8+,                   WI9,  M9,    VI.4+/5, 6B/6C
+9,            7c,     Xb,          5.12+,         V4/V5,   6b/6c,   E6,     6c+,               8/8+,                   WI9,  M9,    VI.4+/5, 6B+
 9/9+,         7c/7c+, Xb/Xc,       5.12c/d,       V4/V5,   6b/6c,   E6,     6c+,               8+,                     WI9,  M9,    VI.5,    6B/6C
 9+,           7c+,    Xc,          5.13a,         V5,      6c,      E6/E7,  7a,                8+,                     WI9,  M9,    VI.5/5+, 6C
 9+/10-,       7c+/8a, Xc/XIa,      5.13-,         V5,      6c,      E6/E7,  7a,                8+/9-,                  WI9,  M9,    VI.5+,   6C
 9+/10-,       8a,     Xc/XIa,      5.13a/b,       V5,      6c,      E6/E7,  7a,                8+/9-,                  WI9,  M9,    VI.5+,   6C
-9+/10-,       8a,     Xc/XIa,      5.13b,         V5,      6c,      E6/E7,  7a,                8+/9-,                  WI9,  M9,    VI.5+,   6C
+9+/10-,       8a,     Xc/XIa,      5.13b,         V5,      6c,      E6/E7,  7a,                8+/9-,                  WI9,  M9,    VI.5+,   6C+
 10-,          8a/8a+, Xc/XIa,      5.13,          V6,      6c,      E7,     7a+,               9-,                     WI9,  M9,    VI.5+,   7A
 10-,          8a+,    XIa,         5.13b/c,       V6,      6c,      E7,     7a+,               9-/9,                   WI9,  M9,    VI.5+,   7A
 10-,          8a+,    XIa,         5.13c,         V6,      6c,      E7,     7a+,               9-/9,                   WI9,  M9,    VI.5+,   7A
@@ -81,29 +81,29 @@ export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_clas
 11-,          8c,     XIIa,        5.14b,         V8,      7a,      E9,     7b+,               9+,                     WI10, M10,   VI.7,    7B
 11-,          8c/8c+, XIIa,        5.14,          V8,      7a,      E9,     7b+,               9+/10-,                 WI10, M10,   VI.7,    7B
 11-/11,       8c+,    XIIa/XIIb,   5.14b/c,       V8,      7a,      E9,     7b+,               10-,                    WI10, M10,   VI.7,    7B
-11-/11,       8c+/9a, XIIa/XIIb,   5.14c,         V8,      7a,      E9,     7b+,               10-,                    WI10, M10,   VI.7/7+, 7B
+11-/11,       8c+/9a, XIIa/XIIb,   5.14c,         V8,      7a,      E9,     7b+,               10-,                    WI10, M10,   VI.7/7+, 7B+
 11,           9a,     XIIb,        5.14+,         V9,      7a/7b,   E9/E10, 7c,                10-/10,                 WI10, M10,   VI.7+,   7C
 11/11+,       9a/9a+, XIIb/XIIc,   5.14c/d,       V9,      7a/7b,   E9/E10, 7c,                10,                     WI10, M10,   VI.7+/8, 7C
-11+,          9a+,    XIIc,        5.14d,         V10,     7b,      E10,    7c+,               10,                     WI10, M10,   VI.8,    7C+
-11+,          9a+/9b, XIIc/XIIIa,  5.15a,         V10,     7b,      E10,    7c+,               10,                     WI10, M10,   VI.8,    7C+
-11+/12-,      9b,     XIIIa,       5.15-,         V10,     7b,      E10,    7c+,               10/10+,                 WI10, M10,   VI.8,    7C+
-11+/12-,      9b/9b+, XIIIa/XIIIb, 5.15a/b,       V10,     7b,      E10,    7c+,               10+,                    WI10, M10,   VI.8/8+, 7C+
-12-,          9b+,    XIIIb,       5.15b,         V10/V11, 7b,      E11,    7c+/8a,            10+/11-,                WI11, M11,   VI.8+,   7C+/8A
-12-/12,       9b+/9c, XIIIb/XIIIc, 5.15,          V10/V11, 7b,      E11,    7c+/8a,            11-,                    WI11, M11,   VI.8+/9, 7C+/8A
-12,           9c,     XIIIc,       5.15c,         V11,     7b,      E11,    8a,                11-,                    WI11, M11,   VI.9,    8A
-12,           9c,     XIIIc,       5.15c,         V11,     7b,      E11,    8a,                11-/11+,                WI11, M11,   VI.9,    8A
-12/12+,       9c/9c+, XIIIc,       5.15+,         V11,     7b,      E11,    8a,                11,                     WI11, M11,   VI.9/9+, 8A
-12+,          9c+,    XIIIc,       5.15+,         V12,     >7b,     >E11,   8a+/8b,            11,                     WI11, M11,   VI.9+,   8A+
-12+/13-,      10a,    >XIIIc,      5.15c/d,       V12,     >7b,     >E11,   8a+/8b,            11/11+,                 WI11, M11,   VI.9+,   8A+
-13-,          >10a,   >XIIIc,      5.15c/d,       V13,     >7b,     >E11,   8b,                11+,                    WI11, M11,   >VI.9+,  8B
-13-/13,       >10a,   >XIIIc,      5.15d,         V13,     >7b,     >E11,   8b,                11+,                    WI11, M11,   >VI.9+,  8B
-13,           >10a,   >XIIIc,      5.15d,         V14,     >7b,     >E11,   8b+,               11+,                    WI12, M12,   >VI.9+,  8B+
+11+,          9a+,    XIIc,        5.15a,         V10,     7b,      E10,    7c+,               10,                     WI10, M10,   VI.8,    7C+
+11+,          9a+/9b, XIIc/XIIIa,  5.15a/b,       V10,     7b,      E10,    7c+,               10,                     WI10, M10,   VI.8,    7C+
+11+/12-,      9b,     XIIIa,       5.15b,         V10,     7b,      E10,    7c+,               10/10+,                 WI10, M10,   VI.8,    7C+
+11+/12-,      9b/9b+, XIIIa/XIIIb, 5.15b/c,       V10,     7b,      E10,    7c+,               10+,                    WI10, M10,   VI.8/8+, 7C+
+12-,          9b+,    XIIIb,       5.15c,         V10/V11, 7b,      E11,    7c+/8a,            10+/11-,                WI11, M11,   VI.8+,   7C+/8A
+12-/12,       9b+/9c, XIIIb/XIIIc, 5.15c/d,       V10/V11, 7b,      E11,    7c+/8a,            11-,                    WI11, M11,   VI.8+/9, 7C+/8A
+12,           9c,     XIIIc,       5.15d,         V11,     7b,      E11,    8a,                11-,                    WI11, M11,   VI.9,    8A
+12,           9c,     XIIIc,       5.15d,         V11,     7b,      E11,    8a,                11-/11+,                WI11, M11,   VI.9,    8A
+12/12+,       9c/9c+, XIIIc,       >5.15d,        V11,     7b,      E11,    8a,                11,                     WI11, M11,   VI.9/9+, 8A
+12+,          9c+,    XIIIc,       >5.15d,        V12,     >7b,     >E11,   8a+/8b,            11,                     WI11, M11,   VI.9+,   8A+
+12+/13-,      10a,    >XIIIc,      >5.15d,        V12,     >7b,     >E11,   8a+/8b,            11/11+,                 WI11, M11,   VI.9+,   8A+
+13-,          >10a,   >XIIIc,      >5.15d,        V13,     >7b,     >E11,   8b,                11+,                    WI11, M11,   >VI.9+,  8B
+13-/13,       >10a,   >XIIIc,      >5.15d,        V13,     >7b,     >E11,   8b,                11+,                    WI11, M11,   >VI.9+,  8B
+13,           >10a,   >XIIIc,      >5.15d,        V14,     >7b,     >E11,   8b+,               11+,                    WI12, M12,   >VI.9+,  8B+
 13/13+,       >10a,   >XIIIc,      >5.15d,        V14,     >7b,     >E11,   8b+,               11+/12-,                WI12, M12,   >VI.9+,  8B+
 13+,          >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12-,                    WI13, M13,   >VI.9+,  8C
-13+,          >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12-/12,                 WI13, M13,   >VI.9+,  8C
-13+/14-,      >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12,                     WI13, M13,   >VI.9+,  8C
-13+/14-,      >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12/12+,                 WI13, M13,   >VI.9+,  8C
-14-,          >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c+,               12+,                    WI13, M13,   >VI.9+,  8C`;
+13+,          >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12-/12,                 WI13, M13,   >VI.9+,  8C+
+13+/14-,      >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12,                     WI13, M13,   >VI.9+,  9A
+13+/14-,      >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c,                12/12+,                 WI13, M13,   >VI.9+,  9A+
+14-,          >10a,   >XIIIc,      >5.15d,        V15,     >7b,     >E11,   8c+,               12+,                    WI13, M13,   >VI.9+,  9B`;
 export const gradeColors = {
   '1-': { light: '#668f16', dark: '#7aac19' },
   '1': { light: '#668f16', dark: '#7aac19' },
