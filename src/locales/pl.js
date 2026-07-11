@@ -384,6 +384,10 @@ export default {
   'featurepanel.type_crag': 'Rejon',
   'featurepanel.routes': 'drogi',
   'featurepanel.hidden_crags': 'ukryte rejony',
+  'featurepanel.error.title': 'Coś poszło nie tak podczas wyświetlania tego miejsca.',
+  'featurepanel.error.description':
+    'Reszta mapy nadal działa. Spróbuj wrócić lub otworzyć inne miejsce.',
+  'featurepanel.error.back': 'Wstecz',
   'photo_coverage.tooltip': '__withPhoto__ z __total__ dróg (__percent__ %) jest narysowanych na zdjęciu',
   'opening_hours.all_day': '24 godziny',
   'opening_hours.open': 'Otwarte: __todayTime__',

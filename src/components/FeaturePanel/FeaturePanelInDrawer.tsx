@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import React, { Ref } from 'react';
 import { FeaturePanel } from './FeaturePanel';
+import { FeaturePanelErrorBoundary } from './FeaturePanelErrorBoundary';
 import { Drawer } from '../utils/Drawer';
 import {
   DRAWER_PREVIEW_HEIGHT,
@@ -44,7 +45,9 @@ export const FeaturePanelInDrawer = ({
       collapsedHeight={collapsedHeight}
       scrollRef={scrollRef}
     >
-      <FeaturePanel headingRef={headingRef} />
+      <FeaturePanelErrorBoundary>
+        <FeaturePanel headingRef={headingRef} />
+      </FeaturePanelErrorBoundary>
     </Drawer>
   );
 };

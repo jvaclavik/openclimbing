@@ -184,6 +184,9 @@ export default {
   'featurepanel.sectors': '岩場',
   'featurepanel.routes': '路線',
   'featurepanel.hidden_crags': '隱藏岩場',
+  'featurepanel.error.title': '顯示此地點時發生問題。',
+  'featurepanel.error.description': '地圖其他部分仍可正常運作。請嘗試返回或開啟其他地點。',
+  'featurepanel.error.back': '返回',
 
   'opening_hours.all_day': '24 小時',
   'opening_hours.open': '營業中：__todayTime__',

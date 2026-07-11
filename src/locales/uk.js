@@ -385,6 +385,10 @@ export default {
   'featurepanel.type_crag': 'Скеля',
   'featurepanel.routes': 'маршрути',
   'featurepanel.hidden_crags': 'приховані скелі',
+  'featurepanel.error.title': 'Під час показу цього місця сталася помилка.',
+  'featurepanel.error.description':
+    'Решта карти працює. Спробуйте повернутися назад або відкрити інше місце.',
+  'featurepanel.error.back': 'Назад',
   'photo_coverage.tooltip': '__withPhoto__ із __total__ маршрутів (__percent__ %) намальовано на фото',
   'opening_hours.all_day': '24 години',
   'opening_hours.open': 'Відкрито: __todayTime__',
