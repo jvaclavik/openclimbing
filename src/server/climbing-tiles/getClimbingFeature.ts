@@ -125,6 +125,10 @@ const buildBaseFeature = (row: ClimbingFeaturesRow): ClimbingFeatureFull => {
     osmMeta: { type: osmType, id: osmId },
     tags: parsedTags,
     members: members ? JSON.parse(members) : undefined,
+    // Always default to [] (like the Overpass path's leaf/visited case) so
+    // consumers can safely iterate memberFeatures without null-guards. It's
+    // overwritten with the resolved children in buildMemberTree() when present.
+    memberFeatures: [],
     center,
     geometry: buildGeometry(row),
     imageDefs: getImageDefs(parsedTags, osmType, center),

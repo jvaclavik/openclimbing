@@ -174,7 +174,7 @@ describe('getClimbingFeature (dummy SQLite DB)', () => {
     const route = await getClimbingFeature('node', 300);
 
     expect(route.osmMeta).toEqual({ type: 'node', id: 300 });
-    expect(route.memberFeatures).toBeUndefined();
+    expect(route.memberFeatures).toEqual([]);
     expect(route.parentFeatures?.map((p) => p.osmMeta)).toEqual([
       { type: 'relation', id: 200 },
       { type: 'relation', id: 100 },
