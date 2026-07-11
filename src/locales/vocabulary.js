@@ -884,6 +884,13 @@ export default {
   'climbing_rock.trachyandesite': 'trachyandesite',
   'climbing_rock.tuff': 'tuff',
 
+  'climbing_start.label': 'Start',
+  'climbing_start.sit': 'sit start',
+  'climbing_start.stand': 'stand start',
+  'climbing_start.low': 'low start',
+  'climbing_start.crouch': 'crouch start',
+  'climbing_start.jump': 'jump start',
+
   'editdialog.add_value': 'Add',
   'editdialog.all_values_added': 'All values added',
   'editdialog.custom_value': 'Custom value',

@@ -5,6 +5,7 @@ import { Chip, Stack, Tooltip } from '@mui/material';
 import React from 'react';
 import { t } from '../../../services/intl';
 import { CLIMBING_ROCK_OPTIONS } from '../../../services/tagging/climbing/climbingRockData';
+import { CLIMBING_START_OPTIONS } from '../../../services/tagging/climbing/climbingAttributes';
 import { Feature, TranslationId } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 
@@ -162,6 +163,8 @@ const renderTitle = (
 type Props = {
   feature: Feature;
   hasTooltip?: boolean;
+  dense?: boolean;
+  subtle?: boolean;
 };
 
 const MaterialBadge = ({ feature }) => {
@@ -191,9 +194,35 @@ const MaterialBadge = ({ feature }) => {
   );
 };
 
-export const ClimbingBadges = ({ feature, hasTooltip }: Props) => {
+const StartBadge = ({ feature }: { feature: Feature }) => {
+  const start = feature.tags?.['climbing:start'];
+  if (!start) return null;
+
+  const translationItem = CLIMBING_START_OPTIONS.find(
+    ({ value }) => value === start,
+  );
+  const startLabel = translationItem?.translationKey
+    ? t(translationItem.translationKey)
+    : start;
+
+  return <StyledChip label={startLabel} size="small" color="info" />;
+};
+
+export const ClimbingBadges = ({
+  feature,
+  hasTooltip,
+  dense,
+  subtle,
+}: Props) => {
   return (
-    <Stack direction="row" spacing={0.5} flexWrap="wrap" paddingBottom={2}>
+    <Stack
+      direction="row"
+      useFlexGap
+      gap={0.5}
+      flexWrap="wrap"
+      paddingBottom={dense ? 0 : 2}
+      sx={subtle ? { opacity: 0.6 } : undefined}
+    >
       {Object.entries(climbingTypes).map(
         ([_key, { value, label, description }]) =>
           feature.tags?.[value] === 'yes' ? (
@@ -236,6 +265,7 @@ export const ClimbingBadges = ({ feature, hasTooltip }: Props) => {
           ) : null;
         },
       )}
+      <StartBadge feature={feature} />
       <MaterialBadge feature={feature} />
     </Stack>
   );

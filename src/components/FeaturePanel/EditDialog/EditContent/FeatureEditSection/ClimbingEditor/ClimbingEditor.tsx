@@ -20,6 +20,7 @@ import styled from '@emotion/styled';
 import { ClimbingGradesEditor } from './ClimbingGradesEditor';
 import { DrawClimbingRoutesBanner } from './DrawClimbingRoutesBanner';
 import { ClimbingRockSelect } from '../ClimbingRockSelect';
+import { ClimbingStartSelect } from '../ClimbingStartSelect';
 
 const IconContainer = styled.div`
   display: flex;
@@ -128,6 +129,7 @@ export const ClimbingEditor = () => {
           <Box ml={2}>
             <ClimbingGradesEditor />
             <ClimbingRockSelect />
+            <ClimbingStartSelect />
             <ClimbingMultiValuesInner />
           </Box>
         </AccordionDetails>

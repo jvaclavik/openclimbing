@@ -22,6 +22,15 @@ export const INCLINATION_KEYS = [
   'traverse',
 ] as const;
 
+// Values of the single-value `climbing:start` tag (how the climb/boulder starts)
+export const CLIMBING_START_OPTIONS = [
+  { value: 'sit', translationKey: 'climbing_start.sit' },
+  { value: 'stand', translationKey: 'climbing_start.stand' },
+  { value: 'low', translationKey: 'climbing_start.low' },
+  { value: 'crouch', translationKey: 'climbing_start.crouch' },
+  { value: 'jump', translationKey: 'climbing_start.jump' },
+] as const;
+
 export type ClimbingAttributes = {
   materials: string[];
   climbingTypes: string[];

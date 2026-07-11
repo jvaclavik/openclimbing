@@ -25,7 +25,6 @@ import {
 } from '../../../../services/tagging/climbing/routeGrade';
 import { useTheme } from '@mui/material';
 import { Feature, LonLat } from '../../../../services/types';
-import { useMobileMode } from '../../../helpers';
 import { ListBadges } from '../../../MyLists/ListBadges';
 import { ListPickerDialog } from '../../../MyLists/ListPickerDialog';
 import { useMapStateContext } from '../../../utils/MapStateContext';
@@ -299,7 +298,6 @@ const RouteName = (props: {
   selected: boolean;
   highlighted?: boolean;
 }) => {
-  const isMobileMode = useMobileMode();
   return (
     <RouteNameContainer>
       <Typography
@@ -309,7 +307,6 @@ const RouteName = (props: {
       >
         {props.feature.tags?.name}
       </Typography>
-      <ClimbingBadges feature={props.feature} />
     </RouteNameContainer>
   );
 };
@@ -413,6 +410,7 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
               </Stack>
               <RouteDescription feature={feature} />
               <RouteAuthor feature={feature} />
+              <ClimbingBadges feature={feature} dense subtle />
             </NameColumn>
             <RouteGrade feature={feature} />
             <MoreMenuContainer>
