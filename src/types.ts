@@ -1,5 +1,5 @@
 import { Feature as GeojsonFeature, Geometry } from 'geojson';
-import { ImageDef, OsmType } from './services/types';
+import { FeatureProperties, ImageDef, OsmType } from './services/types';
 
 export type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
 
@@ -69,7 +69,9 @@ export type ClimbingFeatureFull = {
   countryCode?: string; // ISO 3166-1 lowercase (root feature only)
   center: [number, number];
   geometry: Geometry;
-  properties: ClimbingTilesProperties & { histogram?: number[] };
+  // Only class/subclass (POI icon), computed from tags like osmToFeature().
+  // Tile-only props (routeCount, histogram, grade, ...) are computed on the FE.
+  properties: FeatureProperties;
 };
 
 export type ClimbingTick = {

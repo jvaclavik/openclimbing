@@ -4,15 +4,20 @@ import { ClimbingFeaturesRow } from '../db/types';
 import { ClimbingFeatureFull } from '../../types';
 import { Feature, OsmType } from '../../services/types';
 import { getApiId } from '../../services/helpers';
-import { convertOsmIdToMapId, getProperties } from './buildTileGeojson';
-import { decodeHistogram } from './overpass/histogram';
+import { convertOsmIdToMapId } from './buildTileGeojson';
 import {
   getImageDefs,
   mergeMemberImageDefs,
 } from '../../services/images/getImageDefs';
 import { getCountryCode } from '../../services/osm/getCountryCode';
+import { getPoiClass } from '../../services/getPoiClass';
 
 const OSM_TYPES: OsmType[] = ['node', 'way', 'relation'];
+
+// Thrown when the feature is not present in the climbing SQLite DB (e.g. a
+// non-climbing POI, or data not yet refreshed). The /get endpoint maps it to a
+// 404 so the client can cheaply fall back to the OSM/Overpass path.
+export class ClimbingFeatureNotFoundError extends Error {}
 
 const mapTypeToOsm: Record<string, OsmType> = {
   '0': 'node',
@@ -110,7 +115,7 @@ const buildGeometry = (row: ClimbingFeaturesRow): Geometry =>
     : { type: 'Point', coordinates: [row.lon, row.lat] };
 
 const buildBaseFeature = (row: ClimbingFeaturesRow): ClimbingFeatureFull => {
-  const { osmType, osmId, lon, lat, tags, members, histogramCode } = row;
+  const { osmType, osmId, lon, lat, tags, members } = row;
   const center: [number, number] = [lon, lat];
   const parsedTags = tags ? JSON.parse(tags) : {};
 
@@ -120,13 +125,19 @@ const buildBaseFeature = (row: ClimbingFeaturesRow): ClimbingFeatureFull => {
     osmMeta: { type: osmType, id: osmId },
     tags: parsedTags,
     members: members ? JSON.parse(members) : undefined,
+    // Always default to [] (like the Overpass path's leaf/visited case) so
+    // consumers can safely iterate memberFeatures without null-guards. It's
+    // overwritten with the resolved children in buildMemberTree() when present.
+    memberFeatures: [],
     center,
     geometry: buildGeometry(row),
     imageDefs: getImageDefs(parsedTags, osmType, center),
-    properties: {
-      ...getProperties(row),
-      histogram: histogramCode ? decodeHistogram(histogramCode) : undefined,
-    },
+    // Only class/subclass (for the POI icon), computed from tags - exactly like
+    // osmToFeature(). Tile-only props (routeCount, histogram, grade, materials,
+    // ...) are intentionally NOT sent: the FeaturePanel derives everything it
+    // needs from `tags` + resolved `memberFeatures`, so shipping the precomputed
+    // tile properties would only bloat the payload. Compute them on the FE.
+    properties: getPoiClass(parsedTags),
   };
 };
 
@@ -182,7 +193,9 @@ export const getClimbingFeature = async (
 ): Promise<ClimbingFeatureFull> => {
   const row = getRow(osmType, osmId);
   if (!row) {
-    throw new Error(`Feature ${osmType}/${osmId} not found`);
+    throw new ClimbingFeatureNotFoundError(
+      `Feature ${osmType}/${osmId} not found`,
+    );
   }
 
   const feature = buildBaseFeature(row);
