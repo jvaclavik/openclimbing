@@ -386,8 +386,7 @@ export default {
   'featurepanel.routes': 'vie',
   'featurepanel.hidden_crags': 'falesie nascoste',
   'featurepanel.error.title': 'Qualcosa è andato storto durante la visualizzazione di questo luogo.',
-  'featurepanel.error.description':
-    'Il resto della mappa funziona ancora. Prova a tornare indietro o ad aprire un altro luogo.',
+  'featurepanel.error.description': 'Il resto della mappa funziona ancora. Prova a tornare indietro o ad aprire un altro luogo.',
   'featurepanel.error.back': 'Indietro',
   'photo_coverage.tooltip': '__withPhoto__ di __total__ vie (__percent__ %) sono disegnate su una foto',
   'opening_hours.all_day': '24 ore',

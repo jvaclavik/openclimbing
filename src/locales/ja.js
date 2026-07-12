@@ -97,8 +97,7 @@ export default {
   'featurepanel.error_network': '地物を取得できません。通信環境を確認してください。',
   'featurepanel.error_deleted': 'この地物は OpenStreetMap で削除済みとしてマークされています。',
   'featurepanel.error.title': 'この場所の表示中に問題が発生しました。',
-  'featurepanel.error.description':
-    '地図の他の部分は引き続き利用できます。前に戻るか、別の場所を開いてみてください。',
+  'featurepanel.error.description': '地図の他の部分は引き続き利用できます。前に戻るか、別の場所を開いてみてください。',
   'featurepanel.error.back': '戻る',
   'featurepanel.info_no_tags': 'この地物にはタグがありません。通常、これは親オブジェクトの形状/位置のみを保持することを意味します。',
   'featurepanel.history_button': '履歴 »',

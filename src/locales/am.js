@@ -35,8 +35,7 @@ export default {
   'featurepanel.error_network': 'ማምጣት አልቻልኩም, የመገናኛ መረብዎን ገመዶች ይመርምሩ',
   'featurepanel.error_deleted': 'ይህ አካል በOpenStreetMap ላይ ተሰርዟል የሚል ምልክት ተደርጎበታል',
   'featurepanel.error.title': 'ይህን ቦታ ሲያሳይ የሆነ ስህተት ተከስቷል።',
-  'featurepanel.error.description':
-    'የተቀረው ካርታ አሁንም ይሰራል። ወደ ኋላ ለመመለስ ወይም ሌላ ቦታ ለመክፈት ይሞክሩ።',
+  'featurepanel.error.description': 'የተቀረው ካርታ አሁንም ይሰራል። ወደ ኋላ ለመመለስ ወይም ሌላ ቦታ ለመክፈት ይሞክሩ።',
   'featurepanel.error.back': 'ተመለስ',
   'featurepanel.history_button': 'ታሪኮች »',
   'featurepanel.details_heading': 'ተጨማሪ መረጃ',

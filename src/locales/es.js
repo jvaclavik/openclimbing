@@ -387,8 +387,7 @@ export default {
   'featurepanel.routes': 'vías',
   'featurepanel.hidden_crags': 'zonas ocultas',
   'featurepanel.error.title': 'Algo salió mal al mostrar este lugar.',
-  'featurepanel.error.description':
-    'El resto del mapa sigue funcionando. Prueba a volver atrás o abrir otro lugar.',
+  'featurepanel.error.description': 'El resto del mapa sigue funcionando. Prueba a volver atrás o abrir otro lugar.',
   'featurepanel.error.back': 'Volver',
   'photo_coverage.tooltip': '__withPhoto__ de __total__ vías (__percent__ %) están dibujadas sobre una foto',
   'opening_hours.all_day': '24 horas',

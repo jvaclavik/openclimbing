@@ -387,8 +387,7 @@ export default {
   'featurepanel.routes': 'Routen',
   'featurepanel.hidden_crags': 'ausgeblendete Felsen',
   'featurepanel.error.title': 'Beim Anzeigen dieses Orts ist etwas schiefgelaufen.',
-  'featurepanel.error.description':
-    'Der Rest der Karte funktioniert weiterhin. Geh zurück oder öffne einen anderen Ort.',
+  'featurepanel.error.description': 'Der Rest der Karte funktioniert weiterhin. Geh zurück oder öffne einen anderen Ort.',
   'featurepanel.error.back': 'Zurück',
   'photo_coverage.tooltip': '__withPhoto__ von __total__ Routen (__percent__ %) sind auf einem Foto eingezeichnet',
   'opening_hours.all_day': '24 Stunden',

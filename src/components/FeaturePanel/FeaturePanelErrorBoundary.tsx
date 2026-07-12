@@ -6,10 +6,7 @@ import { t } from '../../services/intl';
 import { getReactKey } from '../../services/helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { PanelSidePadding } from '../utils/PanelHelpers';
-import {
-  isCrashDebugEnabled,
-  reportReactError,
-} from '../App/crashOverlay';
+import { isCrashDebugEnabled, reportReactError } from '../App/crashOverlay';
 
 type Props = {
   children: React.ReactNode;

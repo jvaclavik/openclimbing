@@ -389,8 +389,7 @@ export default {
   'featurepanel.routes': 'voies',
   'featurepanel.hidden_crags': 'sites masqués',
   'featurepanel.error.title': "Une erreur est survenue lors de l'affichage de ce lieu.",
-  'featurepanel.error.description':
-    "Le reste de la carte fonctionne toujours. Essayez de revenir en arrière ou d'ouvrir un autre lieu.",
+  'featurepanel.error.description': "Le reste de la carte fonctionne toujours. Essayez de revenir en arrière ou d'ouvrir un autre lieu.",
   'featurepanel.error.back': 'Retour',
   'photo_coverage.tooltip': '__withPhoto__ sur __total__ voies (__percent__ %) sont dessinées sur une photo',
   'opening_hours.all_day': '24 heures',

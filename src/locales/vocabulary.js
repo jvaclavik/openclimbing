@@ -404,8 +404,7 @@ export default {
   'featurepanel.routes': 'routes',
   'featurepanel.hidden_crags': 'hidden crags',
   'featurepanel.error.title': 'Something went wrong while showing this place.',
-  'featurepanel.error.description':
-    'The rest of the map still works. Try going back or opening another place.',
+  'featurepanel.error.description': 'The rest of the map still works. Try going back or opening another place.',
   'featurepanel.error.back': 'Go back',
   'photo_coverage.tooltip': '__withPhoto__ of __total__ routes (__percent__\u00A0%) are drawn on a photo',
 
