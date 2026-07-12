@@ -184,6 +184,9 @@ export default {
   'featurepanel.sectors': '岩场',
   'featurepanel.routes': '路线',
   'featurepanel.hidden_crags': '隐藏岩场',
+  'featurepanel.error.title': '显示此地点时出现问题。',
+  'featurepanel.error.description': '地图的其余部分仍可正常使用。请尝试返回或打开其他地点。',
+  'featurepanel.error.back': '返回',
 
   'opening_hours.all_day': '24 小时',
   'opening_hours.open': '营业中：__todayTime__',

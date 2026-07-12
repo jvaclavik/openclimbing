@@ -102,6 +102,29 @@ const recordEntry = (entry: CrashEntry) => {
   console.error('[crashOverlay]', entry.source, entry.message, entry);
 };
 
+/**
+ * Zaznamená React chybu zachycenou lokálním error boundary (např. kolem
+ * FeaturePanelu). Chyba se do window 'error' nedostane (boundary ji pohltí),
+ * takže ji musíme do reportu poslat ručně – ať ji v debug módu vidíme stejně
+ * jako pády zachycené globálním <CrashErrorBoundary>.
+ */
+export const reportReactError = (
+  source: string,
+  error: unknown,
+  componentStack?: string,
+) => {
+  const err = error as { name?: string; message?: string; stack?: string };
+  recordEntry({
+    source,
+    name: err?.name,
+    message: err?.message || String(error),
+    stack: err?.stack,
+    componentStack,
+    time: new Date().toISOString(),
+  });
+  renderVanillaOverlay();
+};
+
 // ---------------------------------------------------------------------------
 // Vanilla DOM overlay (funguje i po unmountu Reactu)
 // ---------------------------------------------------------------------------

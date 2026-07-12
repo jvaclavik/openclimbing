@@ -358,6 +358,9 @@ export default {
   'featurepanel.type_crag': 'Sektor',
   'featurepanel.routes': 'cest',
   'featurepanel.hidden_crags': 'skrytých sektorů',
+  'featurepanel.error.title': 'Při zobrazení tohoto místa se něco pokazilo.',
+  'featurepanel.error.description': 'Zbytek mapy funguje dál. Zkus se vrátit zpět nebo otevřít jiné místo.',
+  'featurepanel.error.back': 'Zpět',
   'photo_coverage.tooltip': '__withPhoto__ z __total__ cest (__percent__\u00A0%) je zakresleno na fotce',
 
   'opening_hours.open': 'Otevřeno: __todayTime__',
