@@ -43,8 +43,15 @@ export const mockSchemaTranslations = (mockTranslations) => {
 export const getPresetTranslation = (key: string): string =>
   translations?.[intl.lang]?.presets?.presets?.[key]?.name ?? `[${key}]`;
 
-export const getPresetTermsTranslation = (key: string) =>
-  translations?.[intl.lang]?.presets?.presets?.[key]?.terms ?? '';
+// id-tagging-schema ships `terms` as a string[] (older builds emitted a single
+// comma-separated string) - normalize both to a string[] so callers don't
+// have to care.
+export const getPresetTermsTranslation = (key: string): string[] => {
+  const terms = translations?.[intl.lang]?.presets?.presets?.[key]?.terms;
+  if (Array.isArray(terms)) return terms;
+  if (typeof terms === 'string') return terms ? terms.split(',') : [];
+  return [];
+};
 
 export const getAllTranslations = () => translations?.[intl.lang];
 
