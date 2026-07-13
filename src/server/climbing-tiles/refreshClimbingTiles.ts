@@ -160,9 +160,6 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   return records;
 };
 
-// Resolves an ISO country code for each record from its lon/lat. next-codegrid
-// runs fully locally (dynamic-imported grid tiles, cached after first hit).
-// 'None' (ocean / unmatched) is stored as null.
 const addCountryCodes = async (
   records: ClimbingFeaturesRow[],
   log: (message: string) => void,
