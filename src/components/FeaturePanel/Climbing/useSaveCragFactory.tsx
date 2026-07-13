@@ -1,6 +1,8 @@
+import * as Sentry from '@sentry/nextjs';
 import { saveChanges } from '../../../services/osm/auth/osmApiAuth';
 import { Feature, FeatureTags, OsmId } from '../../../services/types';
 import { Setter } from '../../../types';
+import { getErrorMessage } from '../../../utils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useSnackbar } from '../../utils/SnackbarContext';
 import { fetchFreshItem } from '../EditDialog/context/itemsHelpers';
@@ -133,9 +135,8 @@ export const useSaveCragFactory = (setIsEditMode: Setter<boolean>) => {
       await reloadFeature(); // saveChanges() already cleared the cache, so this re-fetches fresh data
     } catch (err) {
       console.error('Failed to save climbing crag', err); // eslint-disable-line no-console
-      const message =
-        (err as any)?.responseText ?? (err as any)?.message ?? String(err);
-      showToast(`Save failed: ${message}`, 'error');
+      Sentry.captureException(err);
+      showToast(`Save failed: ${getErrorMessage(err)}`, 'error');
     }
   };
 };

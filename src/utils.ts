@@ -46,6 +46,15 @@ export const getUtfStrikethrough = (text: string) =>
 
 export const join = (a, sep, b) => `${a || ''}${a && b ? sep : ''}${b || ''}`;
 
+// osm-auth's xhr() rejects with the raw XHR ProgressEvent on network failures,
+// which has no .message/.responseText and stringifies to "[object ...Event]".
+export const getErrorMessage = (err: any) => {
+  if (err instanceof Event) {
+    return 'Network error, please check your connection and try again.';
+  }
+  return err?.responseText ?? err?.message ?? String(err);
+};
+
 export const publishDbgObject = (key, value) => {
   if (typeof window !== 'undefined') {
     // @ts-ignore

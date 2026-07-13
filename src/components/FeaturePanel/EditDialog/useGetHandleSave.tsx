@@ -1,8 +1,10 @@
+import * as Sentry from '@sentry/nextjs';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { useEditDialogFeature } from './utils';
 import { useEditContext } from './context/EditContext';
 import { t } from '../../../services/intl';
 import { saveChanges } from '../../../services/osm/auth/osmApiAuth';
+import { getErrorMessage } from '../../../utils';
 import { useSnackbar } from '../../utils/SnackbarContext';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
 
@@ -50,10 +52,11 @@ export const useGetHandleSave = () => {
         handleLogout();
       } else {
         showToast(
-          `${t('editdialog.save_refused')} ${err.responseText ?? err.message ?? err}`,
+          `${t('editdialog.save_refused')} ${getErrorMessage(err)}`,
           'error',
         );
         console.error(err); // eslint-disable-line no-console
+        Sentry.captureException(err);
       }
     }
   };
