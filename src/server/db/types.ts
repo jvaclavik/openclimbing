@@ -21,6 +21,7 @@ export type ClimbingFeaturesRow = {
   familyFriendly?: number | null; // bool
   tags?: string | null; // JSON object of all OSM tags
   members?: string | null; // JSON array of relation members (relations only)
+  countryCode?: string | null; // ISO country code resolved from lon/lat
 };
 
 export type ClimbingStatsRow = {

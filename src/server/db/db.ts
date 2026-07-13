@@ -160,6 +160,20 @@ const runPendingMigrations = (db: Database) => {
 
     console.log(`Database ${DB_PATH} migrated from version 6 to 7`); // eslint-disable-line no-console
   }
+  if (getDbVersion(db) === 7) {
+    db.transaction(() => {
+      const existingColumns = db
+        .prepare<[], { name: string }>(`PRAGMA table_info(climbing_features)`)
+        .all()
+        .map((c) => c.name);
+      if (!existingColumns.includes('countryCode')) {
+        db.exec(`ALTER TABLE climbing_features ADD COLUMN "countryCode" TEXT;`);
+      }
+      db.pragma('user_version = 8');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 7 to 8`); // eslint-disable-line no-console
+  }
 };
 
 // global to allow hot-reload in dev
@@ -175,10 +189,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 7');
+        db.pragma('user_version = 8');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 7`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 8`); // eslint-disable-line no-console
     }
 
     store.db = db;
