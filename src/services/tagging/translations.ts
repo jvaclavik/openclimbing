@@ -26,11 +26,23 @@ export const fetchSchemaTranslations = async () => {
     merge(translations, getOurTranslations(intl.lang));
   } catch (e) {
     console.log('fetchSchemaTranslations() failed, using local npm', e); // eslint-disable-line no-console
-    const localTranslation = await import(
-      `@openstreetmap/id-tagging-schema/dist/translations/en.min.json`
-    );
-    translations[intl.lang] = localTranslation[intl.lang];
-    merge(translations, getOurTranslations(intl.lang));
+    try {
+      // NOTE this is a dynamic import = an async webpack chunk fetched over
+      // the network. Offline it fails too (the chunk is never cached — this
+      // branch never runs while online), and it must NOT reject the whole
+      // call: every offline feature load would crash into the OSM fallback
+      // and show a network error, even with the feature data cached.
+      const localTranslation = await import(
+        `@openstreetmap/id-tagging-schema/dist/translations/en.min.json`
+      );
+      translations[intl.lang] = localTranslation[intl.lang];
+      merge(translations, getOurTranslations(intl.lang));
+    } catch (e2) {
+      console.log('fetchSchemaTranslations() local npm failed too', e2); // eslint-disable-line no-console
+      // proceed with empty translations — getPresetTranslation() falls back
+      // to `[key]` and addSchemaToFeature() catches schema errors per feature
+      merge(translations, getOurTranslations(intl.lang));
+    }
   } finally {
     publishDbgObject('id-tagging-schema translations', translations);
   }

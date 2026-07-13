@@ -17,6 +17,8 @@ import { MyListsLayer } from './MyListsLayer';
 import { CragPhotoMarkers } from './CragPhotoMarkers';
 import { SunShadow } from './SunShadow/SunShadow';
 import { Radar } from './Radar/Radar';
+import { OfflineAreasButton } from '../App/OfflineAreasButton';
+import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
@@ -48,6 +50,16 @@ const TopRight = styled.div`
   @media ${isDesktop} {
     top: 0;
   }
+`;
+
+// Just below the search box, on the map. z-index stays under the search
+// (1200) and the feature/homepage panel (1100) so it never covers them.
+const TopLeft = styled.div`
+  position: absolute;
+  z-index: 100;
+  top: ${SEARCH_BOX_HEIGHT + 4}px;
+  left: 12px;
+  pointer-events: none;
 `;
 
 const BottomLeft = styled.div`
@@ -106,6 +118,9 @@ const Map = () => {
       <TopRight>
         <TopMenu />
       </TopRight>
+      <TopLeft>
+        <OfflineAreasButton />
+      </TopLeft>
       <BottomLeft>
         {SHOW_PROTOTYPE_UI && <BugReportButton />}
         <MaptilerLogo />

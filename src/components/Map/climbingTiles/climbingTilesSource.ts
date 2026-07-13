@@ -11,6 +11,7 @@ import {
 } from '../../../types';
 import { computeTiles } from './computeTiles';
 import { CLIMBING_TILES_HOST } from '../../../services/osm/consts';
+import { matchOffline } from '../../../services/offline/offlineCache';
 import { CLIMBING_SPRITE, CLIMBING_TILES_SOURCE } from './consts';
 import {
   GRADE_TABLE,
@@ -23,11 +24,23 @@ import { constructOutlines } from './constructOutlines';
 import { Interval, PoiTypes } from '../../utils/userSettings/getClimbingFilter';
 
 const getTileJson = async ({ z, x, y }: Tile) => {
+  const url = `${CLIMBING_TILES_HOST}api/climbing-tiles/tile?z=${z}&x=${x}&y=${y}`;
   try {
-    const url = `${CLIMBING_TILES_HOST}api/climbing-tiles/tile?z=${z}&x=${x}&y=${y}`;
     const data = await fetchJson(url); // this is cached by fetchCache
     return (data.features || []) as ClimbingTilesFeature[];
   } catch (e) {
+    // Offline: read the downloaded tile straight from the offline cache
+    // (bypasses the service worker, unreliable on iOS; opens the specific
+    // cache because the global caches.match() misses on iOS).
+    try {
+      const cached = await matchOffline(url);
+      if (cached) {
+        const data = await cached.json();
+        return (data.features || []) as ClimbingTilesFeature[];
+      }
+    } catch {
+      // fall through
+    }
     console.warn('climbingTiles fetch error:', e); // eslint-disable-line no-console
     return [];
   }

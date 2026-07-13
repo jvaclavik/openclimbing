@@ -28,6 +28,7 @@ import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import Link from 'next/link';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
@@ -128,6 +129,14 @@ const ClimbingLeaderboardLink = ({ closeMenu }) => (
     <ListItemText>{t('leaderboard.menu_link')}</ListItemText>
   </MenuItem>
 );
+const OfflineAreasLink = ({ closeMenu }) => (
+  <MenuItem href="/offline" component={Link} onClick={closeMenu}>
+    <ListItemIcon>
+      <DownloadForOfflineIcon />
+    </ListItemIcon>
+    <ListItemText>{t('offline.menu_link')}</ListItemText>
+  </MenuItem>
+);
 
 const themeOptions = {
   system: {
@@ -194,6 +203,7 @@ export const HamburgerMenu = () => {
               <>
                 <ClimbingGradesTableLink closeMenu={close} />
                 <TickScoringLink closeMenu={close} />
+                <OfflineAreasLink closeMenu={close} />
                 {isOpenClimbing && (
                   <>
                     <ClimbingLeaderboardLink closeMenu={close} />

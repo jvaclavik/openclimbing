@@ -26,6 +26,7 @@ import {
   getWikimediaCommonsKey,
 } from './utils/photo';
 import { usePhotoChange } from './utils/usePhotoChange';
+import { OfflineBadge } from '../../App/OfflineBadge';
 
 const Title = styled.div`
   flex: 1;
@@ -153,8 +154,10 @@ const PhotoThumbnail = ({
   onClick,
 }: PhotoThumbnailProps) => {
   const isMobileMode = useMobileMode();
-  const thumbUrl = getCommonsImageUrl(`File:${photo}`, 120);
-  const previewUrl = getCommonsImageUrl(`File:${photo}`, 250);
+  // Use widths from the offline set (250, 500) so the header thumbnails resolve
+  // from cache when offline instead of requesting an uncached 120/… variant.
+  const thumbUrl = getCommonsImageUrl(`File:${photo}`, 250);
+  const previewUrl = getCommonsImageUrl(`File:${photo}`, 500);
 
   const button = (
     <PhotoThumbnailButton
@@ -221,14 +224,17 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
     <AppBar position="static" color="transparent">
       <Toolbar variant="dense">
         <Title>
-          <Typography
-            noWrap
-            variant="h5"
-            component="div"
-            fontFamily={'Piazzolla'}
-          >
-            {label}
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography
+              noWrap
+              variant="h5"
+              component="div"
+              fontFamily={'Piazzolla'}
+            >
+              {label}
+            </Typography>
+            <OfflineBadge />
+          </Box>
           {(photoPaths?.length > 1 ||
             (isEditMode && photoPaths?.length >= 1)) && (
             <PhotosContainer>

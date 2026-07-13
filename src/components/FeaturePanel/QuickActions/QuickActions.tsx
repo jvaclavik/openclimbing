@@ -9,6 +9,7 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import { QuickActionButton } from './QuickActionButton';
 import { SaveButton } from './SaveButton';
 import { ShareButton } from './ShareDialog/ShareButton';
+import { OfflineButton } from './OfflineButton';
 
 const Wrapper = styled.div`
   max-width: 100%;
@@ -63,6 +64,7 @@ export const QuickActions = () => {
         />
         <SaveButton />
         <ShareButton />
+        {showPdfButton && <OfflineButton />}
         {showPdfButton && (
           <QuickActionButton
             icon={PictureAsPdfIcon}
