@@ -11,6 +11,7 @@ import {
 import { cacheTile000 } from './getClimbingTile';
 import { OsmResponse } from './overpass/types';
 import { ClimbingFeaturesRow } from '../db/types';
+import { resolveCountryCode } from 'next-codegrid';
 
 const fetchFromOverpass = async () => {
   if (existsSync('../overpass.json')) {
@@ -159,6 +160,25 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   return records;
 };
 
+// Resolves an ISO country code for each record from its lon/lat. next-codegrid
+// runs fully locally (dynamic-imported grid tiles, cached after first hit), so
+// this is fast even for ~76k records. 'None' (ocean / unmatched) is stored as null.
+const addCountryCodes = async (
+  records: ClimbingFeaturesRow[],
+  log: (message: string) => void,
+) => {
+  const start = performance.now();
+  for (const record of records) {
+    try {
+      const code = await resolveCountryCode([record.lon, record.lat]);
+      record.countryCode = code && code !== 'None' ? code : null;
+    } catch {
+      record.countryCode = null;
+    }
+  }
+  log(`Country codes resolved in ${Math.round(performance.now() - start)} ms`);
+};
+
 export const refreshClimbingTiles = async () => {
   const { getBuildLog, log } = buildLogFactory();
   const start = performance.now();
@@ -169,6 +189,8 @@ export const refreshClimbingTiles = async () => {
 
   const records = getNewRecords(data, log); // ~ 70k records
   log(`Records: ${records.length}`);
+
+  await addCountryCodes(records, log);
 
   getDb().transaction(() => {
     getDb().prepare('DELETE FROM climbing_features').run();
