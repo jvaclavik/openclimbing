@@ -100,6 +100,24 @@ const ROUTE_WAY: SeedRow = {
   tags: { sport: 'climbing', climbing: 'route', name: 'Way Route' },
 };
 
+// A standalone boulder problem (climbing=route_bottom) with no parent relation
+// in the DB - the common case on openclimbing.org.
+const STANDALONE_BOULDER: SeedRow = {
+  type: 'route',
+  osmType: 'node',
+  osmId: 500,
+  lon: 14.5,
+  lat: 50.5,
+  nameRaw: 'Lonely Boulder',
+  tags: {
+    sport: 'climbing',
+    climbing: 'route_bottom',
+    'climbing:boulder': 'yes',
+    name: 'Lonely Boulder',
+    'climbing:grade:font': '7A',
+  },
+};
+
 const buildDummyDb = (rows: SeedRow[]): Database => {
   const db = new BetterSqlite3(':memory:');
   const schema = readFileSync(
@@ -133,7 +151,13 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
 
 describe('getClimbingFeature (dummy SQLite DB)', () => {
   beforeEach(() => {
-    mockDb = buildDummyDb([AREA, CRAG, ROUTE_NODE, ROUTE_WAY]);
+    mockDb = buildDummyDb([
+      AREA,
+      CRAG,
+      ROUTE_NODE,
+      ROUTE_WAY,
+      STANDALONE_BOULDER,
+    ]);
   });
 
   afterEach(() => {
@@ -179,6 +203,18 @@ describe('getClimbingFeature (dummy SQLite DB)', () => {
       { type: 'relation', id: 200 },
       { type: 'relation', id: 100 },
     ]);
+  });
+
+  // Regression: a feature with no parent in the DB must still expose
+  // `parentFeatures` as an array (empty), like the OSM path does. The
+  // FeaturePanel calls `filterCrags(feature.parentFeatures)` for route_bottom
+  // photos, which would throw `.filter of undefined` if it were left unset.
+  it('returns an empty parentFeatures array when the feature has no parent', async () => {
+    const boulder = await getClimbingFeature('node', 500);
+
+    expect(boulder.osmMeta).toEqual({ type: 'node', id: 500 });
+    expect(boulder.parentFeatures).toEqual([]);
+    expect(boulder.memberFeatures).toEqual([]);
   });
 
   it('builds a LineString geometry for a way route from `line`', async () => {

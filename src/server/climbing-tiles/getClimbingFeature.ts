@@ -206,9 +206,13 @@ export const getClimbingFeature = async (
     mergeMemberImageDefs(feature as unknown as Feature);
   }
 
-  if (row.parentId) {
-    feature.parentFeatures = buildParentChain(row.parentId, visited);
-  }
+  // Always expose parentFeatures as an array (like the OSM path in osmApi.ts),
+  // even when the feature has no parent. The FeaturePanel calls
+  // filterCrags(feature.parentFeatures) for route_bottom photos and would throw
+  // `.filter of undefined` otherwise.
+  feature.parentFeatures = row.parentId
+    ? buildParentChain(row.parentId, visited)
+    : [];
 
   const countryCode = await getCountryCode({
     center: feature.center,
