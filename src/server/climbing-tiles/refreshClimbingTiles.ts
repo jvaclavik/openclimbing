@@ -161,8 +161,8 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
 };
 
 // Resolves an ISO country code for each record from its lon/lat. next-codegrid
-// runs fully locally (dynamic-imported grid tiles, cached after first hit), so
-// this is fast even for ~76k records. 'None' (ocean / unmatched) is stored as null.
+// runs fully locally (dynamic-imported grid tiles, cached after first hit).
+// 'None' (ocean / unmatched) is stored as null.
 const addCountryCodes = async (
   records: ClimbingFeaturesRow[],
   log: (message: string) => void,
@@ -170,7 +170,7 @@ const addCountryCodes = async (
   const start = performance.now();
   for (const record of records) {
     try {
-      const code = await resolveCountryCode([record.lon, record.lat]);
+      const code = await resolveCountryCode([record.lon, record.lat]); // takes 500ms for all 76k records
       record.countryCode = code && code !== 'None' ? code : null;
     } catch {
       record.countryCode = null;
