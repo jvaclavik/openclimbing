@@ -6,6 +6,7 @@ const osmappVersion = process.env.npm_package_version;
 const commitHash = (process.env.VERCEL_GIT_COMMIT_SHA || '').substring(0, 7);
 const commitMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE || 'dev';
 const sentryRelease = `${osmappVersion}-${commitHash}-${commitMessage.substring(0, 20)}`;
+const isVpsDeploy = !!process.env.VPS_DEPLOY; // set only in vps-deploy.yml, so PR/preview builds stay fast
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -45,8 +46,8 @@ export default withSentryConfig(nextConfig, {
   org: 'osmapp', // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
   project: 'osmapp',
   silent: !process.env.CI,
-  widenClientFileUpload: false, // smaller set of source maps -> faster builds, smaller Sentry storage
-  reactComponentAnnotation: { enabled: false }, // component-name annotations bloat runtime bundle
+  widenClientFileUpload: isVpsDeploy, // full source maps only for the production VPS build
+  reactComponentAnnotation: { enabled: isVpsDeploy }, // component-name annotations bloat runtime bundle, keep off elsewhere
   // tunnelRoute: '/monitoring',
   hideSourceMaps: false,
   disableLogger: true, // Automatically tree-shake Sentry logger statements to reduce bundle size
