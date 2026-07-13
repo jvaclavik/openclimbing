@@ -44,6 +44,7 @@ jobs:
           echo "VERCEL_GIT_COMMIT_SHA=$(git rev-parse HEAD)" >> .env
           echo "VERCEL_GIT_COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> .env
           echo "NEXT_PUBLIC_ENABLE_CLIMBING_TILES=true" >> .env
+          echo "VPS_DEPLOY=true" >> .env
 
           NEXTJS_OUTPUT=standalone yarn build
           mv public .next/standalone
