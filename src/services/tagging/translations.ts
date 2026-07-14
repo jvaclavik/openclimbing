@@ -60,14 +60,12 @@ export const getPresetTermsTranslation = (key: string): string[] => {
 export const getAllTranslations = () => translations?.[intl.lang];
 
 export const getFieldTranslation = (field: Field): FieldTranslation => {
-  if (!translations) return undefined;
-
   if (field.label?.match(/^{.*}$/)) {
     const resolved = field.label.substring(1, field.label.length - 1);
-    return translations[intl.lang].presets.fields[resolved];
+    return translations?.[intl.lang]?.presets?.fields?.[resolved];
   }
 
   // The id 169522276 is different for each intl.language :(
   // https://www.transifex.com/openstreetmap/id-editor/translate/#cs/presets/169522276?q=key%3Apresets.fields.XXX
-  return translations[intl.lang].presets.fields[field.fieldKey];
+  return translations?.[intl.lang]?.presets?.fields?.[field.fieldKey];
 };
