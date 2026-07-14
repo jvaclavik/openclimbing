@@ -661,6 +661,13 @@ export default {
   'climbingareas.title': 'Lezecké oblasti',
   'climbingareas.area': 'Oblast',
   'climbingareas.num_of_crags': 'Počet skal',
+  'climbingareas.areas_count': '__count__ oblastí',
+  'climbingareas.crags_count': '__count__ skal',
+  'climbingareas.unknown_country': 'Neznámá země',
+  'climbingareas.sort_label': 'Řadit podle',
+  'climbingareas.sort_photos': 'Zakreslených cest na fotce',
+  'climbingareas.sort_sectors': 'Počtu sektorů',
+  'climbingareas.sort_alphabetical': 'Abecedně',
 
   'hamburger_menu.climbing.title': 'Lezení',
   'climbing_grade_table.title': 'Tabulka lezeckých obtížností',

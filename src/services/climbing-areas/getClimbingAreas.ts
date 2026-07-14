@@ -1,27 +1,38 @@
-import { fetchOverpass } from '../overpass/fetchOverpass';
+import { isServer } from '../../components/helpers';
+import { fetchJson } from '../fetch';
+import { CLIMBING_TILES_HOST } from '../osm/consts';
+import type { ClimbingArea } from '../../server/climbing-tiles/getClimbingAreas';
 
-/*
-This query doesn't work, because area is usualy a relation of realtions,
-which doesn't hold a center point in overpass:
+export type { ClimbingArea };
 
-  [out:json][timeout:300];
-  ( area["ISO3166-1"="CZ"][admin_level=2]; )->.a;
-  rel["climbing"="area"](area.a);
-  out body;
-*/
+// When CLIMBING_TILES_HOST is '/', we are the canonical host that owns the
+// SQLite DB (production openclimbing.org, or local dev with
+// NEXT_PUBLIC_CLIMBING_TILES_LOCAL). Otherwise (e.g. Vercel preview, which has
+// no DB deployed) the data lives on openclimbing.org, so we fetch it from there
+// - exactly like the climbing tiles / search / get endpoints.
+const isCanonicalHost = CLIMBING_TILES_HOST === '/';
 
-export type ClimbingArea = {
-  id: number;
-  type: string;
-  tags: {
-    name: string;
-  };
-  members: any[];
+const getFromSqlite = async (): Promise<ClimbingArea[]> => {
+  const { getClimbingAreas: getFromDb } = await import(
+    '../../server/climbing-tiles/getClimbingAreas'
+  );
+  return getFromDb();
 };
 
-export const getClimbingAreas = async (): Promise<ClimbingArea[]> => {
-  const query = `[out:json][timeout:300]; rel["climbing"="area"]; out body;`;
+const getFromApi = async (): Promise<ClimbingArea[]> =>
+  fetchJson<ClimbingArea[]>(`${CLIMBING_TILES_HOST}api/climbing-tiles/areas`);
 
-  const areas = await fetchOverpass(query);
-  return areas?.elements as ClimbingArea[];
+export const getClimbingAreas = async (): Promise<ClimbingArea[]> => {
+  try {
+    // Read the local DB directly only when we own it and run on the server;
+    // in every other case go through the (possibly remote) API endpoint.
+    if (isCanonicalHost && isServer()) {
+      return await getFromSqlite();
+    }
+    return await getFromApi();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('getClimbingAreas failed', e);
+    return [];
+  }
 };

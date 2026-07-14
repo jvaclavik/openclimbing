@@ -77,6 +77,7 @@ export const recordsFactory = (log: (message: string) => void) => {
       name: name === nameRaw ? null : name, // query length optimization
       nameRaw,
       routeCount: feature.properties.routeCount,
+      routesWithPhoto: feature.properties.routesWithPhoto,
       hasImages: feature.properties.hasImages ? 1 : 0,
       parentId: feature.properties.parentId,
       gradeId,
