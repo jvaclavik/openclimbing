@@ -23,6 +23,7 @@ import { getLabel } from '../../../helpers/featureLabel';
 import { getFullOsmappLink, getShortId } from '../../../services/helpers';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
+import { useOnlineStatus } from '../../../services/offline/useOnlineStatus';
 import { TickStyleBadge } from '../../../services/my-ticks/TickStyleBadge';
 import {
   findOrConvertRouteGrade,
@@ -1445,6 +1446,10 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
   // Export options (next to the Print button).
   const [showMap, setShowMap] = useState(true);
   const [showProtection, setShowProtection] = useState(true);
+  // The PDF map is rendered from MapTiler basemap tiles, which we don't cache
+  // for offline use — so skip it entirely when offline (blank tiles otherwise).
+  const online = useOnlineStatus();
+  const mapEnabled = showMap && online;
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -1525,9 +1530,9 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
           open={Boolean(settingsAnchor)}
           onClose={() => setSettingsAnchor(null)}
         >
-          <MenuItem onClick={toggleShowMap}>
+          <MenuItem onClick={toggleShowMap} disabled={!online}>
             <ListItemIcon>
-              <Checkbox edge="start" checked={showMap} tabIndex={-1} />
+              <Checkbox edge="start" checked={mapEnabled} tabIndex={-1} />
             </ListItemIcon>
             <ListItemText primary={t('climbingpanel.pdf_export_show_map')} />
           </MenuItem>
@@ -1559,7 +1564,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
           color="primary"
           startIcon={<PrintIcon />}
           onClick={handlePrint}
-          disabled={loading || (showMap && !mapReady)}
+          disabled={loading || (mapEnabled && !mapReady)}
           sx={{ mr: 1 }}
         >
           {t('climbingpanel.pdf_export_print')}
@@ -1597,7 +1602,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
 
           <FeatureExtras feature={feature} />
 
-          {showMap && !loading && (
+          {mapEnabled && !loading && (
             <ClimbingPdfExportMap
               feature={feature}
               crags={crags}

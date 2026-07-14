@@ -56,6 +56,7 @@ import {
 import { DebugModeManager } from '../src/components/utils/debug';
 import { AddNewCragProvider } from '../src/components/Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { AddNewCragBanner } from '../src/components/Map/HamburgerMenu/AddNewCrag/AddNewCragBanner';
+import { registerServiceWorker } from '../src/services/offline/registerServiceWorker';
 
 initCrashOverlay(); // čte chyby na telefonu, kde není konzole (no-op na serveru)
 
@@ -95,10 +96,16 @@ const MyApp = (props: Props) => {
     setTimeout(() => {
       Router.prefetch('/'); // works only in PROD
       Router.prefetch('/directions/[[...all]]');
+      // Prefetch so the page chunk is cached by the SW while online — otherwise
+      // navigating to /offline while offline fails to load its chunk and Next
+      // hard-reloads, dropping the user back on the homepage shell.
+      Router.prefetch('/offline');
+      Router.prefetch('/[...all]'); // feature detail pages (crags/routes)
       fetchSchemaTranslations();
     }, 1000);
 
     fakeStaticExportStartup();
+    registerServiceWorker();
   }, []);
 
   return (

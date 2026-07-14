@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, IconButton, Tooltip } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { t, Translation } from '../../../../services/intl';
+import { useMobileMode } from '../../../helpers';
 import { TooltipButton } from '../../../utils/TooltipButton';
 import { useSnackbar } from '../../../utils/SnackbarContext';
 import { getCommonsImageUrl } from '../../../../services/images/getCommonsImageUrl';
@@ -97,6 +98,7 @@ const tooltipContent = (
 export const RecognizeBoltsButton = () => {
   const { photoRef, photoPath, addProtectionPoint } = useClimbingContext();
   const { showToast } = useSnackbar();
+  const isMobileMode = useMobileMode();
   const [isRunning, setIsRunning] = useState(false);
   // null while the model is still downloading (indeterminate spinner);
   // { done, total } once tiles start (determinate progress).
@@ -152,6 +154,36 @@ export const RecognizeBoltsButton = () => {
       setProgress(null);
     }
   };
+
+  if (isMobileMode) {
+    // Icon-only on mobile to save toolbar space.
+    return (
+      <Tooltip title={t('climbingpanel.recognize_bolts')}>
+        <IconButton
+          onClick={handleClick}
+          disabled={isRunning}
+          size="small"
+          sx={{ pointerEvents: 'all' }}
+          aria-label={t('climbingpanel.recognize_bolts')}
+        >
+          {isRunning ? (
+            <CircularProgress
+              size={18}
+              color="inherit"
+              variant={progress ? 'determinate' : 'indeterminate'}
+              value={
+                progress && progress.total
+                  ? (progress.done / progress.total) * 100
+                  : undefined
+              }
+            />
+          ) : (
+            <AutoAwesomeIcon />
+          )}
+        </IconButton>
+      </Tooltip>
+    );
+  }
 
   return (
     <Root $disabled={isRunning}>

@@ -6,6 +6,7 @@ import { addSchemaToFeature } from '../tagging/idTaggingScheme';
 import { fetchSchemaTranslations } from '../tagging/translations';
 import { getShortId } from '../helpers';
 import { CLIMBING_TILES_HOST } from './consts';
+import { matchOffline } from '../offline/offlineCache';
 import { fetchFeature } from './osmApi';
 import { wasRecentlyEdited } from './recentlyEditedFeatures';
 
@@ -16,8 +17,17 @@ import { wasRecentlyEdited } from './recentlyEditedFeatures';
  * on the FE from `tags` (same as the OSM path in fetchFeature()).
  */
 const toFeature = async (full: ClimbingFeatureFull): Promise<Feature> => {
-  await fetchSchemaTranslations(); // needed by addSchemaToFeature()
-  return addSchemaToFeature(full as unknown as Feature);
+  try {
+    await fetchSchemaTranslations(); // needed by addSchemaToFeature()
+    return addSchemaToFeature(full as unknown as Feature);
+  } catch (e) {
+    // The schema is a nice-to-have. If anything around it fails (e.g. offline
+    // translation loading), show the feature without it rather than cascading
+    // into the OSM fallback — which offline always ends in a network error,
+    // even with the feature data already in hand.
+    console.warn('toFeature(): schema failed, using bare feature', e); // eslint-disable-line no-console
+    return full as unknown as Feature;
+  }
 };
 
 // On the server we read the local SQLite DB directly (no network round-trip).
@@ -32,7 +42,17 @@ const getFromSqlite = async (apiId: OsmId): Promise<ClimbingFeatureFull> => {
 
 const getFromApi = async (apiId: OsmId): Promise<ClimbingFeatureFull> => {
   const url = `${CLIMBING_TILES_HOST}api/climbing-tiles/get?osmType=${apiId.type}&osmId=${apiId.id}`;
-  return fetchJson<ClimbingFeatureFull>(url);
+  try {
+    return await fetchJson<ClimbingFeatureFull>(url);
+  } catch (e) {
+    // Offline fallback: read the downloaded response straight from the offline
+    // cache, bypassing the service worker (iOS Safari's SW cache matching is
+    // unreliable). matchOffline opens the specific cache — the global
+    // caches.match() misses on iOS.
+    const cached = await matchOffline(url);
+    if (cached) return cached.json();
+    throw e;
+  }
 };
 
 /**

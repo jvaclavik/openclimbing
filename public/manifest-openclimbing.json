@@ -4,7 +4,7 @@
   "description": "Free wiki climbing map",
   "theme_color": "#eb5757",
   "background_color": "#f8f4f0",
-  "start_url": "/start",
+  "start_url": "/",
   "display": "standalone",
   "url_handlers": [
     {
