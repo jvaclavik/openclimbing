@@ -54,6 +54,7 @@ export type GeojsonFeature<T extends FeatureGeometry = FeatureGeometry> = {
   tags: FeatureTags;
   properties: {
     routeCount?: number;
+    routesWithPhoto?: number; // routes with a drawn line on a photo (recursive)
     hasImages?: boolean;
     histogram?: number[]; // indexed by GRADE_TABLE.uiaa
     parentId?: number;

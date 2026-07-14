@@ -9,6 +9,7 @@ export type ClimbingFeaturesRow = {
   name?: string;
   nameRaw: string;
   routeCount?: number;
+  routesWithPhoto?: number; // routes with a drawn line on a photo (crag/area only)
   hasImages?: number; // sqlite doesn't have bool
   parentId?: number;
   gradeId?: number;

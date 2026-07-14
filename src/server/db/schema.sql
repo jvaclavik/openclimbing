@@ -1,4 +1,4 @@
--- SQLite schema v8 (see db.ts migrations when bumping user_version)
+-- SQLite schema v9 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -11,6 +11,7 @@ CREATE TABLE climbing_features
   name            TEXT, -- name with diacritics - ONLY IF it differs from nameRaw
   "nameRaw"       TEXT, -- name without diacritics (always present, or NULL)
   "routeCount"    INTEGER,
+  "routesWithPhoto" INTEGER, -- routes with a drawn line on a photo (recursive, crag/area only)
   "hasImages"     INTEGER, -- bool
   line            TEXT, -- geometry coordinates JSON
   "gradeTxt"      TEXT,

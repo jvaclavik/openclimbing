@@ -60,6 +60,25 @@ const getRouteNumberFromTags = ({ tags }: OsmItem) => {
 const isRoute = (member: GeojsonFeature) =>
   ['route', 'route_bottom'].includes(member.tags.climbing);
 
+// A route is "drawn on a photo" when it has a non-empty `wikimedia_commons[...]:path` tag.
+const isWikimediaCommonsPhotoPath = (tag: string) =>
+  /^wikimedia_commons(:\d+)*:path$/.test(tag);
+
+const hasPathOnPhoto = (member: GeojsonFeature) =>
+  Object.keys(member.tags ?? {}).some(
+    (key) =>
+      isWikimediaCommonsPhotoPath(key) && Boolean(member.tags[key]?.trim()),
+  );
+
+const countRoutesWithPhoto = (members: GeojsonFeature[]) =>
+  members.reduce((acc, member) => {
+    if (isRoute(member)) {
+      return acc + (hasPathOnPhoto(member) ? 1 : 0);
+    }
+    // crag / sub-area: use its own precomputed recursive count
+    return acc + (member.properties.routesWithPhoto ?? 0);
+  }, 0);
+
 const hasOwnImages = (element: OsmItem) =>
   Object.keys(element.tags ?? {}).some((key) =>
     key.startsWith('wikimedia_commons'),
@@ -155,6 +174,7 @@ const getRelationProperties = (
         members.filter(isRoute).length,
         getRouteNumberFromTags(relation),
       ),
+      routesWithPhoto: countRoutesWithPhoto(members),
       attributes: mergeClimbingAttributes([
         getClimbingAttributes(tags),
         ...getMemberAttributes(members),
@@ -169,6 +189,7 @@ const getRelationProperties = (
       routeCount: members
         .map((member) => member?.properties.routeCount ?? 1)
         .reduce((acc, count) => acc + count, 0),
+      routesWithPhoto: countRoutesWithPhoto(members),
       attributes: mergeClimbingAttributes([
         getClimbingAttributes(tags),
         ...getMemberAttributes(members),

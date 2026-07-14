@@ -167,6 +167,7 @@ test('climbingTiles overpassToGeojson basic', () => {
         hasImages: true,
         histogram: [1, undefined, 1],
         routeCount: 52,
+        routesWithPhoto: 1,
         attributes: { ...noAttributes, climbingTypes: ['sport'] },
       },
       tags: { climbing: 'area', name: 'Area of areas' },
@@ -198,6 +199,7 @@ test('climbingTiles overpassToGeojson basic', () => {
         histogram: [1, undefined, 1],
         parentId: 999,
         routeCount: 52,
+        routesWithPhoto: 1,
         attributes: { ...noAttributes, climbingTypes: ['sport'] },
       },
       tags: { climbing: 'area', name: 'Roviště' },
@@ -223,6 +225,7 @@ test('climbingTiles overpassToGeojson basic', () => {
         histogram: [1, undefined, 1],
         parentId: 17130099,
         routeCount: 2,
+        routesWithPhoto: 1,
         attributes: noAttributes,
       },
       tags: {

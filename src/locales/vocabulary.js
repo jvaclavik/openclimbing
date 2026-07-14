@@ -730,6 +730,13 @@ export default {
   'climbingareas.title': 'Climbing areas',
   'climbingareas.area': 'Area',
   'climbingareas.num_of_crags': 'Number of crags',
+  'climbingareas.areas_count': '__count__ areas',
+  'climbingareas.crags_count': '__count__ crags',
+  'climbingareas.unknown_country': 'Unknown country',
+  'climbingareas.sort_label': 'Sort by',
+  'climbingareas.sort_photos': 'Routes drawn on photo',
+  'climbingareas.sort_sectors': 'Number of sectors',
+  'climbingareas.sort_alphabetical': 'Alphabetically',
 
   'hamburger_menu.climbing.title': 'Climbing',
   'climbing_grade_table.title': 'Climbing grades table',

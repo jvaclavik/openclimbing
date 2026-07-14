@@ -28,6 +28,7 @@ import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import TerrainIcon from '@mui/icons-material/Terrain';
 import Link from 'next/link';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
@@ -102,6 +103,14 @@ const ClimbingForumLink = () => (
       <QuestionAnswerIcon />
     </ListItemIcon>
     <ListItemText>{t('climbing.forum')} </ListItemText>
+  </MenuItem>
+);
+const ClimbingAreasLink = ({ closeMenu }) => (
+  <MenuItem href="/climbing-areas" component={Link} onClick={closeMenu}>
+    <ListItemIcon>
+      <TerrainIcon />
+    </ListItemIcon>
+    <ListItemText>{t('climbingareas.title')}</ListItemText>
   </MenuItem>
 );
 const ClimbingGradesTableLink = ({ closeMenu }) => (
@@ -192,6 +201,7 @@ export const HamburgerMenu = () => {
             )}
             {(hasClimbingLayer || isOpenClimbing) && (
               <>
+                <ClimbingAreasLink closeMenu={close} />
                 <ClimbingGradesTableLink closeMenu={close} />
                 <TickScoringLink closeMenu={close} />
                 {isOpenClimbing && (
