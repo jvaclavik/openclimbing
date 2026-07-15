@@ -1,4 +1,5 @@
-<!-- Please, remove any section which is not applicable/useful. -->
+<!--
+// Please, remove any section which is not applicable/useful.
 
 ### Description
 
@@ -6,7 +7,7 @@
 
 ### Screenshots
 
-<!-- consider using smaller images, eg. <img src="url" width="500"> instead of ![](url) -->
+// consider using smaller images, eg. <img src="url" width="500"> instead of ![](url)
 
 ### Checklist
 
@@ -14,3 +15,5 @@
 - [ ] mobile / desktop
 - [ ] server-side-rendering (SSR)
 - [ ] all texts are localized (in vocabulary.ts)
+
+-->
