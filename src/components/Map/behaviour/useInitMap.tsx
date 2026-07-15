@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import maplibregl from 'maplibre-gl';
-import { basicStyle } from '../styles/basicStyle';
+import { emptyStyle } from '../styles/emptyStyle';
 import { setGlobalMap } from '../../../services/mapStorage';
 import { COMPASS_TOOLTIP } from '../useAddTopRightControls';
 
@@ -52,7 +52,9 @@ export const useInitMap = () => {
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: basicStyle,
+      // real style is set right after by useUpdateStyle() - starting with
+      // basicStyle here made the map fetch it, then immediately abort it
+      style: emptyStyle,
       attributionControl: false,
       refreshExpiredTiles: false,
       locale: {
