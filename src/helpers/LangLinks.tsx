@@ -3,6 +3,15 @@ import React from 'react';
 import type { DocumentContext } from 'next/dist/shared/lib/utils';
 import { PROJECT_URL } from '../services/project';
 
+// Static content pages worth emitting hreflang links for (besides homepage and
+// OSM feature pages).
+const SEO_STATIC_PATHS = [
+  '/climbing-areas',
+  '/climbing-grades',
+  '/climbing-leaderboard',
+  '/tick-scoring',
+];
+
 export const getUrlForLangLinks = (ctx: DocumentContext) => {
   // NOTE: there are two bugs in vercel deployments
   // 1) the asPath contains the lang prefix, even though it shouldn't
@@ -12,7 +21,8 @@ export const getUrlForLangLinks = (ctx: DocumentContext) => {
   const fixedPath = ctx.asPath
     .replace(/\?nxtPall=.*$/, '')
     .replace(/^\/feature/, '') // remove in 11/2025
-    .replace(/^\/[a-z]{2}(\/|$)/, '$1');
+    .replace(/^\/[a-z]{2}(\/|$)/, '$1')
+    .replace(/\/$/, '');
 
   if (fixedPath === '/' || fixedPath === '') {
     return '';
@@ -22,8 +32,12 @@ export const getUrlForLangLinks = (ctx: DocumentContext) => {
     return fixedPath;
   }
 
+  if (SEO_STATIC_PATHS.includes(fixedPath)) {
+    return fixedPath;
+  }
+
   return false;
-  // Test cases: /, /node/6, /en, /en/node/6
+  // Test cases: /, /node/6, /en, /en/node/6, /climbing-areas
 };
 
 type Props = {
@@ -42,5 +56,10 @@ export const LangLinks = ({ urlForLangLinks }: Props) =>
           href={`${PROJECT_URL}/${lang}${urlForLangLinks}`}
         />
       ))}
+      <link
+        rel="alternate"
+        hrefLang="x-default"
+        href={`${PROJECT_URL}${urlForLangLinks || '/'}`}
+      />
     </>
   );

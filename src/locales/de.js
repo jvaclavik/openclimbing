@@ -1,6 +1,16 @@
 // identifier should be in the form: foldername.messageid.
 
 export default {
+  'seo.routes': '__count__ Kletterrouten',
+  'seo.grades': 'Schwierigkeit __range__',
+  'seo.grade': 'Schwierigkeit __grade__',
+  'seo.length': '__length__ m lang',
+  'seo.rock': 'Gestein: __rock__',
+  'seo.type.area': 'Klettergebiet',
+  'seo.type.crag': 'Kletterfels',
+  'seo.type.route': 'Kletterroute',
+  'seo.suffix': 'Kletter-Topo, Fotos & Routenführer.',
+
   loading: 'Lade',
   error: 'Fehler',
   close_panel: 'Panel schließen',

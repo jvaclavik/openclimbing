@@ -2,6 +2,16 @@
 // 标识符应采用以下形式：文件夹名.消息ID
 
 export default {
+  'seo.routes': '__count__ 条攀岩线路',
+  'seo.grades': '难度 __range__',
+  'seo.grade': '难度 __grade__',
+  'seo.length': '长度 __length__ 米',
+  'seo.rock': '岩石：__rock__',
+  'seo.type.area': '攀岩区域',
+  'seo.type.crag': '岩场',
+  'seo.type.route': '攀岩线路',
+  'seo.suffix': '攀岩线路图、照片和指南。',
+
   loading: '加载中',
   error: '错误',
   close_panel: '关闭面板',

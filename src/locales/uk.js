@@ -1,6 +1,16 @@
 // identifier should be in the form: foldername.messageid.
 
 export default {
+  'seo.routes': '__count__ скелелазних маршрутів',
+  'seo.grades': 'категорії __range__',
+  'seo.grade': 'категорія __grade__',
+  'seo.length': 'довжина __length__ м',
+  'seo.rock': 'порода: __rock__',
+  'seo.type.area': 'скелелазний район',
+  'seo.type.crag': 'скеля',
+  'seo.type.route': 'скелелазний маршрут',
+  'seo.suffix': 'Топо, фото та путівник для скелелазіння.',
+
   loading: 'Завантаження',
   error: 'Помилка',
   close_panel: 'Закрити панель',

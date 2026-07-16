@@ -1,6 +1,16 @@
 // identifier should be in the form: foldername.messageid.
 
 export default {
+  'seo.routes': 'クライミングルート __count__ 本',
+  'seo.grades': 'グレード __range__',
+  'seo.grade': 'グレード __grade__',
+  'seo.length': '全長 __length__ m',
+  'seo.rock': '岩質: __rock__',
+  'seo.type.area': 'クライミングエリア',
+  'seo.type.crag': '岩場',
+  'seo.type.route': 'クライミングルート',
+  'seo.suffix': 'クライミングのトポ・写真・ガイド。',
+
   loading: '読み込み中',
   error: 'エラー',
   close_panel: 'パネルを閉じる',

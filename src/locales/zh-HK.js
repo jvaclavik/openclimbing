@@ -2,6 +2,16 @@
 // 識別碼格式應為：資料夾名稱.訊息id
 
 export default {
+  'seo.routes': '__count__ 條攀岩路線',
+  'seo.grades': '難度 __range__',
+  'seo.grade': '難度 __grade__',
+  'seo.length': '長度 __length__ 米',
+  'seo.rock': '岩石：__rock__',
+  'seo.type.area': '攀岩區域',
+  'seo.type.crag': '岩場',
+  'seo.type.route': '攀岩路線',
+  'seo.suffix': '攀岩路線圖、照片與指南。',
+
   loading: '載入中',
   error: '發生錯誤',
   close_panel: '關閉面板',

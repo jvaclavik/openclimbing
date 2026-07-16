@@ -234,6 +234,16 @@ export default {
   'project.openclimbing.serpDescription': 'A wiki based open-source climbing map with topos. Built on OpenStreetMap and Wikipedia projects.',
   'project.openclimbing.climbing_guide': 'Climbing guide & topos',
 
+  'seo.routes': '__count__ climbing routes',
+  'seo.grades': 'grades __range__',
+  'seo.grade': 'grade __grade__',
+  'seo.length': '__length__ m long',
+  'seo.rock': 'rock: __rock__',
+  'seo.type.area': 'climbing area',
+  'seo.type.crag': 'crag',
+  'seo.type.route': 'climbing route',
+  'seo.suffix': 'Climbing topo, photos & route guide.',
+
   'homepage.how_to_start': 'Start by typing your query into the searchbox.\nOr click any item on the map.',
   'homepage.go_to_map_button': 'Go to map',
   'homepage.examples.eg': 'eg.',

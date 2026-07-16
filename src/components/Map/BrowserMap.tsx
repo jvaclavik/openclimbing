@@ -1,12 +1,8 @@
 import React, { useEffect } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import type { Map as MaplibreMap } from 'maplibre-gl';
 import { useMapStateContext, View } from '../utils/MapStateContext';
-import {
-  createMapEffectHook,
-  createMapEventHook,
-  MapEventHandler,
-  useMobileMode,
-} from '../helpers';
+import { createMapEffectHook, useMobileMode } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { useFeatureMarker } from './behaviour/useFeatureMarker';
 import { useOnMapClicked } from './behaviour/useOnMapClicked';
@@ -23,12 +19,26 @@ import { useUserThemeContext } from '../../helpers/theme';
 import { useSnackbar } from '../utils/SnackbarContext';
 import { PreviewArrow, usePreviewMarker } from './behaviour/usePreviewMarker';
 
-const useOnMapLoaded = createMapEventHook<'load', [MapEventHandler<'load'>]>(
-  (_, onMapLoaded) => ({
-    eventType: 'load',
-    eventHandler: onMapLoaded,
-  }),
-);
+// The map can fire `load` before this effect attaches its listener — with the
+// empty init style that happens almost instantly, so on fast machines (e.g.
+// localhost) the event was missed and the map spinner spun forever. Guard by
+// invoking the handler immediately when the map has already loaded.
+const useOnMapLoaded = (
+  map: MaplibreMap | undefined,
+  onMapLoaded: () => void,
+) => {
+  useEffect(() => {
+    if (!map) return undefined;
+    if (map.loaded()) {
+      onMapLoaded();
+      return undefined;
+    }
+    map.on('load', onMapLoaded);
+    return () => {
+      map.off('load', onMapLoaded);
+    };
+  }, [map, onMapLoaded]);
+};
 
 const useUpdateMap = createMapEffectHook<[View]>((map, viewForMap) => {
   const center: [number, number] = [
