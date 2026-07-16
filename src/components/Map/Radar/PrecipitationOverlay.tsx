@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { useQuery } from 'react-query';
-import RadarIcon from '@mui/icons-material/Radar';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import {
@@ -20,13 +19,18 @@ import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
 import { useMapStateContext } from '../../utils/MapStateContext';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
-import { applyRadar, isInRadarCoverage, removeRadar } from './radarLayer';
+import {
+  applyOverlay,
+  isInRadarCoverage,
+  overlayFrameUrl,
+  RADAR_COORDINATES,
+  removeOverlay,
+} from './radarLayer';
+import type { PrecipProduct } from './precipitationProducts';
 
-type RadarFrame = { ts: string; time: string };
+type Frame = { ts: string; time: string };
 
-const RADAR_COLOR = '#f5a623';
 const FRAME_INTERVAL_MS = 450;
-const DEFAULT_OPACITY = 0.75;
 
 const StyledIconButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -51,63 +55,72 @@ const Panel = styled.div`
   pointer-events: all;
 `;
 
-const RADAR_SLIDER_SX = {
-  color: RADAR_COLOR,
-  '& .MuiSlider-rail': {
-    opacity: 1,
-    backgroundColor: convertHexToRgba(RADAR_COLOR, 0.16),
-  },
-  '& .MuiSlider-track': {
-    border: 'none',
-    backgroundColor: convertHexToRgba(RADAR_COLOR, 0.45),
-  },
-  '& .MuiSlider-thumb': {
-    width: 14,
-    height: 14,
-    boxShadow: `0 0 0 4px ${convertHexToRgba(RADAR_COLOR, 0.18)}`,
-    '&:hover, &.Mui-focusVisible': {
-      boxShadow: `0 0 0 6px ${convertHexToRgba(RADAR_COLOR, 0.24)}`,
+const sliderSx = (color: string) =>
+  ({
+    color,
+    '& .MuiSlider-rail': {
+      opacity: 1,
+      backgroundColor: convertHexToRgba(color, 0.16),
     },
-  },
-} as const;
+    '& .MuiSlider-track': {
+      border: 'none',
+      backgroundColor: convertHexToRgba(color, 0.45),
+    },
+    '& .MuiSlider-thumb': {
+      width: 14,
+      height: 14,
+      boxShadow: `0 0 0 4px ${convertHexToRgba(color, 0.18)}`,
+      '&:hover, &.Mui-focusVisible': {
+        boxShadow: `0 0 0 6px ${convertHexToRgba(color, 0.24)}`,
+      },
+    },
+  }) as const;
 
-const fetchFrames = async (): Promise<RadarFrame[]> => {
-  const res = await fetch('/api/radar-chmu-frames');
+const fetchFrames = async (product: string): Promise<Frame[]> => {
+  const res = await fetch(`/api/radar-chmu-frames?product=${product}`);
   if (!res.ok) {
     throw new Error(`frames ${res.status}`);
   }
-  const json = (await res.json()) as { frames: RadarFrame[] };
+  const json = (await res.json()) as { frames: Frame[] };
   return json.frames ?? [];
 };
 
 const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-type RadarButtonProps = {
+type OverlayButtonProps = {
+  product: PrecipProduct;
   open: boolean;
   active: boolean;
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
 };
 
-const RadarButton = ({ open, active, onClick }: RadarButtonProps) => {
+const OverlayButton = ({
+  product,
+  open,
+  active,
+  onClick,
+}: OverlayButtonProps) => {
   const isMobileMode = useMobileMode();
+  const Icon = product.icon;
   return (
     <Badge color="success" variant="dot" overlap="circular" invisible={!active}>
-      <Tooltip title="Srážkový radar (ČHMÚ)" arrow>
+      <Tooltip title={product.buttonTooltip} arrow>
         <StyledIconButton
           onClick={onClick}
           $isOpened={open}
           size={isMobileMode ? 'large' : 'medium'}
         >
-          <RadarIcon fontSize="small" color={active ? 'primary' : 'inherit'} />
+          <Icon fontSize="small" color={active ? 'primary' : 'inherit'} />
         </StyledIconButton>
       </Tooltip>
     </Badge>
   );
 };
 
-type RadarControlsProps = {
-  frames: RadarFrame[] | undefined;
+type OverlayControlsProps = {
+  product: PrecipProduct;
+  frames: Frame[] | undefined;
   isLoading: boolean;
   index: number;
   setIndex: (v: number) => void;
@@ -117,7 +130,8 @@ type RadarControlsProps = {
   setOpacity: (v: number) => void;
 };
 
-const RadarControls = ({
+const OverlayControls = ({
+  product,
   frames,
   isLoading,
   index,
@@ -126,12 +140,14 @@ const RadarControls = ({
   togglePlay,
   opacity,
   setOpacity,
-}: RadarControlsProps) => {
+}: OverlayControlsProps) => {
+  const sx = sliderSx(product.color);
+
   if (isLoading || !frames) {
     return (
       <Panel>
         <Typography variant="caption" color="text.secondary">
-          Načítám radarová data…
+          {product.loadingText}
         </Typography>
       </Panel>
     );
@@ -141,7 +157,7 @@ const RadarControls = ({
     return (
       <Panel>
         <Typography variant="caption" color="text.secondary">
-          Radarová data se nepodařilo načíst.
+          {product.emptyText}
         </Typography>
       </Panel>
     );
@@ -157,7 +173,7 @@ const RadarControls = ({
           <IconButton
             size="small"
             onClick={togglePlay}
-            sx={{ color: RADAR_COLOR }}
+            sx={{ color: product.color }}
           >
             {playing ? (
               <PauseIcon fontSize="small" />
@@ -173,7 +189,7 @@ const RadarControls = ({
           step={1}
           value={Math.min(index, frames.length - 1)}
           onChange={(_, v) => setIndex(v as number)}
-          sx={RADAR_SLIDER_SX}
+          sx={sx}
         />
       </Stack>
 
@@ -185,14 +201,14 @@ const RadarControls = ({
         <Typography
           variant="body2"
           fontWeight={700}
-          sx={{ color: RADAR_COLOR }}
+          sx={{ color: product.color }}
         >
           {formatTime(current.time)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {isLatest
-            ? 'poslední snímek'
-            : `−${(frames.length - 1 - index) * 5} min`}
+            ? product.latestLabel
+            : `−${(frames.length - 1 - index) * product.stepMinutes} min`}
         </Typography>
       </Stack>
 
@@ -210,7 +226,7 @@ const RadarControls = ({
         step={0.05}
         value={opacity}
         onChange={(_, v) => setOpacity(v as number)}
-        sx={RADAR_SLIDER_SX}
+        sx={sx}
       />
 
       <Typography
@@ -218,31 +234,35 @@ const RadarControls = ({
         color="text.secondary"
         sx={{ display: 'block', mt: 0.5 }}
       >
-        Data © ČHMÚ · pokrytí Česko a okolí
+        {product.footer}
       </Typography>
     </Panel>
   );
 };
 
-export const Radar = () => {
+type Props = {
+  product: PrecipProduct;
+};
+
+export const PrecipitationOverlay = ({ product }: Props) => {
   const { view } = useMapStateContext();
   const [, latStr, lonStr] = view;
   const inCoverage = isInRadarCoverage(parseFloat(latStr), parseFloat(lonStr));
 
-  const { open, toggle } = useExclusiveMapControl('radar');
+  const { open, toggle } = useExclusiveMapControl(product.controlId);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [opacity, setOpacity] = useState(DEFAULT_OPACITY);
+  const [opacity, setOpacity] = useState(product.defaultOpacity);
   const [followLatest, setFollowLatest] = useState(true);
 
   // Only draw / fetch while the button is actually offered (map centre in range).
   const active = enabled && inCoverage;
 
   const { data: frames, isLoading } = useQuery(
-    ['chmu-radar-frames'],
-    fetchFrames,
+    ['chmu-frames', product.key],
+    () => fetchFrames(product.key),
     {
       enabled: active,
       refetchInterval: 60_000,
@@ -252,7 +272,7 @@ export const Radar = () => {
 
   // Keep the newest values reachable from the style-reload handler without
   // re-subscribing on every change.
-  const framesRef = useRef<RadarFrame[] | undefined>(frames);
+  const framesRef = useRef<Frame[] | undefined>(frames);
   framesRef.current = frames;
   const indexRef = useRef(index);
   indexRef.current = index;
@@ -278,16 +298,22 @@ export const Radar = () => {
       const f = framesRef.current;
       if (f?.length) {
         const i = Math.min(indexRef.current, f.length - 1);
-        applyRadar(map, f[i].ts, opacityRef.current);
+        applyOverlay(
+          map,
+          product.ids,
+          overlayFrameUrl(product.key, f[i].ts),
+          RADAR_COORDINATES,
+          opacityRef.current,
+        );
       }
     };
     map.on('styledata', reapply);
     reapply();
     return () => {
       map.off('styledata', reapply);
-      removeRadar(map);
+      removeOverlay(map, product.ids);
     };
-  }, [active]);
+  }, [active, product]);
 
   // Swap the frame / opacity in place (no flicker) when they change.
   useEffect(() => {
@@ -295,8 +321,17 @@ export const Radar = () => {
     if (!map || !active || !frames?.length) {
       return;
     }
-    applyRadar(map, frames[Math.min(index, frames.length - 1)].ts, opacity);
-  }, [active, frames, index, opacity]);
+    applyOverlay(
+      map,
+      product.ids,
+      overlayFrameUrl(
+        product.key,
+        frames[Math.min(index, frames.length - 1)].ts,
+      ),
+      RADAR_COORDINATES,
+      opacity,
+    );
+  }, [active, frames, index, opacity, product]);
 
   // Animation loop.
   useEffect(() => {
@@ -329,17 +364,22 @@ export const Radar = () => {
     setPlaying((p) => !p);
   };
 
-  // Radar data only covers Czechia and its surroundings – hide the control
-  // entirely when the map is centred elsewhere.
+  // Data only covers Czechia and its surroundings – hide the control entirely
+  // when the map is centred elsewhere.
   if (!inCoverage) {
     return null;
   }
 
   return (
     <>
-      <RadarButton open={open} active={enabled} onClick={handleToggle} />
+      <OverlayButton
+        product={product}
+        open={open}
+        active={enabled}
+        onClick={handleToggle}
+      />
       <PopperWithArrow
-        title="Radar"
+        title={product.popperTitle}
         isOpen={open}
         anchorEl={anchorEl}
         placement="top-end"
@@ -356,7 +396,8 @@ export const Radar = () => {
       >
         <Box sx={{ p: 1, pt: 0.5, pointerEvents: 'all' }}>
           {enabled ? (
-            <RadarControls
+            <OverlayControls
+              product={product}
               frames={frames}
               isLoading={isLoading}
               index={index}
@@ -368,7 +409,7 @@ export const Radar = () => {
             />
           ) : (
             <Typography variant="caption" sx={{ pl: 1 }}>
-              Zapni radar přepínačem vpravo nahoře.
+              {product.enableHint}
             </Typography>
           )}
         </Box>

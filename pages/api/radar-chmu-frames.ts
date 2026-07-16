@@ -1,19 +1,31 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-// Lists the most recent ČHMÚ radar frames by parsing the opendata directory
+// Lists the most recent ČHMÚ composite frames by parsing the opendata directory
 // index. Returns them oldest→newest so the UI can drive a time slider.
-const DIR =
-  'https://opendata.chmi.cz/meteorology/weather/radar/composite/maxz/png_masked/';
+// Supports the instantaneous radar (MAX_Z) and the MERGE 1h precipitation sums.
+const PRODUCTS = {
+  maxz: {
+    dir: 'https://opendata.chmi.cz/meteorology/weather/radar/composite/maxz/png_masked/',
+    re: /pacz2gmaps3\.z_max3d\.(\d{8})\.(\d{4})\.0\.png/g,
+  },
+  merge1h: {
+    dir: 'https://opendata.chmi.cz/meteorology/weather/radar/composite/merge1h/png/',
+    re: /pacz2gmaps3\.merge\.(\d{8})\.(\d{4})\.60\.png/g,
+  },
+} as const;
 
-const FRAME_RE = /pacz2gmaps3\.z_max3d\.(\d{8})\.(\d{4})\.0\.png/g;
+type ProductKey = keyof typeof PRODUCTS;
 
-// ~2 hours of history at the 5-minute publishing step.
+// ~2h of radar (5-min step) / ~4h of MERGE (10-min step).
 const MAX_FRAMES = 24;
 
 export type RadarFrame = {
   ts: string; // `YYYYMMDD.HHMM` (UTC) – key for /api/radar-chmu
   time: string; // ISO timestamp (UTC)
 };
+
+const single = (v: string | string[] | undefined) =>
+  Array.isArray(v) ? v[0] : v;
 
 const tsToIso = (ts: string): string => {
   const [d, hm] = ts.split('.');
@@ -34,17 +46,25 @@ export default async function handler(
     return;
   }
 
+  const productKey = (single(req.query.product) ?? 'maxz') as ProductKey;
+  const product = PRODUCTS[productKey];
+  if (!product) {
+    res.status(400).json({ frames: [], error: 'Invalid product' });
+    return;
+  }
+
   try {
-    const upstream = await fetch(DIR);
+    const upstream = await fetch(product.dir);
     if (!upstream.ok) {
       throw new Error(`directory listing ${upstream.status}`);
     }
     const html = await upstream.text();
 
     const seen = new Set<string>();
+    const re = new RegExp(product.re.source, 'g');
     let match: RegExpExecArray | null;
     // eslint-disable-next-line no-cond-assign
-    while ((match = FRAME_RE.exec(html))) {
+    while ((match = re.exec(html))) {
       seen.add(`${match[1]}.${match[2]}`);
     }
 
