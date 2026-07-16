@@ -1,4 +1,14 @@
 export default {
+  'seo.routes': '__count__ lezeckých cest',
+  'seo.grades': 'obtížnost __range__',
+  'seo.grade': 'obtížnost __grade__',
+  'seo.length': 'délka __length__ m',
+  'seo.rock': 'hornina: __rock__',
+  'seo.type.area': 'lezecká oblast',
+  'seo.type.crag': 'skála',
+  'seo.type.route': 'lezecká cesta',
+  'seo.suffix': 'Lezecké topo, fotky a průvodce.',
+
   loading: 'Nahrávám',
   error: 'Chyba',
   close_panel: 'Zavřít panel',

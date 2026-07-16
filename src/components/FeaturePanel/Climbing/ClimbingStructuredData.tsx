@@ -1,7 +1,10 @@
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { getWikimediaCommonsPhotoKeys } from './utils/photo';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
-import { getHumanPoiType } from '../../../helpers/featureLabel';
+import { getHumanPoiType, getLabel } from '../../../helpers/featureLabel';
+import { generateFeatureDescription } from '../../../helpers/generateFeatureDescription';
+import { getFullOsmappLink } from '../../../services/helpers';
+import { Feature } from '../../../services/types';
 import {
   findOrConvertRouteGrade,
   getDifficulties,
@@ -15,17 +18,15 @@ const generateScriptContent = (feature, userSettings) => {
   const isClimbingCrag = feature.tags.climbing === 'crag';
   const isClimbingRoute = feature.tags.climbing === 'route_bottom';
   const poiType = getHumanPoiType(feature);
+  const description =
+    feature.tags.description || generateFeatureDescription(feature);
 
   if (isClimbingArea) {
     return {
       '@context': 'https://schema.org',
       '@type': 'Place',
       name: `${feature.tags.name} - ${poiType}`,
-      ...(feature.tags.description
-        ? {
-            description: feature.tags.description,
-          }
-        : {}),
+      ...(description ? { description } : {}),
       geo: {
         '@type': 'GeoCoordinates',
         latitude: feature.center?.[1],
@@ -47,9 +48,7 @@ const generateScriptContent = (feature, userSettings) => {
             ),
           }
         : {}),
-      ...(feature.tags.description
-        ? { description: feature.tags.description }
-        : {}),
+      ...(description ? { description } : {}),
 
       geo: {
         '@type': 'GeoCoordinates',
@@ -79,9 +78,7 @@ const generateScriptContent = (feature, userSettings) => {
             ),
           }
         : {}),
-      ...(feature.tags.description
-        ? { description: feature.tags.description }
-        : {}),
+      ...(description ? { description } : {}),
       difficulty: `${routeDifficulty.grade} (${getGradeSystemName(routeDifficulty.gradeSystem)})`,
       geo: {
         '@type': 'GeoCoordinates',
@@ -94,21 +91,57 @@ const generateScriptContent = (feature, userSettings) => {
   return null;
 };
 
+// Breadcrumb trail from the climbing hierarchy (area > crag > route). parentFeatures
+// is ordered nearest-first, so we reverse it to put the root area first.
+const generateBreadcrumbList = (feature: Feature) => {
+  const parents = (feature.parentFeatures ?? [])
+    .filter((parent) => parent.tags?.climbing)
+    .reverse();
+  const chain = [...parents, feature];
+
+  if (chain.length < 2) {
+    return null;
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: chain.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: getLabel(item),
+      item: getFullOsmappLink(item),
+    })),
+  };
+};
+
 export const ClimbingStructuredData = () => {
   const { feature } = useFeatureContext();
   const { userSettings } = useUserSettingsContext();
 
   const structuredData = generateScriptContent(feature, userSettings);
-  if (!structuredData) return null;
+  const breadcrumbList = feature ? generateBreadcrumbList(feature) : null;
+
+  if (!structuredData && !breadcrumbList) return null;
 
   return (
     <Head>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData),
-        }}
-      />
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
+        />
+      )}
+      {breadcrumbList && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbList),
+          }}
+        />
+      )}
     </Head>
   );
 };

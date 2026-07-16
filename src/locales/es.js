@@ -1,6 +1,16 @@
 // identifier should be in the form: foldername.messageid.
 
 export default {
+  'seo.routes': '__count__ vías de escalada',
+  'seo.grades': 'grados __range__',
+  'seo.grade': 'grado __grade__',
+  'seo.length': '__length__ m de longitud',
+  'seo.rock': 'roca: __rock__',
+  'seo.type.area': 'zona de escalada',
+  'seo.type.crag': 'sector de escalada',
+  'seo.type.route': 'vía de escalada',
+  'seo.suffix': 'Croquis, fotos y guía de escalada.',
+
   loading: 'Cargando',
   error: 'Error',
   close_panel: 'Cerrar panel',

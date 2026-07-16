@@ -1,6 +1,16 @@
 // identifier should be in the form: foldername.messageid.
 
 export default {
+  'seo.routes': '__count__ dróg wspinaczkowych',
+  'seo.grades': 'trudności __range__',
+  'seo.grade': 'trudność __grade__',
+  'seo.length': 'długość __length__ m',
+  'seo.rock': 'skała: __rock__',
+  'seo.type.area': 'rejon wspinaczkowy',
+  'seo.type.crag': 'skała',
+  'seo.type.route': 'droga wspinaczkowa',
+  'seo.suffix': 'Topo, zdjęcia i przewodnik wspinaczkowy.',
+
   loading: 'Wczytywanie',
   error: 'Błąd',
   close_panel: 'Zamknij panel',
