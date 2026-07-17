@@ -55,7 +55,7 @@ export type ClimbingSearchRecord = {
   osmId: number;
   name: string;
   countryCode?: string; // ISO 3166-1 lowercase, resolved from lon/lat during refresh
-  parents?: ClimbingSearchParent[]; // relation ancestry (parentId chain), nearest first, up to 4
+  parents?: ClimbingSearchParent[]; // parent and grandparent, nearest first
 };
 
 export type ClimbingTilesFeature = GeojsonFeature<

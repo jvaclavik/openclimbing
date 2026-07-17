@@ -45,55 +45,56 @@ const QUERY_ROUTES = `
     ORDER BY distance_sq
     LIMIT 10`;
 
-const MAX_PARENT_DEPTH = 4; // how many parentId hops to resolve for each result
-
 type SearchRow = ClimbingSearchRecord & { parentId: number | null };
 type ParentRow = { osmId: number; name: string; parentId: number | null };
 
-// Resolves the parentId chain (always relations - climbing areas/sites) for each
-// result, up to MAX_PARENT_DEPTH hops. Done breadth-first, one batched query per
-// level (`osmId IN (...)`) instead of one query per hop per record - so at most
-// MAX_PARENT_DEPTH queries total, all hitting idx_climbing_features_osm.
+const fetchRelationsByOsmId = (osmIds: number[]): ParentRow[] => {
+  if (!osmIds.length) return [];
+  const placeholders = osmIds.map(() => '?').join(',');
+  return getDb()
+    .prepare<number[], ParentRow>(
+      `SELECT "osmId", COALESCE("name", "nameRaw") AS "name", "parentId"
+       FROM climbing_features
+       WHERE "osmType" = 'relation' AND "osmId" IN (${placeholders})`,
+    )
+    .all(...osmIds);
+};
+
+// Attaches up to two ancestors (parent and grandparent, always relations - climbing
+// areas/sites) to each result, resolved with one query per level.
 const attachParents = (records: SearchRow[]): void => {
-  const cache = new Map<number, ParentRow>();
+  const parentIds = [
+    ...new Set(records.map((r) => r.parentId).filter(Boolean)),
+  ] as number[];
+  const parents = fetchRelationsByOsmId(parentIds);
+  const parentById = new Map(parents.map((row) => [row.osmId, row]));
 
-  let frontier = new Set<number>();
-  for (const record of records) {
-    if (record.parentId) frontier.add(record.parentId);
-  }
-
-  for (let depth = 0; depth < MAX_PARENT_DEPTH && frontier.size; depth += 1) {
-    const ids = [...frontier].filter((id) => !cache.has(id));
-    if (!ids.length) break;
-
-    const placeholders = ids.map(() => '?').join(',');
-    const rows = getDb()
-      .prepare<number[], ParentRow>(
-        `SELECT "osmId", COALESCE("name", "nameRaw") AS "name", "parentId"
-         FROM climbing_features
-         WHERE "osmType" = 'relation' AND "osmId" IN (${placeholders})`,
-      )
-      .all(...ids);
-
-    frontier = new Set();
-    for (const row of rows) {
-      cache.set(row.osmId, row);
-      if (row.parentId) frontier.add(row.parentId);
-    }
-  }
+  const grandparentIds = [
+    ...new Set(parents.map((row) => row.parentId).filter(Boolean)),
+  ] as number[];
+  const grandparents = fetchRelationsByOsmId(grandparentIds);
+  const grandparentById = new Map(grandparents.map((row) => [row.osmId, row]));
 
   for (const record of records) {
-    const parents: ClimbingSearchParent[] = [];
-    const seen = new Set<number>();
-    let pid = record.parentId ?? undefined;
-    while (pid && parents.length < MAX_PARENT_DEPTH && !seen.has(pid)) {
-      seen.add(pid);
-      const row = cache.get(pid);
-      if (!row) break;
-      parents.push({ name: row.name, osmType: 'relation', osmId: row.osmId });
-      pid = row.parentId ?? undefined;
+    const parent = record.parentId
+      ? parentById.get(record.parentId)
+      : undefined;
+    const grandparent = parent?.parentId
+      ? grandparentById.get(parent.parentId)
+      : undefined;
+
+    const chain = [parent, grandparent].filter(
+      (row): row is ParentRow => row != null,
+    );
+    if (chain.length) {
+      record.parents = chain.map(
+        (row): ClimbingSearchParent => ({
+          name: row.name,
+          osmType: 'relation',
+          osmId: row.osmId,
+        }),
+      );
     }
-    if (parents.length) record.parents = parents;
     delete record.parentId;
   }
 };

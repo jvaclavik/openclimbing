@@ -68,16 +68,13 @@ const getTypeLabels = (): Record<ClimbingSearchRecord['type'], string> => ({
 // font, so it's only an approximation - occasional overflow is fine).
 const MAX_SECONDARY_CHARS = 43;
 const PARENT_SEPARATOR = ' › ';
-const COLLAPSE_MARKER = '…'; // stands in for the omitted middle of a long chain
 
 const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, Math.max(1, max - 1))}…` : text;
 
-// Builds the secondary line, e.g. "crag › area › region, CZ". With no parents it
-// falls back to the type label ("Lezecká cesta"). Longer chains (>2 parents) are
-// collapsed to just the nearest and farthest ancestor with a "…" in between. Each
-// shown parent gets an equal share of the remaining width (total minus the
-// country suffix, separators and marker) so it roughly fits.
+// Builds the secondary line, e.g. "crag › area, CZ". With no parents it falls
+// back to the type label ("Lezecká cesta"). Each shown parent gets an equal
+// share of the remaining width (total minus the country suffix and separator).
 const buildSecondaryLine = (
   parents: ClimbingSearchParent[] | undefined,
   countryCode: string | undefined,
@@ -89,26 +86,16 @@ const buildSecondaryLine = (
     return `${label}${suffix}`;
   }
 
-  const collapsed = parents.length > 2;
-  const names = collapsed
-    ? [parents[0].name, parents[parents.length - 1].name]
-    : parents.map((parent) => parent.name);
-
-  const markerLen = collapsed
-    ? PARENT_SEPARATOR.length + COLLAPSE_MARKER.length
-    : 0;
-  const separatorsLen = PARENT_SEPARATOR.length * (names.length - 1);
+  const separatorsLen = PARENT_SEPARATOR.length * (parents.length - 1);
   const perParent = Math.max(
     4,
     Math.floor(
-      (MAX_SECONDARY_CHARS - suffix.length - separatorsLen - markerLen) /
-        names.length,
+      (MAX_SECONDARY_CHARS - suffix.length - separatorsLen) / parents.length,
     ),
   );
 
-  const shown = names.map((name) => truncate(name, perParent));
-  const segments = collapsed ? [shown[0], COLLAPSE_MARKER, shown[1]] : shown;
-  return `${segments.join(PARENT_SEPARATOR)}${suffix}`;
+  const shown = parents.map((parent) => truncate(parent.name, perParent));
+  return `${shown.join(PARENT_SEPARATOR)}${suffix}`;
 };
 
 type Props = {
