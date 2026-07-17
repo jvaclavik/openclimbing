@@ -20,7 +20,10 @@ import { GeocoderAborted } from './geocoder';
 import { t } from '../../../services/intl';
 import { getPresetTranslation } from '../../../services/tagging/translations';
 import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
-import { getDifficultyColor } from '../../../services/tagging/climbing/routeGrade';
+import {
+  getDifficultyColor,
+  getGradeLabel,
+} from '../../../services/tagging/climbing/routeGrade';
 
 const getApiUrl = (inputValue: string, view: View) => {
   const [_zoom, lat, lon] = view;
@@ -122,10 +125,13 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
   const theme = useTheme();
   const { userSettings } = useUserSettingsContext();
   const { isImperial } = userSettings;
-  const { name, type, lon, lat, parents, countryCode, gradeId } =
+  const { name, type, lon, lat, parents, countryCode, gradeId, gradeTxt } =
     option.climbing;
 
   const isRoute = type === 'route' || type === 'route_top';
+  const gradeLabel = isRoute
+    ? getGradeLabel(gradeId, gradeTxt, userSettings['climbing.gradeSystem'])
+    : undefined;
   const gradeColor = isRoute
     ? getDifficultyColor(
         { gradeSystem: 'uiaa', grade: GRADE_TABLE.uiaa[gradeId] },
@@ -149,6 +155,12 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
       </IconPart>
       <Grid size={{ xs: 12 }}>
         {highlightText(name, inputValue)}
+        {gradeLabel && (
+          <Typography component="span" variant="body2" color="textSecondary">
+            {' '}
+            {gradeLabel}
+          </Typography>
+        )}
         {secondaryLine && (
           <Typography variant="body2" color="textSecondary" noWrap>
             {secondaryLine}

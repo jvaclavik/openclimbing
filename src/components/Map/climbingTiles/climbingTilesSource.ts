@@ -16,6 +16,7 @@ import {
   GRADE_TABLE,
   gradeColors,
 } from '../../../services/tagging/climbing/gradeData';
+import { getGradeLabel } from '../../../services/tagging/climbing/routeGrade';
 import { join } from '../../../utils';
 import { mapClimbingFilter } from '../../utils/userSettings/mapClimbingFilter';
 import { decodeHistogram } from '../../../server/climbing-tiles/overpass/histogram';
@@ -51,11 +52,12 @@ const getColor = (gradeId: number): string | undefined => {
 
 const joinLabel = (...params: string[]) => params.filter(Boolean).join(' ');
 
-const getGrade = (properties: ClimbingTilesProperties) => {
-  const userSystem = mapClimbingFilter.userSystem;
-  const convertedGrade = GRADE_TABLE[userSystem]?.[properties.gradeId];
-  return convertedGrade ? convertedGrade : properties.gradeTxt;
-};
+const getGrade = (properties: ClimbingTilesProperties) =>
+  getGradeLabel(
+    properties.gradeId,
+    properties.gradeTxt,
+    mapClimbingFilter.userSystem,
+  );
 
 const processFeature = (
   feature: ClimbingTilesFeature,

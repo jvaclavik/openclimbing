@@ -109,6 +109,17 @@ export function findGradeTableRowIndexForGradeText(
   return null;
 }
 
+// Same fallback as used for map labels: convert to the user's chosen grade
+// system when possible, otherwise show the grade as originally tagged.
+export const getGradeLabel = (
+  gradeId: number | undefined,
+  gradeTxt: string | undefined,
+  userSystem: GradeSystem | undefined,
+): string | undefined => {
+  const convertedGrade = GRADE_TABLE[userSystem]?.[gradeId];
+  return convertedGrade || gradeTxt;
+};
+
 export const getDifficultyColor = (
   routeDifficulty: RouteDifficulty,
   mode: 'light' | 'dark',
