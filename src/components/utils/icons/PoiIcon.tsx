@@ -6,6 +6,8 @@ import { getPoiClass } from '../../../services/getPoiClass';
 import { FeatureTags } from '../../../services/types';
 import { AreaIcon } from '../../FeaturePanel/Climbing/AreaIcon';
 import { CragIcon } from '../../FeaturePanel/Climbing/CragIcon';
+import { GymIcon } from '../../FeaturePanel/Climbing/GymIcon';
+import { FerrataIcon } from '../../FeaturePanel/Climbing/FerrataIcon';
 import { Maki } from './Maki';
 
 // Shared accent used to highlight a route (its line is drawn on the active
@@ -41,6 +43,34 @@ const ClimbingCragIcon = (props: { size: number }) => {
         stroke={theme.palette.text.secondary}
         height={props.size}
         width={props.size}
+      />
+    </Container>
+  );
+};
+
+const ClimbingGymIcon = (props: { size: number }) => {
+  const theme = useTheme();
+  return (
+    <Container>
+      <GymIcon
+        fill={theme.palette.text.secondary}
+        stroke={theme.palette.text.secondary}
+        height={props.size}
+        width={(props.size * 39) / 22}
+      />
+    </Container>
+  );
+};
+
+const ClimbingFerrataIcon = (props: { size: number }) => {
+  const theme = useTheme();
+  return (
+    <Container>
+      <FerrataIcon
+        fill={theme.palette.text.secondary}
+        stroke={theme.palette.text.secondary}
+        height={props.size}
+        width={(props.size * 29) / 36}
       />
     </Container>
   );
@@ -83,10 +113,14 @@ export const PoiIcon = ({
     const isClimbingArea = tags.climbing === 'area';
     const isClimbingCrag = tags.climbing === 'crag';
     const isClimbingRoute = ['route_bottom', 'route'].includes(tags.climbing);
+    const isClimbingGym = tags.climbing === 'gym';
+    const isClimbingFerrata = tags.climbing === 'ferrata';
 
     if (isClimbingArea) return <ClimbingAreaIcon size={size} />;
     if (isClimbingCrag) return <ClimbingCragIcon size={size} />;
     if (isClimbingRoute) return <ClimbingRouteIcon highlighted={highlighted} />;
+    if (isClimbingGym) return <ClimbingGymIcon size={size} />;
+    if (isClimbingFerrata) return <ClimbingFerrataIcon size={size} />;
   }
 
   const finalIco = ico ? ico : getPoiClass(tags).class;
