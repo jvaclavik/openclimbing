@@ -84,7 +84,6 @@ export const PoiIcon = ({
     const isClimbingCrag = tags.climbing === 'crag';
     const isClimbingRoute = ['route_bottom', 'route'].includes(tags.climbing);
 
-    if (isClimbingArea || isClimbingCrag || isClimbingRoute) return null;
     if (isClimbingArea) return <ClimbingAreaIcon size={size} />;
     if (isClimbingCrag) return <ClimbingCragIcon size={size} />;
     if (isClimbingRoute) return <ClimbingRouteIcon highlighted={highlighted} />;

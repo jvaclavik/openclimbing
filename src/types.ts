@@ -40,6 +40,13 @@ export type ClimbingTilesProperties = {
   familyFriendly?: boolean;
 };
 
+// Relation ancestor of a search result (climbing area / site), nearest first.
+export type ClimbingSearchParent = {
+  name: string;
+  osmType: OsmType;
+  osmId: number;
+};
+
 export type ClimbingSearchRecord = {
   type: 'area' | 'crag' | 'gym' | 'ferrata' | 'route' | 'route_top';
   lon: number;
@@ -47,6 +54,8 @@ export type ClimbingSearchRecord = {
   osmType: OsmType;
   osmId: number;
   name: string;
+  countryCode?: string; // ISO 3166-1 lowercase, resolved from lon/lat during refresh
+  parents?: ClimbingSearchParent[]; // relation ancestry (parentId chain), nearest first, up to 4
 };
 
 export type ClimbingTilesFeature = GeojsonFeature<
