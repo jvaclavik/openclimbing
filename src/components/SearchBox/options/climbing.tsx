@@ -72,10 +72,11 @@ type Props = {
 export const ClimbingRow = ({ option, inputValue }: Props) => {
   const mapCenter = useMapCenter();
   const { isImperial } = useUserSettingsContext().userSettings;
-  const { name, type, lon, lat } = option.climbing;
+  const { name, type, lon, lat, parents } = option.climbing;
 
   const distance = getHumanDistance(isImperial, mapCenter, [lon, lat]);
   const label = getTypeLabels()[type] ?? `climbing ${type}`;
+  const parentPath = parents?.map((parent) => parent.name).join(' › ');
 
   return (
     <>
@@ -86,7 +87,7 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
       <Grid size={{ xs: 12 }}>
         {highlightText(name, inputValue)}
         <Typography variant="body2" color="textSecondary">
-          {label}
+          {parentPath ? `${label} · ${parentPath}` : label}
         </Typography>
       </Grid>
     </>
