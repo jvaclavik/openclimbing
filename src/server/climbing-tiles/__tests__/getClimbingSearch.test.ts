@@ -19,7 +19,7 @@ type SeedRow = {
 };
 
 // A deep chain: country (rel) -> area (rel) -> subarea (rel) -> crag (rel) -> route (node)
-// so the route has 4 relation ancestors (exactly MAX_PARENT_DEPTH).
+// so the route has more relation ancestors than we resolve (only parent + grandparent).
 const ROOT: SeedRow = {
   type: 'area',
   osmType: 'relation',
@@ -111,15 +111,13 @@ describe('getClimbingSearch parent chain', () => {
     mockDb.close();
   });
 
-  it('attaches the parentId chain (nearest first) capped at 4 hops', () => {
+  it('attaches only parent and grandparent (nearest first)', () => {
     const [route] = getClimbingSearch('Direttissima', 14, 50);
 
     expect(route.osmId).toBe(5);
     expect(route.parents).toEqual([
       { name: 'Sluncni stena', osmType: 'relation', osmId: 4 },
       { name: 'Skalni mesto', osmType: 'relation', osmId: 3 },
-      { name: 'Adrspach', osmType: 'relation', osmId: 2 },
-      { name: 'Cesko', osmType: 'relation', osmId: 1 },
     ]);
   });
 
