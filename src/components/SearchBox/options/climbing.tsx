@@ -99,7 +99,7 @@ const useMapCenterCountryCode = (): string | null => {
 
 // Rough estimate of how many characters fit on the secondary line (proportional
 // font, so it's only an approximation - occasional overflow is fine).
-const MAX_SECONDARY_CHARS = 38;
+const MAX_SECONDARY_CHARS = 43;
 const PARENT_SEPARATOR = ' › ';
 const COLLAPSE_MARKER = '…'; // stands in for the omitted middle of a long chain
 
