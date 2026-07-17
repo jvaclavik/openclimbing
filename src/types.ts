@@ -54,6 +54,7 @@ export type ClimbingSearchRecord = {
   osmType: OsmType;
   osmId: number;
   name: string;
+  countryCode?: string; // ISO 3166-1 lowercase, resolved from lon/lat during refresh
   parents?: ClimbingSearchParent[]; // relation ancestry (parentId chain), nearest first, up to 4
 };
 
