@@ -57,13 +57,15 @@ export const fetchClimbingSearchOptions = async (
 // font, so it's only an approximation - occasional overflow is fine).
 const MAX_SECONDARY_CHARS = 38;
 const PARENT_SEPARATOR = ' › ';
+const COLLAPSE_MARKER = '…'; // stands in for the omitted middle of a long chain
 
 const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, Math.max(1, max - 1))}…` : text;
 
-// Builds "crag › area › region, CZ" for the secondary line. Each parent gets an
-// equal share of the remaining width (total minus the fixed country suffix and
-// the separators) so the whole path roughly fits.
+// Builds "crag › area › region, CZ" for the secondary line. Longer chains
+// (>2 parents) are collapsed to just the nearest and the farthest ancestor with
+// a "…" in between. Each shown parent gets an equal share of the remaining width
+// (total minus the country suffix, separators and marker) so it roughly fits.
 const buildParentPath = (
   parents: ClimbingSearchParent[] | undefined,
   countryCode: string | undefined,
@@ -73,18 +75,27 @@ const buildParentPath = (
     return country;
   }
 
+  const collapsed = parents.length > 2;
+  const names = collapsed
+    ? [parents[0].name, parents[parents.length - 1].name]
+    : parents.map((parent) => parent.name);
+
   const countrySuffixLen = country ? country.length + 2 : 0; // ", CZ"
-  const separatorsLen = PARENT_SEPARATOR.length * (parents.length - 1);
+  const markerLen = collapsed
+    ? PARENT_SEPARATOR.length + COLLAPSE_MARKER.length
+    : 0;
+  const separatorsLen = PARENT_SEPARATOR.length * (names.length - 1);
   const perParent = Math.max(
     4,
     Math.floor(
-      (MAX_SECONDARY_CHARS - countrySuffixLen - separatorsLen) / parents.length,
+      (MAX_SECONDARY_CHARS - countrySuffixLen - separatorsLen - markerLen) /
+        names.length,
     ),
   );
 
-  const path = parents
-    .map((parent) => truncate(parent.name, perParent))
-    .join(PARENT_SEPARATOR);
+  const shown = names.map((name) => truncate(name, perParent));
+  const segments = collapsed ? [shown[0], COLLAPSE_MARKER, shown[1]] : shown;
+  const path = segments.join(PARENT_SEPARATOR);
   return country ? `${path}, ${country}` : path;
 };
 
