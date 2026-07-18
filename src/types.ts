@@ -56,6 +56,10 @@ export type ClimbingSearchRecord = {
   name: string;
   countryCode?: string; // ISO 3166-1 lowercase, resolved from lon/lat during refresh
   parents?: ClimbingSearchParent[]; // parent and grandparent, nearest first
+
+  // route/route_top only:
+  gradeId?: number;
+  gradeTxt?: string;
 };
 
 export type ClimbingTilesFeature = GeojsonFeature<

@@ -1,4 +1,5 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid, Typography, useTheme } from '@mui/material';
+import styled from '@emotion/styled';
 import React from 'react';
 import {
   getHumanDistance,
@@ -18,6 +19,11 @@ import { ClimbingSearchParent, ClimbingSearchRecord } from '../../../types';
 import { GeocoderAborted } from './geocoder';
 import { t } from '../../../services/intl';
 import { getPresetTranslation } from '../../../services/tagging/translations';
+import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
+import {
+  getDifficultyColor,
+  getGradeLabel,
+} from '../../../services/tagging/climbing/routeGrade';
 
 const getApiUrl = (inputValue: string, view: View) => {
   const [_zoom, lat, lon] = view;
@@ -98,6 +104,17 @@ const buildSecondaryLine = (
   return `${shown.join(PARENT_SEPARATOR)}${suffix}`;
 };
 
+const RouteGradeDot = styled.span<{ $color: string }>`
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background-color: ${({ $color }) => $color};
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+`;
+
 type Props = {
   option: ClimbingOption;
   inputValue: string;
@@ -105,8 +122,22 @@ type Props = {
 
 export const ClimbingRow = ({ option, inputValue }: Props) => {
   const mapCenter = useMapCenter();
-  const { isImperial } = useUserSettingsContext().userSettings;
-  const { name, type, lon, lat, parents, countryCode } = option.climbing;
+  const theme = useTheme();
+  const { userSettings } = useUserSettingsContext();
+  const { isImperial } = userSettings;
+  const { name, type, lon, lat, parents, countryCode, gradeId, gradeTxt } =
+    option.climbing;
+
+  const isRoute = type === 'route' || type === 'route_top';
+  const gradeLabel = isRoute
+    ? getGradeLabel(gradeId, gradeTxt, userSettings['climbing.gradeSystem'])
+    : undefined;
+  const gradeColor = isRoute
+    ? getDifficultyColor(
+        { gradeSystem: 'uiaa', grade: GRADE_TABLE.uiaa[gradeId] },
+        theme.palette.mode,
+      )
+    : undefined;
 
   const distance = getHumanDistance(isImperial, mapCenter, [lon, lat]);
   const label = getTypeLabels()[type] ?? `climbing ${type}`;
@@ -115,11 +146,16 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
   return (
     <>
       <IconPart>
-        <PoiIcon tags={{ climbing: type }} ico="climbing" size={20} />
+        {isRoute ? (
+          <RouteGradeDot $color={gradeColor} />
+        ) : (
+          <PoiIcon tags={{ climbing: type }} ico="climbing" size={20} />
+        )}
         <div>{distance}</div>
       </IconPart>
       <Grid size={{ xs: 12 }}>
         {highlightText(name, inputValue)}
+        {gradeLabel && ` ${gradeLabel}`}
         {secondaryLine && (
           <Typography variant="body2" color="textSecondary" noWrap>
             {secondaryLine}
