@@ -16,6 +16,7 @@ import { SEARCH_THRESHOLD } from './consts';
 
 export const IconPart = styled.div`
   width: 50px;
+  flex-shrink: 0;
   text-align: center;
   padding-right: 10px;
   font-size: 10px;
