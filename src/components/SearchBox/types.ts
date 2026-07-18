@@ -71,6 +71,8 @@ export type PresetOption = GenericOption<
 
 type LoaderOption = GenericOption<'loader', null>;
 
+export type SeparatorOption = GenericOption<'separator', { section: string }>;
+
 export type CoordsOption = GenericOption<
   'coords',
   { center: LonLat; label: string; sublabel: string }
@@ -100,4 +102,5 @@ export type Option =
   | GeocoderOption
   | ClimbingOption
   | OsmOption
-  | TilesOption;
+  | TilesOption
+  | SeparatorOption;
