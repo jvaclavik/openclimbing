@@ -155,12 +155,7 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
       </IconPart>
       <Grid size={{ xs: 12 }}>
         {highlightText(name, inputValue)}
-        {gradeLabel && (
-          <Typography component="span" variant="body2" color="textSecondary">
-            {' '}
-            {gradeLabel}
-          </Typography>
-        )}
+        {gradeLabel && ` ${gradeLabel}`}
         {secondaryLine && (
           <Typography variant="body2" color="textSecondary" noWrap>
             {secondaryLine}
