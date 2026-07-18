@@ -17,8 +17,6 @@ import { CLIMBING_TILES_HOST } from '../../../services/osm/consts';
 import { PROJECT_ID } from '../../../services/project';
 import { ClimbingSearchParent, ClimbingSearchRecord } from '../../../types';
 import { GeocoderAborted } from './geocoder';
-import { t } from '../../../services/intl';
-import { getPresetTranslation } from '../../../services/tagging/translations';
 import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
 import {
   getDifficultyColor,
@@ -61,15 +59,6 @@ export const fetchClimbingSearchOptions = async (
   }
 };
 
-const getTypeLabels = (): Record<ClimbingSearchRecord['type'], string> => ({
-  area: getPresetTranslation('type/site/climbing/area'),
-  crag: getPresetTranslation('climbing/crag'),
-  route: getPresetTranslation('climbing/route'),
-  route_top: getPresetTranslation('climbing/route_top'), // only in ourPresets.ts yet
-  gym: getPresetTranslation('leisure/sports_centre/climbing'),
-  ferrata: t('climbing.type.ferrata'), // no preset yet
-});
-
 // Rough estimate of how many characters fit on the secondary line (proportional
 // font, so it's only an approximation - occasional overflow is fine).
 const MAX_SECONDARY_CHARS = 43;
@@ -79,19 +68,19 @@ const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, Math.max(1, max - 1))}…` : text;
 
 // Builds the secondary line, e.g. "crag › area, CZ". With no parents it falls
-// back to the type label ("Lezecká cesta"). Each shown parent gets an equal
+// back to just the country code ("CZ"). Each shown parent gets an equal
 // share of the remaining width (total minus the country suffix and separator).
 const buildSecondaryLine = (
   parents: ClimbingSearchParent[] | undefined,
   countryCode: string | undefined,
-  label: string,
 ): string => {
-  const suffix = countryCode ? `, ${countryCode.toUpperCase()}` : '';
+  const countryText = countryCode ? countryCode.toUpperCase() : '';
 
   if (!parents?.length) {
-    return `${label}${suffix}`;
+    return countryText;
   }
 
+  const suffix = countryText ? `, ${countryText}` : '';
   const separatorsLen = PARENT_SEPARATOR.length * (parents.length - 1);
   const perParent = Math.max(
     4,
@@ -140,8 +129,7 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
     : undefined;
 
   const distance = getHumanDistance(isImperial, mapCenter, [lon, lat]);
-  const label = getTypeLabels()[type] ?? `climbing ${type}`;
-  const secondaryLine = buildSecondaryLine(parents, countryCode, label);
+  const secondaryLine = buildSecondaryLine(parents, countryCode);
 
   return (
     <>
