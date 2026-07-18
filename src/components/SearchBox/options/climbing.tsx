@@ -17,6 +17,8 @@ import { CLIMBING_TILES_HOST } from '../../../services/osm/consts';
 import { PROJECT_ID } from '../../../services/project';
 import { ClimbingSearchParent, ClimbingSearchRecord } from '../../../types';
 import { GeocoderAborted } from './geocoder';
+import { t } from '../../../services/intl';
+import { getPresetTranslation } from '../../../services/tagging/translations';
 import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
 import {
   getDifficultyColor,
@@ -58,6 +60,15 @@ export const fetchClimbingSearchOptions = async (
     throw e;
   }
 };
+
+const getTypeLabels = (): Record<ClimbingSearchRecord['type'], string> => ({
+  area: getPresetTranslation('type/site/climbing/area'),
+  crag: getPresetTranslation('climbing/crag'),
+  route: getPresetTranslation('climbing/route'),
+  route_top: getPresetTranslation('climbing/route_top'), // only in ourPresets.ts yet
+  gym: getPresetTranslation('leisure/sports_centre/climbing'),
+  ferrata: t('climbing.type.ferrata'), // no preset yet
+});
 
 // Rough estimate of how many characters fit on the secondary line (proportional
 // font, so it's only an approximation - occasional overflow is fine).
@@ -129,15 +140,21 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
     : undefined;
 
   const distance = getHumanDistance(isImperial, mapCenter, [lon, lat]);
+  const label = getTypeLabels()[type] ?? `climbing ${type}`;
   const secondaryLine = buildSecondaryLine(parents, countryCode);
 
   return (
     <>
       <IconPart>
         {isRoute ? (
-          <RouteGradeDot $color={gradeColor} />
+          <RouteGradeDot $color={gradeColor} title={label} />
         ) : (
-          <PoiIcon tags={{ climbing: type }} ico="climbing" size={20} />
+          <PoiIcon
+            tags={{ climbing: type }}
+            ico="climbing"
+            size={20}
+            title={label}
+          />
         )}
         <div>{distance}</div>
       </IconPart>
