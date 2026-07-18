@@ -34,8 +34,11 @@ export const withSeparators = (options: Option[]): Option[] => {
 
 const StyledDivider = styled(Divider)`
   width: 100%;
-  margin: 2px 0;
-  border-color: ${({ theme }) => theme.palette.divider};
+  margin: 4px 0;
+  border-color: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.12)'
+      : 'rgba(0, 0, 0, 0.12)'};
 `;
 
 export const SeparatorRow = () => <StyledDivider />;
