@@ -18,6 +18,7 @@ import {
   CLIMBING_SEARCH_ABORTABLE_QUEUE,
   fetchClimbingSearchOptions,
 } from './options/climbing';
+import { withSeparators } from './separators';
 
 const getMatchedOptions = (inputValue: string) => {
   if (inputValue === '') {
@@ -100,12 +101,14 @@ export const useGetOptions = (
           return; // This blocks rendering of old result, when user already changed input
         }
 
-        setOptions([
-          ...before,
-          ...climbingOptions,
-          ...geocoderOptions,
-          ...restPresets,
-        ]);
+        setOptions(
+          withSeparators([
+            ...before,
+            ...climbingOptions,
+            ...geocoderOptions,
+            ...restPresets,
+          ]),
+        );
       } catch (e) {
         if (e instanceof GeocoderDebounced || e instanceof GeocoderAborted) {
           return;

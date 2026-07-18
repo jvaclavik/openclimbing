@@ -8,6 +8,7 @@ import { OsmRow } from './options/osm';
 import { CoordsRow } from './options/coords';
 import { ClimbingRow } from './options/climbing';
 import { TilesRow } from './options/tiles';
+import { SeparatorRow } from './separators';
 
 type Props = {
   option: Option;
@@ -32,14 +33,30 @@ const Row = ({ option, inputValue }: Props) => {
       return <TilesRow option={option} />;
     case 'loader':
       return <LoaderRow />;
+    case 'separator':
+      return <SeparatorRow />;
   }
 };
 
 export const renderOptionFactory = (inputValue: string) => {
-  const renderOptionFn = ({ key, ...props }, option: Option) => (
-    <li key={key} {...props}>
-      <Row option={option} inputValue={inputValue} />
-    </li>
-  );
+  const renderOptionFn = ({ key, ...props }, option: Option) => {
+    if (option.type === 'separator') {
+      return (
+        <li
+          key={key}
+          {...props} // eslint-disable-line react/jsx-props-no-spreading
+          style={{ padding: 0, minHeight: 0, pointerEvents: 'none' }}
+        >
+          <SeparatorRow />
+        </li>
+      );
+    }
+
+    return (
+      <li key={key} {...props}>
+        <Row option={option} inputValue={inputValue} />
+      </li>
+    );
+  };
   return renderOptionFn;
 };

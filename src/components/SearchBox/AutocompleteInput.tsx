@@ -79,7 +79,9 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       renderOption={renderOptionFactory(inputValue)}
       renderInput={renderInputFactory(setInputValue, autocompleteRef)}
       filterOptions={(option) => option}
-      getOptionDisabled={(option) => option.type === 'loader'}
+      getOptionDisabled={(option) =>
+        option.type === 'loader' || option.type === 'separator'
+      }
       getOptionKey={(option) => JSON.stringify(option)}
     />
   );
