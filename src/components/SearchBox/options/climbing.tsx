@@ -79,19 +79,19 @@ const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, Math.max(1, max - 1))}…` : text;
 
 // Builds the secondary line, e.g. "crag › area, CZ". With no parents it falls
-// back to the type label ("Lezecká cesta"). Each shown parent gets an equal
+// back to just the country code ("CZ"). Each shown parent gets an equal
 // share of the remaining width (total minus the country suffix and separator).
 const buildSecondaryLine = (
   parents: ClimbingSearchParent[] | undefined,
   countryCode: string | undefined,
-  label: string,
 ): string => {
-  const suffix = countryCode ? `, ${countryCode.toUpperCase()}` : '';
+  const countryText = countryCode ? countryCode.toUpperCase() : '';
 
   if (!parents?.length) {
-    return `${label}${suffix}`;
+    return countryText;
   }
 
+  const suffix = countryText ? `, ${countryText}` : '';
   const separatorsLen = PARENT_SEPARATOR.length * (parents.length - 1);
   const perParent = Math.max(
     4,
@@ -141,15 +141,20 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
 
   const distance = getHumanDistance(isImperial, mapCenter, [lon, lat]);
   const label = getTypeLabels()[type] ?? `climbing ${type}`;
-  const secondaryLine = buildSecondaryLine(parents, countryCode, label);
+  const secondaryLine = buildSecondaryLine(parents, countryCode);
 
   return (
     <>
       <IconPart>
         {isRoute ? (
-          <RouteGradeDot $color={gradeColor} />
+          <RouteGradeDot $color={gradeColor} title={label} />
         ) : (
-          <PoiIcon tags={{ climbing: type }} ico="climbing" size={20} />
+          <PoiIcon
+            tags={{ climbing: type }}
+            ico="climbing"
+            size={20}
+            title={label}
+          />
         )}
         <div>{distance}</div>
       </IconPart>
