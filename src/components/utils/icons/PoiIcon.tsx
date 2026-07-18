@@ -48,15 +48,18 @@ const ClimbingCragIcon = (props: { size: number }) => {
   );
 };
 
+const GYM_ICON_SCALE = 0.7;
+
 const ClimbingGymIcon = (props: { size: number }) => {
   const theme = useTheme();
+  const height = props.size * GYM_ICON_SCALE;
   return (
     <Container>
       <GymIcon
         fill={theme.palette.text.secondary}
         stroke={theme.palette.text.secondary}
-        height={props.size}
-        width={(props.size * 39) / 22}
+        height={height}
+        width={(height * 39) / 22}
       />
     </Container>
   );
