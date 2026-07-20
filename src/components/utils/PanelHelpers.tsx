@@ -88,15 +88,26 @@ export const PanelScrollbars = ({
           {children}
         </MobileScrollbars>
       ) : (
-        <Scrollbars
-          universal
-          autoHide
-          style={{ height: '100%' }}
-          onScroll={onScroll}
-          ref={scrollElementRef}
-        >
-          {children}
-        </Scrollbars>
+        <>
+          <noscript
+            // react-custom-scrollbars renders the view with overflow:hidden until
+            // its componentDidMount switches it to scroll – without JS the panel
+            // would never become scrollable, so re-enable native scrolling here
+            dangerouslySetInnerHTML={{
+              __html: `<style>.panel-ssr-scroll > :first-child { overflow: auto !important; }</style>`,
+            }}
+          />
+          <Scrollbars
+            universal
+            autoHide
+            className="panel-ssr-scroll"
+            style={{ height: '100%' }}
+            onScroll={onScroll}
+            ref={scrollElementRef}
+          >
+            {children}
+          </Scrollbars>
+        </>
       )}
 
       <ShadowBottom backgroundColor={theme.palette.background.paper} />
