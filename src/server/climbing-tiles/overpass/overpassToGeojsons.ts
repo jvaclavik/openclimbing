@@ -233,24 +233,72 @@ const addToLookup = <T extends FeatureGeometry>(
   });
 };
 
-const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
+// relationId -> ids of area/crag relations that list it as a (direct) member
+const getRelationParentsMap = (lookup: Lookup) => {
+  const parentsOf = new Map<number, number[]>();
   for (const relation of Object.values(lookup.relation)) {
-    if (['area', 'crag'].includes(relation.tags?.climbing)) {
-      for (const member of relation.members ?? []) {
-        const child = lookup[member.type][member.ref]; // we know, that in lookup is the same object as in nodesOut/waysOut
-        if (child) {
-          // same relation can list a member twice - not a real conflict
-          if (
-            child.properties.parentId &&
-            child.properties.parentId !== relation.osmMeta.id
-          ) {
-            log(
-              `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${child.properties.parentId} and ${relation.osmMeta.id}`,
-            );
-          }
-          child.properties.parentId = relation.osmMeta.id;
-        }
+    if (!['area', 'crag'].includes(relation.tags?.climbing)) continue;
+    for (const member of relation.members ?? []) {
+      if (member.type !== 'relation') continue;
+      const parents = parentsOf.get(member.ref) ?? [];
+      parents.push(relation.osmMeta.id);
+      parentsOf.set(member.ref, parents);
+    }
+  }
+  return parentsOf;
+};
+
+// is `candidateId` reachable by walking up from `ofId` through relation nesting?
+const isAncestor = (
+  parentsOf: Map<number, number[]>,
+  candidateId: number,
+  ofId: number,
+) => {
+  const seen = new Set<number>([ofId]);
+  const queue = [...(parentsOf.get(ofId) ?? [])];
+  while (queue.length) {
+    const current = queue.shift();
+    if (current === candidateId) return true;
+    if (seen.has(current)) continue;
+    seen.add(current);
+    queue.push(...(parentsOf.get(current) ?? []));
+  }
+  return false;
+};
+
+const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
+  const parentsOf = getRelationParentsMap(lookup);
+
+  for (const relation of Object.values(lookup.relation)) {
+    if (!['area', 'crag'].includes(relation.tags?.climbing)) continue;
+
+    for (const member of relation.members ?? []) {
+      const child = lookup[member.type][member.ref]; // we know, that in lookup is the same object as in nodesOut/waysOut
+      if (!child) continue;
+
+      const existingParentId = child.properties.parentId;
+      const newParentId = relation.osmMeta.id;
+
+      // same relation listed twice as a member - not a real conflict
+      if (existingParentId === undefined || existingParentId === newParentId) {
+        child.properties.parentId = newParentId;
+        continue;
       }
+
+      // one candidate parent is nested inside the other - transitively correct,
+      // just keep the nearer (more specific) one
+      if (isAncestor(parentsOf, newParentId, existingParentId)) {
+        continue;
+      }
+      if (isAncestor(parentsOf, existingParentId, newParentId)) {
+        child.properties.parentId = newParentId;
+        continue;
+      }
+
+      log(
+        `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${existingParentId} and ${newParentId}`,
+      );
+      child.properties.parentId = newParentId;
     }
   }
 };
