@@ -239,7 +239,11 @@ const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
       for (const member of relation.members ?? []) {
         const child = lookup[member.type][member.ref]; // we know, that in lookup is the same object as in nodesOut/waysOut
         if (child) {
-          if (child.properties.parentId) {
+          // same relation can list a member twice - not a real conflict
+          if (
+            child.properties.parentId &&
+            child.properties.parentId !== relation.osmMeta.id
+          ) {
             log(
               `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${child.properties.parentId} and ${relation.osmMeta.id}`,
             );
