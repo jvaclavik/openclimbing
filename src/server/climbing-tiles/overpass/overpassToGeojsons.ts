@@ -233,20 +233,106 @@ const addToLookup = <T extends FeatureGeometry>(
   });
 };
 
-const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
+// relationId -> ids of area/crag relations that list it as a (direct) member
+const getRelationParentsMap = (lookup: Lookup) => {
+  const parentsOf = new Map<number, number[]>();
   for (const relation of Object.values(lookup.relation)) {
-    if (['area', 'crag'].includes(relation.tags?.climbing)) {
-      for (const member of relation.members ?? []) {
-        const child = lookup[member.type][member.ref]; // we know, that in lookup is the same object as in nodesOut/waysOut
-        if (child) {
-          if (child.properties.parentId) {
-            log(
-              `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${child.properties.parentId} and ${relation.osmMeta.id}`,
-            );
-          }
-          child.properties.parentId = relation.osmMeta.id;
-        }
+    if (!['area', 'crag'].includes(relation.tags?.climbing)) continue;
+    for (const member of relation.members ?? []) {
+      if (member.type !== 'relation') continue;
+      const parents = parentsOf.get(member.ref) ?? [];
+      parents.push(relation.osmMeta.id);
+      parentsOf.set(member.ref, parents);
+    }
+  }
+  return parentsOf;
+};
+
+// is `candidateId` reachable by walking up from `ofId` through relation nesting?
+const isAncestor = (
+  parentsOf: Map<number, number[]>,
+  candidateId: number,
+  ofId: number,
+) => {
+  const seen = new Set<number>([ofId]);
+  const queue = [...(parentsOf.get(ofId) ?? [])];
+  while (queue.length) {
+    const current = queue.shift();
+    if (current === candidateId) return true;
+    if (seen.has(current)) continue;
+    seen.add(current);
+    queue.push(...(parentsOf.get(current) ?? []));
+  }
+  return false;
+};
+
+const getAncestorChainLength = (
+  parentsOf: Map<number, number[]>,
+  id: number,
+) => {
+  let length = 0;
+  let current = id;
+  const seen = new Set([id]);
+  for (;;) {
+    const next = parentsOf.get(current)?.[0];
+    if (next === undefined || seen.has(next)) return length;
+    seen.add(next);
+    current = next;
+    length++;
+  }
+};
+
+const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
+  const parentsOf = getRelationParentsMap(lookup);
+
+  for (const relation of Object.values(lookup.relation)) {
+    if (!['area', 'crag'].includes(relation.tags?.climbing)) continue;
+
+    for (const member of relation.members ?? []) {
+      const child = lookup[member.type][member.ref]; // we know, that in lookup is the same object as in nodesOut/waysOut
+      if (!child) continue;
+
+      const existingParentId = child.properties.parentId;
+      const newParentId = relation.osmMeta.id;
+
+      // same relation listed twice as a member - not a real conflict
+      if (existingParentId === undefined || existingParentId === newParentId) {
+        child.properties.parentId = newParentId;
+        continue;
       }
+
+      // one candidate parent is nested inside the other - transitively correct,
+      // just keep the nearer (more specific) one
+      if (isAncestor(parentsOf, newParentId, existingParentId)) {
+        continue;
+      }
+      if (isAncestor(parentsOf, existingParentId, newParentId)) {
+        child.properties.parentId = newParentId;
+        continue;
+      }
+
+      // two independent candidate parents - prefer the more deeply nested one
+      // (more specific location) when the two chains differ in depth
+      const existingDepth = getAncestorChainLength(parentsOf, existingParentId);
+      const newDepth = getAncestorChainLength(parentsOf, newParentId);
+
+      if (existingDepth === newDepth) {
+        log(
+          `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${existingParentId} and ${newParentId}`,
+        );
+        child.properties.parentId = newParentId;
+        continue;
+      }
+
+      const [deeperId, shallowerId] =
+        existingDepth > newDepth
+          ? [existingParentId, newParentId]
+          : [newParentId, existingParentId];
+
+      log(
+        `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${existingParentId} and ${newParentId}, kept deeper parent ${deeperId} over ${shallowerId}`,
+      );
+      child.properties.parentId = deeperId;
     }
   }
 };
