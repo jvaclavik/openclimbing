@@ -266,6 +266,22 @@ const isAncestor = (
   return false;
 };
 
+const getAncestorChainLength = (
+  parentsOf: Map<number, number[]>,
+  id: number,
+) => {
+  let length = 0;
+  let current = id;
+  const seen = new Set([id]);
+  for (;;) {
+    const next = parentsOf.get(current)?.[0];
+    if (next === undefined || seen.has(next)) return length;
+    seen.add(next);
+    current = next;
+    length++;
+  }
+};
+
 const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
   const parentsOf = getRelationParentsMap(lookup);
 
@@ -295,10 +311,28 @@ const addParentIds = (lookup: Lookup, log: (message: string) => void) => {
         continue;
       }
 
+      // two independent candidate parents - prefer the more deeply nested one
+      // (more specific location) when the two chains differ in depth
+      const existingDepth = getAncestorChainLength(parentsOf, existingParentId);
+      const newDepth = getAncestorChainLength(parentsOf, newParentId);
+
+      if (existingDepth === newDepth) {
+        log(
+          `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${existingParentId} and ${newParentId}`,
+        );
+        child.properties.parentId = newParentId;
+        continue;
+      }
+
+      const [deeperId, shallowerId] =
+        existingDepth > newDepth
+          ? [existingParentId, newParentId]
+          : [newParentId, existingParentId];
+
       log(
-        `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${existingParentId} and ${newParentId}`,
+        `Child ${getUrlOsmId(child.osmMeta)} has more parents: ${existingParentId} and ${newParentId}, kept deeper parent ${deeperId} over ${shallowerId}`,
       );
-      child.properties.parentId = newParentId;
+      child.properties.parentId = deeperId;
     }
   }
 };
