@@ -42,3 +42,23 @@ export const getCommonsImageUrl = (
 
   return encodeUrl`https://upload.wikimedia.org/wikipedia/commons/thumb/${part1}/${part2}/${fileName}/${width}px-${fileName}`;
 };
+
+// Wikimedia thumbnail URLs look like `.../thumb/x/xx/Name.jpg/500px-Name.jpg`.
+// The app fetches small thumbs (WIDTH) for the UI, but for downloads/exports we
+// want a sharper source. This bumps the requested width in-place; only upscales
+// (never shrinks) and leaves non-Wikimedia URLs untouched.
+export const upscaleWikimediaThumbUrl = (
+  url: string,
+  width: CommonsAllowedWidth,
+): string => {
+  if (
+    !url ||
+    !url.includes('upload.wikimedia.org') ||
+    !url.includes('/thumb/')
+  ) {
+    return url;
+  }
+  return url.replace(/\/(\d+)px-/, (match, current) =>
+    Number(current) < width ? `/${width}px-` : match,
+  );
+};

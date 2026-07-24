@@ -1,14 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Router, { useRouter } from 'next/router';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
+  FormControlLabel,
   MenuItem,
+  Switch,
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableRow,
   TextField,
   Typography,
@@ -23,20 +26,24 @@ import {
 } from '../utils/PanelHelpers';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import { ClimbingArea } from '../../services/climbing-areas/getClimbingAreas';
-import { TranslationId } from '../../services/types';
+import { Feature, TranslationId } from '../../services/types';
 import Link from 'next/link';
 import { ClimbingGuideInfo } from '../FeaturePanel/Climbing/ClimbingGuideInfo';
 import { getCountryFlag, getCountryName } from '../../services/getCountryFlag';
 import { PhotoCoverageRing } from '../FeaturePanel/Climbing/PhotoCoverageRing';
+import { useFeatureContext } from '../utils/FeatureContext';
+import { useMobileMode } from '../helpers';
+import { Bbox, useMapStateContext } from '../utils/MapStateContext';
 
 type ClimbingAreasPanelProps = {
   areas: ClimbingArea[];
 };
 
-type SortBy = 'photos' | 'sectors' | 'alphabetical';
+type SortBy = 'photos' | 'routes' | 'sectors' | 'alphabetical';
 
 const SORT_OPTIONS: { value: SortBy; labelId: TranslationId }[] = [
   { value: 'photos', labelId: 'climbingareas.sort_photos' },
+  { value: 'routes', labelId: 'climbingareas.sort_routes' },
   { value: 'sectors', labelId: 'climbingareas.sort_sectors' },
   { value: 'alphabetical', labelId: 'climbingareas.sort_alphabetical' },
 ];
@@ -46,35 +53,50 @@ type CountryGroup = {
   name: string;
   areas: ClimbingArea[];
   cragCount: number;
+  routeCount: number;
   routesWithPhoto: number;
 };
 
-// Compares two {name, cragCount, routesWithPhoto} items by the chosen key.
-// `photos` (default): drawn routes desc, then sectors desc; `sectors`: sectors
-// desc, then drawn routes desc; both fall back to the name; `alphabetical`: name.
-const compareBy =
-  (sortBy: SortBy) =>
-  (
-    a: { name: string | null; cragCount: number; routesWithPhoto: number },
-    b: { name: string | null; cragCount: number; routesWithPhoto: number },
-  ) => {
-    const byName = (a.name ?? '').localeCompare(b.name ?? '');
-    if (sortBy === 'alphabetical') {
-      return byName;
-    }
-    if (sortBy === 'sectors') {
-      return (
-        b.cragCount - a.cragCount ||
-        b.routesWithPhoto - a.routesWithPhoto ||
-        byName
-      );
-    }
+type SortableItem = {
+  name: string | null;
+  cragCount: number;
+  routeCount: number;
+  routesWithPhoto: number;
+};
+
+// Compares two items by the chosen key. `photos` (default): drawn routes desc;
+// `routes`: total routes desc; `sectors`: sectors desc; each falls back to the
+// remaining counts and finally the name; `alphabetical`: name only.
+const compareBy = (sortBy: SortBy) => (a: SortableItem, b: SortableItem) => {
+  const byName = (a.name ?? '').localeCompare(b.name ?? '');
+  if (sortBy === 'alphabetical') {
+    return byName;
+  }
+  if (sortBy === 'routes') {
+    return b.routeCount - a.routeCount || b.cragCount - a.cragCount || byName;
+  }
+  if (sortBy === 'sectors') {
     return (
-      b.routesWithPhoto - a.routesWithPhoto ||
       b.cragCount - a.cragCount ||
+      b.routesWithPhoto - a.routesWithPhoto ||
       byName
     );
-  };
+  }
+  return (
+    b.routesWithPhoto - a.routesWithPhoto || b.cragCount - a.cragCount || byName
+  );
+};
+
+// Bbox from MapStateContext is [west, north, east, south] (not GeoJSON order).
+const isInViewport = (area: ClimbingArea, bbox: Bbox): boolean => {
+  const [west, north, east, south] = bbox;
+  return (
+    area.lon >= west &&
+    area.lon <= east &&
+    area.lat >= south &&
+    area.lat <= north
+  );
+};
 
 // Groups areas by country and sorts both the areas inside each country and the
 // countries themselves by the selected key (country uses summed values).
@@ -98,6 +120,7 @@ const groupByCountry = (
       t('climbingareas.unknown_country'),
     areas: [...list].sort(comparator),
     cragCount: list.reduce((sum, area) => sum + area.cragCount, 0),
+    routeCount: list.reduce((sum, area) => sum + area.routeCount, 0),
     routesWithPhoto: list.reduce((sum, area) => sum + area.routesWithPhoto, 0),
   }));
 
@@ -114,6 +137,12 @@ const CountryAccordion = ({
   backTarget: string;
 }) => {
   const { countryCode, name: countryName, areas, cragCount } = group;
+  const { setPreview } = useFeatureContext();
+  const mobileMode = useMobileMode();
+
+  const handleHover = (area: ClimbingArea) => () => {
+    setPreview({ center: [area.lon, area.lat] } as Feature);
+  };
 
   return (
     <Accordion
@@ -149,9 +178,26 @@ const CountryAccordion = ({
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0 }}>
         <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell width={1} />
+              <TableCell>{t('climbingareas.col_name')}</TableCell>
+              <TableCell align="right">
+                {t('climbingareas.col_routes')}
+              </TableCell>
+              <TableCell align="right">
+                {t('climbingareas.col_sectors')}
+              </TableCell>
+            </TableRow>
+          </TableHead>
           <TableBody>
             {areas.map((area, index) => (
-              <TableRow key={`${area.osmType}-${area.osmId}`}>
+              <TableRow
+                key={`${area.osmType}-${area.osmId}`}
+                hover
+                onMouseEnter={mobileMode ? undefined : handleHover(area)}
+                onMouseLeave={mobileMode ? undefined : () => setPreview(null)}
+              >
                 <TableCell width={1}>{index + 1}.</TableCell>
                 <TableCell>
                   <Link
@@ -174,9 +220,10 @@ const CountryAccordion = ({
                         withPhoto={area.routesWithPhoto}
                       />
                     )}
-                    <span>{area.cragCount}</span>
+                    <span>{area.routeCount}</span>
                   </Box>
                 </TableCell>
+                <TableCell align="right">{area.cragCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -188,12 +235,26 @@ const CountryAccordion = ({
 
 export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
   const router = useRouter();
+  const { bbox } = useMapStateContext();
+  const { setPreview } = useFeatureContext();
   const [sortBy, setSortBy] = useState<SortBy>('photos');
+  const [filterViewport, setFilterViewport] = useState(false);
   const handleClose = () => {
     Router.push(`/`);
   };
 
-  const groups = useMemo(() => groupByCountry(areas, sortBy), [areas, sortBy]);
+  // Clear the hover pin when leaving the panel so it doesn't stay on the map.
+  useEffect(() => () => setPreview(null), [setPreview]);
+
+  const visibleAreas = useMemo(() => {
+    if (!filterViewport || !bbox) return areas;
+    return areas.filter((area) => isInViewport(area, bbox));
+  }, [areas, filterViewport, bbox]);
+
+  const groups = useMemo(
+    () => groupByCountry(visibleAreas, sortBy),
+    [visibleAreas, sortBy],
+  );
   const backTarget = encodeURIComponent(router.asPath);
 
   return (
@@ -211,7 +272,7 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
               label={t('climbingareas.sort_label')}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortBy)}
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             >
               {SORT_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -219,13 +280,28 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
                 </MenuItem>
               ))}
             </TextField>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={filterViewport}
+                  onChange={(e) => setFilterViewport(e.target.checked)}
+                />
+              }
+              label={t('climbingareas.filter_viewport')}
+              sx={{ mb: 1, display: 'block' }}
+            />
+            {groups.length === 0 && (
+              <Typography color="text.secondary" sx={{ mb: 2 }}>
+                {t('climbingareas.no_areas_in_viewport')}
+              </Typography>
+            )}
           </PanelSidePadding>
 
-          {groups.map((group, index) => (
+          {groups.map((group) => (
             <CountryAccordion
               key={group.countryCode ?? 'unknown'}
               group={group}
-              defaultExpanded={index === 0}
+              defaultExpanded={false}
               backTarget={backTarget}
             />
           ))}

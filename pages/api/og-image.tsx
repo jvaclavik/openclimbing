@@ -11,6 +11,7 @@ import {
   OsmId,
 } from '../../src/services/types';
 import { getImageFromApi } from '../../src/services/images/getImageFromApi';
+import { upscaleWikimediaThumbUrl } from '../../src/services/images/getCommonsImageUrl';
 import { getLogo, ProjectLogo } from '../../src/server/images/logo';
 import { ImageType } from '../../src/services/images/getImageDefs';
 import { fetchImage } from '../../src/server/images/fetchImage';
@@ -43,6 +44,11 @@ const Svg = ({ children, size }) => (
 );
 
 const OG_SIZE = { width: 1200, height: 630 };
+
+// Width of the source photo fetched for the `raw` export (session share images).
+// Larger than the UI thumbnail (WIDTH=500) so the downloaded/shared PNG stays
+// crisp after Strava re-compresses it. Must be a Commons-allowed thumb width.
+const RAW_EXPORT_WIDTH = 1280;
 
 const parsePhotoIndex = (raw: unknown): number => {
   if (typeof raw !== 'string') return 0;
@@ -121,7 +127,10 @@ const renderSvg = async (
   image: ImageType,
   raw: boolean,
 ): Promise<RenderedSvg> => {
-  const { size, dataUrl } = await fetchImage(image.imageUrl);
+  const imageUrl = raw
+    ? upscaleWikimediaThumbUrl(image.imageUrl, RAW_EXPORT_WIDTH)
+    : image.imageUrl;
+  const { size, dataUrl } = await fetchImage(imageUrl);
 
   const Root = raw
     ? () => (

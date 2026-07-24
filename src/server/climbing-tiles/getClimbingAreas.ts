@@ -9,6 +9,8 @@ export type ClimbingArea = {
   cragCount: number;
   routeCount: number;
   routesWithPhoto: number;
+  lon: number;
+  lat: number;
 };
 
 type Row = {
@@ -19,13 +21,15 @@ type Row = {
   countryCode: string | null;
   routeCount: number | null;
   routesWithPhoto: number | null;
+  lon: number;
+  lat: number;
 };
 
 export const getClimbingAreas = (): ClimbingArea[] => {
   const rows = getDb()
     .prepare<[], Row>(
       `SELECT "osmType", "osmId", COALESCE("name", "nameRaw") AS name, members,
-        "countryCode", "routeCount", "routesWithPhoto"
+        "countryCode", "routeCount", "routesWithPhoto", "lon", "lat"
        FROM climbing_features
        WHERE type = 'area' AND "osmType" = 'relation'
        ORDER BY "countryCode" IS NULL, "countryCode", name COLLATE NOCASE`,
@@ -40,5 +44,7 @@ export const getClimbingAreas = (): ClimbingArea[] => {
     cragCount: row.members ? (JSON.parse(row.members) as unknown[]).length : 0,
     routeCount: row.routeCount ?? 0,
     routesWithPhoto: row.routesWithPhoto ?? 0,
+    lon: row.lon,
+    lat: row.lat,
   }));
 };
