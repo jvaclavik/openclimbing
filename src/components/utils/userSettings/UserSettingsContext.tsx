@@ -16,12 +16,20 @@ import { getGradeSystem } from './getGradeSystem';
 
 type CragViewLayout = 'vertical' | 'horizontal' | 'auto';
 
+export type TickDefaults = {
+  style: TickStyle;
+  timestamp: string;
+  pairing: Record<string, string> | null;
+};
+
 export type UserSettingsType = Partial<{
   isImperial: boolean;
   'weather.enabled': boolean;
   'climbing.gradeSystem': GradeSystem;
   'climbing.isGradesOnPhotosVisible': boolean;
   'climbing.defaultClimbingStyle': TickStyle;
+  'climbing.rememberTickDefaults': boolean;
+  'climbing.tickDefaults': TickDefaults | null;
   'climbing.selectRoutesByScrolling': boolean;
   'climbing.switchPhotosByScrolling': boolean;
   'climbing.showRelatedPhotoByRouteClick': boolean;
@@ -52,6 +60,8 @@ const initialUserSettings: UserSettingsType = {
   'climbing.gradeSystem': null,
   'climbing.isGradesOnPhotosVisible': true,
   'climbing.defaultClimbingStyle': 'OS',
+  'climbing.rememberTickDefaults': false,
+  'climbing.tickDefaults': null,
   'climbing.selectRoutesByScrolling': isMobileDevice(),
   'climbing.switchPhotosByScrolling': true,
   'climbing.showRelatedPhotoByRouteClick': true,

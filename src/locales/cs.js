@@ -54,6 +54,8 @@ export default {
   'tick.save_success': 'Přelez byl uložen',
   'tick.date_label': 'Datum',
   'tick.date_future_error': 'Datum výlezu nemůže být v budoucnosti.',
+  'tick.remember_defaults_label': 'Pamatovat si pro příště',
+  'tick.remember_defaults_helper': 'Nové přelezy budou mít předvyplněné stejné datum, styl a spolulezce.',
   'tick.my_grade_label': 'Má obtížnost',
   'tick.note_label': 'Poznámka pro ostatní',
 

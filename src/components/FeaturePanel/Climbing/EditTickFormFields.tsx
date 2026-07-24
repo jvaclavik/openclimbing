@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Button, Collapse, Stack, TextField } from '@mui/material';
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  FormControlLabel,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ClimbingTick } from '../../../types';
 import { TickStyle } from './types';
@@ -19,6 +27,7 @@ import {
   todayDateInputMax,
 } from '../../../services/my-ticks/tickTimestampInput';
 import { t } from '../../../services/intl';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 
 export const EditTickFormFields = ({
   tempTick,
@@ -35,6 +44,7 @@ export const EditTickFormFields = ({
   const [moreOpen, setMoreOpen] = useState(
     () => !!(tempTick.myGrade?.trim() || tempTick.note?.trim()),
   );
+  const { userSettings, setUserSetting } = useUserSettingsContext();
   const partnerSuggestions = useMemo(
     () => collectPartnerSuggestionsFromTicks(allTicks),
     [allTicks],
@@ -98,6 +108,27 @@ export const EditTickFormFields = ({
         }}
         fillFromLastRouteDisabled={lastRoutePartners == null}
       />
+
+      <Stack spacing={0}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={!!userSettings['climbing.rememberTickDefaults']}
+              onChange={(e) =>
+                setUserSetting(
+                  'climbing.rememberTickDefaults',
+                  e.target.checked,
+                )
+              }
+            />
+          }
+          label={t('tick.remember_defaults_label')}
+        />
+        <Typography variant="caption" color="text.secondary" sx={{ pl: 4.5 }}>
+          {t('tick.remember_defaults_helper')}
+        </Typography>
+      </Stack>
 
       <Button
         fullWidth

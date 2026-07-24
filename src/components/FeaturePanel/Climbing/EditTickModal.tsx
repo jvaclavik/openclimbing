@@ -19,7 +19,10 @@ import clone from 'lodash/clone';
 import { useSnackbar } from '../../utils/SnackbarContext';
 import { ClimbingTick } from '../../../types';
 import { useTicksContext } from '../../utils/TicksContext';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { useMoreMenu } from './useMoreMenu';
+import { EditTickButton } from './EditTickButton';
+import { TickStyle } from './types';
 import {
   applyDateInputToTickTimestamp,
   isClimbCalendarDateAfterToday,
@@ -64,6 +67,7 @@ export const EditTickModal = () => {
   const { updateTick, deleteTick, editedTickId, setEditedTickId, ticks } =
     useTicksContext();
   const { showToast } = useSnackbar();
+  const { userSettings, setUserSetting } = useUserSettingsContext();
   const { tempTick, updateTempTick } = useTempTick();
   const [loading, setLoading] = useState<boolean>(false);
   const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
@@ -93,7 +97,19 @@ export const EditTickModal = () => {
     setLoading(true);
     try {
       await updateTick(tempTick);
-      showToast(t('tick.save_success'), 'success');
+      if (userSettings['climbing.rememberTickDefaults']) {
+        setUserSetting('climbing.tickDefaults', {
+          style: tempTick.style as TickStyle,
+          timestamp: tempTick.timestamp,
+          pairing: tempTick.pairing,
+        });
+      }
+      const savedTickId = tempTick.id;
+      showToast(
+        t('tick.save_success'),
+        'success',
+        <EditTickButton onClick={() => setEditedTickId(savedTickId)} />,
+      );
       onClose();
     } catch (e) {
       showToast(`${t('error')}: ${e}`, 'error');

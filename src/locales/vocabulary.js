@@ -183,6 +183,8 @@ export default {
   'tick.save_success': 'Tick was updated',
   'tick.date_label': 'Date',
   'tick.date_future_error': 'Climb date cannot be in the future.',
+  'tick.remember_defaults_label': 'Remember for next time',
+  'tick.remember_defaults_helper': 'New ticks will start with this date, style, and partners.',
   'tick.my_grade_label': 'My grade',
   'tick.note_label': 'Note for other climbers',
 

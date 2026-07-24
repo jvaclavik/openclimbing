@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ClimbingTick, Setter } from '../../types';
 import { EditTickModal } from '../FeaturePanel/Climbing/EditTickModal';
+import { EditTickButton } from '../FeaturePanel/Climbing/EditTickButton';
 import { TickStyle } from '../FeaturePanel/Climbing/types';
 import { getAllTicks } from '../../services/my-ticks/ticks';
-import { Button } from '@mui/material';
 import { useSnackbar } from './SnackbarContext';
 import { useUserSettingsContext } from './userSettings/UserSettingsContext';
 import {
@@ -30,12 +30,6 @@ export type TicksContextType = {
   isFetching: boolean;
   isTicked: (shortId: string) => boolean;
 };
-
-const EditTickButton = (props: { onClick: () => void }) => (
-  <Button color="inherit" size="small" onClick={props.onClick}>
-    {t('tick.edit_button')}
-  </Button>
-);
 
 const useGetDefaultTickStyle = (): TickStyle => {
   const { userSettings } = useUserSettingsContext();
@@ -78,11 +72,20 @@ const useGetAddTick = (setEditedTickId: Setter<number>) => {
   const queryClient = useQueryClient();
   const { showToast } = useSnackbar();
   const style = useGetDefaultTickStyle();
+  const { userSettings } = useUserSettingsContext();
 
   return async (shortId: string) => {
     if (!shortId) return;
-    const timestamp = new Date().toISOString();
-    const id = await postClimbingTick({ shortId, timestamp, style });
+    const remembered = userSettings['climbing.rememberTickDefaults']
+      ? userSettings['climbing.tickDefaults']
+      : null;
+    const timestamp = remembered?.timestamp ?? new Date().toISOString();
+    const id = await postClimbingTick({
+      shortId,
+      timestamp,
+      style: remembered?.style ?? style,
+      pairing: remembered?.pairing ?? null,
+    });
     await queryClient.invalidateQueries(QUERY_KEY);
     showToast(
       t('tick.added_toast'),
