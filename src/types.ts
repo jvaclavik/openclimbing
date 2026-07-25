@@ -1,4 +1,4 @@
-import { Feature as GeojsonFeature, Geometry } from 'geojson';
+import { BBox, Feature as GeojsonFeature, Geometry } from 'geojson';
 import { FeatureProperties, ImageDef, OsmType } from './services/types';
 
 export type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -82,6 +82,9 @@ export type ClimbingFeatureFull = {
   countryCode?: string; // ISO 3166-1 lowercase (root feature only)
   center: [number, number];
   geometry: Geometry;
+  // [w, s, e, n] extent of the feature and its whole memberFeatures subtree
+  // (root feature only). Degenerates to a point for a feature without members.
+  bbox?: BBox;
   // Only class/subclass (POI icon), computed from tags like osmToFeature().
   // Tile-only props (routeCount, histogram, grade, ...) are computed on the FE.
   properties: FeatureProperties;

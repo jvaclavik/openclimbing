@@ -1,8 +1,9 @@
-import { Geometry } from 'geojson';
+import { BBox, Geometry } from 'geojson';
 import { getDb } from '../db/db';
 import { ClimbingFeaturesRow } from '../db/types';
 import { ClimbingFeatureFull } from '../../types';
-import { Feature, OsmType } from '../../services/types';
+import { Feature, LonLat, OsmType } from '../../services/types';
+import { getBbox } from '../../services/getCenter';
 import { getApiId } from '../../services/helpers';
 import { convertOsmIdToMapId } from './buildTileGeojson';
 import {
@@ -141,6 +142,27 @@ const buildBaseFeature = (row: ClimbingFeaturesRow): ClimbingFeatureFull => {
   };
 };
 
+const collectCoords = (feature: ClimbingFeatureFull, out: LonLat[]) => {
+  const { geometry } = feature;
+  if (geometry.type === 'Point') {
+    out.push(geometry.coordinates as LonLat);
+  } else if (geometry.type === 'LineString') {
+    out.push(...(geometry.coordinates as LonLat[]));
+  }
+  for (const member of feature.memberFeatures ?? []) {
+    collectCoords(member, out);
+  }
+};
+
+// Extent of the feature plus its whole memberFeatures subtree. Relations have
+// only their center point in the DB, so their real extent comes from members.
+const buildBbox = (feature: ClimbingFeatureFull): BBox => {
+  const coords: LonLat[] = [];
+  collectCoords(feature, coords);
+  const { w, s, e, n } = getBbox(coords);
+  return [w, s, e, n];
+};
+
 // Resolves relation members to full features from the DB (recursive tree).
 const buildMemberTree = (
   members: ClimbingFeatureFull['members'],
@@ -205,6 +227,8 @@ export const getClimbingFeature = async (
     feature.memberFeatures = buildMemberTree(feature.members, visited);
     mergeMemberImageDefs(feature as unknown as Feature);
   }
+
+  feature.bbox = buildBbox(feature);
 
   // Always expose parentFeatures as an array (like the OSM path in osmApi.ts),
   // even when the feature has no parent. The FeaturePanel calls

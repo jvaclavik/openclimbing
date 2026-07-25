@@ -228,6 +228,21 @@ describe('getClimbingFeature (dummy SQLite DB)', () => {
     });
   });
 
+  it('computes bbox from the whole memberFeatures subtree', async () => {
+    const crag = await getClimbingFeature('relation', 200);
+    // crag center + node route + both way route points
+    expect(crag.bbox).toEqual([14.01, 50.01, 14.021, 50.021]);
+
+    const area = await getClimbingFeature('relation', 100);
+    // area center + everything below the crag
+    expect(area.bbox).toEqual([14, 50, 14.021, 50.021]);
+  });
+
+  it('degenerates bbox to a point for a feature without members', async () => {
+    const boulder = await getClimbingFeature('node', 500);
+    expect(boulder.bbox).toEqual([14.5, 50.5, 14.5, 50.5]);
+  });
+
   it('returns only class/subclass in properties (tile props computed on FE)', async () => {
     const crag = await getClimbingFeature('relation', 200);
 
