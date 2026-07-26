@@ -22,6 +22,7 @@ import { join } from '../../../utils';
 import { mapClimbingFilter } from '../../utils/userSettings/mapClimbingFilter';
 import { decodeHistogram } from '../../../server/climbing-tiles/overpass/histogram';
 import { constructOutlines } from './constructOutlines';
+import { reapplySelectedOutline } from './selectedOutline';
 import { Interval, PoiTypes } from '../../utils/userSettings/getClimbingFilter';
 
 const getTileJson = async ({ z, x, y }: Tile) => {
@@ -213,6 +214,8 @@ const updateData = async () => {
     type: 'FeatureCollection' as const,
     features: [...filteredFeatures.map(processFeature), ...boxes],
   });
+
+  reapplySelectedOutline();
 };
 
 mapClimbingFilter.callback = updateData;

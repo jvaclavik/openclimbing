@@ -5,6 +5,7 @@ import { useMapStateContext, View } from '../utils/MapStateContext';
 import { createMapEffectHook, useMobileMode } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { useFeatureMarker } from './behaviour/useFeatureMarker';
+import { useSelectedOutline } from './behaviour/useSelectedOutline';
 import { useOnMapClicked } from './behaviour/useOnMapClicked';
 import { useUpdateViewOnMove } from './behaviour/useUpdateViewOnMove';
 import { useUpdateStyle } from './behaviour/useUpdateStyle';
@@ -123,6 +124,7 @@ const BrowserMap = () => {
   useOnMapLongPressed(map, setFeature);
   useOnMapLoaded(map, setMapLoaded);
   useFeatureMarker(map);
+  useSelectedOutline(map);
   usePreviewMarker(map);
 
   const { viewForMap, setViewFromMap, setBbox, activeLayers } =

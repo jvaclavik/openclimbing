@@ -17,13 +17,23 @@ const SHOULD_SHOW: ExpressionInputType | ExpressionSpecification =
     ? 1
     : HOVER;
 
+// feature opened in the FeaturePanel - it stays lit regardless of hover/zoom
+const SELECTED: ExpressionSpecification = [
+  'boolean',
+  ['feature-state', 'selected'],
+  false,
+];
+
 const BY_ZOOM = (z: number): ExpressionSpecification => [
   'case',
+  SELECTED,
+  1,
   ['>', z, ['get', 'minZoom']],
   SHOULD_SHOW,
   0,
 ];
 
+// ['zoom'] must stay the input of a top-level 'step', hence the per-zoom cases
 const zoomSpec = Array.from({ length: 22 }, (_, z) => [z, BY_ZOOM(z)]).flat();
 
 export const outlinesLayer: LayerSpecification = {
@@ -35,7 +45,7 @@ export const outlinesLayer: LayerSpecification = {
   layout: { 'line-cap': 'round' },
   paint: {
     'line-color': '#f60',
-    'line-width': 2,
+    'line-width': ['case', SELECTED, 3, 2],
     'line-opacity': ['step', ['zoom'], 0, ...zoomSpec],
   },
 };
