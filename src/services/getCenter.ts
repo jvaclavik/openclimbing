@@ -1,4 +1,6 @@
+import { BBox } from 'geojson';
 import {
+  Feature,
   FeatureGeometry,
   GeometryCollection,
   isGeometryCollection,
@@ -41,18 +43,51 @@ const getCenterOfBbox = (points: LonLat[]): LonLat | undefined => {
 };
 
 const getPointsRecursive = (geometry: GeometryCollection): LonLat[] =>
-  geometry.geometries.flatMap((subGeometry) => {
-    if (isGeometryCollection(subGeometry)) {
-      return getPointsRecursive(subGeometry);
-    }
-    if (isLineString(subGeometry)) {
-      return subGeometry.coordinates;
-    }
-    if (isPoint(subGeometry)) {
-      return [subGeometry.coordinates];
-    }
-    return [];
-  });
+  geometry.geometries.flatMap((subGeometry) => getPoints(subGeometry));
+
+const getPoints = (geometry: FeatureGeometry): LonLat[] => {
+  if (isPoint(geometry)) {
+    return [geometry.coordinates];
+  }
+  if (isLineString(geometry)) {
+    return geometry.coordinates;
+  }
+  if (isPolygon(geometry)) {
+    return geometry.coordinates.flat() as LonLat[];
+  }
+  if (isGeometryCollection(geometry)) {
+    return getPointsRecursive(geometry);
+  }
+  return [];
+};
+
+const collectPoints = (feature: Feature, out: LonLat[]) => {
+  out.push(...getPoints(feature.geometry));
+  if (feature.center) {
+    out.push(feature.center);
+  }
+  for (const member of feature.memberFeatures ?? []) {
+    collectPoints(member, out);
+  }
+};
+
+// Climbing features get `bbox` from the climbing-tiles API, everything else
+// (OSM/Overpass) has to be measured here - from the geometry, the centers and
+// the whole memberFeatures subtree.
+export const getFeatureBbox = (feature: Feature): BBox | undefined => {
+  if (feature.bbox) {
+    return feature.bbox;
+  }
+
+  const points: LonLat[] = [];
+  collectPoints(feature, points);
+  if (!points.length) {
+    return undefined;
+  }
+
+  const { w, s, e, n } = getBbox(points);
+  return [w, s, e, n];
+};
 
 export const getCenter = (geometry: FeatureGeometry): LonLat => {
   if (isPoint(geometry)) {

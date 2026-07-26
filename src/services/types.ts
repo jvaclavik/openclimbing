@@ -1,6 +1,6 @@
 import type Vocabulary from '../locales/vocabulary';
 import type { getSchemaForFeature } from './tagging/idTaggingScheme';
-import type { Polygon } from 'geojson';
+import type { BBox, Polygon } from 'geojson';
 
 export type OsmType = 'node' | 'way' | 'relation';
 export type OsmId = {
@@ -113,6 +113,7 @@ export type Feature = {
   imageDefs?: ImageDef[];
   properties: FeatureProperties;
   center: LonLat;
+  bbox?: BBox; // [w, s, e, n] - only from climbing-tiles, see getFeatureBbox()
   countryCode?: string; // ISO3166-1 code lowercase, undefined = no country
   roundedCenter?: LonLatRounded;
   error?: 'network' | 'unknown' | '404' | '500'; // etc.
