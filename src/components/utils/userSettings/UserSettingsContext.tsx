@@ -16,6 +16,8 @@ import { getGradeSystem } from './getGradeSystem';
 
 type CragViewLayout = 'vertical' | 'horizontal' | 'auto';
 
+export type EditMapPosition = 'auto' | 'right' | 'bottom';
+
 export type TickDefaults = {
   style: TickStyle;
   timestamp: string;
@@ -39,6 +41,10 @@ export type UserSettingsType = Partial<{
   'climbing.filter': ClimbingFilterSettings;
   'editdialog.splitPaneSize': null | number;
   'editdialog.mapFullscreen': boolean;
+  'editdialog.mapPosition': EditMapPosition;
+  'editdialog.showRouteNames': boolean;
+  'editdialog.showRouteGrades': boolean;
+  'editdialog.lineHelpDismissed': boolean;
   'debug.enabled': boolean;
 }>;
 
@@ -72,6 +78,10 @@ const initialUserSettings: UserSettingsType = {
   'climbing.splitPaneSize': null,
   'editdialog.splitPaneSize': null,
   'editdialog.mapFullscreen': false,
+  'editdialog.mapPosition': 'auto',
+  'editdialog.showRouteNames': true,
+  'editdialog.showRouteGrades': true,
+  'editdialog.lineHelpDismissed': false,
 };
 
 export const UserSettingsContext =

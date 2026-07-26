@@ -19,6 +19,8 @@ import { useEditDialogContext } from '../../../../helpers/EditDialogContext';
 import { KeyInput } from './KeyInput';
 import { ValueInput } from './ValueInput';
 import { OptionsEditor } from '../OptionsEditor';
+import { CommentField } from '../../CommentField';
+import { DownloadEditButton } from '../../DownloadEditButton';
 import {
   useCurrentItem,
   useExpandedSections,
@@ -156,6 +158,12 @@ export const TagsEditor = () => {
           <TagsEditorInner />
 
           <OptionsEditor />
+
+          <Divider sx={{ my: 1 }} />
+          <Stack alignItems="flex-start">
+            <CommentField />
+            <DownloadEditButton />
+          </Stack>
         </AccordionDetails>
       </Accordion>
     </>

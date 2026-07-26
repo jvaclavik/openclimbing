@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import maplibregl from 'maplibre-gl';
 import styled from '@emotion/styled';
 import {
@@ -13,6 +13,7 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import { t } from '../../../services/intl';
+import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { useCragRoutePositionEditor } from './utils/useCragRoutePositionEditor';
 
 const ToolbarContainer = styled.div`
@@ -58,7 +59,10 @@ export const RoutePositionToolbar = ({
   showNames,
   showGrades,
 }: Props) => {
-  const [isHelpOpen, setIsHelpOpen] = useState(true);
+  const { userSettings, setUserSetting } = useUserSettingsContext();
+  const isHelpOpen = !(userSettings['editdialog.lineHelpDismissed'] ?? false);
+  const setHelpDismissed = (dismissed: boolean) =>
+    setUserSetting('editdialog.lineHelpDismissed', dismissed);
   const { isGuideMode, setIsGuideMode, clearGuide, controlPoints, hasRoutes } =
     useCragRoutePositionEditor(mapRef, isMapLoaded, styleEpoch, {
       showNames,
@@ -95,7 +99,7 @@ export const RoutePositionToolbar = ({
               <IconButton
                 size="small"
                 sx={{ mt: '-2px' }}
-                onClick={() => setIsHelpOpen(false)}
+                onClick={() => setHelpDismissed(true)}
               >
                 <CloseIcon fontSize="small" />
               </IconButton>
@@ -108,7 +112,7 @@ export const RoutePositionToolbar = ({
             size="small"
             color="secondary"
             sx={{ bgcolor: 'background.paper', boxShadow: 1 }}
-            onClick={() => setIsHelpOpen(true)}
+            onClick={() => setHelpDismissed(false)}
           >
             <HelpOutlineIcon />
           </IconButton>

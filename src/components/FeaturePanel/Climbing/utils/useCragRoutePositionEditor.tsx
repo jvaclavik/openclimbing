@@ -387,6 +387,19 @@ export const useCragRoutePositionEditor = (
   const editableRoutesRef = useRef(editableRoutes);
   editableRoutesRef.current = editableRoutes;
 
+  // When switching to another crag/sector in the dialog, drop the in-progress
+  // guide-line state so a line drawn for one sector isn't applied to the next
+  // one. Route positions already stored (nodeLonLat) are kept — we only reset
+  // the shared line/manual overrides of this single map instance.
+  const cragKeyRef = useRef(cragItem?.shortId);
+  useEffect(() => {
+    if (cragKeyRef.current === cragItem?.shortId) return;
+    cragKeyRef.current = cragItem?.shortId;
+    setIsGuideMode(false);
+    setControlPoints([]);
+    setManualRoutePositions({});
+  }, [cragItem?.shortId]);
+
   const getEffectivePosition = useCallback(
     (route: EditableRoute): LonLat | undefined => {
       const manual = manualRoutePositionsRef.current[route.id];
@@ -895,11 +908,26 @@ export const useCragRoutePositionEditor = (
         });
       }
       if (persist) {
-        setManualRoutePositions((prev) => ({ ...prev, ...updates }));
+        // When a guide line exists it moves together with the routes, so routes
+        // that were on the line stay on the (now shifted) line — they must not
+        // be flagged as manually moved off it (no dashed outline, and the line
+        // stays editable). Only routes already off the line keep their manual
+        // override. Without a line, keep every route pinned so it holds its new
+        // spot during async persistence.
+        const hasLine = shiftedLine.length >= 2;
+        const wasManual = manualRoutePositionsRef.current;
+        const manualUpdates: Record<string, LonLat> = {};
+        editableRoutesRef.current.forEach((route) => {
+          if (!updates[route.id]) return;
+          if (!hasLine || wasManual[route.id]) {
+            manualUpdates[route.id] = updates[route.id];
+          }
+        });
+        setManualRoutePositions((prev) => ({ ...prev, ...manualUpdates }));
         editableRoutesRef.current.forEach((route) => {
           if (updates[route.id]) persistRoutePosition(route, updates[route.id]);
         });
-        if (shiftedLine.length >= 2) setControlPoints(shiftedLine);
+        if (hasLine) setControlPoints(shiftedLine);
         cragMoveRef.current = null;
       }
     };

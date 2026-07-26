@@ -403,6 +403,10 @@ export default {
   'editdialog.restore_size': 'Zmenšit zpět',
   'editdialog.minimize_map': 'Minimalizovat mapu',
   'editdialog.show_map': 'Zobrazit mapu',
+  'editdialog.map_position': 'Poloha mapy',
+  'editdialog.map_position_auto': 'Automaticky',
+  'editdialog.map_position_right': 'Vpravo',
+  'editdialog.map_position_bottom': 'Dole',
   'editdialog.enlarge_map': 'Zvětšit mapu',
   'editdialog.fullscreen_map': 'Mapa na celou obrazovku',
   'editdialog.exit_fullscreen_map': 'Zpět do rozděleného zobrazení',
@@ -471,10 +475,8 @@ export default {
   'editdialog.comment': 'Poznámka k úpravám (nepovinné)',
   'editdialog.comment_checkbox': 'Přidat poznámku ke změnám',
   'editdialog.comment_placeholder': 'Odkaz na zdroj informace apod.',
-  'editdialog.info_edit': `Vaše úprava bude ihned uložena do databáze OpenStreetMap, ale trvá různou dobu než se objeví na různých podkladech. Prosíme,
-        vkládejte pouze informace z vlastních nebo ověřených zdrojů. Je zakázano
-        kopírovat data krytá autorským zákonem (např. Google Maps).
-        <a href="https://wiki.openstreetmap.org/wiki/Cs:Jak_mapujeme">Více informací</a>`,
+  'editdialog.info_edit': `Vaše úprava bude ihned uložena do databáze OpenStreetMap, ale trvá různou dobu než se objeví na různých podkladech.<br />Prosíme, vkládejte pouze informace z vlastních nebo ověřených zdrojů. Je zakázano kopírovat data krytá autorským zákonem (např. Google Maps). <a href="https://wiki.openstreetmap.org/wiki/Cs:Jak_mapujeme">Více informací</a>`,
+  'editdialog.info_edit_button': 'Informace o úpravách',
   'editdialog.climbing_editor': 'Lezení',
   'editdialog.tags_editor': 'Všechny vlastnosti – tagy',
   'editdialog.add_tag': 'Přidat tag',

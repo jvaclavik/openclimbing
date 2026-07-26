@@ -159,7 +159,7 @@ const AddTickMenuItem = ({ feature, closeMenu }: AddTickMenuItemProps) => {
   };
 
   return (
-    <MenuItem onClick={handleAddTick} disableRipple>
+    <MenuItem onClick={handleAddTick} disableRipple disabled={loading}>
       <CheckIcon />
       {t('climbingpanel.add_tick')}
       &nbsp;

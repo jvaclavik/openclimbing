@@ -3,6 +3,7 @@ import {
   IconButton,
   Stack,
   Tooltip,
+  Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -12,14 +13,12 @@ import dynamic from 'next/dynamic';
 import React, { useEffect, useRef, useState } from 'react';
 import SplitPane from 'react-split-pane';
 import { EditDialogActions } from './EditDialogActions';
-import { CommentField } from './CommentField';
 import { OsmUserLogged } from './OsmUserLogged';
-import { ContributionInfoBox } from './ContributionInfoBox';
 import { OsmUserLoggedOut } from './OsmUserLoggedOut';
 import { TestApiWarning } from '../../helpers/TestApiWarning';
 import { ItemsTabs } from './ItemsTabs';
 import { ItemEditSection } from './ItemEditSection';
-import { t } from '../../../../services/intl';
+import { t, Translation } from '../../../../services/intl';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { getSplitPaneDefaultSize } from '../../Climbing/config';
 import { useEditDialogSplitLayout } from '../useEditDialogSplitLayout';
@@ -106,16 +105,13 @@ const MapPane = styled.div`
   position: relative;
 `;
 
-// The restore button stays pinned 20px from the edge the map collapsed
-// against (right edge for side-by-side, bottom edge for stacked) so it doesn't
-// drift while the user is shrinking the map.
-const RestoreCollapsedMapButton = styled.div<{
-  $layout: 'vertical' | 'horizontal';
-}>`
+// The restore button stays pinned to the bottom-right corner so it's easy to
+// find and doesn't drift while the user is shrinking the map.
+const RestoreCollapsedMapButton = styled.div`
   position: absolute;
   z-index: 1002;
   right: 20px;
-  ${({ $layout }) => ($layout === 'vertical' ? 'top: 20px;' : 'bottom: 20px;')}
+  bottom: 20px;
 `;
 
 // Once the map pane shrinks below this (along the split axis) the divider is
@@ -194,9 +190,14 @@ const FormPane: React.FC = () => {
           <Stack height="100%">
             <Stack flex={1}>
               <ItemEditSection />
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                sx={{ mt: 1, mb: 2, lineHeight: 1.4 }}
+              >
+                <Translation id="editdialog.info_edit" />
+              </Typography>
             </Stack>
-            <CommentField />
-            <ContributionInfoBox />
             <OsmUserLogged />
             <TestApiWarning />
           </Stack>
@@ -239,13 +240,18 @@ export const EditContent = () => {
           </MapPane>
         </SplitPane>
         {isMapCollapsed && (
-          <RestoreCollapsedMapButton $layout={layout}>
-            <Tooltip title={t('editdialog.enlarge_map')} arrow>
+          <RestoreCollapsedMapButton>
+            <Tooltip title={t('editdialog.show_map')} arrow>
               <IconButton
                 size="small"
-                color="secondary"
-                aria-label={t('editdialog.enlarge_map')}
-                sx={{ bgcolor: 'background.paper', boxShadow: 1 }}
+                color="primary"
+                aria-label={t('editdialog.show_map')}
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  boxShadow: 2,
+                  '&:hover': { bgcolor: 'primary.dark' },
+                }}
                 onClick={() => setUserSetting('editdialog.splitPaneSize', null)}
               >
                 <MapIcon />

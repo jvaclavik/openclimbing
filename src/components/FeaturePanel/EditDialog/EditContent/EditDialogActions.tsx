@@ -3,19 +3,7 @@ import React from 'react';
 import { t } from '../../../../services/intl';
 import { useEditContext } from '../context/EditContext';
 import { useGetHandleSave } from '../useGetHandleSave';
-import { getDiffXml } from '../../../../services/osm/auth/getDIffXml';
 import { useEditDialogClose } from '../utils';
-
-const downloadFile = (content: string, filename: string) => {
-  const file = new Blob([content], { type: 'text/xml' });
-  const element = document.createElement('a');
-  element.style.display = 'none';
-  element.href = URL.createObjectURL(file);
-  element.download = filename;
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
-};
 
 const SaveButton = () => {
   const handleSave = useGetHandleSave();
@@ -44,29 +32,11 @@ const CancelButton = () => {
   );
 };
 
-const DownloadButton = (props: { onClick: () => void }) => (
-  <Button
-    variant="text"
-    color="secondary"
-    sx={{ fontSize: '11px', textTransform: 'none' }}
-    onClick={props.onClick}
-  >
-    {t('editdialog.download_osc')}
-  </Button>
-);
-
 export const EditDialogActions = () => {
-  const { isSaving, items } = useEditContext();
-  const isModified = items.some(({ modified }) => modified);
-
-  const download = () => {
-    const content = getDiffXml(items);
-    downloadFile(content, 'changes.osc');
-  };
+  const { isSaving } = useEditContext();
 
   return (
     <DialogActions>
-      {isModified && <DownloadButton onClick={download} />}
       <div style={{ flex: '1 1' }}></div>
       {isSaving && <CircularProgress size={20} />}
       <CancelButton />

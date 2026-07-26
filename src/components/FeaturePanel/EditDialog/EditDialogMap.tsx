@@ -7,25 +7,31 @@ import {
   Checkbox,
   Chip,
   CircularProgress,
+  Divider,
   IconButton,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Menu,
   MenuItem,
+  Radio,
   Tooltip,
 } from '@mui/material';
 import maplibregl, { StyleSpecification } from 'maplibre-gl';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { t } from '../../../services/intl';
 import { getApiId, getShortId } from '../../../services/helpers';
-import { Feature, LonLat } from '../../../services/types';
+import { Feature, LonLat, TranslationId } from '../../../services/types';
 import { fetchWays } from '../../../services/osm/fetchWays';
 import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { touristStyle } from '../../Map/styles/touristStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import {
+  EditMapPosition,
+  useUserSettingsContext,
+} from '../../utils/userSettings/UserSettingsContext';
 import { RoutePositionToolbar } from '../Climbing/RoutePositionToolbar';
 import { usePhotoHighlightContext } from '../Climbing/contexts/PhotoHighlightContext';
 import {
@@ -332,10 +338,19 @@ type ControlsProps = {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   showNames: boolean;
-  setShowNames: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleNames: () => void;
   showGrades: boolean;
-  setShowGrades: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleGrades: () => void;
 };
+
+const MAP_POSITION_OPTIONS: {
+  value: EditMapPosition;
+  label: TranslationId;
+}[] = [
+  { value: 'auto', label: 'editdialog.map_position_auto' },
+  { value: 'right', label: 'editdialog.map_position_right' },
+  { value: 'bottom', label: 'editdialog.map_position_bottom' },
+];
 
 const MapControls: React.FC<ControlsProps> = ({
   mapStyle,
@@ -343,13 +358,15 @@ const MapControls: React.FC<ControlsProps> = ({
   isFullscreen,
   onToggleFullscreen,
   showNames,
-  setShowNames,
+  onToggleNames,
   showGrades,
-  setShowGrades,
+  onToggleGrades,
 }) => {
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(
     null,
   );
+  const { userSettings, setUserSetting } = useUserSettingsContext();
+  const mapPosition = userSettings['editdialog.mapPosition'] ?? 'auto';
   return (
     <>
       <MapStyleChip>
@@ -377,18 +394,38 @@ const MapControls: React.FC<ControlsProps> = ({
           open={Boolean(settingsAnchor)}
           onClose={() => setSettingsAnchor(null)}
         >
-          <MenuItem onClick={() => setShowNames((prev) => !prev)}>
+          <MenuItem onClick={onToggleNames}>
             <ListItemIcon>
               <Checkbox edge="start" checked={!showNames} tabIndex={-1} />
             </ListItemIcon>
             <ListItemText primary={t('climbing.hide_route_names')} />
           </MenuItem>
-          <MenuItem onClick={() => setShowGrades((prev) => !prev)}>
+          <MenuItem onClick={onToggleGrades}>
             <ListItemIcon>
               <Checkbox edge="start" checked={!showGrades} tabIndex={-1} />
             </ListItemIcon>
             <ListItemText primary={t('climbing.hide_difficulty')} />
           </MenuItem>
+          <Divider />
+          <ListSubheader disableSticky>
+            {t('editdialog.map_position')}
+          </ListSubheader>
+          {MAP_POSITION_OPTIONS.map(({ value, label }) => (
+            <MenuItem
+              key={value}
+              selected={mapPosition === value}
+              onClick={() => setUserSetting('editdialog.mapPosition', value)}
+            >
+              <ListItemIcon>
+                <Radio
+                  edge="start"
+                  checked={mapPosition === value}
+                  tabIndex={-1}
+                />
+              </ListItemIcon>
+              <ListItemText primary={t(label)} />
+            </MenuItem>
+          ))}
         </Menu>
       </SettingsButton>
       <FullscreenButton>
@@ -435,8 +472,8 @@ const EditDialogMap = () => {
   const currentIsRoute = isRouteTags(currentItem?.tags);
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const isFullscreen = userSettings['editdialog.mapFullscreen'] ?? false;
-  const [showNames, setShowNames] = useState(true);
-  const [showGrades, setShowGrades] = useState(true);
+  const showNames = userSettings['editdialog.showRouteNames'] ?? true;
+  const showGrades = userSettings['editdialog.showRouteGrades'] ?? true;
 
   // Resize the canvas once the fullscreen layout has been applied (the
   // ResizeObserver covers it too, but this avoids a one-frame stale canvas).
@@ -460,9 +497,13 @@ const EditDialogMap = () => {
           setUserSetting('editdialog.mapFullscreen', !isFullscreen)
         }
         showNames={showNames}
-        setShowNames={setShowNames}
+        onToggleNames={() =>
+          setUserSetting('editdialog.showRouteNames', !showNames)
+        }
         showGrades={showGrades}
-        setShowGrades={setShowGrades}
+        onToggleGrades={() =>
+          setUserSetting('editdialog.showRouteGrades', !showGrades)
+        }
       />
       {isMapLoaded && hasCragRoutesMap && (
         <RoutePositionToolbar
