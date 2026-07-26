@@ -8,20 +8,41 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import { useRouter } from 'next/router';
 import { getMapViewFromHash } from '../App/helpers';
 import { getFeatureBbox } from '../../services/getCenter';
-import { getViewFromBbox } from '../../services/getViewFromBbox';
+import { mapCreatedPromise } from '../../services/mapStorage';
 import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
 import { Feature } from '../../services/types';
+import { View } from '../utils/MapStateContext';
+import type { LngLat } from 'maplibre-gl';
 
-const getBboxView = (feature: Feature) => {
-  const bbox = getFeatureBbox(feature);
-  return (
-    bbox &&
-    getViewFromBbox(bbox, {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      panelWidth: window.innerWidth > 700 ? FEATURE_PANEL_WIDTH : 0,
-    })
-  );
+const FEATURE_ZOOM = 17;
+const PADDING = 20;
+
+// The map is created later than the panel (dynamic import), so on the initial
+// url open we have to wait for it - it is the only one who can do the mercator
+// math. We only borrow its camera, the move itself goes through setView().
+const getBboxView = async (feature: Feature): Promise<View | undefined> => {
+  const [w, s, e, n] = getFeatureBbox(feature) ?? [];
+  if (w === e && s === n) {
+    return undefined; // feature without extent - its center is enough
+  }
+
+  const map = await mapCreatedPromise;
+  const panelWidth = window.innerWidth > 700 ? FEATURE_PANEL_WIDTH : 0;
+  const camera = map.cameraForBounds([w, s, e, n], {
+    padding: {
+      top: PADDING,
+      bottom: PADDING,
+      right: PADDING,
+      left: panelWidth + PADDING,
+    },
+    maxZoom: FEATURE_ZOOM,
+  });
+  if (!camera) {
+    return undefined;
+  }
+
+  const { lat, lng } = camera.center as LngLat;
+  return [camera.zoom.toFixed(2), lat.toFixed(4), lng.toFixed(4)];
 };
 
 const useUpdateViewFromFeature = () => {
@@ -29,19 +50,22 @@ const useUpdateViewFromFeature = () => {
   const { setView } = useMapStateContext();
 
   useEffect(() => {
-    if (!feature?.center) return;
+    if (!feature?.center) return undefined;
     // clicking a feature on the map keeps the hash (pushFeatureToRouter) - the
     // map must not move in that case, only url/router opens are zoomed
-    if (getMapViewFromHash()) return;
+    if (getMapViewFromHash()) return undefined;
 
-    const bboxView = getBboxView(feature);
-    if (bboxView) {
-      setView(bboxView);
-      return;
-    }
+    let cancelled = false;
+    getBboxView(feature).then((bboxView) => {
+      if (cancelled) return;
 
-    const [lon, lat] = feature.center.map((deg) => deg.toFixed(4));
-    setView(['17.00', lat, lon]);
+      const [lon, lat] = feature.center.map((deg) => deg.toFixed(4));
+      setView(bboxView ?? [`${FEATURE_ZOOM}.00`, lat, lon]);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [feature, setView]);
 };
 
