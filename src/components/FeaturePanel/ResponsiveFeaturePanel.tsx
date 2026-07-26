@@ -7,6 +7,22 @@ import { useMapStateContext } from '../utils/MapStateContext';
 import { Scrollbars } from 'react-custom-scrollbars';
 import { useRouter } from 'next/router';
 import { getMapViewFromHash } from '../App/helpers';
+import { getFeatureBbox } from '../../services/getCenter';
+import { getViewFromBbox } from '../../services/getViewFromBbox';
+import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
+import { Feature } from '../../services/types';
+
+const getBboxView = (feature: Feature) => {
+  const bbox = getFeatureBbox(feature);
+  return (
+    bbox &&
+    getViewFromBbox(bbox, {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      panelWidth: window.innerWidth > 700 ? FEATURE_PANEL_WIDTH : 0,
+    })
+  );
+};
 
 const useUpdateViewFromFeature = () => {
   const { feature } = useFeatureContext();
@@ -14,7 +30,15 @@ const useUpdateViewFromFeature = () => {
 
   useEffect(() => {
     if (!feature?.center) return;
+    // clicking a feature on the map keeps the hash (pushFeatureToRouter) - the
+    // map must not move in that case, only url/router opens are zoomed
     if (getMapViewFromHash()) return;
+
+    const bboxView = getBboxView(feature);
+    if (bboxView) {
+      setView(bboxView);
+      return;
+    }
 
     const [lon, lat] = feature.center.map((deg) => deg.toFixed(4));
     setView(['17.00', lat, lon]);
