@@ -50,10 +50,14 @@ export const RenderListRow = ({ routeId, parentRef, feature }: Props) => {
   const isSelected = routeSelectedIndex === index;
 
   useEffect(() => {
-    if (
-      (!userSettings['climbing.selectRoutesByScrolling'] && isSelected) ||
-      isEditMode
-    ) {
+    // Only the selected row should scroll itself into view. The previous code
+    // OR-ed `isEditMode` outside the `isSelected` check, so in edit mode every
+    // row ran scrollIntoView and the last one (not the selected one) won,
+    // leaving the selected route scrolled out of sight.
+    const shouldScrollIntoView =
+      isSelected &&
+      (isEditMode || !userSettings['climbing.selectRoutesByScrolling']);
+    if (shouldScrollIntoView) {
       ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [isEditMode, isSelected, userSettings]);

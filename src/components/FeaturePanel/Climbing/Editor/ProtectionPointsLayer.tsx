@@ -8,6 +8,8 @@ import { UnfinishedPoint } from './Points/UnfinishedPoint';
 import { PointType } from '../types';
 import { ProtectionPointCenter } from './ProtectionPointCenter';
 import { getStickyThreshold } from '../utils/findCloserPoint';
+import { useMobileMode } from '../../../helpers';
+import { useShowProtectionPoints } from '../utils/useShowProtectionPoints';
 
 export const ProtectionPointsLayer = () => {
   const {
@@ -17,10 +19,20 @@ export const ProtectionPointsLayer = () => {
     isEditMode,
     machine,
     protectionPointSelectedIndex,
+    isPlacingProtectionPoints,
   } = useClimbingContext();
+  const isMobileMode = useMobileMode();
+  const showProtectionPoints = useShowProtectionPoints();
 
   const points = getProtectionPointsForCurrentPhoto();
   if (points.length === 0) {
+    return null;
+  }
+
+  // While actively placing protection the overlay must stay visible so the
+  // user can see what they add, even on small screens where it is hidden by
+  // default. Otherwise honor the (screen-aware) visibility setting.
+  if (!showProtectionPoints && !isPlacingProtectionPoints) {
     return null;
   }
 
@@ -41,10 +53,14 @@ export const ProtectionPointsLayer = () => {
 
   const pointerEvents = canInteract ? 'auto' : 'none';
 
+  // On small screens the gear overlay competes with the route lines, so make
+  // it more subtle unless the user is actively placing points.
+  const layerOpacity = isMobileMode && !isPlacingProtectionPoints ? 0.45 : 1;
+
   const xOffset = 15;
 
   return (
-    <g style={{ pointerEvents }}>
+    <g style={{ pointerEvents, opacity: layerOpacity }}>
       {points.map(({ x, y, type }, index) => {
         const position = getPixelPosition({ x, y, units: 'percentage' });
         const isSelected = protectionPointSelectedIndex === index;

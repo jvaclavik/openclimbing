@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SuccessInfo } from '../../../../services/types';
 import { useEditItems } from './useEditItems';
 import { Setter } from '../../../../types';
@@ -20,6 +20,10 @@ type EditContextType = {
   items: EditDataItem[];
   current: string;
   setCurrent: Setter<string>;
+  // Multi-selection of items (shortIds), e.g. several routes selected in the
+  // tablist / map to be dragged together. `current` is always one of them.
+  selectedIds: string[];
+  setSelectedIds: Setter<string[]>;
   validate: boolean;
   setValidate: Setter<boolean>;
   // shortId of the crag whose routes are currently shown on the edit map; kept
@@ -39,7 +43,17 @@ export const EditContextProvider: React.FC = ({ children }) => {
   const [validate, setValidate] = useState(false);
   const { items, addItem, removeItem } = useEditItems();
   const [current, setCurrent] = useState<ShortId>(''); // to get currentItem - use `useCurrentItem()`
+  const [selectedIds, setSelectedIds] = useState<ShortId[]>([]);
   const [activeCragId, setActiveCragId] = useState<ShortId>('');
+
+  // Keep the multi-selection in sync with `current`. Multi-select actions set
+  // `current` to a member of the selection, so this only fires when `current`
+  // changes through other means (opening a tab, map popup, initial load),
+  // collapsing any stale multi-selection down to the single active item.
+  useEffect(() => {
+    if (!current) return;
+    setSelectedIds((prev) => (prev.includes(current) ? prev : [current]));
+  }, [current]);
 
   const value: EditContextType = {
     successInfo,
@@ -55,6 +69,8 @@ export const EditContextProvider: React.FC = ({ children }) => {
     items,
     current,
     setCurrent,
+    selectedIds,
+    setSelectedIds,
     validate,
     setValidate,
     activeCragId,

@@ -1,9 +1,9 @@
 import { useClimbingContext } from '../contexts/ClimbingContext';
-import React from 'react';
+import React, { useState } from 'react';
 import { LineType } from '../types';
-import { Button } from '@mui/material';
+import { Button, Menu, MenuItem } from '@mui/material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { t } from '../../../../services/intl';
-import { Setter } from '../../../../types';
 
 type ButtonDef = {
   previousLineType: LineType;
@@ -21,30 +21,47 @@ const lineTypes: Array<ButtonDef> = [
   },
 ];
 
-type Props = {
-  setShowLineTypeMenu: Setter<boolean>;
-};
+export const LineTypeButtons = () => {
+  const { machine, getCurrentPath, pointSelectedIndex } = useClimbingContext();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
-export const LineTypeButtons = ({ setShowLineTypeMenu }: Props) => {
-  const { machine } = useClimbingContext();
+  const selectedPoint = getCurrentPath()?.[pointSelectedIndex];
+  const currentLineType = selectedPoint?.previousLineType ?? 'solid';
 
-  const onLineTypeChange = (previousLineType: LineType | 'none') => {
+  const onLineTypeChange = (previousLineType: LineType) => {
     machine.execute('changeLineType', {
       previousLineType: previousLineType === 'solid' ? null : previousLineType,
     });
-    setShowLineTypeMenu(false);
+    setAnchorEl(null);
   };
 
   return (
     <>
-      {lineTypes.map(({ message, previousLineType }) => (
-        <Button
-          key={previousLineType}
-          onClick={() => onLineTypeChange(previousLineType)}
-        >
-          {message}
-        </Button>
-      ))}
+      <Button
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        endIcon={<ArrowDropDownIcon />}
+      >
+        {t('climbingpanel.line')}
+      </Button>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        {lineTypes.map(({ message, previousLineType }) => (
+          <MenuItem
+            key={previousLineType}
+            dense
+            selected={currentLineType === previousLineType}
+            onClick={() => onLineTypeChange(previousLineType)}
+          >
+            {message}
+          </MenuItem>
+        ))}
+      </Menu>
     </>
   );
 };

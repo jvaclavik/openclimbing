@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import AddIcon from '@mui/icons-material/Add';
 import {
   Button,
   Dialog,
@@ -11,6 +10,7 @@ import Router, { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { getOsmappLink } from '../../../services/helpers';
 import { t } from '../../../services/intl';
+import { useMobileMode } from '../../helpers';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { ClimbingCragDialogHeader } from './ClimbingCragDialogHeader';
 import { ClimbingEditorHelperText } from './ClimbingEditorHelperText';
@@ -50,7 +50,6 @@ export const ClimbingCragDialog = ({
     isEditMode,
     setIsPlacingProtectionPoints,
     machine,
-    showDebugMenu,
     setRouteSelectedIndex,
     routes,
     setPhotoPath,
@@ -63,6 +62,7 @@ export const ClimbingCragDialog = ({
   const { feature } = useFeatureContext();
   const saveCrag = useSaveCragFactory(setIsEditMode);
   const router = useRouter();
+  const isMobileMode = useMobileMode();
   const featureLink = getOsmappLink(feature);
   // Hide the dialog synchronously when the user clicks close. Router.push can
   // take a moment to actually unmount us (it re-runs getServerSideProps on the
@@ -150,10 +150,6 @@ export const ClimbingCragDialog = ({
     });
   };
 
-  const onNewRouteCreate = () => {
-    machine.execute('createRoute');
-  };
-
   return (
     <Dialog
       fullScreen
@@ -166,7 +162,11 @@ export const ClimbingCragDialog = ({
         },
       }}
     >
-      <ClimbingCragDialogHeader onClose={handleClose} />
+      <ClimbingCragDialogHeader
+        onClose={handleClose}
+        onSave={saveCrag}
+        onCancel={handleCancel}
+      />
 
       <DialogContent
         dividers
@@ -181,20 +181,11 @@ export const ClimbingCragDialog = ({
         <ClimbingView />
       </DialogContent>
 
-      {isEditMode && (
+      {isEditMode && !isMobileMode && (
         <DialogActions>
           <Flex>
             <LeftActions>
               <Stack spacing={1} alignItems="flex-start" width="100%">
-                {showDebugMenu && (
-                  <Button
-                    onClick={onNewRouteCreate}
-                    color="primary"
-                    startIcon={<AddIcon />}
-                  >
-                    Add new route
-                  </Button>
-                )}
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <ClimbingEditorHelperText />
                 </div>

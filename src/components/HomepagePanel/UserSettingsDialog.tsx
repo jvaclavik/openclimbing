@@ -18,6 +18,7 @@ import { TickStyleSelect } from '../FeaturePanel/Climbing/Ticks/TickStyleSelect'
 import { t } from '../../services/intl';
 import { usePersistedState } from '../utils/usePersistedState';
 import { LOCAL_STORAGE_CACHE } from '../../services/fetchCache';
+import { useMobileMode, useSmallScreen } from '../helpers';
 
 type Props = {
   onClose: (event: unknown) => void;
@@ -79,9 +80,19 @@ const ShowAllClimbingOutlines = () => {
 // eslint-disable-next-line max-lines-per-function
 export const UserSettingsDialog = ({ onClose, isOpened }: Props) => {
   const { setUserSetting, userSettings } = useUserSettingsContext();
+  const isMobileMode = useMobileMode();
+  const isSmallScreen = useSmallScreen();
+  const showProtectionPoints =
+    userSettings['climbing.showProtectionPoints'] ?? !isSmallScreen;
 
   return (
-    <Dialog onClose={onClose} open={isOpened} maxWidth="sm" fullWidth>
+    <Dialog
+      onClose={onClose}
+      open={isOpened}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={isMobileMode}
+    >
       <DialogTitle>{t('user.user_settings')}</DialogTitle>
 
       <ClosePanelButton right onClick={onClose} />
@@ -135,6 +146,23 @@ export const UserSettingsDialog = ({ onClose, isOpened }: Props) => {
                 );
               }}
               checked={userSettings['climbing.isGradesOnPhotosVisible']}
+            />
+          </ListItem>
+
+          <ListItem>
+            <ListItemText>
+              {t('user_settings.show_protection_points')}
+            </ListItemText>
+            <Switch
+              color="primary"
+              edge="end"
+              onChange={(e) => {
+                setUserSetting(
+                  'climbing.showProtectionPoints',
+                  e.target.checked,
+                );
+              }}
+              checked={showProtectionPoints}
             />
           </ListItem>
 

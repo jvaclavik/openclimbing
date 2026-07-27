@@ -7,6 +7,7 @@ import { Sling } from './Points/Sling';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { Anchor } from './Points/Anchor';
 import { UnfinishedPoint } from './Points/UnfinishedPoint';
+import { useShowProtectionPoints } from '../utils/useShowProtectionPoints';
 
 type Props = {
   routeIndex: number;
@@ -23,20 +24,27 @@ export const RouteMarks = ({ routeIndex }: Props) => {
     isEditMode,
     routes,
   } = useClimbingContext();
+  const showProtectionPoints = useShowProtectionPoints();
   const isSelected = isRouteSelected(routeIndex);
   const isOtherSelected = isOtherRouteSelected(routeIndex);
   const route = routes[routeIndex];
   const path = getPathForRoute(route);
 
+  // The gear symbols along a route are "protection on the photo" too, so they
+  // honor the same setting. While editing we always show them so points stay
+  // manipulable regardless of the viewing preference.
+  const showGear = isEditMode || showProtectionPoints;
+
   return (
     <>
       {path.map(({ x, y, type }, index) => {
-        const isBoltVisible = !isOtherSelected && type === 'bolt';
-        const isAnchorVisible = !isOtherSelected && type === 'anchor';
-        const isSlingVisible = !isOtherSelected && type === 'sling';
-        const isPitonVisible = !isOtherSelected && type === 'piton';
+        const isBoltVisible = showGear && !isOtherSelected && type === 'bolt';
+        const isAnchorVisible =
+          showGear && !isOtherSelected && type === 'anchor';
+        const isSlingVisible = showGear && !isOtherSelected && type === 'sling';
+        const isPitonVisible = showGear && !isOtherSelected && type === 'piton';
         const isUnfinishedPointVisible =
-          !isOtherSelected && type === 'unfinished';
+          showGear && !isOtherSelected && type === 'unfinished';
 
         const position = getPixelPosition({ x, y, units: 'percentage' });
         const isActualPointSelected = isSelected && isPointSelected(index);

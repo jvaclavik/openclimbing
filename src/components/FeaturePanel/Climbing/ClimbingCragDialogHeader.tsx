@@ -6,7 +6,9 @@ import TuneIcon from '@mui/icons-material/Tune';
 import {
   AppBar,
   Box,
+  Button,
   IconButton,
+  Stack,
   Toolbar,
   Tooltip,
   Typography,
@@ -198,12 +200,26 @@ const PhotoThumbnail = ({
   );
 };
 
-export const ClimbingCragDialogHeader = ({ onClose }) => {
+type HeaderProps = {
+  onClose: () => void;
+  onSave?: () => void;
+  onCancel?: () => void;
+};
+
+export const ClimbingCragDialogHeader = ({
+  onClose,
+  onSave,
+  onCancel,
+}: HeaderProps) => {
   const [isUserSettingsOpened, setIsUserSettingsOpened] =
     useState<boolean>(false);
   const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
   const { photoPath, photoPaths, isEditMode } = useClimbingContext();
   const { openWithTag } = useEditDialogContext();
+  const isMobileMode = useMobileMode();
+  // On mobile the bottom DialogActions bar is hidden, so Save/Cancel live in
+  // the header instead of the PDF/settings/close icons while editing.
+  const showMobileEditActions = isMobileMode && isEditMode;
 
   const { feature } = useFeatureContext();
   const onPhotoChange = usePhotoChange();
@@ -258,35 +274,48 @@ export const ClimbingCragDialogHeader = ({ onClose }) => {
           )}
         </Title>
 
-        <Box mr={1}>
-          <Tooltip title={t('climbingpanel.pdf_export_button')}>
-            <IconButton
-              color="primary"
-              edge="end"
-              onClick={() => setIsPdfExportOpen(true)}
-            >
-              <PictureAsPdfIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        <Box mr={2}>
-          <Tooltip title="Show settings">
-            <IconButton
-              color="primary"
-              edge="end"
-              onClick={() => {
-                setIsUserSettingsOpened(!isUserSettingsOpened);
-              }}
-            >
-              <TuneIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        <Tooltip title="Close crag detail">
-          <IconButton color="primary" edge="end" onClick={onClose}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        {showMobileEditActions ? (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button autoFocus onClick={onCancel}>
+              {t('editdialog.cancel_button')}
+            </Button>
+            <Button onClick={onSave} variant="contained" color="primary">
+              {t('editdialog.save_button_edit')}
+            </Button>
+          </Stack>
+        ) : (
+          <>
+            <Box mr={1}>
+              <Tooltip title={t('climbingpanel.pdf_export_button')}>
+                <IconButton
+                  color="primary"
+                  edge="end"
+                  onClick={() => setIsPdfExportOpen(true)}
+                >
+                  <PictureAsPdfIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Box mr={2}>
+              <Tooltip title="Show settings">
+                <IconButton
+                  color="primary"
+                  edge="end"
+                  onClick={() => {
+                    setIsUserSettingsOpened(!isUserSettingsOpened);
+                  }}
+                >
+                  <TuneIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Tooltip title="Close crag detail">
+              <IconButton color="primary" edge="end" onClick={onClose}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
       </Toolbar>
       <UserSettingsDialog
         isOpened={isUserSettingsOpened}

@@ -8,6 +8,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useEditContext } from '../context/EditContext';
+import { getRangeSelection, toggleSelectedId } from '../context/selection';
 import React from 'react';
 import { NwrIcon } from '../../NwrIcon';
 import { EditDataItem } from '../context/types';
@@ -104,9 +105,40 @@ const TabLabel = ({ item }: TabLabelProps) => {
 };
 
 export const ItemsTabs = () => {
-  const { items, current, setCurrent } = useEditContext();
+  const { items, current, setCurrent, selectedIds, setSelectedIds } =
+    useEditContext();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // All selection is handled on the Tab's onClick so we can read the keyboard
+  // modifiers and also react to clicks on the already-active tab (MUI Tabs
+  // `onChange` doesn't fire in that case). Cmd/Ctrl+click toggles a tab in the
+  // multi-selection, Shift+click selects the whole range from the active tab.
+  const handleTabClick = (event: React.MouseEvent, shortId: string) => {
+    if (event.shiftKey) {
+      event.preventDefault();
+      const orderedIds = items.map((item) => item.shortId);
+      setSelectedIds(getRangeSelection(orderedIds, current, shortId));
+      setCurrent(shortId);
+      return;
+    }
+
+    if (event.metaKey || event.ctrlKey) {
+      event.preventDefault();
+      const wasSelected = selectedIds.includes(shortId);
+      const next = toggleSelectedId(selectedIds, shortId);
+      setSelectedIds(next);
+      if (!wasSelected) {
+        setCurrent(shortId);
+      } else if (shortId === current && next.length > 0) {
+        setCurrent(next[next.length - 1]);
+      }
+      return;
+    }
+
+    setSelectedIds([shortId]);
+    setCurrent(shortId);
+  };
 
   return (
     <>
@@ -115,23 +147,29 @@ export const ItemsTabs = () => {
           orientation={isSmallScreen ? 'horizontal' : 'vertical'}
           variant="scrollable"
           value={current}
-          onChange={(_event: React.SyntheticEvent, newShortId: string) => {
-            setCurrent(newShortId);
-          }}
+          onChange={() => {}}
         >
-          {items.map((item, idx) => (
-            <Tab
-              key={idx}
-              label={<TabLabel item={item} />}
-              value={item.shortId}
-              sx={{
-                maxWidth: '100%',
-                ...(isSmallScreen
-                  ? {}
-                  : { borderBottom: `solid 1px ${theme.palette.divider}` }),
-              }}
-            />
-          ))}
+          {items.map((item, idx) => {
+            const isMultiSelected =
+              selectedIds.includes(item.shortId) && item.shortId !== current;
+            return (
+              <Tab
+                key={idx}
+                label={<TabLabel item={item} />}
+                value={item.shortId}
+                onClick={(event) => handleTabClick(event, item.shortId)}
+                sx={{
+                  maxWidth: '100%',
+                  ...(isSmallScreen
+                    ? {}
+                    : { borderBottom: `solid 1px ${theme.palette.divider}` }),
+                  ...(isMultiSelected
+                    ? { backgroundColor: theme.palette.action.selected }
+                    : {}),
+                }}
+              />
+            );
+          })}
         </StyledTabs>
       )}
     </>

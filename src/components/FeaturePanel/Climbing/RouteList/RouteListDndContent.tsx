@@ -8,6 +8,7 @@ import { t } from '../../../../services/intl';
 import { Box } from '@mui/material';
 import { useReplacePhotoIfNeeded } from '../utils/useReplacePhotoIfNeeded';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { useMobileMode } from '../../../helpers';
 
 const Container = styled.div`
   width: 100%;
@@ -69,6 +70,12 @@ const NameHeader = styled.div`
   padding-left: 40px;
 `;
 
+const BottomGradeSystem = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 12px 8px 4px;
+`;
+
 export const RouteListDndContent = () => {
   const {
     routes,
@@ -80,6 +87,7 @@ export const RouteListDndContent = () => {
     setRouteIndexHovered,
   } = useClimbingContext();
   const { userSettings } = useUserSettingsContext();
+  const isMobileMode = useMobileMode();
   const parentRef = useRef<HTMLDivElement>(null);
   const replacePhotoIfNeeded = useReplacePhotoIfNeeded();
   const onRowClick = (index: number) => {
@@ -102,14 +110,16 @@ export const RouteListDndContent = () => {
 
   return (
     <Container ref={parentRef}>
-      <TableHeader>
-        <MaxWidthContainer>
-          <NameHeader>{t('member_features.climbing')}</NameHeader>
-          <Box mr={1}>
-            <GradeSystemSelect />
-          </Box>
-        </MaxWidthContainer>
-      </TableHeader>
+      {!isMobileMode && (
+        <TableHeader>
+          <MaxWidthContainer>
+            <NameHeader>{t('member_features.climbing')}</NameHeader>
+            <Box mr={1}>
+              <GradeSystemSelect />
+            </Box>
+          </MaxWidthContainer>
+        </TableHeader>
+      )}
       {routes.map((route, index) => {
         const isSelected = isRouteSelected(index);
         return (
@@ -137,6 +147,11 @@ export const RouteListDndContent = () => {
           </RowInner>
         );
       })}
+      {isMobileMode && (
+        <BottomGradeSystem>
+          <GradeSystemSelect />
+        </BottomGradeSystem>
+      )}
     </Container>
   );
 };

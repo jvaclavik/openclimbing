@@ -35,6 +35,7 @@ export type UserSettingsType = Partial<{
   'climbing.selectRoutesByScrolling': boolean;
   'climbing.switchPhotosByScrolling': boolean;
   'climbing.showRelatedPhotoByRouteClick': boolean;
+  'climbing.showProtectionPoints': boolean;
   'climbing.visibleGradeSystems': Record<string, boolean>;
   'climbing.cragViewLayout': CragViewLayout;
   'climbing.splitPaneSize': null | number;

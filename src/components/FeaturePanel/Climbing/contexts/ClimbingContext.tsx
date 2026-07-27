@@ -36,6 +36,7 @@ import { publishDbgObject } from '../../../../utils';
 import { getContainedSizeImage } from '../utils/image';
 import { Setter } from '../../../../types';
 import { parseProtectionPointsByPhoto } from '../utils/protectionPathTags';
+import { useEditUndoHistory } from './useEditUndoHistory';
 
 type LoadedPhotos = Record<string, Record<number, boolean>>;
 type ImageSize = {
@@ -161,6 +162,11 @@ type ClimbingContextType = {
   ) => void;
   discardEdits: () => void;
   hasUnsavedEdits: boolean;
+  undo: () => void;
+  redo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  deleteLastPathPoint: () => void;
 };
 
 // @TODO generate?
@@ -279,6 +285,20 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     setEditSnapshot(snapshot);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode]);
+
+  const { undo, redo, canUndo, canRedo } = useEditUndoHistory({
+    isEditMode,
+    routes,
+    protectionPointsByPhoto,
+    setRoutes,
+    setProtectionPointsByPhoto,
+    setPointSelectedIndex,
+    setProtectionPointSelectedIndex,
+    // A drag gesture (point or protection point) keeps one of these true from
+    // mousedown to mouseup, so all its intermediate updates coalesce into a
+    // single undo step.
+    isCoalescing: isPointClicked || isProtectionPointClicked,
+  });
 
   const discardEdits = useCallback(() => {
     const snapshot = editSnapshotRef.current;
@@ -427,6 +447,14 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
         [photoPath]: callback(getPathOnIndex(routeIndex)),
       },
     }));
+
+  const deleteLastPathPoint = () => {
+    if (routeSelectedIndex === null || routeSelectedIndex === undefined) return;
+    const path = routes[routeSelectedIndex]?.paths?.[photoPath] ?? [];
+    if (path.length === 0) return;
+    updatePathOnRouteIndex(routeSelectedIndex, (p) => p.slice(0, -1));
+    setPointSelectedIndex(null);
+  };
 
   const moveRoute = (fromIndex: number, toIndex: number) => {
     if (
@@ -612,6 +640,11 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     updateProtectionPointPositionAtIndex,
     discardEdits,
     hasUnsavedEdits,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    deleteLastPathPoint,
   };
 
   return (

@@ -107,6 +107,10 @@ export const isMobileMode = '(max-width: 700px)';
 export const useMobileMode = () => useMediaQuery(isMobileMode);
 export const isMobileModeVanilla = () => window.innerWidth <= 700;
 
+// (<= small phone) used to further declutter the climbing editor
+export const isSmallScreen = '(max-width: 480px)';
+export const useSmallScreen = () => useMediaQuery(isSmallScreen);
+
 // (>= mobile size) SearchBox stops growing
 export const isDesktop = '(min-width: 500px)';
 

@@ -7,8 +7,10 @@ export const useFloatingMenuShortcuts = (
   onPointTypeChange: (type: PointType | null) => void,
   onContinueClimbingRouteClick: () => void,
   onToggleProtectionPoints: () => void,
-  isUndoVisible: boolean,
+  canUndo: boolean,
   handleUndo: (e) => void,
+  canRedo: boolean,
+  handleRedo: (e) => void,
   isDoneVisible: boolean,
   onFinishClimbingRouteClick: () => void,
 ) => {
@@ -19,6 +21,17 @@ export const useFloatingMenuShortcuts = (
       if (isTypingInFormField(e.target)) return;
 
       if (isEditMode) {
+        // Cmd/Ctrl+Z = undo, Cmd/Ctrl+Shift+Z = redo. Handle first so the plain
+        // letter shortcuts below don't also fire on the modified keypress.
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+          if (e.shiftKey) {
+            if (canRedo) handleRedo(e);
+          } else if (canUndo) {
+            handleUndo(e);
+          }
+          return;
+        }
+        if (e.metaKey || e.ctrlKey) return;
         if (e.key === 'b') {
           onPointTypeChange('bolt');
         }
@@ -43,9 +56,6 @@ export const useFloatingMenuShortcuts = (
         if (e.key === 'm') {
           onToggleProtectionPoints();
         }
-        if (isUndoVisible && e.key === 'z' && e.metaKey) {
-          handleUndo(e);
-        }
         if (isDoneVisible && (e.key === 'Enter' || e.key === 'Escape')) {
           onFinishClimbingRouteClick();
         }
@@ -58,10 +68,12 @@ export const useFloatingMenuShortcuts = (
       window.removeEventListener('keydown', downHandler);
     };
   }, [
+    canRedo,
+    canUndo,
+    handleRedo,
     handleUndo,
     isDoneVisible,
     isEditMode,
-    isUndoVisible,
     onContinueClimbingRouteClick,
     onFinishClimbingRouteClick,
     onToggleProtectionPoints,

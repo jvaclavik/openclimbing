@@ -15,6 +15,7 @@ import {
   getCommonsImageUrl,
 } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
+import { useMobileMode } from '../../helpers';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
@@ -258,6 +259,13 @@ const RestorePaneFab = styled.div<{
 // swap it for a single restore-arrow FAB that brings the routes list back.
 const PANE2_COLLAPSED_THRESHOLD_PX = 100;
 
+// On mobile we want the panel to stay grabbable much longer and only snap
+// fully away once it's essentially gone.
+const PANE2_COLLAPSED_THRESHOLD_MOBILE_PX = 20;
+
+// Below this the pane is treated as fully hidden (0 px, subpixel tolerated).
+const PANE2_HIDDEN_THRESHOLD_PX = 2;
+
 // Once pane2 crosses the threshold, we set splitPaneSize to this sentinel so
 // pane2 actually goes to 0 px (pane1Style: maxHeight/maxWidth 100% clamps
 // pane1 back down to the container, so the actual rendered size is fine on
@@ -319,6 +327,7 @@ export const ClimbingView = () => {
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(null);
   const [editFabAnchor, setEditFabAnchor] = useState<HTMLElement | null>(null);
   const cragViewLayout = useGetCragViewLayout();
+  const isMobileMode = useMobileMode();
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const splitPaneSize = userSettings['climbing.splitPaneSize'];
   useClimbingViewShortcuts();
@@ -423,20 +432,30 @@ export const ClimbingView = () => {
 
   const pane2Ref = useRef<HTMLDivElement>(null);
   const [isPane2Collapsed, setIsPane2Collapsed] = useState(false);
+  const [isPane2Hidden, setIsPane2Hidden] = useState(false);
 
   useEffect(() => {
     const node = pane2Ref.current;
     if (!node || typeof ResizeObserver === 'undefined') return undefined;
+    const collapseThreshold = isMobileMode
+      ? PANE2_COLLAPSED_THRESHOLD_MOBILE_PX
+      : PANE2_COLLAPSED_THRESHOLD_PX;
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
       const { width, height } = entry.contentRect;
       const dim = cragViewLayout === 'horizontal' ? height : width;
-      setIsPane2Collapsed(dim < PANE2_COLLAPSED_THRESHOLD_PX);
+      setIsPane2Collapsed(dim < collapseThreshold);
+      setIsPane2Hidden(dim < PANE2_HIDDEN_THRESHOLD_PX);
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [cragViewLayout]);
+  }, [cragViewLayout, isMobileMode]);
+
+  // On mobile the restore FAB only appears once the pane is fully hidden; on
+  // desktop it appears as soon as the pane collapses past the (larger)
+  // threshold so the useless dragger can be swapped out earlier.
+  const showRestorePaneFab = isMobileMode ? isPane2Hidden : isPane2Collapsed;
 
   // Once the threshold is crossed (arrow is showing), snap pane2 down to 0
   // by parking splitPaneSize at the sentinel.
@@ -622,7 +641,7 @@ export const ClimbingView = () => {
                   </TransformComponent>
                 </TransformWrapper>
               </BlurContainer>
-              {isPane2Collapsed && (
+              {showRestorePaneFab && (
                 <RestorePaneFab $cragViewLayout={cragViewLayout}>
                   <Tooltip
                     title={t('climbing.photos') /* shown on hover */}

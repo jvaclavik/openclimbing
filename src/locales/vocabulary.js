@@ -85,6 +85,7 @@ export default {
   'user_settings.climbing': 'Climbing',
   'user_settings.default_grade_system': 'Default grade system',
   'user_settings.show_grades_in_pictures': 'Show grades in pictures',
+  'user_settings.show_protection_points': 'Show protection on photos',
   'user_settings.default_climbing_style': 'Default climbing style',
   'user_settings.select_climbing_routes_by_scrolling': 'Select climbing routes by scrolling',
   'user_settings.switch_climbing_photos_by_scrolling': 'Switch photos automatically by scrolling',
@@ -725,7 +726,7 @@ export default {
   'climbingpanel.pdf_export_generated_at': 'Generated __datetime__',
   'climbingpanel.pdf_export_footer':
     'Generated with <a href="https://openclimbing.org" target="_blank" rel="noopener noreferrer">openclimbing.org</a> — free and open climbing data that anyone can use, improve and contribute to.',
-  'climbingpanel.protection_points_mode': 'Gear placements',
+  'climbingpanel.protection_points_mode': 'Draw protection on rock',
   'climbingpanel.protection_points_hint':
     'Click the photo to add protection points. Pick a type in the bar. When you draw routes, new nodes snap to them and inherit the type.',
   'climbingpanel.protection_points_tooltip': 'Place bolts and other gear on the photo before drawing routes; route points snap to them.',
@@ -736,6 +737,9 @@ export default {
   'climbingpanel.recognize_bolts_error': 'Bolt recognition failed. Please try again.',
   'climbingpanel.recognize_bolts_result': 'Recognized __count__ bolts. Please check them, as the AI can make mistakes.',
   'climbingpanel.recognize_bolts_none': 'No bolts recognized in this photo. Please mark them precisely by hand, and report it <a>here</a>.',
+  'climbingpanel.more_options': 'More options',
+  'climbingpanel.redo': 'Redo',
+  'climbingpanel.delete_last_point': 'Delete last point of route',
 
   'runway.information': 'Runway information',
   'runway.runway': 'Runway',

@@ -43,10 +43,13 @@ export const RoutesLayerSvgContent = () => {
       ) : null}
 
       {/* Render all route number badges + grades on top of every path and
-          mark, so they're never visually covered by another route's line. */}
-      {routes.map((_, routeIndex) => (
-        <RouteNumber key={routeIndex} routeIndex={routeIndex} />
-      ))}
+          mark, so they're never visually covered by another route's line.
+          On mobile, once a route is selected we show only that one to keep
+          the small photo uncluttered. */}
+      {!(isMobileMode && routeSelectedIndex != null) &&
+        routes.map((_, routeIndex) => (
+          <RouteNumber key={routeIndex} routeIndex={routeIndex} />
+        ))}
 
       {routeIndexHovered != null && !isMobileMode ? (
         <RouteNumber routeIndex={routeIndexHovered} />

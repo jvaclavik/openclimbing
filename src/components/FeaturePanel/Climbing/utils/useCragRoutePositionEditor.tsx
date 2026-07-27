@@ -293,7 +293,8 @@ export const useCragRoutePositionEditor = (
   { showNames = true, showGrades = true }: DisplayOptions = {},
 ) => {
   const crag = useCragFeatureForRoutes();
-  const { items, addItem, setCurrent, current } = useEditContext();
+  const { items, addItem, setCurrent, current, selectedIds, setSelectedIds } =
+    useEditContext();
   const { highlightedPhoto } = usePhotoHighlightContext();
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
@@ -386,6 +387,31 @@ export const useCragRoutePositionEditor = (
   // Latest editable routes, for the imperative crag-move handlers below.
   const editableRoutesRef = useRef(editableRoutes);
   editableRoutesRef.current = editableRoutes;
+  // Latest multi-selection / current, read from imperative marker handlers.
+  const selectedIdsRef = useRef(selectedIds);
+  selectedIdsRef.current = selectedIds;
+  const currentRef = useRef(current);
+  currentRef.current = current;
+
+  // Cmd/Ctrl(+Shift)+click a route marker toggles it in the multi-selection.
+  const toggleRouteSelection = useCallback(
+    (routeId: string) => {
+      const ids = selectedIdsRef.current;
+      const wasSelected = ids.includes(routeId);
+      const next = wasSelected
+        ? ids.length <= 1
+          ? ids
+          : ids.filter((id) => id !== routeId)
+        : [...ids, routeId];
+      setSelectedIds(next);
+      if (!wasSelected) {
+        setCurrent(routeId);
+      } else if (routeId === currentRef.current && next.length > 0) {
+        setCurrent(next[next.length - 1]);
+      }
+    },
+    [setSelectedIds, setCurrent],
+  );
 
   // When switching to another crag/sector in the dialog, drop the in-progress
   // guide-line state so a line drawn for one sector isn't applied to the next
@@ -502,6 +528,17 @@ export const useCragRoutePositionEditor = (
     },
     [editableRoutes, addItem],
   );
+
+  // Toggle guide mode. Entering it starts a fresh guide line, so we drop the
+  // manual pins left over from moving routes beforehand (dragging a single
+  // route, or the whole crag with the ✥ handle, pins routes as manual). Manual
+  // pins are intentionally excluded from the line distribution, so without this
+  // a line drawn *after* moving routes wouldn't redistribute them. Their moved
+  // positions are preserved via nodeLonLat until the line overrides them.
+  const setGuideMode = useCallback((value: boolean) => {
+    if (value) setManualRoutePositions({});
+    setIsGuideMode(value);
+  }, []);
 
   const clearGuide = useCallback(() => {
     // Reset every route back to its original position (revert the locally
@@ -759,13 +796,88 @@ export const useCragRoutePositionEditor = (
       });
       marker.setPopup(popup);
 
+      // Cmd/Ctrl(+Shift)+click toggles this route in the multi-selection
+      // instead of opening the popup. Capture phase + stopImmediatePropagation
+      // so it runs before MapLibre's own marker click (popup toggle).
+      element.addEventListener(
+        'click',
+        (event) => {
+          if (!(event.metaKey || event.ctrlKey)) return;
+          event.stopImmediatePropagation();
+          event.preventDefault();
+          toggleRouteSelection(route.id);
+        },
+        true,
+      );
+
+      // Dragging a marker that is part of a multi-selection moves the whole
+      // selection together (like the ✥ crag handle, but only for the selected
+      // subset). A single unselected marker keeps the original solo behaviour.
+      let dragState: {
+        startHandle: LonLat;
+        groupIds: string[];
+        startPositions: Record<string, LonLat>;
+      } | null = null;
+
+      marker.on('dragstart', () => {
+        const ids = selectedIdsRef.current;
+        const groupIds =
+          ids.includes(route.id) && ids.length > 1 ? ids : [route.id];
+        const startPositions: Record<string, LonLat> = {};
+        editableRoutesRef.current.forEach((r) => {
+          if (!groupIds.includes(r.id)) return;
+          const pos = getEffectivePosition(r);
+          if (isValidLonLat(pos)) startPositions[r.id] = pos as LonLat;
+        });
+        const { lng, lat } = marker.getLngLat();
+        dragState = { startHandle: [lng, lat], groupIds, startPositions };
+      });
+
+      marker.on('drag', () => {
+        if (!dragState || dragState.groupIds.length <= 1) return;
+        const { lng, lat } = marker.getLngLat();
+        const delta: LonLat = [
+          lng - dragState.startHandle[0],
+          lat - dragState.startHandle[1],
+        ];
+        dragState.groupIds.forEach((id) => {
+          if (id === route.id) return; // this marker moves itself
+          const start = dragState.startPositions[id];
+          if (!start) return;
+          routeMarkersRef.current[id]?.setLngLat([
+            start[0] + delta[0],
+            start[1] + delta[1],
+          ]);
+        });
+      });
+
       marker.on('dragend', () => {
         const { lng, lat } = marker.getLngLat();
-        setManualRoutePositions((prev) => ({
-          ...prev,
-          [route.id]: [lng, lat],
-        }));
-        persistRoutePosition(route, [lng, lat]);
+        const groupIds = dragState?.groupIds ?? [route.id];
+
+        if (dragState && groupIds.length > 1) {
+          const delta: LonLat = [
+            lng - dragState.startHandle[0],
+            lat - dragState.startHandle[1],
+          ];
+          const manualUpdates: Record<string, LonLat> = {};
+          groupIds.forEach((id) => {
+            const start = dragState.startPositions[id];
+            if (!start) return;
+            const next: LonLat = [start[0] + delta[0], start[1] + delta[1]];
+            manualUpdates[id] = next;
+            const r = editableRoutesRef.current.find((x) => x.id === id);
+            if (r) persistRoutePosition(r, next);
+          });
+          setManualRoutePositions((prev) => ({ ...prev, ...manualUpdates }));
+        } else {
+          setManualRoutePositions((prev) => ({
+            ...prev,
+            [route.id]: [lng, lat],
+          }));
+          persistRoutePosition(route, [lng, lat]);
+        }
+        dragState = null;
       });
 
       // Right-click a moved route to snap it back onto the line.
@@ -810,13 +922,24 @@ export const useCragRoutePositionEditor = (
         : getEffectivePosition(route);
       if (isValidLonLat(position)) marker.setLngLat(position);
 
-      // Mark routes that sit off the guide line (manually moved away from it).
+      // Highlight multi-selected routes (other than the current one, which
+      // already has its own blue ring). Fall back to the dashed off-line mark.
+      const isMultiSelected =
+        selectedIds.includes(route.id) && route.id !== current;
       const dot = marker
         .getElement()
         .querySelector('.crag-route-dot') as HTMLElement | null;
       if (dot) {
-        dot.style.outline = isOffLine ? '2px dashed #e8833a' : '';
-        dot.style.outlineOffset = isOffLine ? '2px' : '';
+        if (isMultiSelected) {
+          dot.style.outline = '3px solid #4150a0';
+          dot.style.outlineOffset = '2px';
+        } else if (isOffLine) {
+          dot.style.outline = '2px dashed #e8833a';
+          dot.style.outlineOffset = '2px';
+        } else {
+          dot.style.outline = '';
+          dot.style.outlineOffset = '';
+        }
       }
     });
   }, [
@@ -826,6 +949,8 @@ export const useCragRoutePositionEditor = (
     manualRoutePositions,
     items,
     getEffectivePosition,
+    selectedIds,
+    current,
   ]);
 
   // ── Move the whole crag ──────────────────────────────────────────────────
@@ -1051,7 +1176,7 @@ export const useCragRoutePositionEditor = (
 
   return {
     isGuideMode,
-    setIsGuideMode,
+    setIsGuideMode: setGuideMode,
     controlPoints,
     clearGuide,
     hasRoutes: editableRoutes.length > 0,

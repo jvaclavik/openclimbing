@@ -212,6 +212,7 @@ export default {
   'user_settings.climbing': 'Lezení',
   'user_settings.default_grade_system': 'Výchozí lezecká klasifikace',
   'user_settings.show_grades_in_pictures': 'Zobrazovat obtížnosti cest na fotkách',
+  'user_settings.show_protection_points': 'Zobrazovat jištění na fotkách',
   'user_settings.default_climbing_style': 'Výchozí styl přelezu',
   'user_settings.select_climbing_routes_by_scrolling': 'Vybírat lezecké cesty scrollováním',
   'user_settings.switch_climbing_photos_by_scrolling': 'Přepínat automaticky fotky při scrollování',
@@ -562,6 +563,7 @@ export default {
   'climbingpanel.edit_climbing_route': 'Upravit cestu v obrázku',
   'climbingpanel.finish_climbing_route': 'Hotovo',
   'climbingpanel.undo': 'Zpět',
+  'climbingpanel.redo': 'Dopředu',
   'climbingpanel.type': 'Typ',
   'climbingpanel.line': 'Čára',
   'climbingpanel.extend': 'Prodloužit',
@@ -661,11 +663,19 @@ export default {
   'climbingpanel.pdf_export_generated_at': 'Vygenerováno: __datetime__',
   'climbingpanel.pdf_export_footer':
     'Vytvořeno přes <a href="https://openclimbing.org" target="_blank" rel="noopener noreferrer">openclimbing.org</a> — svobodná a otevřená lezecká data, která může kdokoli zdarma používat a vylepšovat.',
-  'climbingpanel.protection_points_mode': 'Jištění na fotce',
+  'climbingpanel.protection_points_mode': 'Zakreslit jištění na skále',
   'climbingpanel.protection_points_hint':
     'Klikáním do obrázku přidáte body jištění. Typ zvolte v liště. Při zakreslování cest se nové body přichytí k těmto bodům a převezmou jejich typ.',
   'climbingpanel.protection_points_tooltip': 'Nejdřív umístěte borháky a další jištění na fotku; při kreslení cesty se na ně body přichytí.',
   'climbingpanel.delete_protection_point': 'Smazat bod jištění',
+  'climbingpanel.more_options': 'Další možnosti',
+  'climbingpanel.delete_last_point': 'Smazat poslední bod cesty',
+  'climbingpanel.recognize_bolts': 'Rozpoznat borháky',
+  'climbingpanel.recognize_bolts_tooltip':
+    'Použije strojové učení (AI) k odhadu polohy borháků na této fotce. Výsledek zkontrolujte, může se mýlit – hlavně u neexistujících borháků. Výpočet běží lokálně ve vašem prohlížeči. Více informací na',
+  'climbingpanel.recognize_bolts_error': 'Rozpoznání borháků selhalo. Zkuste to prosím znovu.',
+  'climbingpanel.recognize_bolts_result': 'Rozpoznáno __count__ borháků. Zkontrolujte je prosím, AI se může mýlit.',
+  'climbingpanel.recognize_bolts_none': 'Na této fotce nebyly rozpoznány žádné borháky. Označte je prosím ručně a nahlaste to <a>zde</a>.',
 
   'runway.information': 'Runway information',
   'runway.runway': 'Runway',
