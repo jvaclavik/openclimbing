@@ -34,13 +34,31 @@ const resolveCurrentLang = (ctx) => {
   return getLangFromAcceptHeader(ctx) ?? DEFAULT_LANG;
 };
 
-export const getServerIntl = async (ctx): Promise<Intl> => {
-  const lang = resolveCurrentLang(ctx);
-  const vocabulary = await getMessages('vocabulary');
-  const messages = lang === DEFAULT_LANG ? {} : await getMessages(lang);
+// _app and _document both need the server intl within the same request; cache
+// it on the request object so the locale files + merge run only once per SSR.
+const REQUEST_INTL_KEY = '__openclimbingServerIntl';
 
-  return {
-    lang,
-    messages: { ...vocabulary, ...messages },
+export const getServerIntl = async (ctx): Promise<Intl> => {
+  const req = ctx?.req;
+  const cached: Promise<Intl> | undefined = req?.[REQUEST_INTL_KEY];
+  if (cached) {
+    return cached;
+  }
+
+  const compute = async (): Promise<Intl> => {
+    const lang = resolveCurrentLang(ctx);
+    const vocabulary = await getMessages('vocabulary');
+    const messages = lang === DEFAULT_LANG ? {} : await getMessages(lang);
+
+    return {
+      lang,
+      messages: { ...vocabulary, ...messages },
+    };
   };
+
+  const promise = compute();
+  if (req) {
+    req[REQUEST_INTL_KEY] = promise;
+  }
+  return promise;
 };

@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Grid, Typography } from '@mui/material';
 import orderBy from 'lodash/orderBy';
 import React from 'react';
-import maplibregl, { LngLatLike } from 'maplibre-gl';
+import type { LngLatLike } from 'maplibre-gl';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import { useMapStateContext } from '../utils/MapStateContext';
@@ -82,11 +82,16 @@ export const fitBounds = ({ geocoder }: GeocoderOption) => {
   const { properties } = geocoder;
   if (properties.extent) {
     const [w, s, e, n] = properties.extent;
-    const bbox = new maplibregl.LngLatBounds([w, s], [e, n]);
     const panelWidth = window.innerWidth > 700 ? 410 : 0;
-    getGlobalMap()?.fitBounds(bbox, {
-      padding: { top: 5, bottom: 5, right: 5, left: panelWidth + 5 },
-    });
+    getGlobalMap()?.fitBounds(
+      [
+        [w, s],
+        [e, n],
+      ],
+      {
+        padding: { top: 5, bottom: 5, right: 5, left: panelWidth + 5 },
+      },
+    );
     return;
   }
 

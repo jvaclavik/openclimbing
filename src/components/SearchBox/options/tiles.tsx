@@ -6,7 +6,6 @@ import { IconPart } from '../utils';
 import { t } from '../../../services/intl';
 import { getGlobalMap } from '../../../services/mapStorage';
 import { tileToBBOX } from '../../../server/climbing-tiles/tileToBBOX';
-import maplibregl from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 
 const tileRegex = /^(\d+)\/(\d+)\/(\d+)$/;
@@ -101,11 +100,16 @@ export const tilesOptionSelected = ({ tiles }: TilesOption) => {
     });
   }
 
-  const bbox = new maplibregl.LngLatBounds([w, s], [e, n]);
   const panelWidth = window.innerWidth > 700 ? 410 : 0;
-  map.fitBounds(bbox, {
-    padding: { top: 5, bottom: 5, right: 5, left: panelWidth + 5 },
-  });
+  map.fitBounds(
+    [
+      [w, s],
+      [e, n],
+    ],
+    {
+      padding: { top: 5, bottom: 5, right: 5, left: panelWidth + 5 },
+    },
+  );
 };
 
 type Props = {

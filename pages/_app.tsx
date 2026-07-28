@@ -186,12 +186,16 @@ MyApp.getInitialProps = async ({
 
   await setIntlForSSR(ctx); // needed for lang urls like /es/node/123
 
-  const pageProps = await Component.getInitialProps?.(ctx);
-  const { userTheme } = nextCookies(ctx);
+  // These three are independent; running them concurrently avoids an SSR
+  // waterfall (getInitialMapView may hit an IP-geolocation service).
+  const [pageProps, featureFromRouter, initialMapView] = await Promise.all([
+    Component.getInitialProps?.(ctx),
+    getInitialFeature(ctx),
+    getInitialMapView(ctx),
+  ]);
 
   const cookies = nextCookies(ctx);
 
-  const featureFromRouter = await getInitialFeature(ctx);
   if (ctx.res) {
     if (featureFromRouter === '404' || featureFromRouter?.error === '404') {
       ctx.res.statusCode = 404;
@@ -200,13 +204,11 @@ MyApp.getInitialProps = async ({
     }
   }
 
-  const initialMapView = await getInitialMapView(ctx);
-
   return {
     featureFromRouter,
     initialMapView,
     cookies,
-    userThemeCookie: userTheme,
+    userThemeCookie: cookies.userTheme,
     pageProps,
   };
 };

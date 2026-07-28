@@ -1,4 +1,5 @@
-import maplibregl, { GeoJSONSource } from 'maplibre-gl';
+import type maplibregl from 'maplibre-gl';
+import type { GeoJSONSource } from 'maplibre-gl';
 import { publishDbgObject } from '../utils';
 
 let mapIsIdle: (value: maplibregl.Map) => void;

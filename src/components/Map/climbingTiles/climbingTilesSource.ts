@@ -1,4 +1,5 @@
 import { GeoJSONSource } from 'maplibre-gl';
+import debounce from 'lodash/debounce';
 import { fetchJson } from '../../../services/fetch';
 import { EMPTY_GEOJSON_SOURCE, OSMAPP_SPRITE } from '../consts';
 import { getGlobalMap } from '../../../services/mapStorage';
@@ -225,8 +226,12 @@ export const addClimbingTilesSource = (style: StyleSpecification) => {
 
   if (!eventsAdded) {
     const map = getGlobalMap();
+    // `styledata` fires many times during startup (each source/sprite/glyph
+    // load), so debounce it to avoid re-fetching tiles and re-setting the
+    // GeoJSON source several times in a row. `load` and `moveend` stay
+    // immediate so data appears as soon as possible and reacts to panning.
     map.on('load', updateData);
-    map.on('styledata', updateData);
+    map.on('styledata', debounce(updateData, 200));
     map.on('moveend', updateData);
     eventsAdded = true;
   }
