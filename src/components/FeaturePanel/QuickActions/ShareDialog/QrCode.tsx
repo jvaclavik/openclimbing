@@ -1,5 +1,12 @@
-import { QRCodeSVG } from 'qrcode.react';
+import dynamic from 'next/dynamic';
 import { useTheme } from '@emotion/react';
+
+// The QR code only appears inside the (client-only) share dialog, so load the
+// library lazily to keep it out of the shared bundle.
+const QRCodeSVG = dynamic(
+  () => import('qrcode.react').then((m) => m.QRCodeSVG),
+  { ssr: false },
+);
 
 type Props = {
   payload: string;

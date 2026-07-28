@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Alert,
   Box,
@@ -18,25 +19,21 @@ import {
 import { PANEL_GAP } from '../utils/PanelHelpers';
 import { ClimbingStatsDateRangeSelect } from '../climbingStats/ClimbingStatsDateRangeSelect';
 import { GradeSystemSelect } from '../FeaturePanel/Climbing/GradeSystemSelect';
-import { UserProfileBestSendByMonthChart } from './UserProfileBestSendByMonthChart';
-import {
-  UserProfileAreaDaysChart,
-  UserProfileGradeHistogramChart,
-  UserProfileMonthlyPointsChart,
-  UserProfilePerformanceStats,
-  UserProfileTickStylePieChart,
-  UserProfileWeekdayRadarChart,
-} from './UserProfilePerformanceCharts';
+import { UserProfilePerformanceStats } from './UserProfilePerformanceStats';
 import {
   MyTicksContent,
   MyTicksEmptyHint,
 } from '../MyTicksPanel/MyTicksContent';
-import { MyTicksGraphs } from '../MyTicksPanel/MyTicksGraphs/MyTicksGraphs';
 import { fetchedTicksToGraphFeatures } from '../MyTicksPanel/mapMyTicksRows';
 import { useUserProfilePerformanceDerived } from './useUserProfilePerformanceDerived';
 import { useUserProfileLeaderboardRank } from './useUserProfileLeaderboardRank';
 import type { GradeStyleSegment } from './userProfilePerformanceAggregates';
 import { t } from '../../services/intl';
+
+const UserProfileChartsTab = dynamic(
+  () => import('./UserProfileChartsTab').then((m) => m.UserProfileChartsTab),
+  { ssr: false },
+);
 
 function UserProfilePerformanceTopBar({
   years,
@@ -269,59 +266,6 @@ function UserProfileTicksTab({
           )
         }
       />
-    </Box>
-  );
-}
-
-function UserProfileChartsTab({
-  monthlySeries,
-  maxMonthly,
-  bestSendSeries,
-  maxBestRow,
-  stylePie,
-  weekdayRadar,
-  areaSeries,
-  maxAreaDays,
-  gradeSeries,
-  maxGradeCount,
-  routeDistributionFeatures,
-}: {
-  monthlySeries: { key: string; points: number }[];
-  maxMonthly: number;
-  bestSendSeries: Array<{ key: string; gradeLabel: string; rowIndex: number }>;
-  maxBestRow: number;
-  stylePie: Array<{ key: string; name: string; value: number; color: string }>;
-  weekdayRadar: Array<{ key: string; label: string; value: number }>;
-  areaSeries: Array<{ crag: string; days: number }>;
-  maxAreaDays: number;
-  gradeSeries: Array<{
-    grade: string;
-    total: number;
-    segments: GradeStyleSegment[];
-    sampleTick: FetchedClimbingTick | null;
-  }>;
-  maxGradeCount: number;
-  routeDistributionFeatures: ReturnType<typeof fetchedTicksToGraphFeatures>;
-}) {
-  return (
-    <Box sx={{ pt: 1 }}>
-      <UserProfileMonthlyPointsChart
-        monthlySeries={monthlySeries}
-        maxMonthly={maxMonthly}
-        isFirstChart
-      />
-      <UserProfileBestSendByMonthChart
-        series={bestSendSeries}
-        maxRowIndex={maxBestRow}
-      />
-      <UserProfileTickStylePieChart data={stylePie} />
-      <UserProfileWeekdayRadarChart data={weekdayRadar} />
-      <UserProfileAreaDaysChart series={areaSeries} maxDays={maxAreaDays} />
-      <UserProfileGradeHistogramChart
-        series={gradeSeries}
-        maxCount={maxGradeCount}
-      />
-      <MyTicksGraphs features={routeDistributionFeatures} />
     </Box>
   );
 }

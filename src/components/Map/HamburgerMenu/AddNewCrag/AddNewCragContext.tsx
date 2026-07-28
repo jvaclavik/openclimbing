@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import maplibregl from 'maplibre-gl';
+import type maplibregl from 'maplibre-gl';
 import { getGlobalMap } from '../../../../services/mapStorage';
 import { getCoordsFeature } from '../../../../services/getCoordsFeature';
 import { getRoundedPosition } from '../../../../utils';
@@ -37,13 +37,16 @@ export const AddNewCragProvider: React.FC = ({ children }) => {
     markerRef.current = undefined;
   }, []);
 
-  const start = useCallback(() => {
+  const start = useCallback(async () => {
     const map = getGlobalMap();
     if (!map) {
       return;
     }
     removeMarker();
-    markerRef.current = new maplibregl.Marker(createCragMarkerOptions())
+    // Import maplibre-gl on demand so it stays out of the shared _app bundle;
+    // by the time a crag is added the map's chunk is already loaded.
+    const { Marker } = await import('maplibre-gl');
+    markerRef.current = new Marker(createCragMarkerOptions())
       .setLngLat(map.getCenter())
       .addTo(map);
     setIsActive(true);

@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { getLabel } from '../../../helpers/featureLabel';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
@@ -21,13 +22,20 @@ import { useMobileMode } from '../../helpers';
 import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
-import { ClimbingPdfExportDialog } from './ClimbingPdfExportDialog';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import {
   getNextWikimediaCommonsIndex,
   getWikimediaCommonsKey,
 } from './utils/photo';
 import { usePhotoChange } from './utils/usePhotoChange';
+
+// Heavy client-only export dialog; loaded lazily (only when the user opens the
+// PDF export) so it stays out of the shared bundle.
+const ClimbingPdfExportDialog = dynamic(
+  () =>
+    import('./ClimbingPdfExportDialog').then((m) => m.ClimbingPdfExportDialog),
+  { ssr: false },
+);
 
 const Title = styled.div`
   flex: 1;

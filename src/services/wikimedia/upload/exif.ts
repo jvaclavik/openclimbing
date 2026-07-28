@@ -1,4 +1,3 @@
-import exifr from 'exifr';
 import { LonLat } from '../../types';
 
 export type ExifData = {
@@ -8,6 +7,9 @@ export type ExifData = {
 
 export const extractExifData = async (file: Blob): Promise<ExifData> => {
   try {
+    // Load exifr on demand so it stays out of the shared bundle; this runs
+    // only when a user actually uploads a photo.
+    const { default: exifr } = await import('exifr');
     const exif = await exifr.parse(file as unknown as ArrayBuffer);
     const location =
       exif?.latitude && exif?.longitude

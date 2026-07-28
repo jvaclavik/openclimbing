@@ -11,6 +11,7 @@
     "lintfix": "prettier . --write && next lint --fix",
     "prettify": "prettier . --write",
     "build": "next build",
+    "analyze": "ANALYZE=true next build",
     "start": "next start",
     "dist": "next build && next export -o dist",
     "postinstall": "copyfiles -u 2 node_modules/maplibre-gl-indoorequal/sprite/* public/icons-indoor/"
@@ -69,6 +70,7 @@
     "suncalc": "^1.9.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "15.3.8",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",
     "@types/autosuggest-highlight": "^3.2.3",

@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import AccessTime from '@mui/icons-material/AccessTime';
 import { useToggleState } from '../../helpers';
 import { t } from '../../../services/intl';
 import { ToggleButton } from '../helpers/ToggleButton';
-import { parseOpeningHours } from './openingHours';
 import { SimpleOpeningHoursTable } from './openingHours/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { Status } from './openingHours/complex';
+import type { Status } from './openingHours/complex';
+
+// `opening_hours` is a ~245 kB parser needed only for POIs that actually carry
+// the tag (rare for climbing features). Load it lazily on the client so it
+// never ships in the shared _app bundle. The status is time-dependent anyway,
+// hence the existing suppressHydrationWarning below.
+type OpeningHoursResult = ReturnType<
+  (typeof import('./openingHours'))['parseOpeningHours']
+>;
 
 const Table = styled.table`
   margin: 1em;
@@ -54,10 +61,20 @@ export const OpeningHoursRenderer = ({ v }) => {
 
   const { countryCode, center } = useFeatureContext().feature;
 
-  const openingHours = parseOpeningHours(v, center, {
-    country_code: countryCode,
-    state: '',
-  });
+  const [openingHours, setOpeningHours] = useState<OpeningHoursResult>(null);
+  useEffect(() => {
+    let cancelled = false;
+    import('./openingHours').then(({ parseOpeningHours }) => {
+      if (cancelled) return;
+      setOpeningHours(
+        parseOpeningHours(v, center, { country_code: countryCode, state: '' }),
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [v, center, countryCode]);
+
   if (!openingHours) return null;
 
   const { daysTable, status, maybeReasons } = openingHours;

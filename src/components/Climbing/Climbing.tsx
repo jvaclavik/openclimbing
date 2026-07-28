@@ -1,10 +1,21 @@
 import { useFeatureContext } from '../utils/FeatureContext';
 import Router, { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 import { ClimbingContextProvider } from '../FeaturePanel/Climbing/contexts/ClimbingContext';
 import { ClimbingCragDialog } from '../FeaturePanel/Climbing/ClimbingCragDialog';
-import { ClimbingPdfExportDialog } from '../FeaturePanel/Climbing/ClimbingPdfExportDialog';
 import React, { useEffect, useState } from 'react';
 import { getOsmappLink, getReactKey } from '../../services/helpers';
+
+// Heavy client-only export dialog (canvg, qrcode, jsPDF-style rendering) that is
+// only shown on the `.../pdf` route, so load it lazily to keep it out of the
+// shared bundle.
+const ClimbingPdfExportDialog = dynamic(
+  () =>
+    import('../FeaturePanel/Climbing/ClimbingPdfExportDialog').then(
+      (m) => m.ClimbingPdfExportDialog,
+    ),
+  { ssr: false },
+);
 
 // TODO perhaps rename this to ClimbingDialog (and the folder as well)
 

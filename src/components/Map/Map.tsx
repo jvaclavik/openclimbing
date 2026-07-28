@@ -13,8 +13,6 @@ import { TopMenu } from './HamburgerMenu/TopMenu';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { Weather } from './Weather/Weather';
 import { MapFilter } from './MapFilter/MapFilter';
-import { MyListsLayer } from './MyListsLayer';
-import { CragPhotoMarkers } from './CragPhotoMarkers';
 import { SunShadow } from './SunShadow/SunShadow';
 import { Radar } from './Radar/Radar';
 
@@ -22,6 +20,18 @@ const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
   loading: () => <div />,
 });
+
+// These are client-only map overlays that render after the map has loaded and
+// use maplibre-gl at runtime. Importing them lazily keeps maplibre-gl out of
+// the shared _app bundle (it ships in the map's async chunk instead).
+const MyListsLayer = dynamic(
+  () => import('./MyListsLayer').then((m) => m.MyListsLayer),
+  { ssr: false },
+);
+const CragPhotoMarkers = dynamic(
+  () => import('./CragPhotoMarkers').then((m) => m.CragPhotoMarkers),
+  { ssr: false },
+);
 
 const LayerSwitcherDynamic = dynamic(
   () => import('../LayerSwitcher/LayerSwitcher'),

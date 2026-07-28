@@ -1,6 +1,13 @@
 // @ts-check
 import { withSentryConfig } from '@sentry/nextjs';
+import bundleAnalyzer from '@next/bundle-analyzer';
 import { LANGUAGES } from './src/config.mjs';
+
+// Run `yarn analyze` to build with the interactive treemap of client/server
+// bundles (opens in the browser). No effect on normal `yarn build`.
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const osmappVersion = process.env.npm_package_version;
 const commitHash = (process.env.VERCEL_GIT_COMMIT_SHA || '').substring(0, 7);
@@ -17,6 +24,16 @@ const nextConfig = {
   },
   output: process.env.NEXTJS_OUTPUT || undefined,
   env: { osmappVersion, sentryRelease },
+  experimental: {
+    // Rewrite barrel imports (`import { Button } from '@mui/material'`) to
+    // direct submodule imports so only used components are bundled.
+    optimizePackageImports: [
+      '@mui/material',
+      '@mui/lab',
+      '@mui/icons-material',
+      '@mui/system',
+    ],
+  },
   i18n: {
     locales: ['default', ...Object.keys(LANGUAGES)], // we let next only handle URL, but chosen locale is in getServerIntl()
     defaultLocale: 'default',
@@ -42,14 +59,16 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: 'osmapp', // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-  project: 'osmapp',
-  silent: !process.env.CI,
-  widenClientFileUpload: isVpsDeploy, // full source maps only for the production VPS build
-  reactComponentAnnotation: { enabled: isVpsDeploy }, // component-name annotations bloat runtime bundle, keep off elsewhere
-  // tunnelRoute: '/monitoring',
-  hideSourceMaps: false,
-  disableLogger: true, // Automatically tree-shake Sentry logger statements to reduce bundle size
-  automaticVercelMonitors: true, // https://vercel.com/docs/cron-jobs
-});
+export default withBundleAnalyzer(
+  withSentryConfig(nextConfig, {
+    org: 'osmapp', // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+    project: 'osmapp',
+    silent: !process.env.CI,
+    widenClientFileUpload: isVpsDeploy, // full source maps only for the production VPS build
+    reactComponentAnnotation: { enabled: isVpsDeploy }, // component-name annotations bloat runtime bundle, keep off elsewhere
+    // tunnelRoute: '/monitoring',
+    hideSourceMaps: false,
+    disableLogger: true, // Automatically tree-shake Sentry logger statements to reduce bundle size
+    automaticVercelMonitors: true, // https://vercel.com/docs/cron-jobs
+  }),
+);
