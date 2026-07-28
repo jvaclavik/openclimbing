@@ -46,6 +46,9 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
 
   // On hover we only change the route's outline (border) — width and colour —
   // and keep the inner route stroke (its difficulty colour) untouched.
+  // Purely visual lines (drawn route + the extend preview). They must not
+  // intercept pointer taps, otherwise the preview line that follows the cursor
+  // would steal every add-point tap. Interaction lives on InteractivePath.
   const BorderPath = () => (
     <RouteLine
       pathPx={pathPx}
@@ -60,6 +63,7 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
       }
       stroke={isHovered ? config.pathStrokeColorSelected : contrastColor}
       opacity={opacity ? opacity : isOtherSelected && !isHovered ? 0 : 1}
+      pointerEvents="none"
     />
   );
 
@@ -69,6 +73,7 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
       strokeWidth={isOtherSelected ? 1.3 : config.pathStrokeWidth}
       stroke={isOtherSelected ? 'white' : strokeColor}
       opacity={opacity ? opacity : isOtherSelected ? (isEditMode ? 1 : 0.6) : 1}
+      pointerEvents="none"
     />
   );
 

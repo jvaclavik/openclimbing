@@ -44,8 +44,12 @@ export const RoutesLayer = ({ isVisible }: Props) => {
     isPlacingProtectionPoints,
     getCurrentPath,
   } = useClimbingContext();
-  const { onClick, onPointerMove, handleOnMovingPointDropped } =
-    useRoutesLayerSvgHandlers();
+  const {
+    onPointerDown,
+    onPointerUp,
+    onPointerMove,
+    handleOnMovingPointDropped,
+  } = useRoutesLayerSvgHandlers();
   const path = getCurrentPath();
   if (!path) return null;
 
@@ -56,7 +60,8 @@ export const RoutesLayer = ({ isVisible }: Props) => {
         (machine.currentStateName === 'extendRoute' ||
           isPlacingProtectionPoints)
       }
-      onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
       onMouseUp={handleOnMovingPointDropped}
       onPointerMove={onPointerMove}
       $imageSize={imageSize}

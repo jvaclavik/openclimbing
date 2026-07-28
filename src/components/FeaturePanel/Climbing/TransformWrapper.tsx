@@ -10,6 +10,13 @@ import { ZoomState } from './types';
 // add-clicks in edit mode and cause spurious tiny velocity pans.
 const PAN_INTENT_THRESHOLD_PX = 5;
 
+// A gesture is treated as a click (not a pan) when the press is short and the
+// pointer travelled only a little between press and release. Clicking fast
+// while drawing a route often drags a few pixels mid-press, which would
+// otherwise be misread as a pan and swallow the click.
+const CLICK_MAX_DURATION_MS = 250;
+const CLICK_MAX_TRAVEL_PX = 24;
+
 export const TransformWrapper = ({ children }) => {
   const {
     setArePointerEventsDisabled,
@@ -19,7 +26,10 @@ export const TransformWrapper = ({ children }) => {
     isZoomingRef,
   } = useClimbingContext();
 
-  const panStartRef = useRef<{ x: number; y: number } | null>(null);
+  const panStartRef = useRef<{ x: number; y: number; time: number } | null>(
+    null,
+  );
+  const panLastRef = useRef<{ x: number; y: number } | null>(null);
 
   const startPointerEvents = () => {
     setArePointerEventsDisabled(false);
@@ -28,29 +38,24 @@ export const TransformWrapper = ({ children }) => {
     setArePointerEventsDisabled(true);
   };
 
+  const getPoint = (event: MouseEvent | TouchEvent) =>
+    'touches' in event && event.touches.length > 0
+      ? { x: event.touches[0].clientX, y: event.touches[0].clientY }
+      : { x: (event as MouseEvent).clientX, y: (event as MouseEvent).clientY };
+
   const handlePanningStart = (_ref, event: MouseEvent | TouchEvent) => {
     startPointerEvents();
-    const point =
-      'touches' in event && event.touches.length > 0
-        ? { x: event.touches[0].clientX, y: event.touches[0].clientY }
-        : {
-            x: (event as MouseEvent).clientX,
-            y: (event as MouseEvent).clientY,
-          };
-    panStartRef.current = point;
+    const point = getPoint(event);
+    panStartRef.current = { ...point, time: Date.now() };
+    panLastRef.current = point;
   };
 
   const handlePanning = (_ref, event: MouseEvent | TouchEvent) => {
-    if (isAddingPointBlockedRef.current) return;
     const start = panStartRef.current;
     if (!start) return;
-    const current =
-      'touches' in event && event.touches.length > 0
-        ? { x: event.touches[0].clientX, y: event.touches[0].clientY }
-        : {
-            x: (event as MouseEvent).clientX,
-            y: (event as MouseEvent).clientY,
-          };
+    const current = getPoint(event);
+    panLastRef.current = current;
+    if (isAddingPointBlockedRef.current) return;
     const dx = current.x - start.x;
     const dy = current.y - start.y;
     if (
@@ -63,7 +68,26 @@ export const TransformWrapper = ({ children }) => {
 
   const handlePanningStop = () => {
     startPointerEvents();
+    const start = panStartRef.current;
+    const last = panLastRef.current;
     panStartRef.current = null;
+    panLastRef.current = null;
+
+    // A short press with little travel is a click (even if it briefly crossed
+    // the pan threshold mid-gesture): unblock immediately so the click event
+    // firing right after mouseup can add the point. A real pan keeps blocking
+    // for a moment to swallow the trailing click.
+    const dx = start && last ? last.x - start.x : 0;
+    const dy = start && last ? last.y - start.y : 0;
+    const duration = start ? Date.now() - start.time : Infinity;
+    const isClick =
+      duration <= CLICK_MAX_DURATION_MS &&
+      dx * dx + dy * dy <= CLICK_MAX_TRAVEL_PX * CLICK_MAX_TRAVEL_PX;
+
+    if (isClick) {
+      isAddingPointBlockedRef.current = false;
+      return;
+    }
     setTimeout(() => {
       isAddingPointBlockedRef.current = false;
     }, 300);

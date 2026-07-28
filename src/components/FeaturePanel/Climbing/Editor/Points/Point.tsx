@@ -121,7 +121,15 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
   if (isOtherSelected && isEditMode)
     return (
       <g transform={`translate(${x},${y}) scale(${1 / photoZoom.scale})`}>
-        <circle cx={0} cy={0} r={2.5 * photoZoom.scale} fill="white" />
+        {/* Purely a marker for other routes — must not intercept pointer taps,
+            otherwise it blocks selecting that route via the line beneath it. */}
+        <circle
+          cx={0}
+          cy={0}
+          r={2.5 * photoZoom.scale}
+          fill="white"
+          pointerEvents="none"
+        />
       </g>
     );
   if (!isSelected || !isEditMode) return null;

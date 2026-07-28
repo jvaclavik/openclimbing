@@ -108,6 +108,7 @@ export const InteractivePath = ({ routeIndex, allowHoverMidpoint }: Props) => {
         onMouseMove={isMobileMode ? undefined : setMidpointPosition}
         onClick={onClick}
         cursor={isMidpointAddScenario ? 'copy' : 'pointer'}
+        pointerEvents="all"
       />
 
       {allowHoverMidpoint && isMidpointAddScenario && midpoint && (

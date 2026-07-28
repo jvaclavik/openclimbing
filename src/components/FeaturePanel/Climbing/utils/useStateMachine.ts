@@ -61,6 +61,7 @@ export const useStateMachine = ({
   setProtectionPointTypeAtIndex,
   removeProtectionPointAtIndex,
   setIsPlacingProtectionPoints,
+  heldPointTypeRef,
 }) => {
   const [currentState, setCurrentState] = useState<State>('init');
   const { showToast } = useSnackbar();
@@ -186,6 +187,11 @@ export const useStateMachine = ({
     }
   };
 
+  const applyHeldPointType = (point) => {
+    const heldType = heldPointTypeRef?.current;
+    return heldType ? { ...point, type: heldType } : point;
+  };
+
   const addPointInBetween = ({
     hoveredPosition,
     hoveredSegmentIndex,
@@ -195,7 +201,9 @@ export const useStateMachine = ({
 
     const position = getPercentagePosition(hoveredPosition);
     const closestPoint = findCloserPoint(position, { disableSnap });
-    const inserted = closestPoint ? { ...closestPoint } : position;
+    const inserted = applyHeldPointType(
+      closestPoint ? { ...closestPoint } : position,
+    );
     updatePathOnRouteIndex(routeSelectedIndex, (path) => [
       ...path.slice(0, hoveredSegmentIndex + 1),
       inserted,
@@ -216,7 +224,9 @@ export const useStateMachine = ({
     const closestPoint = findCloserPoint(newCoordinate, {
       disableSnap: event.altKey,
     });
-    const nextPoint = closestPoint ? { ...closestPoint } : newCoordinate;
+    const nextPoint = applyHeldPointType(
+      closestPoint ? { ...closestPoint } : newCoordinate,
+    );
     updatePathOnRouteIndex(routeSelectedIndex, (path) => [...path, nextPoint]);
   };
 

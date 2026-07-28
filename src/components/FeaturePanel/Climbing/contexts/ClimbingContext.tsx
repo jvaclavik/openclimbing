@@ -37,6 +37,7 @@ import { getContainedSizeImage } from '../utils/image';
 import { Setter } from '../../../../types';
 import { parseProtectionPointsByPhoto } from '../utils/protectionPathTags';
 import { useEditUndoHistory } from './useEditUndoHistory';
+import { useHeldPointType } from '../utils/useHeldPointType';
 
 type LoadedPhotos = Record<string, Record<number, boolean>>;
 type ImageSize = {
@@ -338,6 +339,8 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     setIsProtectionPointMoving(false);
   }, [photoPath]);
 
+  const heldPointTypeRef = useHeldPointType(isEditMode);
+
   const getProtectionPointsForCurrentPhoto = useCallback(
     () => protectionPointsByPhoto[photoPath] ?? [],
     [protectionPointsByPhoto, photoPath],
@@ -507,6 +510,7 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     setProtectionPointTypeAtIndex,
     removeProtectionPointAtIndex,
     setIsPlacingProtectionPoints,
+    heldPointTypeRef,
   });
 
   const isRouteSelected = (index: number) => routeSelectedIndex === index;

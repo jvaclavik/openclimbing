@@ -1,6 +1,7 @@
 import { LineType, PositionPx } from '../types';
 import React from 'react';
 import { useMobileMode } from '../../../helpers';
+import { useTapGesture } from './useTapGesture';
 
 type RouteLineProps = {
   pathPx: PositionPx[];
@@ -12,6 +13,7 @@ type RouteLineProps = {
   onMouseMove?: (e: React.MouseEvent) => void;
   onClick?: (e: React.MouseEvent, segmentIndex: number) => void;
   cursor?: string;
+  pointerEvents?: React.SVGAttributes<SVGLineElement>['pointerEvents'];
 };
 export const RouteLine = ({
   pathPx,
@@ -23,8 +25,10 @@ export const RouteLine = ({
   onMouseMove,
   onClick,
   cursor,
+  pointerEvents,
 }: RouteLineProps) => {
   const isMobileMode = useMobileMode();
+  const { onPointerDown, endTap } = useTapGesture();
 
   const getLineDasharray = (previousLineType: LineType) => {
     if (previousLineType === 'dotted') {
@@ -55,8 +59,16 @@ export const RouteLine = ({
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             onMouseMove={onMouseMove}
-            onClick={(e) => onClick?.(e, segmentIndex)}
+            onPointerDown={onClick ? onPointerDown : undefined}
+            onPointerUp={
+              onClick
+                ? (e) => {
+                    if (endTap(e)) onClick(e, segmentIndex);
+                  }
+                : undefined
+            }
             cursor={cursor}
+            pointerEvents={pointerEvents}
             strokeLinecap="round"
             strokeLinejoin="round"
             opacity={opacity}
