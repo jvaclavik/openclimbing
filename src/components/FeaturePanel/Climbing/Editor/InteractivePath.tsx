@@ -4,7 +4,6 @@ import { PositionPx } from '../types';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { useMobileMode } from '../../../helpers';
 import { getPositionInImageFromMouse } from '../utils/mousePositionUtils';
-import { MouseTrackingLine } from './MouseTrackingLine';
 import { RouteLine } from './RouteLine';
 
 const InteractiveRectangle = styled.line`
@@ -46,7 +45,6 @@ export const InteractivePath = ({ routeIndex, allowHoverMidpoint }: Props) => {
     getPixelPosition,
     machine,
     isEditMode,
-    routeIndexHovered,
     setRouteIndexHovered,
     getPathForRoute,
     svgRef,
@@ -121,10 +119,6 @@ export const InteractivePath = ({ routeIndex, allowHoverMidpoint }: Props) => {
           strokeWidth={1 / photoZoom.scale}
         />
       )}
-      {machine.currentStateName === 'extendRoute' &&
-        routeIndexHovered === null && (
-          <MouseTrackingLine routeIndex={routeIndex} />
-        )}
     </>
   );
 };

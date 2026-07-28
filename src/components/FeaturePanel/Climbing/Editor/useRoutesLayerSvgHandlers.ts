@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useClimbingContext } from '../contexts/ClimbingContext';
+import { useRafThrottle } from './useRafThrottle';
 import { updateElementOnIndex } from '../utils/array';
 import { getPositionInImageFromMouse } from '../utils/mousePositionUtils';
 import { useBackgroundTap } from './useBackgroundTap';
@@ -101,15 +102,18 @@ export const useRoutesLayerSvgHandlers = () => {
 
   const { onPointerDown, onPointerUp } = useBackgroundTap(svgRef, runTapAction);
 
-  const onPointerMove = useCallback(
-    (event: React.MouseEvent) => {
+  // Pointer moves fire far more often than the screen refreshes; coalescing
+  // them to one update per animation frame keeps the preview line and point
+  // dragging smooth (one re-render per frame instead of one per event).
+  const processMove = useCallback(
+    (move: { clientX: number; clientY: number; altKey: boolean }) => {
       if (!isEditMode) {
         setMousePosition(null);
         return;
       }
       const positionInImage = getPositionInImageFromMouse(
         svgRef,
-        event,
+        move,
         photoZoom,
       );
 
@@ -124,7 +128,7 @@ export const useRoutesLayerSvgHandlers = () => {
         const newCoordinate = getPercentagePosition(positionInImage);
         const closestPoint = findCloserPoint(newCoordinate, {
           excludeProtectionIndex: protectionPointSelectedIndex,
-          disableSnap: event.altKey,
+          disableSnap: move.altKey,
         });
 
         const updatedPoint = closestPoint ?? newCoordinate;
@@ -143,7 +147,7 @@ export const useRoutesLayerSvgHandlers = () => {
 
         const newCoordinate = getPercentagePosition(positionInImage);
         const closestPoint = findCloserPoint(newCoordinate, {
-          disableSnap: event.altKey,
+          disableSnap: move.altKey,
         });
 
         const updatedPoint = closestPoint ?? newCoordinate;
@@ -183,7 +187,25 @@ export const useRoutesLayerSvgHandlers = () => {
     ],
   );
 
+  const { schedule: scheduleMove, cancel: cancelMove } =
+    useRafThrottle(processMove);
+
+  const onPointerMove = useCallback(
+    (event: React.MouseEvent) => {
+      scheduleMove({
+        clientX: event.clientX,
+        clientY: event.clientY,
+        altKey: event.altKey,
+      });
+    },
+    [scheduleMove],
+  );
+
   const handleOnMovingPointDropped = useCallback(() => {
+    // Drop any move still queued for the next frame so it can't re-apply a
+    // drag (with now-stale state) after the point has already been released.
+    cancelMove();
+
     if (isZoomingRef.current) {
       return;
     }
@@ -200,6 +222,7 @@ export const useRoutesLayerSvgHandlers = () => {
       setIsPanningDisabled(false);
     }
   }, [
+    cancelMove,
     isPointMoving,
     isProtectionPointMoving,
     isZoomingRef,

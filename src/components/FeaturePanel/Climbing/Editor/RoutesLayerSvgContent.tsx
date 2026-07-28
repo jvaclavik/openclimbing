@@ -5,10 +5,11 @@ import { RouteWithLabel } from './RouteWithLabel';
 import { InteractivePath } from './InteractivePath';
 import { RouteMarks } from './RouteMarks';
 import { RouteNumber } from './RouteNumber';
+import { MouseTrackingLine } from './MouseTrackingLine';
 
 export const RoutesLayerSvgContent = () => {
   const isMobileMode = useMobileMode();
-  const { routes, routeSelectedIndex, routeIndexHovered } =
+  const { routes, routeSelectedIndex, routeIndexHovered, machine } =
     useClimbingContext();
 
   return (
@@ -41,6 +42,12 @@ export const RoutesLayerSvgContent = () => {
       {routeSelectedIndex != null ? (
         <RouteMarks routeIndex={routeSelectedIndex} />
       ) : null}
+
+      {machine.currentStateName === 'extendRoute' &&
+        routeIndexHovered === null &&
+        routeSelectedIndex != null && (
+          <MouseTrackingLine routeIndex={routeSelectedIndex} />
+        )}
 
       {/* Render all route number badges + grades on top of every path and
           mark, so they're never visually covered by another route's line.

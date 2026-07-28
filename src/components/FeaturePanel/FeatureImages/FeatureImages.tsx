@@ -12,6 +12,7 @@ import { getHumanPoiType, getLabel } from '../../../helpers/featureLabel';
 import { isTag } from '../../../services/types';
 import { photoNameKey } from '../Climbing/utils/photo';
 import { usePhotoHighlightContext } from '../Climbing/contexts/PhotoHighlightContext';
+import { isClimbingCragOrArea, isClimbingRoute } from '../../../utils';
 
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
 
@@ -62,9 +63,25 @@ export const FeatureImages = () => {
     // CragsInArea condition
     if (feature.memberFeatures?.length && feature.tags.climbing === 'area') {
       return null;
-    } else {
-      return <Wrapper>{loading ? <ImageSkeleton /> : <NoImage />}</Wrapper>;
     }
+    if (loading) {
+      return (
+        <Wrapper>
+          <ImageSkeleton />
+        </Wrapper>
+      );
+    }
+    // Climbing features look cleaner without the big placeholder icon.
+    const isClimbingFeature =
+      isClimbingCragOrArea(feature.tags) || isClimbingRoute(feature.tags);
+    if (isClimbingFeature) {
+      return null;
+    }
+    return (
+      <Wrapper>
+        <NoImage />
+      </Wrapper>
+    );
   }
 
   const highlightedKey = highlightedPhoto

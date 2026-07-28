@@ -26,6 +26,8 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
     routes,
     isRouteSelected,
     getPixelPosition,
+    isPointMoving,
+    isProtectionPointMoving,
   } = useClimbingContext();
 
   const pathPx = path.map(getPixelPosition);
@@ -42,45 +44,43 @@ export const PathWithBorder = ({ path, routeIndex, opacity }: Props) => {
     isSelected ? config.pathStrokeColorSelected : strokeColor,
   );
   const isOtherSelected = isOtherRouteSelected(routeIndex);
-  const isHovered = !isMobileMode && routeIndexHovered === routeIndex;
+  // While dragging a point the pointer flickers on/off the line, which would
+  // otherwise make the hover colour/width flash. Keep the stable look instead.
+  const isDragging = isPointMoving || isProtectionPointMoving;
+  const isHovered =
+    !isMobileMode && routeIndexHovered === routeIndex && !isDragging;
 
   // On hover we only change the route's outline (border) — width and colour —
   // and keep the inner route stroke (its difficulty colour) untouched.
   // Purely visual lines (drawn route + the extend preview). They must not
   // intercept pointer taps, otherwise the preview line that follows the cursor
   // would steal every add-point tap. Interaction lives on InteractivePath.
-  const BorderPath = () => (
-    <RouteLine
-      pathPx={pathPx}
-      strokeWidth={
-        isHovered
-          ? config.pathHoverWidth
-          : isOtherSelected
-            ? 2
-            : isSelected
-              ? config.pathBorderWidthSelected
-              : config.pathBorderWidth
-      }
-      stroke={isHovered ? config.pathStrokeColorSelected : contrastColor}
-      opacity={opacity ? opacity : isOtherSelected && !isHovered ? 0 : 1}
-      pointerEvents="none"
-    />
-  );
-
-  const RoutePath = () => (
-    <RouteLine
-      pathPx={pathPx}
-      strokeWidth={isOtherSelected ? 1.3 : config.pathStrokeWidth}
-      stroke={isOtherSelected ? 'white' : strokeColor}
-      opacity={opacity ? opacity : isOtherSelected ? (isEditMode ? 1 : 0.6) : 1}
-      pointerEvents="none"
-    />
-  );
-
   return (
     <>
-      <BorderPath />
-      <RoutePath />
+      <RouteLine
+        pathPx={pathPx}
+        strokeWidth={
+          isHovered
+            ? config.pathHoverWidth
+            : isOtherSelected
+              ? 2
+              : isSelected
+                ? config.pathBorderWidthSelected
+                : config.pathBorderWidth
+        }
+        stroke={isHovered ? config.pathStrokeColorSelected : contrastColor}
+        opacity={opacity ? opacity : isOtherSelected && !isHovered ? 0 : 1}
+        pointerEvents="none"
+      />
+      <RouteLine
+        pathPx={pathPx}
+        strokeWidth={isOtherSelected ? 1.3 : config.pathStrokeWidth}
+        stroke={isOtherSelected ? 'white' : strokeColor}
+        opacity={
+          opacity ? opacity : isOtherSelected ? (isEditMode ? 1 : 0.6) : 1
+        }
+        pointerEvents="none"
+      />
     </>
   );
 };

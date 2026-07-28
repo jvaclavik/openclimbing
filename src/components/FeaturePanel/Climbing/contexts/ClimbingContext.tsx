@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -184,6 +185,29 @@ export const initialPhotoZoom = {
   positionY: 0,
 };
 
+const clone = <T,>(value: T): T => {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+};
+
+const stableStringify = (value: unknown): string => {
+  const seen = new WeakSet<object>();
+  const normalize = (v: any): any => {
+    if (v === null || typeof v !== 'object') return v;
+    if (seen.has(v)) return '[Circular]';
+    seen.add(v);
+    if (Array.isArray(v)) return v.map(normalize);
+    const out: Record<string, any> = {};
+    for (const key of Object.keys(v).sort()) {
+      out[key] = normalize(v[key]);
+    }
+    return out;
+  };
+  return JSON.stringify(normalize(value));
+};
+
 export const ClimbingContextProvider = ({ children, feature }: Props) => {
   const initialRoutes = osmToClimbingRoutes(feature);
   publishDbgObject('climbingRoutes', initialRoutes);
@@ -253,29 +277,6 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     protectionPointsByPhoto: Record<string, PathPoints>;
   } | null>(null);
 
-  const clone = <T,>(value: T): T => {
-    if (typeof structuredClone === 'function') {
-      return structuredClone(value);
-    }
-    return JSON.parse(JSON.stringify(value)) as T;
-  };
-
-  const stableStringify = (value: unknown): string => {
-    const seen = new WeakSet<object>();
-    const normalize = (v: any): any => {
-      if (v === null || typeof v !== 'object') return v;
-      if (seen.has(v)) return '[Circular]';
-      seen.add(v);
-      if (Array.isArray(v)) return v.map(normalize);
-      const out: Record<string, any> = {};
-      for (const key of Object.keys(v).sort()) {
-        out[key] = normalize(v[key]);
-      }
-      return out;
-    };
-    return JSON.stringify(normalize(value));
-  };
-
   useEffect(() => {
     if (!isEditMode) return;
     const snapshot = {
@@ -313,12 +314,17 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     setProtectionPointsByPhoto(parseProtectionPointsByPhoto(feature.tags));
   }, [feature]);
 
-  const hasUnsavedEdits =
-    isEditMode &&
-    editSnapshot !== null &&
-    (stableStringify(editSnapshot.routes) !== stableStringify(routes) ||
-      stableStringify(editSnapshot.protectionPointsByPhoto) !==
-        stableStringify(protectionPointsByPhoto));
+  // Serializing all routes on every render (incl. mouse move / drag / zoom)
+  // is wasteful; only recompute when the edited data actually changes.
+  const hasUnsavedEdits = useMemo(
+    () =>
+      isEditMode &&
+      editSnapshot !== null &&
+      (stableStringify(editSnapshot.routes) !== stableStringify(routes) ||
+        stableStringify(editSnapshot.protectionPointsByPhoto) !==
+          stableStringify(protectionPointsByPhoto)),
+    [isEditMode, editSnapshot, routes, protectionPointsByPhoto],
+  );
 
   const [pointElement, setPointElement] = useState<null | HTMLElement>(null);
   const [routeListTopOffsets, setRouteListTopOffsets] = useState<Array<number>>(

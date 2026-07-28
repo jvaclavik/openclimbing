@@ -49,6 +49,7 @@ export const MouseTrackingLine = ({ routeIndex }: Props) => {
 
   const route = routes[routeIndex];
   const path = getPathForRoute(route);
+  if (!path || path.length === 0) return null;
   const lastPoint = path[path.length - 1];
   const lastPointPositionInPx = getPixelPosition(lastPoint);
 
