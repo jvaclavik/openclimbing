@@ -1,9 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { useRafThrottle } from './useRafThrottle';
 import { updateElementOnIndex } from '../utils/array';
 import { getPositionInImageFromMouse } from '../utils/mousePositionUtils';
 import { useBackgroundTap } from './useBackgroundTap';
+
+// A press only turns into a point drag after travelling this far from the
+// pointer-down position. Fingers (and fast mouse clicks) always jitter a few
+// pixels, which would otherwise register as a micro-drag: the point would jump
+// slightly and the drag marker would then suppress the point menu on release.
+const DRAG_START_THRESHOLD_PX = 5;
 
 export const useRoutesLayerSvgHandlers = () => {
   const {
@@ -24,6 +30,7 @@ export const useRoutesLayerSvgHandlers = () => {
     isPointClicked,
     photoZoom,
     isZoomingRef,
+    pointWasDraggedRef,
     isEditMode,
     isPlacingProtectionPoints,
     addProtectionPoint,
@@ -35,6 +42,38 @@ export const useRoutesLayerSvgHandlers = () => {
     setIsProtectionPointMoving,
     updateProtectionPointPositionAtIndex,
   } = useClimbingContext();
+
+  // Tracks every pointer currently touching the SVG. Two or more pointers mean
+  // a pinch-zoom is in progress, which must never drag a point — not even for
+  // the finger that happened to land on one, and not for the finger that stays
+  // down after the pinch ends.
+  const activePointersRef = useRef<Set<number>>(new Set());
+
+  // Where the current gesture's first pointer landed — the reference for the
+  // drag-start threshold.
+  const gestureStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Authoritative cleanup at the window level. During a pinch the fingers often
+  // lift outside the SVG (or after the transform re-renders), so the SVG's own
+  // pointerup/pointercancel never fires for them and their ids would stay stuck
+  // in the set forever — leaving isMultiTouch permanently true and silently
+  // blocking every later single-finger point drag.
+  // MUST be capture phase: several handlers stop the pointerup's propagation
+  // (e.g. a tap on a route line selecting it), which kills the bubble before it
+  // reaches window — the id then leaked and every following one-finger drag was
+  // misread as multi-touch, i.e. dragging died for the rest of the session.
+  // The capture phase completes before any bubble handler can interfere.
+  useEffect(() => {
+    const release = (event: PointerEvent) => {
+      activePointersRef.current.delete(event.pointerId);
+    };
+    window.addEventListener('pointerup', release, { capture: true });
+    window.addEventListener('pointercancel', release, { capture: true });
+    return () => {
+      window.removeEventListener('pointerup', release, { capture: true });
+      window.removeEventListener('pointercancel', release, { capture: true });
+    };
+  }, []);
 
   const runTapAction = useCallback(
     (event: React.PointerEvent) => {
@@ -100,7 +139,10 @@ export const useRoutesLayerSvgHandlers = () => {
     ],
   );
 
-  const { onPointerDown, onPointerUp } = useBackgroundTap(svgRef, runTapAction);
+  const {
+    onPointerDown: onBackgroundPointerDown,
+    onPointerUp: onBackgroundPointerUp,
+  } = useBackgroundTap(svgRef, runTapAction);
 
   // Pointer moves fire far more often than the screen refreshes; coalescing
   // them to one update per animation frame keeps the preview line and point
@@ -117,13 +159,27 @@ export const useRoutesLayerSvgHandlers = () => {
         photoZoom,
       );
 
+      const isMultiTouch = activePointersRef.current.size > 1;
+
+      // Once the threshold is crossed (pointWasDraggedRef set below), the drag
+      // keeps applying even if the pointer returns close to the start.
+      const start = gestureStartRef.current;
+      const dx = start ? move.clientX - start.x : 0;
+      const dy = start ? move.clientY - start.y : 0;
+      const hasDragIntent =
+        pointWasDraggedRef.current ||
+        dx * dx + dy * dy >= DRAG_START_THRESHOLD_PX * DRAG_START_THRESHOLD_PX;
+
       if (
         isProtectionPointClicked &&
         protectionPointSelectedIndex !== null &&
-        !isZoomingRef.current
+        hasDragIntent &&
+        !isZoomingRef.current &&
+        !isMultiTouch
       ) {
         setMousePosition(null);
         setIsProtectionPointMoving(true);
+        pointWasDraggedRef.current = true;
 
         const newCoordinate = getPercentagePosition(positionInImage);
         const closestPoint = findCloserPoint(newCoordinate, {
@@ -140,10 +196,16 @@ export const useRoutesLayerSvgHandlers = () => {
         return;
       }
 
-      if (isPointClicked && !isZoomingRef.current) {
+      if (
+        isPointClicked &&
+        hasDragIntent &&
+        !isZoomingRef.current &&
+        !isMultiTouch
+      ) {
         setMousePosition(null);
         machine.execute('dragPoint', { position: positionInImage });
         setIsPointMoving(true);
+        pointWasDraggedRef.current = true;
 
         const newCoordinate = getPercentagePosition(positionInImage);
         const closestPoint = findCloserPoint(newCoordinate, {
@@ -175,6 +237,7 @@ export const useRoutesLayerSvgHandlers = () => {
       machine,
       photoZoom,
       pointSelectedIndex,
+      pointWasDraggedRef,
       protectionPointSelectedIndex,
       routeIndexHovered,
       routeSelectedIndex,
@@ -206,26 +269,37 @@ export const useRoutesLayerSvgHandlers = () => {
     // drag (with now-stale state) after the point has already been released.
     cancelMove();
 
-    if (isZoomingRef.current) {
-      return;
-    }
-    if (isPointMoving) {
+    // The grab must ALWAYS end on release — drag & drop is
+    // press → move → release, nothing may survive the pointer going up.
+    // Crucially this must not be gated on isPointMoving React state (as it
+    // used to be): with a fast drag the pointerup fires before the rAF move's
+    // setIsPointMoving(true) commits, the stale-false guard skipped the reset
+    // and isPointClicked stayed on — the point then kept following the cursor
+    // with no button held ("sticky drag" that needed a second click to drop).
+    setIsPointClicked(false);
+    setIsProtectionPointClicked(false);
+    setIsPanningDisabled(false);
+
+    // Selection teardown is only for actual drags (a plain click keeps the
+    // selection for the point menu). pointWasDraggedRef is set synchronously
+    // by the same code that applies drag moves, so unlike the isPointMoving
+    // state it can't be stale here; the state checks are a backstop for state
+    // left over from interrupted gestures (e.g. a drag broken by a pinch).
+    if (
+      pointWasDraggedRef.current ||
+      isPointMoving ||
+      isProtectionPointMoving
+    ) {
       setPointSelectedIndex(null);
       setIsPointMoving(false);
-      setIsPointClicked(false);
-      setIsPanningDisabled(false);
-    }
-    if (isProtectionPointMoving) {
       setProtectionPointSelectedIndex(null);
       setIsProtectionPointMoving(false);
-      setIsProtectionPointClicked(false);
-      setIsPanningDisabled(false);
     }
   }, [
     cancelMove,
     isPointMoving,
     isProtectionPointMoving,
-    isZoomingRef,
+    pointWasDraggedRef,
     setIsPanningDisabled,
     setIsPointClicked,
     setIsPointMoving,
@@ -235,10 +309,68 @@ export const useRoutesLayerSvgHandlers = () => {
     setProtectionPointSelectedIndex,
   ]);
 
+  const onPointerDown = useCallback(
+    (event: React.PointerEvent) => {
+      const isFirstPointer = activePointersRef.current.size === 0;
+      activePointersRef.current.add(event.pointerId);
+
+      // Fresh single-finger gesture: reset stale gesture flags so a new drag can
+      // always start. In particular a pinch that ended without a clean
+      // onPinchingStop could leave isZoomingRef stuck true, which then silently
+      // blocks every later point drag — one finger landing is never a zoom, so
+      // clearing it here self-heals that. Also reset the drag/tap marker.
+      if (isFirstPointer) {
+        pointWasDraggedRef.current = false;
+        isZoomingRef.current = false;
+        gestureStartRef.current = { x: event.clientX, y: event.clientY };
+      }
+
+      // A second pointer starts a pinch-zoom. Abort any point-drag intent from
+      // the first finger right away, so neither the pinch itself nor the single
+      // finger left after it ends keeps dragging the previously pressed point.
+      if (activePointersRef.current.size > 1) {
+        cancelMove();
+        setIsPointClicked(false);
+        setIsProtectionPointClicked(false);
+      }
+
+      onBackgroundPointerDown(event);
+    },
+    [
+      cancelMove,
+      isZoomingRef,
+      onBackgroundPointerDown,
+      pointWasDraggedRef,
+      setIsPointClicked,
+      setIsProtectionPointClicked,
+    ],
+  );
+
+  const onPointerUp = useCallback(
+    (event: React.PointerEvent) => {
+      activePointersRef.current.delete(event.pointerId);
+      onBackgroundPointerUp(event);
+      // Release via pointer events (not onMouseUp) so touch drags are reliably
+      // finalized — on touch devices the compatibility mouseup often never
+      // arrives, which used to leave isPointClicked stuck on and let the next
+      // stray touch drag the point.
+      handleOnMovingPointDropped();
+    },
+    [onBackgroundPointerUp, handleOnMovingPointDropped],
+  );
+
+  const onPointerCancel = useCallback(
+    (event: React.PointerEvent) => {
+      activePointersRef.current.delete(event.pointerId);
+      handleOnMovingPointDropped();
+    },
+    [handleOnMovingPointDropped],
+  );
+
   return {
     onPointerDown,
     onPointerUp,
+    onPointerCancel,
     onPointerMove,
-    handleOnMovingPointDropped,
   };
 };

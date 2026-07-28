@@ -73,8 +73,12 @@ export const ProtectionPointsLayer = () => {
         };
 
         return (
+          // Stable key (no x/y): dragging a protection point changes its
+          // coordinates every move; a coordinate-based key would remount the
+          // node mid-drag and, on touch, fire a spurious pointercancel that
+          // aborts the drag. See the same fix in RouteMarks.
           // eslint-disable-next-line react/no-array-index-key
-          <React.Fragment key={`protection-${index}-${x}-${y}`}>
+          <React.Fragment key={`protection-${index}`}>
             {pointType === 'bolt' && (
               <Bolt x={position.x + xOffset} y={position.y} {...iconProps} />
             )}

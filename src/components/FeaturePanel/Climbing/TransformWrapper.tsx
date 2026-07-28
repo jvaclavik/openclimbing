@@ -2,6 +2,13 @@ import { useRef } from 'react';
 import { TransformWrapper as Wrapper } from 'react-zoom-pan-pinch';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { ZoomState } from './types';
+import {
+  PANNING_EXCLUDED_CLASS,
+  usePreventTouchDefaultOnDragHandles,
+} from './Editor/utils';
+import { useCropAnchor } from './useCropAnchor';
+
+const MAX_SCALE = 10;
 
 // Pixel threshold below which a pointer movement during pan is treated as an
 // accidental jitter (e.g. small hand tremor during a click) rather than an
@@ -31,11 +38,19 @@ export const TransformWrapper = ({ children }) => {
   );
   const panLastRef = useRef<{ x: number; y: number } | null>(null);
 
+  const { handleInit, captureAnchor } = useCropAnchor();
+  usePreventTouchDefaultOnDragHandles();
+
   const startPointerEvents = () => {
     setArePointerEventsDisabled(false);
   };
   const stopPointerEvents = () => {
     setArePointerEventsDisabled(true);
+  };
+
+  const handleWheelStop = () => {
+    startPointerEvents();
+    captureAnchor();
   };
 
   const getPoint = (event: MouseEvent | TouchEvent) =>
@@ -72,6 +87,7 @@ export const TransformWrapper = ({ children }) => {
     const last = panLastRef.current;
     panStartRef.current = null;
     panLastRef.current = null;
+    captureAnchor();
 
     // A short press with little travel is a click (even if it briefly crossed
     // the pan threshold mid-gesture): unblock immediately so the click event
@@ -100,6 +116,20 @@ export const TransformWrapper = ({ children }) => {
   const handleZoomStop = () => {
     isZoomingRef.current = false;
     startPointerEvents();
+    captureAnchor();
+  };
+
+  // Pinch fires before the first zoom event, so flag zooming here too —
+  // otherwise the moves at the very start of a pinch could still drag a point
+  // that a finger happened to land on.
+  const handlePinchingStart = () => {
+    isZoomingRef.current = true;
+    stopPointerEvents();
+  };
+  const handlePinchingStop = () => {
+    isZoomingRef.current = false;
+    startPointerEvents();
+    captureAnchor();
   };
 
   return (
@@ -114,22 +144,31 @@ export const TransformWrapper = ({ children }) => {
         animationTime: 150,
       }}
       onWheelStart={stopPointerEvents}
-      onWheelStop={startPointerEvents}
-      onPinchingStart={stopPointerEvents}
-      onPinchingStop={startPointerEvents}
+      onWheelStop={handleWheelStop}
+      onPinchingStart={handlePinchingStart}
+      onPinchingStop={handlePinchingStop}
       onZoomStart={handleZoomStart}
       onZoomStop={handleZoomStop}
       onPanningStart={handlePanningStart}
       onPanning={handlePanning}
       onPanningStop={handlePanningStop}
-      maxScale={10}
+      onInit={handleInit}
+      maxScale={MAX_SCALE}
       disablePadding
       // velocityDisabled prevents the library's momentum/fling animation on
       // pan release. With it enabled, an accidental sub-threshold mouse move
       // during a click could combine with stale lastMousePosition state inside
       // the library (it never resets between pan sessions) to launch a large
       // velocity pan that snaps the viewport to a bounds corner.
-      panning={{ disabled: isPanningDisabled, velocityDisabled: true }}
+      // `excluded` is the reliable guard for point drags: the library skips
+      // starting a pan when the gesture begins on a point (matched
+      // synchronously against the DOM target), so a touch drag can never be
+      // hijacked into a pan. `disabled` stays as a secondary safeguard.
+      panning={{
+        disabled: isPanningDisabled,
+        velocityDisabled: true,
+        excluded: [PANNING_EXCLUDED_CLASS],
+      }}
       wheel={{ step: 100 }}
       centerOnInit
       onTransformed={(_ref, state: ZoomState) => {

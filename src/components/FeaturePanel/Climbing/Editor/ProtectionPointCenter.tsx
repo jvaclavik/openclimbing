@@ -2,7 +2,10 @@ import React, { useState, type TouchEventHandler } from 'react';
 import styled from '@emotion/styled';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { useMobileMode } from '../../../helpers';
-import { useProtectionPointClickHandler } from './utils';
+import {
+  PANNING_EXCLUDED_CLASS,
+  useProtectionPointClickHandler,
+} from './utils';
 import { PointType } from '../types';
 
 const ClickableArea = styled.circle``;
@@ -92,6 +95,7 @@ export const ProtectionPointCenter = ({
 
   const commonProps = interactive
     ? {
+        className: PANNING_EXCLUDED_CLASS,
         onMouseDown: onPointMouseDown,
         onMouseUp: onPointMouseUp,
         onTouchStart:

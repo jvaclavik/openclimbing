@@ -57,8 +57,16 @@ export const RouteMarks = ({ routeIndex }: Props) => {
 
         const xOffset = isSelected && isEditMode ? 15 : 0;
         return (
+          // The key must NOT include x/y: while dragging a point its
+          // coordinates change every move, so a coordinate-based key would
+          // remount the point's DOM node on every frame. On touch that
+          // destroys the node holding the pointerdown's implicit pointer
+          // capture, which fires a spurious `pointercancel` — and our
+          // SVG-level onPointerCancel then aborts the drag after the first
+          // pixel (finger dragging "doesn't work"). A stable key keeps the
+          // node alive for the whole gesture (and avoids needless remounts).
           // eslint-disable-next-line react/no-array-index-key
-          <React.Fragment key={`${routeIndex}-${index}-${x}-${y}`}>
+          <React.Fragment key={`${routeIndex}-${index}`}>
             {isThisRouteEditOrExtendMode && <PulsedPoint x={x} y={y} />}
 
             {isBoltVisible && (

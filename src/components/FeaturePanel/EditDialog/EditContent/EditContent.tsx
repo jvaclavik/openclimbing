@@ -21,6 +21,7 @@ import { ItemEditSection } from './ItemEditSection';
 import { t, Translation } from '../../../../services/intl';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { getSplitPaneDefaultSize } from '../../Climbing/config';
+import { splitPaneResizerStyles } from '../../Climbing/splitPaneResizerStyles';
 import { useEditDialogSplitLayout } from '../useEditDialogSplitLayout';
 
 const EditDialogMapDynamic = dynamic(() => import('../EditDialogMap'), {
@@ -28,75 +29,15 @@ const EditDialogMapDynamic = dynamic(() => import('../EditDialogMap'), {
   loading: () => <div style={{ height: '100%' }} />,
 });
 
-// Mirrors the resizer styling of the climbing crag view's SplitPane so the
-// divider looks and behaves the same in both places.
+// Uses the shared SplitPane resizer styling so the divider looks and behaves
+// the same here as in the climbing crag view.
 const SplitContainer = styled.div`
   position: relative;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 
-  .Resizer {
-    &.horizontal {
-      cursor: row-resize;
-      height: 15px;
-      margin: -7px 0;
-      &::before {
-        width: 40px;
-        height: 12px;
-        content: '...';
-        justify-content: center;
-        align-items: unset;
-      }
-      &::after {
-        border-top: solid 1px #222;
-        width: 100%;
-        height: 1px;
-        margin-top: 1px;
-      }
-    }
-    &.vertical {
-      width: 15px;
-      cursor: col-resize;
-      margin: 0 -7px;
-      &::before {
-        width: 12px;
-        height: 40px;
-        content: '⋮';
-      }
-      &::after {
-        border-left: solid 1px #222;
-        height: 100%;
-        width: 1px;
-      }
-    }
-
-    z-index: 100000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    &::before {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      border-radius: 6px;
-      background: ${({ theme }) => theme.palette.background.paper};
-      margin-top: 1px;
-      z-index: 1;
-      transition: all 0.1s ease;
-      border: solid 1px ${({ theme }) => theme.palette.divider};
-      text-align: center;
-      line-height: 0px;
-      font-size: 20px;
-      color: ${({ theme }) => theme.palette.primary.main};
-      letter-spacing: 1px;
-    }
-    &::after {
-      position: absolute;
-      content: '';
-      transition: all 0.1s ease;
-    }
-  }
+  ${({ theme }) => splitPaneResizerStyles(theme)}
 `;
 
 const MapPane = styled.div`

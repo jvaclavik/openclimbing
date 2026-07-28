@@ -33,7 +33,9 @@ const ImageContainer = styled.div`
 const ImageElement = styled.img<{ zoom?: number }>`
   object-fit: contain; // @TODO try to delete this
   max-width: 100%;
-  transition: all 0.1s ease-in;
+  // Only fade, never animate width/height: a size transition would lag behind
+  // the pane resize and throw off the measurement that re-pins the crop.
+  transition: opacity 0.1s ease-in;
   height: 100%;
 `;
 

@@ -1,0 +1,8 @@
+{
+  "name": "e2e-tmp",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "playwright-core": "^1.62.0"
+  }
+}

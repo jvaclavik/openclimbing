@@ -9,6 +9,7 @@ const Svg = styled.svg<{
   $hasEditableCursor: boolean;
   $imageSize: { width: number; height: number };
   $isVisible: boolean;
+  $isEditMode: boolean;
 }>`
   position: absolute;
   top: 0;
@@ -18,6 +19,11 @@ const Svg = styled.svg<{
   transition: ${({ $isVisible }) =>
     $isVisible ? 'opacity 0.1s ease' : 'none'};
   transform-origin: 0 0;
+  // In edit mode the finger interacts with points/lines, so the browser must
+  // not steal the gesture for scrolling — otherwise a drag fires pointercancel
+  // and the point never moves. Pinch/pan still work: react-zoom-pan-pinch
+  // listens for touches on the wrapper, not via the browser's default action.
+  ${({ $isEditMode }) => ($isEditMode ? 'touch-action: none;' : '')}
 
   ${({ $hasEditableCursor }) =>
     $hasEditableCursor ? `cursor: crosshair;` : ''};
@@ -44,12 +50,8 @@ export const RoutesLayer = ({ isVisible }: Props) => {
     isPlacingProtectionPoints,
     getCurrentPath,
   } = useClimbingContext();
-  const {
-    onPointerDown,
-    onPointerUp,
-    onPointerMove,
-    handleOnMovingPointDropped,
-  } = useRoutesLayerSvgHandlers();
+  const { onPointerDown, onPointerUp, onPointerCancel, onPointerMove } =
+    useRoutesLayerSvgHandlers();
   const path = getCurrentPath();
   if (!path) return null;
 
@@ -62,10 +64,11 @@ export const RoutesLayer = ({ isVisible }: Props) => {
       }
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
-      onMouseUp={handleOnMovingPointDropped}
+      onPointerCancel={onPointerCancel}
       onPointerMove={onPointerMove}
       $imageSize={imageSize}
       $isVisible={isVisible}
+      $isEditMode={isEditMode}
       xmlns="http://www.w3.org/2000/svg"
       ref={svgRef}
     >

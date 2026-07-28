@@ -133,6 +133,7 @@ type ClimbingContextType = {
   showDebugMenu: boolean;
   isAddingPointBlockedRef: React.MutableRefObject<any>;
   isZoomingRef: React.MutableRefObject<any>;
+  pointWasDraggedRef: React.MutableRefObject<boolean>;
   arePointerEventsDisabled: boolean; // @TODO do we need it?
   setArePointerEventsDisabled: Setter<boolean>;
   preparePhotos: (cragPhotos: Array<string>) => void;
@@ -215,6 +216,13 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
   const svgRef = useRef(null);
   const isAddingPointBlockedRef = useRef(false);
   const isZoomingRef = useRef(false);
+  // True once the current pointer gesture has actually dragged a point. Kept in
+  // a ref (not state) and cleared only when the next gesture starts, so the
+  // point's touchend/mouseup can reliably tell "this was a drag" apart from "a
+  // tap" without racing the drag-state reset — otherwise a drag would fall
+  // through to opening the PointMenu, whose modal backdrop then swallows all
+  // further touches and makes dragging appear to stop working.
+  const pointWasDraggedRef = useRef(false);
   const [photoPaths, setPhotoPaths] = useState<Array<string>>(null);
   const [photoPath, setPhotoPath] = useState<string>(null); // photo URL (pathname), should be null
   const { debugMode: showDebugMenu } = useDebugMode();
@@ -629,6 +637,7 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     showDebugMenu,
     isAddingPointBlockedRef,
     isZoomingRef,
+    pointWasDraggedRef,
     arePointerEventsDisabled,
     setArePointerEventsDisabled,
     preparePhotos,

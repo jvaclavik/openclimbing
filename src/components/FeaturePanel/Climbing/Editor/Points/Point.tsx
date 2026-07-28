@@ -3,10 +3,17 @@ import styled from '@emotion/styled';
 import { useClimbingContext } from '../../contexts/ClimbingContext';
 import { useConfig } from '../../config';
 import { useMobileMode } from '../../../../helpers';
-import { usePointClickHandler } from '../utils';
+import { PANNING_EXCLUDED_CLASS, usePointClickHandler } from '../utils';
 import { PointType } from '../../types';
 
-const ClickableArea = styled.circle``;
+// The big invisible grab target is where a touch drag starts, so it must opt
+// out of the browser's default touch gestures. Without this the browser reads
+// the finger drag as a scroll/pan and fires pointercancel — which killed the
+// drag before the point could move (the point was disabled from panning, so
+// react-zoom-pan-pinch doesn't preventDefault to keep the gesture alive).
+const ClickableArea = styled.circle`
+  touch-action: none;
+`;
 
 const PointElement = styled.circle<{
   $isHovered: boolean;
@@ -101,6 +108,7 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
   const isTouchDevice = 'ontouchstart' in window;
 
   const commonProps = {
+    className: PANNING_EXCLUDED_CLASS,
     onMouseDown: onPointMouseDown,
     onMouseUp: onPointMouseUp,
     onTouchStart: onPointMouseDown,
@@ -138,7 +146,7 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
     <g transform={`translate(${x},${y}) scale(${1 / photoZoom.scale})`}>
       <ClickableArea
         fill="transparent"
-        r={isTouchDevice ? 16 : 10}
+        r={isTouchDevice ? 24 : 10}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...commonProps}
       >

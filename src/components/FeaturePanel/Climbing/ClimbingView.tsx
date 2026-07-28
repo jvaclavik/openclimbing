@@ -28,6 +28,7 @@ import {
 } from './DrawRoutesCoachmark';
 import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
 import { RoutesEditor } from './Editor/RoutesEditor';
+import { splitPaneResizerStyles } from './splitPaneResizerStyles';
 import { TransformWrapper } from './TransformWrapper';
 import {
   getResolution,
@@ -62,80 +63,7 @@ const Container = styled.div`
   flex-direction: column;
   height: 100%;
 
-  .Resizer {
-    &.horizontal {
-      cursor: row-resize;
-      height: 15px;
-      margin: -7px 0;
-      &::before {
-        width: 40px;
-        height: 12px;
-        content: '...';
-        justify-content: center;
-        align-items: unset;
-      }
-      &::after {
-        border-top: solid 1px #222;
-        width: 100%;
-        height: 1px;
-        margin-top: 1px;
-      }
-    }
-    &.vertical {
-      width: 15px;
-      cursor: col-resize;
-      margin: 0 -7px;
-      &::before {
-        width: 12px;
-        height: 40px;
-        content: '⋮';
-      }
-      &::after {
-        border-left: solid 1px #222;
-        height: 100%;
-        width: 1px;
-      }
-    }
-
-    z-index: 100000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    &::before {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      border-radius: 6px;
-      background: ${({ theme }) => theme.palette.background.paper};
-      margin-top: 1px;
-      z-index: 1;
-      transition: all 0.1s ease;
-      border: solid 1px ${({ theme }) => theme.palette.divider};
-      text-align: center;
-      line-height: 0px;
-      font-size: 20px;
-      color: ${({ theme }) => theme.palette.primary.main};
-      letter-spacing: 1px;
-    }
-    &::after {
-      position: absolute;
-      content: '';
-      transition: all 0.1s ease;
-    }
-
-    &:hover {
-      &::before {
-        background-color: ${({ theme }) => theme.palette.primary.main};
-        border: solid 1px ${({ theme }) => theme.palette.primary.main};
-        color: ${({ theme }) => theme.palette.primary.contrastText};
-      }
-      &::after {
-        border-color: ${({ theme }) => theme.palette.primary.main};
-        border-width: 1px;
-        transition-delay: 500ms;
-      }
-    }
-  }
+  ${({ theme }) => splitPaneResizerStyles(theme)}
   .Pane.horizontal.Pane2 {
     overflow: hidden;
   }
