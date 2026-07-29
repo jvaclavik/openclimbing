@@ -305,7 +305,6 @@ export default {
   'searchbox.overpass_custom_query': 'custom query',
   'searchbox.coordinate_subtitle': 'Latitude, Longitude',
   'searchbox.tile_boundaries': 'z/x/y tile boundaries',
-  'searchbox.route_count': '__count__ routes',
 
   'directions.get_directions': 'Get Directions',
   'layerswitcher.fetching_index': 'Fetching the layer index...',

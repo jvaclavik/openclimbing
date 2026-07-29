@@ -141,9 +141,6 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
   const gradeLabel = isRoute
     ? getGradeLabel(gradeId, gradeTxt, userSettings['climbing.gradeSystem'])
     : undefined;
-  const routeCountLabel = routeCount
-    ? t('searchbox.route_count', { count: routeCount })
-    : undefined;
   const gradeColor = isRoute
     ? getDifficultyColor(
         { gradeSystem: 'uiaa', grade: GRADE_TABLE.uiaa[gradeId] },
@@ -173,7 +170,7 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
       <Grid size={{ xs: 12 }}>
         {highlightText(name, inputValue)}
         {gradeLabel && ` ${gradeLabel}`}
-        {routeCountLabel && ` · ${routeCountLabel}`}
+        {routeCount ? ` · ${routeCount}` : null}
         {secondaryLine && (
           <Typography variant="body2" color="textSecondary" noWrap>
             {secondaryLine}
