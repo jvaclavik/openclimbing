@@ -60,6 +60,9 @@ export type ClimbingSearchRecord = {
   // route/route_top only:
   gradeId?: number;
   gradeTxt?: string;
+
+  // area/crag only:
+  routeCount?: number;
 };
 
 export type ClimbingTilesFeature = GeojsonFeature<

@@ -31,6 +31,7 @@ const haversineSorter = (origin: LonLat) => (a, b) =>
 
 const QUERY_GROUPS = `
     SELECT "type", "lon", "lat", "osmType", "osmId", COALESCE("name", "nameRaw") AS "name", "countryCode", "parentId",
+      "routeCount",
       ((lat - @lat) * (lat - @lat) + (lon - @lon) * (lon - @lon)) AS distance_sq
     FROM climbing_features
     WHERE type != 'route' AND type != 'route_top' AND nameRaw LIKE @query

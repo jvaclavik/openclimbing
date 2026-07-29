@@ -16,6 +16,7 @@ type SeedRow = {
   lat: number;
   nameRaw: string;
   parentId?: number;
+  routeCount?: number;
 };
 
 // A deep chain: country (rel) -> area (rel) -> subarea (rel) -> crag (rel) -> route (node)
@@ -54,6 +55,7 @@ const CRAG: SeedRow = {
   lat: 50,
   nameRaw: 'Sluncni stena',
   parentId: 3,
+  routeCount: 12,
 };
 const ROUTE: SeedRow = {
   type: 'route',
@@ -84,9 +86,9 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
 
   const insert = db.prepare(`
     INSERT INTO climbing_features
-      (type, lon, lat, "osmType", "osmId", "nameRaw", "parentId")
+      (type, lon, lat, "osmType", "osmId", "nameRaw", "parentId", "routeCount")
     VALUES
-      (@type, @lon, @lat, @osmType, @osmId, @nameRaw, @parentId)
+      (@type, @lon, @lat, @osmType, @osmId, @nameRaw, @parentId, @routeCount)
   `);
   for (const r of rows) {
     insert.run({
@@ -97,6 +99,7 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
       osmId: r.osmId,
       nameRaw: r.nameRaw,
       parentId: r.parentId ?? null,
+      routeCount: r.routeCount ?? null,
     });
   }
   return db;
@@ -127,5 +130,12 @@ describe('getClimbingSearch parent chain', () => {
     expect(lonely.osmId).toBe(6);
     expect(lonely.parents).toBeUndefined();
     expect(lonely).not.toHaveProperty('parentId');
+  });
+
+  it('returns routeCount for crags/areas', () => {
+    const [crag] = getClimbingSearch('Sluncni', 14, 50);
+
+    expect(crag.osmId).toBe(4);
+    expect(crag.routeCount).toBe(12);
   });
 });
