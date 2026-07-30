@@ -256,7 +256,9 @@ export const ClimbingCragDialogHeader = ({
           {(photoPaths?.length > 1 ||
             (isEditMode && photoPaths?.length >= 1)) && (
             <PhotosContainer>
-              <PhotoGallery>
+              {/* class is matched by usePhotoEdgeSwipe to keep its own
+                  horizontal scrolling free of the photo swipe gesture */}
+              <PhotoGallery className="climbing-photo-gallery">
                 {photoPaths.map((photo, index) => (
                   <PhotoThumbnail
                     key={photo}

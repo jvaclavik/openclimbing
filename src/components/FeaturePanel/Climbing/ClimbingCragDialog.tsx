@@ -1,3 +1,4 @@
+import { css, Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import {
   Button,
@@ -14,6 +15,7 @@ import { useMobileMode } from '../../helpers';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { ClimbingCragDialogHeader } from './ClimbingCragDialogHeader';
 import { ClimbingEditorHelperText } from './ClimbingEditorHelperText';
+import { ClimbingPhotoEdgeSwipe } from './ClimbingPhotoEdgeSwipe';
 import { ClimbingView } from './ClimbingView';
 import { useClimbingContext } from './contexts/ClimbingContext';
 import { useSaveCragFactory } from './useSaveCragFactory';
@@ -29,6 +31,18 @@ const Flex = styled.div`
 `;
 const LeftActions = styled.div`
   flex: 1;
+`;
+
+// Inside the crag dialog the horizontal edges belong to the photo swipe, so the
+// browser must not consume them for its overscroll back/forward navigation.
+// GlobalStyle keeps the x axis on 'auto' elsewhere so the back gesture works in
+// the rest of the app.
+const noBackGestureStyle = css`
+  html,
+  body,
+  #__next {
+    overscroll-behavior-x: none;
+  }
 `;
 
 export const ClimbingCragDialog = ({
@@ -162,6 +176,8 @@ export const ClimbingCragDialog = ({
         },
       }}
     >
+      <Global styles={noBackGestureStyle} />
+      <ClimbingPhotoEdgeSwipe />
       <ClimbingCragDialogHeader
         onClose={handleClose}
         onSave={saveCrag}
