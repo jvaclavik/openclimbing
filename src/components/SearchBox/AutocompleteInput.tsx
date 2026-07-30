@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Autocomplete } from '@mui/material';
 import { renderOptionFactory } from './renderOptionFactory';
 import { useGetOnSelected } from './useGetOnSelected';
@@ -17,6 +17,9 @@ import {
   useInputValueWithUrl,
 } from './useHandleQuery';
 import { useFeatureContext } from '../utils/FeatureContext';
+import { useMapStateContext } from '../utils/MapStateContext';
+import { usePoiCategoriesContext } from '../utils/PoiCategoriesContext';
+import { buildPoiCategoryOptions } from './options/poiCategories';
 
 const AutocompleteConfigured = (
   props: AutocompleteProps<Option, false, true, true>,
@@ -44,13 +47,64 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { inputValue, valueRef, setInputValue, lastSyncedValue } =
     useInputValueWithUrl();
-  const options = useGetOptions(inputValue, valueRef);
+  const searchOptions = useGetOptions(inputValue, valueRef);
   const onHighlight = useGetOnHighlight();
   const onSelected = useGetOnSelected(setIsLoading);
   const { setPreview } = useFeatureContext();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { view } = useMapStateContext();
+  const { activeKeys, toggleCategory, clearCategories, openRequest, status } =
+    usePoiCategoriesContext();
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+
+  // An empty input shows the POI category browser instead of search results
+  const isCategoryMode = inputValue === '';
+  const categoryOptions = useMemo(
+    () =>
+      isCategoryMode
+        ? buildPoiCategoryOptions({
+            activeKeys,
+            expandedGroups,
+            zoom: parseFloat(view[0]),
+            status,
+          })
+        : [],
+    [activeKeys, expandedGroups, isCategoryMode, status, view],
+  );
 
   useHandleDirectQuery(onSelected, setInputValue, setIsLoading);
   useHandleQuery(setInputValue, setIsOpen, lastSyncedValue);
+
+  useEffect(() => {
+    if (openRequest > 0) {
+      setInputValue('');
+      setIsOpen(true);
+      inputRef.current?.focus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openRequest]);
+
+  const handleChange = (event, option: Option) => {
+    if (option.type === 'poiGroup') {
+      const { groupKey } = option.poiGroup;
+      setExpandedGroups((current) =>
+        current.includes(groupKey)
+          ? current.filter((key) => key !== groupKey)
+          : [...current, groupKey],
+      );
+      return;
+    }
+    if (option.type === 'poiCategory') {
+      toggleCategory(option.poiCategory.categoryKey);
+      return;
+    }
+    if (option.type === 'poiClear') {
+      clearCategories();
+      return;
+    }
+    onSelected(event, option);
+  };
 
   return (
     <AutocompleteConfigured
@@ -72,15 +126,18 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         setUrlQuery(inputValue, lastSyncedValue);
       }}
       inputValue={inputValue}
-      options={options}
+      options={isCategoryMode ? categoryOptions : searchOptions}
       getOptionLabel={getOptionLabel}
-      onChange={onSelected}
+      onChange={handleChange}
+      disableCloseOnSelect={isCategoryMode} // toggling categories keeps the list open
       onHighlightChange={onHighlight}
       renderOption={renderOptionFactory(inputValue)}
-      renderInput={renderInputFactory(setInputValue, autocompleteRef)}
+      renderInput={renderInputFactory(setInputValue, autocompleteRef, inputRef)}
       filterOptions={(option) => option}
       getOptionDisabled={(option) =>
-        option.type === 'loader' || option.type === 'separator'
+        option.type === 'loader' ||
+        option.type === 'separator' ||
+        option.type === 'poiStatus'
       }
       getOptionKey={(option) => JSON.stringify(option)}
     />

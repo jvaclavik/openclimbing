@@ -1,7 +1,7 @@
-import { Divider } from '@mui/material';
+import { Divider, Typography } from '@mui/material';
 import styled from '@emotion/styled';
 import React from 'react';
-import { Option } from './types';
+import { Option, SeparatorOption } from './types';
 
 // Groups that can appear in the results, in the order they're built in
 // useGetOptions. A separator is inserted wherever two neighbouring options
@@ -41,4 +41,23 @@ const StyledDivider = styled(Divider)`
       : 'rgba(0, 0, 0, 0.12)'};
 `;
 
-export const SeparatorRow = () => <StyledDivider />;
+const SectionLabel = styled(Typography)`
+  width: 100%;
+  padding: 8px 12px 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+` as typeof Typography;
+
+type SeparatorRowProps = { option?: SeparatorOption };
+
+export const SeparatorRow = ({ option }: SeparatorRowProps) => {
+  const label = option?.separator?.label;
+  if (label) {
+    return (
+      <SectionLabel variant="caption" color="textSecondary">
+        {label}
+      </SectionLabel>
+    );
+  }
+  return <StyledDivider />;
+};
