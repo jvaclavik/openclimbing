@@ -64,7 +64,7 @@ Browser
   - we `computeTiles` ids needed for viewport (eg. 6/10/11, 6/10/12)
   - fetch all tiles using `getTileJson()`
   - `doClimbingFilter`
-  - `constructOutlines` (these are shown onHover for area/crag relations)
+  - `constructOutlines` (these are shown onHover for area/crag relations) - the hull is built from the whole `parentId` subtree, so a super-area spans its crags' routes too
   - `processFeature` - called on each feature - computes the color and grade in user's chosen grade system
   - finally `setData` in the maplibre GEOJSON source `CLIMBING_TILES_SOURCE`.
 

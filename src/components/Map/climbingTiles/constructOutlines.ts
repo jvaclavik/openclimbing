@@ -35,14 +35,57 @@ const getMeasures = (hull: GeojsonFeature<Polygon | LineString>) => {
   return { inflation, minZoom };
 };
 
+const isRelation = (feature: ClimbingTilesFeature) =>
+  (feature.id as number) % 10 === 4;
+
+const toRelationId = (mapId: number) => Math.floor(mapId / 10);
+
+type ChildrenByParent = Map<number, ClimbingTilesFeature[]>;
+
+const getChildrenByParent = (features: ClimbingTilesFeature[]) => {
+  const childrenByParent: ChildrenByParent = new Map();
+  for (const feature of features) {
+    const { parentId } = feature.properties;
+    if (parentId === undefined) {
+      continue;
+    }
+    const siblings = childrenByParent.get(parentId);
+    if (siblings) {
+      siblings.push(feature);
+    } else {
+      childrenByParent.set(parentId, [feature]);
+    }
+  }
+  return childrenByParent;
+};
+
+// an area holds only its child crags, and those hold the routes - so the hull
+// has to be built from the whole subtree, not just from the direct children
+const getSubtree = (childrenByParent: ChildrenByParent, relationId: number) => {
+  const subtree: ClimbingTilesFeature[] = [];
+  const visited = new Set([relationId]);
+  const queue = [relationId];
+
+  while (queue.length) {
+    const parentId = queue.pop();
+    for (const child of childrenByParent.get(parentId) ?? []) {
+      subtree.push(child);
+      const childId = toRelationId(child.id as number);
+      if (isRelation(child) && !visited.has(childId)) {
+        visited.add(childId);
+        queue.push(childId);
+      }
+    }
+  }
+
+  return subtree;
+};
+
 const getHullForSubfeatures = (
-  features: ClimbingTilesFeature[],
+  childrenByParent: ChildrenByParent,
   mapId: number,
 ) => {
-  const relationId = Math.floor(mapId / 10);
-  const subfeatures = features.filter(
-    (f) => f.properties.parentId === relationId,
-  );
+  const subfeatures = getSubtree(childrenByParent, toRelationId(mapId));
   if (subfeatures.length <= 1) {
     return null;
   }
@@ -63,33 +106,33 @@ const getHullForSubfeatures = (
 
 export const constructOutlines = (features: ClimbingTilesFeature[]) => {
   // takes ~ 10-90ms
-  return features
-    .filter(({ id }) => (id as number) % 10 === 4)
-    .flatMap((relation) => {
-      const mapId = relation.id as number;
-      const hull = getHullForSubfeatures(features, mapId);
-      if (!hull) {
-        return [];
-      }
+  const childrenByParent = getChildrenByParent(features);
 
-      const { inflation, minZoom } = getMeasures(hull);
-      const buffered = buffer(hull, inflation, { units: 'degrees' });
-      // buffer() returns undefined when the projected geometry yields NaN
-      // coordinates (degenerate inputs). Skip the outline in that case.
-      if (!buffered) {
-        return [];
-      }
-      const smooth = polygonSmooth(buffered, { iterations: 3 });
+  return features.filter(isRelation).flatMap((relation) => {
+    const mapId = relation.id as number;
+    const hull = getHullForSubfeatures(childrenByParent, mapId);
+    if (!hull) {
+      return [];
+    }
 
-      return [
-        {
-          ...smooth.features[0],
-          id: mapId,
-          properties: {
-            type: 'outline',
-            minZoom,
-          },
-        } as GeojsonFeature<Polygon>,
-      ];
-    });
+    const { inflation, minZoom } = getMeasures(hull);
+    const buffered = buffer(hull, inflation, { units: 'degrees' });
+    // buffer() returns undefined when the projected geometry yields NaN
+    // coordinates (degenerate inputs). Skip the outline in that case.
+    if (!buffered) {
+      return [];
+    }
+    const smooth = polygonSmooth(buffered, { iterations: 3 });
+
+    return [
+      {
+        ...smooth.features[0],
+        id: mapId,
+        properties: {
+          type: 'outline',
+          minZoom,
+        },
+      } as GeojsonFeature<Polygon>,
+    ];
+  });
 };

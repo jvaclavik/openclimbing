@@ -22,27 +22,44 @@ const wall = (
   count: number,
   widthMeters: number,
   heightMeters: number,
+  parentId = RELATION_ID,
+  offsetMeters = 0,
 ): ClimbingTilesFeature[] =>
   Array.from({ length: count }, (_, i) => {
     const along = i / (count - 1);
     const across = i % 2 === 0 ? 0 : 1;
     return {
       type: 'Feature' as const,
-      id: (RELATION_ID + 1 + i) * 10 + 1,
+      id: (parentId + 1 + i) * 10 + 1,
       geometry: {
         type: 'Point' as const,
         coordinates: [
-          CRAG_LON + (across * widthMeters) / METERS_PER_LON_DEGREE,
+          CRAG_LON +
+            (offsetMeters + across * widthMeters) / METERS_PER_LON_DEGREE,
           CRAG_LAT + (along * heightMeters) / METERS_PER_LAT_DEGREE,
         ],
       },
       properties: {
         type: 'route' as const,
         name: `r${i}`,
-        parentId: RELATION_ID,
+        parentId,
       },
     };
   });
+
+const relation = (
+  id: number,
+  parentId: number | undefined,
+  offsetMeters: number,
+): ClimbingTilesFeature => ({
+  type: 'Feature',
+  id: id * 10 + 4,
+  geometry: {
+    type: 'Point',
+    coordinates: [CRAG_LON + offsetMeters / METERS_PER_LON_DEGREE, CRAG_LAT],
+  },
+  properties: { type: 'area', name: `a${id}`, parentId },
+});
 
 const getSizeMeters = (features: ClimbingTilesFeature[]) => {
   const outlines = constructOutlines(features);
@@ -79,5 +96,39 @@ describe('constructOutlines', () => {
     expect(constructOutlines([...wall(2, 14, 22).slice(0, 1), crag])).toEqual(
       [],
     );
+  });
+
+  it('spans the whole subtree of a nested area, not just its child crags', () => {
+    const AREA_ID = 900000;
+    const SUB_ID = 900001;
+    const features = [
+      relation(AREA_ID, undefined, 0),
+      relation(SUB_ID, AREA_ID, 200),
+      { ...crag, properties: { ...crag.properties, parentId: AREA_ID } },
+      ...wall(8, 14, 22), // routes of the crag
+      ...wall(8, 14, 22, SUB_ID, 500), // routes of the nested area
+    ];
+
+    const [minX, , maxX] = bbox(
+      constructOutlines(features).find((o) => o.id === AREA_ID * 10 + 4),
+    );
+    const width = distance([minX, CRAG_LAT], [maxX, CRAG_LAT], {
+      units: 'meters',
+    });
+
+    // the two child relations sit 200m apart, their routes reach out to ~515m
+    expect(width).toBeGreaterThan(500);
+  });
+
+  it('survives a cycle in the parent chain', () => {
+    const A = 900010;
+    const B = 900011;
+    const features = [
+      { ...relation(A, B, 0), properties: { type: 'area', parentId: B } },
+      relation(B, A, 200),
+      ...wall(4, 14, 22, A),
+    ] as ClimbingTilesFeature[];
+
+    expect(() => constructOutlines(features)).not.toThrow();
   });
 });
