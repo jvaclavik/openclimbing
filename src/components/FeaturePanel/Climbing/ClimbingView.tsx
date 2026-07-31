@@ -4,8 +4,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import EditIcon from '@mui/icons-material/Edit';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
-import MapIcon from '@mui/icons-material/Map';
 import { CircularProgress, Fab, IconButton, Tooltip } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import SplitPane from 'react-split-pane';
@@ -208,25 +206,6 @@ const getWindowDimensions = () => {
   };
 };
 
-const FabMapSwitcher = ({ isMapVisible, setIsMapVisible }) => (
-  <FabContainer>
-    <Tooltip
-      title={`Show ${isMapVisible ? 'route list' : 'map'}`}
-      enterDelay={1500}
-      arrow
-    >
-      <Fab
-        size="small"
-        color="secondary"
-        aria-label="add"
-        onClick={() => setIsMapVisible(!isMapVisible)}
-      >
-        {isMapVisible ? <FormatListNumberedIcon /> : <MapIcon />}
-      </Fab>
-    </Tooltip>
-  </FabContainer>
-);
-
 export const ClimbingView = () => {
   const {
     imageSize,
@@ -245,6 +224,8 @@ export const ClimbingView = () => {
     setRouteSelectedIndex,
     setIsEditMode,
     isRoutesLayerVisible,
+    isMapVisible,
+    setIsMapVisible,
   } = useClimbingContext();
   const { feature } = useFeatureContext();
   const replacePhotoIfNeeded = useReplacePhotoIfNeeded();
@@ -412,7 +393,6 @@ export const ClimbingView = () => {
     splitPaneSize === viewportSize.height - editorPosition.y;
 
   const [isPhotoLoading, setIsPhotoLoading] = useState(false);
-  const [isMapVisible, setIsMapVisible] = useState(false);
 
   const isResolutionLoaded =
     loadedPhotos?.[photoPath]?.[photoResolution] || false;
@@ -595,10 +575,6 @@ export const ClimbingView = () => {
           </BackgroundContainer>
 
           <BottomContainer ref={pane2Ref}>
-            <FabMapSwitcher
-              isMapVisible={isMapVisible}
-              setIsMapVisible={setIsMapVisible}
-            />
             <BottomPanel onScroll={handleOnScroll}>
               <ClimbingViewContent
                 isMapVisible={isMapVisible}
@@ -608,16 +584,10 @@ export const ClimbingView = () => {
           </BottomContainer>
         </SplitPane>
       ) : (
-        <>
-          <FabMapSwitcher
-            isMapVisible={isMapVisible}
-            setIsMapVisible={setIsMapVisible}
-          />
-          <ClimbingViewContent
-            isMapVisible={isMapVisible}
-            setIsMapVisible={setIsMapVisible}
-          />
-        </>
+        <ClimbingViewContent
+          isMapVisible={isMapVisible}
+          setIsMapVisible={setIsMapVisible}
+        />
       )}
     </Container>
   );

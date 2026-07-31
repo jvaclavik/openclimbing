@@ -3,11 +3,17 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TuneIcon from '@mui/icons-material/Tune';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MapIcon from '@mui/icons-material/Map';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import {
   AppBar,
   Box,
   Button,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
   Stack,
   Toolbar,
   Tooltip,
@@ -28,6 +34,7 @@ import {
   getWikimediaCommonsKey,
 } from './utils/photo';
 import { usePhotoChange } from './utils/usePhotoChange';
+import { useMoreMenu } from './useMoreMenu';
 
 // Heavy client-only export dialog; loaded lazily (only when the user opens the
 // PDF export) so it stays out of the shared bundle.
@@ -222,9 +229,11 @@ export const ClimbingCragDialogHeader = ({
   const [isUserSettingsOpened, setIsUserSettingsOpened] =
     useState<boolean>(false);
   const [isPdfExportOpen, setIsPdfExportOpen] = useState<boolean>(false);
-  const { photoPath, photoPaths, isEditMode } = useClimbingContext();
+  const { photoPath, photoPaths, isEditMode, isMapVisible, setIsMapVisible } =
+    useClimbingContext();
   const { openWithTag } = useEditDialogContext();
   const isMobileMode = useMobileMode();
+  const { handleClickMore, handleCloseMore, MoreMenu } = useMoreMenu();
   // On mobile the bottom DialogActions bar is hidden, so Save/Cancel live in
   // the header instead of the PDF/settings/close icons while editing.
   const showMobileEditActions = isMobileMode && isEditMode;
@@ -293,8 +302,89 @@ export const ClimbingCragDialogHeader = ({
               {t('editdialog.save_button_edit')}
             </Button>
           </Stack>
+        ) : isMobileMode ? (
+          <>
+            <IconButton
+              color="primary"
+              onClick={handleClickMore}
+              aria-label={t('climbing.display_settings')}
+            >
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
+            <Tooltip title="Close crag detail">
+              <IconButton color="primary" edge="end" onClick={onClose}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <MoreMenu>
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseMore(e);
+                  setIsPdfExportOpen(true);
+                }}
+              >
+                <ListItemIcon>
+                  <PictureAsPdfIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>
+                  {t('climbingpanel.pdf_export_button')}
+                </ListItemText>
+              </MenuItem>
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseMore(e);
+                  setIsUserSettingsOpened(true);
+                }}
+              >
+                <ListItemIcon>
+                  <TuneIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{t('climbing.display_settings')}</ListItemText>
+              </MenuItem>
+              <MenuItem
+                onClick={(e) => {
+                  handleCloseMore(e);
+                  setIsMapVisible(!isMapVisible);
+                }}
+              >
+                <ListItemIcon>
+                  {isMapVisible ? (
+                    <FormatListNumberedIcon fontSize="small" />
+                  ) : (
+                    <MapIcon fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText>
+                  {isMapVisible
+                    ? t('climbing_view.show_route_list')
+                    : t('climbing_view.show_map')}
+                </ListItemText>
+              </MenuItem>
+            </MoreMenu>
+          </>
         ) : (
           <>
+            <Box mr={1}>
+              <Tooltip
+                title={
+                  isMapVisible
+                    ? t('climbing_view.show_route_list')
+                    : t('climbing_view.show_map')
+                }
+              >
+                <IconButton
+                  color="primary"
+                  edge="end"
+                  onClick={() => setIsMapVisible(!isMapVisible)}
+                >
+                  {isMapVisible ? (
+                    <FormatListNumberedIcon fontSize="small" />
+                  ) : (
+                    <MapIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
             <Box mr={1}>
               <Tooltip title={t('climbingpanel.pdf_export_button')}>
                 <IconButton

@@ -885,6 +885,7 @@ export default {
   'wikimedia.logged_out': 'Odhlášen z Wikimedia Commons',
   'route_ticks.title': 'Mé přelezy této cesty',
   'climbing_view.show_route_list': 'Zobrazit seznam cest',
+  'climbing_view.show_map': 'Zobrazit mapu',
   'climbing_grades.selected': 'vybráno',
   'my_ticks.graphs.routes_distribution': 'Rozložení cest',
   'my_ticks.graphs.grouping': 'Seskupit',

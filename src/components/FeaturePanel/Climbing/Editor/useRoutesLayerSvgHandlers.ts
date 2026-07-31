@@ -11,6 +11,12 @@ import { useBackgroundTap } from './useBackgroundTap';
 // slightly and the drag marker would then suppress the point menu on release.
 const DRAG_START_THRESHOLD_PX = 5;
 
+// Window in which a second background tap counts as a double-tap (zoom gesture)
+// rather than a deliberate deselect. Long enough to cover a mouse double-click
+// and a finger double-tap, short enough that a single tap's deselect still
+// feels immediate.
+const DOUBLE_TAP_MS = 300;
+
 export const useRoutesLayerSvgHandlers = () => {
   const {
     machine,
@@ -52,6 +58,22 @@ export const useRoutesLayerSvgHandlers = () => {
   // Where the current gesture's first pointer landed — the reference for the
   // drag-start threshold.
   const gestureStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // A double-tap / double-click on the empty background zooms the photo (the
+  // pan/zoom wrapper handles it). Its first tap must not deselect the current
+  // route, so in view mode the background-tap deselect is deferred by one
+  // double-tap window and skipped when a second tap arrives.
+  const lastBackgroundTapRef = useRef(0);
+  const pendingDeselectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const routeSelectedIndexRef = useRef(routeSelectedIndex);
+  routeSelectedIndexRef.current = routeSelectedIndex;
+
+  useEffect(
+    () => () => {
+      if (pendingDeselectRef.current) clearTimeout(pendingDeselectRef.current);
+    },
+    [],
+  );
 
   // Authoritative cleanup at the window level. During a pinch the fingers often
   // lift outside the SVG (or after the transform re-renders), so the SVG's own
@@ -125,7 +147,35 @@ export const useRoutesLayerSvgHandlers = () => {
         return;
       }
 
-      machine.execute('cancelRouteSelection');
+      // In edit mode (no double-tap zoom) or with nothing selected, deselect
+      // right away — there's no selection worth protecting from a zoom gesture.
+      if (isEditMode || routeSelectedIndex === null) {
+        machine.execute('cancelRouteSelection');
+        return;
+      }
+
+      if (pendingDeselectRef.current) {
+        clearTimeout(pendingDeselectRef.current);
+        pendingDeselectRef.current = null;
+      }
+
+      const now = Date.now();
+      if (now - lastBackgroundTapRef.current < DOUBLE_TAP_MS) {
+        // Second tap of a double-tap: this is a zoom gesture, keep the route.
+        lastBackgroundTapRef.current = 0;
+        return;
+      }
+      lastBackgroundTapRef.current = now;
+
+      // Defer the deselect: cancel it if a double-tap follows, and skip it if the
+      // user selected a different route in the meantime.
+      const indexAtSchedule = routeSelectedIndex;
+      pendingDeselectRef.current = setTimeout(() => {
+        pendingDeselectRef.current = null;
+        if (routeSelectedIndexRef.current === indexAtSchedule) {
+          machine.execute('cancelRouteSelection');
+        }
+      }, DOUBLE_TAP_MS);
     },
     [
       addProtectionPoint,
@@ -136,6 +186,7 @@ export const useRoutesLayerSvgHandlers = () => {
       photoZoom,
       svgRef,
       isZoomingRef,
+      routeSelectedIndex,
     ],
   );
 

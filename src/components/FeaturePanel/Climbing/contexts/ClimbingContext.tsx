@@ -170,6 +170,8 @@ type ClimbingContextType = {
   canUndo: boolean;
   canRedo: boolean;
   deleteLastPathPoint: () => void;
+  isMapVisible: boolean;
+  setIsMapVisible: Setter<boolean>;
 };
 
 // @TODO generate?
@@ -227,6 +229,9 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
   const [photoPath, setPhotoPath] = useState<string>(null); // photo URL (pathname), should be null
   const { debugMode: showDebugMenu } = useDebugMode();
   const [isEditMode, setIsEditMode] = useState(false);
+  // Whether the bottom panel shows the map (true) or the route list (false).
+  // Kept in context so the dialog header's overflow menu can toggle it too.
+  const [isMapVisible, setIsMapVisible] = useState<boolean>(false);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [imageContainerSize, setImageContainerSize] = useState({
     width: 0,
@@ -664,6 +669,8 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     canUndo,
     canRedo,
     deleteLastPathPoint,
+    isMapVisible,
+    setIsMapVisible,
   };
 
   return (

@@ -1,11 +1,11 @@
 import { useRef } from 'react';
 import { TransformWrapper as Wrapper } from 'react-zoom-pan-pinch';
 import { useClimbingContext } from './contexts/ClimbingContext';
-import { ZoomState } from './types';
 import {
   PANNING_EXCLUDED_CLASS,
   usePreventTouchDefaultOnDragHandles,
 } from './Editor/utils';
+import { ZoomState } from './types';
 import { useCropAnchor } from './useCropAnchor';
 
 const MAX_SCALE = 10;
@@ -31,6 +31,7 @@ export const TransformWrapper = ({ children }) => {
     isPanningDisabled,
     isAddingPointBlockedRef,
     isZoomingRef,
+    isEditMode,
   } = useClimbingContext();
 
   const panStartRef = useRef<{ x: number; y: number; time: number } | null>(
@@ -134,14 +135,17 @@ export const TransformWrapper = ({ children }) => {
 
   return (
     <Wrapper
-      // Disabled everywhere — in edit mode the double-tap would conflict
-      // with point-add gestures, and in view mode it triggers an unwanted
-      // zoom on the second tap of any double-tap-to-select recovery.
+      // Double-click / double-tap zooms the photo, but only in view mode. In
+      // edit mode it would clash with the drawing gestures (a tap adds a route
+      // point, a double-click on the last point finishes the route), so it stays
+      // off there. `excluded` also skips double-clicks that land directly on a
+      // route point / drag handle so those never trigger a zoom.
       doubleClick={{
-        disabled: true,
+        disabled: isEditMode,
         mode: 'toggle',
-        step: 1,
+        step: 1.2,
         animationTime: 150,
+        excluded: [PANNING_EXCLUDED_CLASS],
       }}
       onWheelStart={stopPointerEvents}
       onWheelStop={handleWheelStop}
