@@ -271,8 +271,8 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
                 isTextInfoExpanded={isTextInfoExpanded}
                 setIsTextInfoExpanded={setIsTextInfoExpanded}
               />
-              <HomepageOpenClimbingGallery />
               <Buttons onClose={onClose} />
+              <HomepageOpenClimbingGallery />
             </Stack>
 
             <Divider>
