@@ -29,6 +29,7 @@ import {
   addNaturalRockSource,
   removeNaturalRockSource,
 } from '../naturalRock/naturalRockSource';
+import { addPoiCategoriesToStyle } from '../PoiCategories/poiCategoriesSource';
 import { emptyStyle } from '../styles/emptyStyle';
 import { shortbreadShadowStyle } from '../styles/shortbreadShadowStyle';
 import { shortbreadColorfulStyle } from '../styles/shortbreadColorfulStyle';
@@ -184,6 +185,8 @@ export const useUpdateStyle = createMapEffectHook(
 
     const style = cloneDeep(getBaseStyle(key, currentTheme));
     addOverlaysToStyle(map, style, overlays, currentTheme);
+
+    addPoiCategoriesToStyle(style);
 
     // `natural=rock` is loaded from Overpass and only shown on the tourist map
     if (key === 'tourist') {

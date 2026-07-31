@@ -9,6 +9,12 @@ import { CoordsRow } from './options/coords';
 import { ClimbingRow } from './options/climbing';
 import { TilesRow } from './options/tiles';
 import { SeparatorRow } from './separators';
+import {
+  PoiCategoryRow,
+  PoiClearRow,
+  PoiGroupRow,
+  PoiStatusRow,
+} from './options/poiCategories';
 
 type Props = {
   option: Option;
@@ -31,10 +37,18 @@ const Row = ({ option, inputValue }: Props) => {
       return <CoordsRow option={option} />;
     case 'tiles':
       return <TilesRow option={option} />;
+    case 'poiGroup':
+      return <PoiGroupRow option={option} />;
+    case 'poiCategory':
+      return <PoiCategoryRow option={option} />;
+    case 'poiClear':
+      return <PoiClearRow option={option} />;
+    case 'poiStatus':
+      return <PoiStatusRow option={option} />;
     case 'loader':
       return <LoaderRow />;
     case 'separator':
-      return <SeparatorRow />;
+      return <SeparatorRow option={option} />;
   }
 };
 
@@ -47,7 +61,7 @@ export const renderOptionFactory = (inputValue: string) => {
           {...props} // eslint-disable-line react/jsx-props-no-spreading
           style={{ padding: 0, minHeight: 0, pointerEvents: 'none' }}
         >
-          <SeparatorRow />
+          <SeparatorRow option={option} />
         </li>
       );
     }

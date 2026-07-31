@@ -71,7 +71,33 @@ export type PresetOption = GenericOption<
 
 type LoaderOption = GenericOption<'loader', null>;
 
-export type SeparatorOption = GenericOption<'separator', { section: string }>;
+export type SeparatorOption = GenericOption<
+  'separator',
+  { section: string; label?: string }
+>;
+
+export type PoiGroupOption = GenericOption<
+  'poiGroup',
+  { groupKey: string; expanded: boolean; activeCount: number }
+>;
+
+export type PoiCategoryOption = GenericOption<
+  'poiCategory',
+  {
+    categoryKey: string;
+    active: boolean;
+    indented: boolean;
+    /** Active, but the current zoom is too low to load it. */
+    needsZoom: boolean;
+  }
+>;
+
+export type PoiClearOption = GenericOption<'poiClear', { activeCount: number }>;
+
+export type PoiStatusOption = GenericOption<
+  'poiStatus',
+  { loading: boolean; zoomTooLow: boolean; count: number; error: string | null }
+>;
 
 export type CoordsOption = GenericOption<
   'coords',
@@ -103,4 +129,8 @@ export type Option =
   | ClimbingOption
   | OsmOption
   | TilesOption
-  | SeparatorOption;
+  | SeparatorOption
+  | PoiGroupOption
+  | PoiCategoryOption
+  | PoiClearOption
+  | PoiStatusOption;

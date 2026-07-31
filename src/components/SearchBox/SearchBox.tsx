@@ -13,6 +13,7 @@ import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { setLastFeature } from '../../services/lastFeatureStorage';
 import { DirectionsButton } from '../Directions/DirectionsButton';
 import { usePanelShown } from '../utils/usePanelShown';
+import { PoiCategoriesButton } from './PoiCategoriesButton';
 
 const TopPanel = styled.div`
   position: absolute;
@@ -102,6 +103,7 @@ const SearchBoxInner = ({ withoutPanel }) => {
           <ClosePanelButton onClick={onClosePanel} />
         )}
 
+        {(!featureShown || isMobileMode) && <PoiCategoriesButton />}
         {(!featureShown || isMobileMode) && <DirectionsButton />}
         {isMobileMode && <HamburgerMenu />}
       </StyledPaper>

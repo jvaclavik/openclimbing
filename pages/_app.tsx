@@ -55,6 +55,7 @@ import {
 } from '../src/components/App/crashOverlay';
 import { DebugModeManager } from '../src/components/utils/debug';
 import { AddNewCragProvider } from '../src/components/Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
+import { PoiCategoriesProvider } from '../src/components/utils/PoiCategoriesContext';
 import { AddNewCragBanner } from '../src/components/Map/HamburgerMenu/AddNewCrag/AddNewCragBanner';
 
 initCrashOverlay(); // čte chyby na telefonu, kde není konzole (no-op na serveru)
@@ -122,28 +123,30 @@ const MyApp = (props: Props) => {
                         <QueryClientProvider client={reactQueryClient}>
                           <MyListsProvider>
                             <TicksProvider>
-                              <AddNewCragProvider>
-                                <Head>
-                                  <meta
-                                    name="viewport"
-                                    content="width=device-width, user-scalable=no, initial-scale=1, interactive-widget=resizes-visual"
-                                  />
-                                </Head>
-                                <DebugModeManager />
-                                <Loading />
-                                <SearchBox />
-                                <PhotoHighlightProvider>
-                                  <ResponsiveFeaturePanel />
-                                  <HomepagePanel />
-                                  <Climbing />
-                                  <Map />
-                                </PhotoHighlightProvider>
-                                <AddNewCragBanner />
-                                <TitleAndMetaTags />
+                              <PoiCategoriesProvider>
+                                <AddNewCragProvider>
+                                  <Head>
+                                    <meta
+                                      name="viewport"
+                                      content="width=device-width, user-scalable=no, initial-scale=1, interactive-widget=resizes-visual"
+                                    />
+                                  </Head>
+                                  <DebugModeManager />
+                                  <Loading />
+                                  <SearchBox />
+                                  <PhotoHighlightProvider>
+                                    <ResponsiveFeaturePanel />
+                                    <HomepagePanel />
+                                    <Climbing />
+                                    <Map />
+                                  </PhotoHighlightProvider>
+                                  <AddNewCragBanner />
+                                  <TitleAndMetaTags />
 
-                                {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-                                <Component {...pageProps} />
-                              </AddNewCragProvider>
+                                  {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+                                  <Component {...pageProps} />
+                                </AddNewCragProvider>
+                              </PoiCategoriesProvider>
                             </TicksProvider>
                           </MyListsProvider>
                         </QueryClientProvider>
