@@ -18,19 +18,22 @@ const METERS_PER_BUFFER_DEGREE = 111195;
 // barely bigger than the marker standing on it
 const MIN_INFLATION_METERS = 10;
 
+// ~10 % of the longer side of a square bbox, just measured on its diagonal
+const INFLATION_RATIO = 0.07;
+
 const getMeasures = (hull: GeojsonFeature<Polygon | LineString>) => {
   const [minX, minY, maxX, maxY] = bbox(hull);
-  const width = maxX - minX;
-  const height = maxY - minY;
-  const maxDimension = Math.max(width, height);
+  const diagonalMeters = distance([minX, minY], [maxX, maxY], {
+    units: 'meters',
+  });
 
-  const inflation = Math.max(
-    maxDimension * 0.1,
-    MIN_INFLATION_METERS / METERS_PER_BUFFER_DEGREE,
+  const inflationMeters = Math.max(
+    diagonalMeters * INFLATION_RATIO,
+    MIN_INFLATION_METERS,
   );
+  const inflation = inflationMeters / METERS_PER_BUFFER_DEGREE;
 
-  const meters = distance([minX, minY], [maxX, maxY], { units: 'meters' });
-  const minZoom = Math.log2((5 * 40075016) / (meters * 256));
+  const minZoom = Math.log2((5 * 40075016) / (diagonalMeters * 256));
 
   return { inflation, minZoom };
 };

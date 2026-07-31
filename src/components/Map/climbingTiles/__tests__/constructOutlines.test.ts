@@ -83,13 +83,21 @@ describe('constructOutlines', () => {
   });
 
   it('scales the padding with the size of a large crag', () => {
-    const { width, height } = getSizeMeters([...wall(96, 26, 95), crag]);
+    const { width, height } = getSizeMeters([...wall(96, 60, 200), crag]);
 
-    // 10% of the 95m hull is already above the minimum
-    expect(width).toBeGreaterThan(43);
-    expect(width).toBeLessThan(50);
-    expect(height).toBeGreaterThan(110);
-    expect(height).toBeLessThan(120);
+    // 7% of the ~209m diagonal is already above the minimum
+    expect(width).toBeGreaterThan(85);
+    expect(width).toBeLessThan(93);
+    expect(height).toBeGreaterThan(225);
+    expect(height).toBeLessThan(233);
+  });
+
+  it('pads a wall the same way regardless of its orientation', () => {
+    const northSouth = getSizeMeters([...wall(96, 60, 200), crag]);
+    const eastWest = getSizeMeters([...wall(96, 200, 60), crag]);
+
+    expect(eastWest.width).toBeCloseTo(northSouth.height, 0);
+    expect(eastWest.height).toBeCloseTo(northSouth.width, 0);
   });
 
   it('skips a relation without at least two subfeatures', () => {
