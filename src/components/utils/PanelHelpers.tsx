@@ -43,14 +43,8 @@ type PanelScrollbarsProps = {
 
 const ScrollArea = styled.div`
   height: 100%;
-  // must stay 'auto' on both axes – MUI SwipeableDrawer ignores children whose
-  // used overflow-x is 'hidden' (and 'clip' next to a scrollable axis computes
-  // to hidden), and would then swallow the swipe to drag the drawer instead
   overflow: auto;
-
-  // disable pulling panel around on mobile
-  overscroll-behavior: none;
-  overscroll-behavior-y: auto;
+  overscroll-behavior: contain;
 `;
 
 export const PanelScrollbars = ({

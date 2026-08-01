@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import React, { Ref } from 'react';
+import Router from 'next/router';
 import { FeaturePanel } from './FeaturePanel';
 import { FeaturePanelErrorBoundary } from './FeaturePanelErrorBoundary';
 import { Drawer } from '../utils/Drawer';
@@ -10,6 +11,7 @@ import {
 } from '../utils/MobilePageDrawer';
 import { useScreensize } from '../../helpers/hooks';
 import { useFeatureContext } from '../utils/FeatureContext';
+import { setLastFeature } from '../../services/lastFeatureStorage';
 
 const DRAWER_CLASSNAME = 'featurePanelInDrawer';
 
@@ -20,7 +22,7 @@ type FeaturePanelInDrawerProps = {
 export const FeaturePanelInDrawer = ({
   scrollRef,
 }: FeaturePanelInDrawerProps) => {
-  const { feature } = useFeatureContext();
+  const { feature, setFeature } = useFeatureContext();
   const [collapsedHeight, setCollapsedHeight] = useState<number>(
     DRAWER_PREVIEW_HEIGHT,
   );
@@ -34,8 +36,14 @@ export const FeaturePanelInDrawer = ({
     if (!headingDiv) return;
 
     const baseHeight = Math.min(headingDiv.clientHeight, maxCollapsedHeight);
-    setCollapsedHeight(baseHeight + DRAWER_PREVIEW_PADDING);
+    setCollapsedHeight(baseHeight + DRAWER_PREVIEW_PADDING - 30);
   }, [headingRef, feature, maxCollapsedHeight]);
+
+  const onDismiss = useCallback(() => {
+    setFeature(null);
+    Router.push(`/${window.location.hash}`);
+    setLastFeature(null);
+  }, [setFeature]);
 
   return (
     <Drawer
@@ -44,6 +52,7 @@ export const FeaturePanelInDrawer = ({
       className={DRAWER_CLASSNAME}
       collapsedHeight={collapsedHeight}
       scrollRef={scrollRef}
+      onDismiss={onDismiss}
     >
       <FeaturePanelErrorBoundary>
         <FeaturePanel headingRef={headingRef} />
