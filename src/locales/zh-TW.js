@@ -111,7 +111,6 @@ export default {
   'homepage.disclaimer': `OpenStreetMap 和 OSM 是 OpenStreetMap 基金會的商標。本專案未受 <a href="https://osmfoundation.org/" target='_blank'>OpenStreetMap 基金會</a>的背書或有任何從屬關係。`,
   'homepage.disclaimer_maptiler': `向量地圖（「基本」和「戶外」）包含一些來自 Wikidata 專案的地名，更多資訊請見<a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target='_blank'>這裡</a>。`,
 
-  'homepage.important_links': `重要連結`,
   'homepage.add_new_climbing_area': `新增岩場`,
   'homepage.our_story': `我們的故事`,
   'homepage.openclimbing_description_p1': `用於繪製攀岩區域地圖和建立互動式攀岩指南的應用程式。`,
@@ -121,8 +120,8 @@ export default {
   'homepage.climbing.expanded_description_p1': `本應用程式為開源開發，使用`,
   'homepage.climbing.expanded_description_p2': `來儲存攀岩路線，圖片則透過`,
   'homepage.climbing.expanded_description_p3': `分享，以達到簡單又有效率的資訊共享。`,
-  'homepage.discover_more_p1': `發現其他`,
-  'homepage.discover_more_p2': `區域`,
+  'homepage.discover_more': `顯示所有區域`,
+  'homepage.gallery.title': `附近的攀岩區域`,
 
   'support_us.title': `支持我們`,
   'support_us.p1': `我們是在業餘時間開發這個 App 的，因為我們樂在其中，也相信公共空間的攀岩路線資訊應該像街道名稱一樣能被自由取用。`,

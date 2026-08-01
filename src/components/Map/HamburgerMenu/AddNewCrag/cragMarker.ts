@@ -26,11 +26,44 @@ export const createCragMarkerOptions = (): MarkerOptions => {
   element.style.width = '27px';
   element.style.height = '41px';
   element.style.zIndex = '999';
-  element.innerHTML = svgHtml;
+
+  // maplibre positions the marker element itself, so the drop is animated on an
+  // inner wrapper to keep the two transforms apart
+  const inner = document.createElement('div');
+  inner.dataset.dropTarget = 'true';
+  inner.style.transformOrigin = 'bottom center';
+  inner.innerHTML = svgHtml;
+  element.appendChild(inner);
 
   return {
     draggable: true,
     element,
     offset: [0, -14],
   };
+};
+
+const DROP_HEIGHT = 220;
+
+/** Drops the pin from above the viewport, so it is obvious what just happened */
+export const animateMarkerDrop = (element: HTMLElement) => {
+  const inner = element.querySelector<HTMLElement>('[data-drop-target]');
+  if (!inner || typeof inner.animate !== 'function') {
+    return;
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    inner.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150 });
+    return;
+  }
+
+  inner.animate(
+    [
+      { transform: `translateY(-${DROP_HEIGHT}px)`, opacity: 0, offset: 0 },
+      { transform: 'translateY(-40px)', opacity: 1, offset: 0.45 },
+      { transform: 'translateY(0)', offset: 0.62, easing: 'ease-in' },
+      { transform: 'translateY(-12px) scaleY(0.96)', offset: 0.78 },
+      { transform: 'translateY(0)', offset: 1 },
+    ],
+    { duration: 750, easing: 'cubic-bezier(0.45, 0, 0.7, 1)' },
+  );
 };

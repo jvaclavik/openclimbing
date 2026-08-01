@@ -256,7 +256,6 @@ export default {
     'OpenStreetMap und OSM sind Marken der OpenStreetMap Foundation. Dieses Projekt wird nicht von der <a href="https://osmfoundation.org/" target=\'_blank\'>OpenStreetMap Foundation</a> unterstützt oder ist mit ihr verbunden.',
   'homepage.disclaimer_maptiler':
     'Vektorkarten ("Standard" und "Outdoor") enthalten einige Ortsnamen aus dem Wikidata-Projekt, mehr <a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target=\'_blank\'>hier</a>.',
-  'homepage.important_links': 'Wichtige Links',
   'homepage.add_new_climbing_area': 'Fels hinzufügen',
   'homepage.our_story': 'Unsere Geschichte',
   'homepage.openclimbing_description_p1': 'Anwendung zum Kartieren von Klettergebieten und zum Erstellen interaktiver Kletterführer.',
@@ -266,8 +265,8 @@ export default {
   'homepage.climbing.expanded_description_p1': 'Die Anwendung wird als Open-Source entwickelt und nutzt',
   'homepage.climbing.expanded_description_p2': 'zum Speichern von Kletterrouten, und Bilder werden geteilt über',
   'homepage.climbing.expanded_description_p3': ', was einen einfachen und effizienten Informationsaustausch ermöglicht.',
-  'homepage.discover_more_p1': 'Entdecke weitere',
-  'homepage.discover_more_p2': 'Gebiete',
+  'homepage.discover_more': 'Alle Gebiete anzeigen',
+  'homepage.gallery.title': 'Klettergebiete in der Nähe',
   'support_us.title': 'Unterstütze uns',
   'support_us.p1':
     'Wir entwickeln diese App in unserer Freizeit, weil es uns Freude macht und weil wir glauben, dass Informationen über Kletterrouten im öffentlichen Raum frei zugänglich sein sollten, genau wie Straßennamen.',

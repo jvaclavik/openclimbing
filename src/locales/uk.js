@@ -256,7 +256,6 @@ export default {
     'OpenStreetMap і OSM є торговельною маркою OpenStreetMap Foundation. Цей проєкт не схвалений і не пов’язаний із <a href="https://osmfoundation.org/" target=\'_blank\'>OpenStreetMap Foundation</a>.',
   'homepage.disclaimer_maptiler':
     'Векторні карти («Basic» і «Outdoor») містять деякі географічні назви з проєкту Wikidata, детальніше <a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target=\'_blank\'>тут</a>.',
-  'homepage.important_links': 'Важливі посилання',
   'homepage.add_new_climbing_area': 'Додати скелю',
   'homepage.our_story': 'Наша історія',
   'homepage.openclimbing_description_p1': 'Застосунок для картографування скелелазних районів і створення інтерактивних скелелазних путівників.',
@@ -266,8 +265,8 @@ export default {
   'homepage.climbing.expanded_description_p1': 'Застосунок розробляється як відкритий код, він використовує',
   'homepage.climbing.expanded_description_p2': 'для зберігання маршрутів, а зображення передаються через',
   'homepage.climbing.expanded_description_p3': ', що дозволяє легко й ефективно ділитися інформацією.',
-  'homepage.discover_more_p1': 'Відкрийте інші',
-  'homepage.discover_more_p2': 'райони',
+  'homepage.discover_more': 'Показати всі райони',
+  'homepage.gallery.title': 'Скелелазні райони поблизу',
   'support_us.title': 'Підтримайте нас',
   'support_us.p1':
     'Ми створюємо цей застосунок у вільний час, бо нам це подобається і бо ми віримо, що інформація про скелелазні маршрути в публічному просторі має бути вільно доступною, як і назви вулиць.',

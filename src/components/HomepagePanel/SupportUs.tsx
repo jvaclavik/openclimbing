@@ -1,17 +1,13 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import CloseIcon from '@mui/icons-material/Close';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   AppBar,
   Box,
+  Button,
   Dialog,
   DialogContent,
   IconButton,
-  Link,
   Stack,
   Toolbar,
   Tooltip,
@@ -20,12 +16,7 @@ import {
 import { useState } from 'react';
 import { useUserThemeContext } from '../../helpers/theme';
 import { t } from '../../services/intl';
-
-const AccordionStyle = {
-  '&:before': {
-    backgroundColor: 'transparent !important',
-  },
-};
+import { CardRow, CardTitle, LinkCard } from './LinkCard';
 
 // Dvojitý úder (“lub-dub”) + pauza, v 1s cyklu (což odpovídá cca 60 BPM).
 const heartbeat = keyframes`
@@ -50,13 +41,30 @@ const heartbeat = keyframes`
 `;
 
 const Heart = styled.div`
-  font-size: 32px;
   animation: ${heartbeat} 5s infinite;
+`;
+
+const HelpList = styled.ul`
+  margin: 4px 0 16px;
+  padding-left: 20px;
+
+  li {
+    margin-bottom: 4px;
+  }
 `;
 
 const Qr = styled.img<{ $isDark: boolean }>`
   ${({ $isDark }) => $isDark && `filter: invert(1);`}
 `;
+
+const DONATION_LINKS = [
+  { label: 'Github sponsor', href: 'https://github.com/sponsors/jvaclavik' },
+  {
+    label: 'Buy me a coffee',
+    href: 'https://buymeacoffee.com/openclimbing.org',
+  },
+  { label: 'Revolut', href: 'https://revolut.me/jvaclavik' },
+];
 
 // This function doesn't contain any logic - so no extraction needed.
 // eslint-disable-next-line max-lines-per-function
@@ -70,101 +78,79 @@ export const SupportUs = () => {
   };
 
   return (
-    <>
-      <Box mt={5}>
-        <Accordion disableGutters sx={AccordionStyle} elevation={0}>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Heart>❤️</Heart>
-              <Typography variant="body1" paragraph>
-                {t('support_us.title')}
+    <Box mt={2}>
+      <LinkCard>
+        <CardRow>
+          <CardTitle icon={<Heart>❤️</Heart>}>
+            {t('support_us.title')}
+          </CardTitle>
+          <Typography variant="body2" color="text.secondary" mb={1}>
+            {t('support_us.p1')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mb={2}>
+            {t('support_us.p2')}
+          </Typography>
+
+          <Typography variant="body2" fontWeight={700}>
+            {t('support_us.how_to_help')}
+          </Typography>
+          <HelpList>
+            <li>
+              <Typography variant="body2" color="text.secondary">
+                {t('support_us.share')}
               </Typography>
-            </Stack>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography variant="body2" mb={2}>
-              {t('support_us.p1')}
-            </Typography>
-            <Typography variant="body2" mt={2}>
-              {t('support_us.p2')}
-            </Typography>
-            <Typography variant="body2" mt={2}>
-              {t('support_us.how_to_help')}
-            </Typography>
-            <ul>
-              <li>
-                <Typography variant="body2">{t('support_us.share')}</Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  <a href="mailto:jvaclavik@gmail.com">
-                    {t('support_us.feedback')}
-                  </a>
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  {t('support_us.add_content')}
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  {t('support_us.develop')}
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  {t('support_us.contribute_financially')}
-                </Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body2">
-                      <Link
-                        component="button"
-                        onClick={() => setIsBitcoinDialogOpen(true)}
-                      >
-                        Bitcoin
-                      </Link>
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body2">
-                      <a
-                        href="https://github.com/sponsors/jvaclavik"
-                        target="_blank"
-                      >
-                        Github sponsor
-                      </a>
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body2">
-                      <a
-                        href="https://buymeacoffee.com/openclimbing.org"
-                        target="_blank"
-                      >
-                        Buy me a coffee
-                      </a>
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body2">
-                      <a href="https://revolut.me/jvaclavik" target="_blank">
-                        Revolut
-                      </a>
-                    </Typography>
-                  </li>
-                </ul>
-              </li>
-            </ul>
+            </li>
+            <li>
+              <Typography variant="body2" color="text.secondary">
+                <a href="mailto:jvaclavik@gmail.com">
+                  {t('support_us.feedback')}
+                </a>
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body2" color="text.secondary">
+                {t('support_us.add_content')}
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body2" color="text.secondary">
+                {t('support_us.develop')}
+              </Typography>
+            </li>
+          </HelpList>
+
+          <Typography variant="body2" fontWeight={700} mb={1}>
+            {t('support_us.contribute_financially')}
+          </Typography>
+          <Stack direction="row" flexWrap="wrap" gap={1}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="inherit"
+              onClick={() => setIsBitcoinDialogOpen(true)}
+            >
+              Bitcoin
+            </Button>
+            {DONATION_LINKS.map(({ label, href }) => (
+              <Button
+                key={label}
+                size="small"
+                variant="outlined"
+                color="inherit"
+                href={href}
+                target="_blank"
+              >
+                {label}
+              </Button>
+            ))}
+          </Stack>
+
+          <Typography variant="body2" color="text.secondary" mt={2}>
             {t('support_us.thanks')}
-          </AccordionDetails>
-        </Accordion>
-      </Box>
+          </Typography>
+        </CardRow>
+      </LinkCard>
+
       <Dialog open={isBitcoinDialogOpen} onClose={onClose}>
         <AppBar position="static" color="transparent">
           <Toolbar>
@@ -185,6 +171,6 @@ export const SupportUs = () => {
           <Typography variant="body1">openclimbing@lnbits.cz</Typography>
         </DialogContent>
       </Dialog>
-    </>
+    </Box>
   );
 };

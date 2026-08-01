@@ -7,7 +7,7 @@ import { useAddNewCragContext } from './AddNewCragContext';
 const MIN_ZOOM = 15;
 
 export const AddNewCragBanner = () => {
-  const { isActive, confirm } = useAddNewCragContext();
+  const { isActive, cancel, confirm } = useAddNewCragContext();
   const { view } = useMapStateContext();
   const zoom = parseFloat(view[0]);
   const zoomedEnough = zoom >= MIN_ZOOM;
@@ -32,16 +32,16 @@ export const AddNewCragBanner = () => {
               ? t('add_new_crag.banner_text')
               : t('add_new_crag.zoom_in')}
           </Typography>
-          {zoomedEnough && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={confirm}
-              sx={{ flexShrink: 0 }}
-            >
-              {t('add_new_crag.continue_button')}
+          <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+            <Button variant="text" color="secondary" onClick={cancel}>
+              {t('add_new_crag.cancel_button')}
             </Button>
-          )}
+            {zoomedEnough && (
+              <Button variant="contained" color="primary" onClick={confirm}>
+                {t('add_new_crag.continue_button')}
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Paper>
     </Snackbar>

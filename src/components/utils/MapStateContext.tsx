@@ -69,7 +69,12 @@ const usePersistMapView = (view: View) => {
   useEffect(() => {
     if (fakeStaticExportSkipDefaultMapView(view)) return;
 
-    window.location.hash = view.join('/');
+    // replaceState instead of `location.hash = ` – that would add a history
+    // entry on every map move and browser back would only rewind the map
+    const hash = `#${view.join('/')}`;
+    if (window.location.hash !== hash) {
+      window.history.replaceState(window.history.state, '', hash);
+    }
     Cookies.set('mapView', view.join('/'), { expires: 7, path: '/' }); // TODO find optimal expiration
   }, [view]);
 };

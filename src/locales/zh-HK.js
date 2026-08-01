@@ -112,7 +112,6 @@ export default {
   'homepage.disclaimer': `OpenStreetMap 同 OSM 係 OpenStreetMap 基金會嘅商標。本項目冇獲得 <a href="https://osmfoundation.org/" target='_blank'>OpenStreetMap 基金會</a>嘅認可或有任何關連。`,
   'homepage.disclaimer_maptiler': `向量地圖（「基本」同「戶外」）包含一啲嚟自 Wikidata 項目嘅地名，更多資訊<a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target='_blank'>喺呢度</a>。`,
 
-  'homepage.important_links': `重要連結`,
   'homepage.add_new_climbing_area': `新增岩場`,
   'homepage.our_story': `我哋嘅故仔`,
   'homepage.openclimbing_description_p1': `用嚟繪製攀石區地圖，同埋建立互動攀石指南嘅應用程式。`,
@@ -122,8 +121,8 @@ export default {
   'homepage.climbing.expanded_description_p1': `呢個應用程式係開源開發，佢用`,
   'homepage.climbing.expanded_description_p2': `嚟儲存攀石路線，而相片就經`,
   'homepage.climbing.expanded_description_p3': `分享，令資訊可以簡單又有效率咁共享。`,
-  'homepage.discover_more_p1': `發現其他`,
-  'homepage.discover_more_p2': `地區`,
+  'homepage.discover_more': `顯示所有地區`,
+  'homepage.gallery.title': `附近嘅攀石地區`,
 
   'support_us.title': `支持我哋`,
   'support_us.p1': `我哋喺工餘時間開發呢個 App，除咗係出於興趣，亦都係因為我哋相信，公共空間嘅攀石路線資訊，應該好似街名一樣可以免費流通。`,

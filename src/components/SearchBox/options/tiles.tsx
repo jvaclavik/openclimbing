@@ -7,6 +7,7 @@ import { t } from '../../../services/intl';
 import { getGlobalMap } from '../../../services/mapStorage';
 import { tileToBBOX } from '../../../server/climbing-tiles/tileToBBOX';
 import type { GeoJSONSource } from 'maplibre-gl';
+import { FEATURE_PANEL_WIDTH } from '../../utils/PanelHelpers';
 
 const tileRegex = /^(\d+)\/(\d+)\/(\d+)$/;
 const urlZRegex = /z=(\d+)/;
@@ -100,7 +101,7 @@ export const tilesOptionSelected = ({ tiles }: TilesOption) => {
     });
   }
 
-  const panelWidth = window.innerWidth > 700 ? 410 : 0;
+  const panelWidth = window.innerWidth > 700 ? FEATURE_PANEL_WIDTH : 0;
   map.fitBounds(
     [
       [w, s],

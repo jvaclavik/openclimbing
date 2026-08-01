@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { SEARCH_BOX_HEIGHT } from './consts';
 import { css } from '@emotion/react';
 import { isDesktop } from '../helpers';
+import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
 
 export const TopPanel = styled.div<{ $isMobileMode: boolean }>`
   position: absolute;
@@ -22,6 +23,6 @@ export const TopPanel = styled.div<{ $isMobileMode: boolean }>`
 
   width: 100%;
   @media ${isDesktop} {
-    width: 410px;
+    width: ${FEATURE_PANEL_WIDTH}px;
   }
 `;

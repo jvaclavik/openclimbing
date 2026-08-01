@@ -255,7 +255,6 @@ export default {
     'OpenStreetMap i OSM są znakami towarowymi OpenStreetMap Foundation. Ten projekt nie jest wspierany przez ani powiązany z <a href="https://osmfoundation.org/" target=\'_blank\'>OpenStreetMap Foundation</a>.',
   'homepage.disclaimer_maptiler':
     'Mapy wektorowe („Basic” i „Outdoor”) zawierają niektóre nazwy miejsc z projektu Wikidata, więcej <a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target=\'_blank\'>tutaj</a>.',
-  'homepage.important_links': 'Ważne linki',
   'homepage.add_new_climbing_area': 'Dodaj rejon',
   'homepage.our_story': 'Nasza historia',
   'homepage.openclimbing_description_p1': 'Aplikacja do mapowania rejonów wspinaczkowych i tworzenia interaktywnych przewodników wspinaczkowych.',
@@ -265,8 +264,8 @@ export default {
   'homepage.climbing.expanded_description_p1': 'Aplikacja jest tworzona jako open-source, korzysta z',
   'homepage.climbing.expanded_description_p2': 'do przechowywania dróg wspinaczkowych, a zdjęcia są udostępniane przez',
   'homepage.climbing.expanded_description_p3': ', co pozwala na łatwe i efektywne dzielenie się informacjami.',
-  'homepage.discover_more_p1': 'Odkryj inne',
-  'homepage.discover_more_p2': 'rejony',
+  'homepage.discover_more': 'Pokaż wszystkie rejony',
+  'homepage.gallery.title': 'Rejony wspinaczkowe w pobliżu',
   'support_us.title': 'Wesprzyj nas',
   'support_us.p1':
     'Tworzymy tę aplikację w wolnym czasie, bo sprawia nam to radość i bo wierzymy, że informacje o drogach wspinaczkowych w przestrzeni publicznej powinny być dostępne za darmo, tak jak nazwy ulic.',

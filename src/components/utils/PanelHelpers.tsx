@@ -6,7 +6,7 @@ import { isDesktop, useMobileMode } from '../helpers';
 import { useScrollShadow } from '../FeaturePanel/Climbing/utils/useScrollShadow';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 
-export const FEATURE_PANEL_WIDTH = 410;
+export const FEATURE_PANEL_WIDTH = 460;
 
 // custom scrollbar
 // better: https://github.com/rommguy/react-custom-scroll

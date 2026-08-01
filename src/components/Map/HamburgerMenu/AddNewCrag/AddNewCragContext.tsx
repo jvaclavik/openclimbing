@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -11,15 +12,22 @@ import { getCoordsFeature } from '../../../../services/getCoordsFeature';
 import { getRoundedPosition } from '../../../../utils';
 import { useFeatureContext } from '../../../utils/FeatureContext';
 import { useEditDialogContext } from '../../../FeaturePanel/helpers/EditDialogContext';
-import { createCragMarkerOptions } from './cragMarker';
+import { getVisibleCenter } from '../../../utils/getVisibleCenter';
+import { usePanelShown } from '../../../utils/usePanelShown';
+import { animateMarkerDrop, createCragMarkerOptions } from './cragMarker';
 
 // matches the `climbing/crag` preset in the iD tagging schema, so it is
 // preselected in the EditDialog (see findPreset / getPresetKey)
 const CRAG_PRESET_TAGS = { climbing: 'crag' };
 
+type StartOptions = {
+  /** the caller closes the panel at the same time, so ignore its width */
+  ignorePanel?: boolean;
+};
+
 type AddNewCragContextType = {
   isActive: boolean;
-  start: () => void;
+  start: (options?: StartOptions) => void;
   cancel: () => void;
   confirm: () => void;
 };
@@ -31,26 +39,32 @@ export const AddNewCragProvider: React.FC = ({ children }) => {
   const markerRef = useRef<maplibregl.Marker>();
   const { setFeature } = useFeatureContext();
   const { open } = useEditDialogContext();
+  const panelShown = usePanelShown();
 
   const removeMarker = useCallback(() => {
     markerRef.current?.remove();
     markerRef.current = undefined;
   }, []);
 
-  const start = useCallback(async () => {
-    const map = getGlobalMap();
-    if (!map) {
-      return;
-    }
-    removeMarker();
-    // Import maplibre-gl on demand so it stays out of the shared _app bundle;
-    // by the time a crag is added the map's chunk is already loaded.
-    const { Marker } = await import('maplibre-gl');
-    markerRef.current = new Marker(createCragMarkerOptions())
-      .setLngLat(map.getCenter())
-      .addTo(map);
-    setIsActive(true);
-  }, [removeMarker]);
+  const start = useCallback(
+    async ({ ignorePanel }: StartOptions = {}) => {
+      const map = getGlobalMap();
+      if (!map) {
+        return;
+      }
+      removeMarker();
+      // Import maplibre-gl on demand so it stays out of the shared _app bundle;
+      // by the time a crag is added the map's chunk is already loaded.
+      const { Marker } = await import('maplibre-gl');
+      const options = createCragMarkerOptions();
+      markerRef.current = new Marker(options)
+        .setLngLat(getVisibleCenter(map, panelShown && !ignorePanel))
+        .addTo(map);
+      animateMarkerDrop(options.element);
+      setIsActive(true);
+    },
+    [panelShown, removeMarker],
+  );
 
   const cancel = useCallback(() => {
     removeMarker();
@@ -71,6 +85,20 @@ export const AddNewCragProvider: React.FC = ({ children }) => {
     removeMarker();
     setIsActive(false);
   }, [open, removeMarker, setFeature]);
+
+  useEffect(() => {
+    if (!isActive) {
+      return undefined;
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        cancel();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [cancel, isActive]);
 
   const value: AddNewCragContextType = {
     isActive,

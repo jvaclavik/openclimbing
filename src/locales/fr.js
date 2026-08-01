@@ -259,7 +259,6 @@ export default {
     "OpenStreetMap et OSM sont une marque déposée de l'OpenStreetMap Foundation. Ce projet n'est ni soutenu par ni affilié à l'<a href=\"https://osmfoundation.org/\" target='_blank'>OpenStreetMap Foundation</a>.",
   'homepage.disclaimer_maptiler':
     "Les cartes vectorielles (« Basic » et « Outdoor ») contiennent des noms de lieux issus du projet Wikidata, plus d'infos <a href=\"https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674\" target='_blank'>ici</a>.",
-  'homepage.important_links': 'Liens importants',
   'homepage.add_new_climbing_area': 'Ajouter un site',
   'homepage.our_story': 'Notre histoire',
   'homepage.openclimbing_description_p1': "Application pour cartographier les sites d'escalade et créer des topos d'escalade interactifs.",
@@ -269,8 +268,8 @@ export default {
   'homepage.climbing.expanded_description_p1': "L'application est développée en open-source, elle utilise",
   'homepage.climbing.expanded_description_p2': 'pour stocker les voies et les images sont partagées via',
   'homepage.climbing.expanded_description_p3': ', ce qui permet un partage simple et efficace des informations.',
-  'homepage.discover_more_p1': "Découvrez d'autres",
-  'homepage.discover_more_p2': 'sites',
+  'homepage.discover_more': 'Voir tous les sites',
+  'homepage.gallery.title': "Sites d'escalade à proximité",
   'support_us.title': 'Soutenez-nous',
   'support_us.p1':
     "Nous développons cette app sur notre temps libre parce que cela nous plaît et parce que nous pensons que les informations sur les voies d'escalade dans les espaces publics devraient être librement disponibles, tout comme les noms de rues.",

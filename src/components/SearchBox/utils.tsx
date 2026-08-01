@@ -13,6 +13,7 @@ import { DotLoader } from '../helpers';
 import { GeocoderOption } from './types';
 import { diceCoefficient } from 'dice-coefficient';
 import { SEARCH_THRESHOLD } from './consts';
+import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
 
 export const IconPart = styled.div`
   width: 50px;
@@ -82,7 +83,7 @@ export const fitBounds = ({ geocoder }: GeocoderOption) => {
   const { properties } = geocoder;
   if (properties.extent) {
     const [w, s, e, n] = properties.extent;
-    const panelWidth = window.innerWidth > 700 ? 410 : 0;
+    const panelWidth = window.innerWidth > 700 ? FEATURE_PANEL_WIDTH : 0;
     getGlobalMap()?.fitBounds(
       [
         [w, s],

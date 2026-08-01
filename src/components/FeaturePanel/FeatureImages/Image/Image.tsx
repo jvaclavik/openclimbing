@@ -9,7 +9,7 @@ import { PathsSvg } from '../PathsSvg';
 import { css } from '@emotion/react';
 import { ImageDef, isTag } from '../../../../services/types';
 import { isMobileMode } from '../../../helpers';
-import { PANEL_GAP } from '../../../utils/PanelHelpers';
+import { FEATURE_PANEL_WIDTH, PANEL_GAP } from '../../../utils/PanelHelpers';
 import { HEIGHT } from '../helpers';
 import {
   ImageClickHandler,
@@ -31,14 +31,14 @@ const Img = styled.img<{ $hasPaths: boolean }>`
 // example wide image: relation/1515375
 const CROP_IMAGE_CSS = css`
   overflow: hidden;
-  max-width: calc(410px - 2 * ${PANEL_GAP});
+  max-width: calc(${FEATURE_PANEL_WIDTH}px - 2 * ${PANEL_GAP});
   @media ${isMobileMode} {
     max-width: calc(100% - 2 * ${PANEL_GAP});
   }
 
   &:has(+ div) {
     // if there is another image on the right, show 15px of it
-    max-width: calc(410px - 2 * ${PANEL_GAP} - 15px);
+    max-width: calc(${FEATURE_PANEL_WIDTH}px - 2 * ${PANEL_GAP} - 15px);
     @media ${isMobileMode} {
       max-width: calc(100% - 2 * ${PANEL_GAP} - 15px);
     }

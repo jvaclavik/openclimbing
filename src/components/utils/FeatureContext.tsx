@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import Router, { useRouter } from 'next/router';
@@ -35,6 +36,45 @@ export type FeatureContextType = {
 };
 
 export const FeatureContext = createContext<FeatureContextType>(undefined);
+
+/** Homepage gets hidden as soon as a feature is shown. Browser back returns to
+ *  the very same history entry, so we show it again there. Closing the panel
+ *  pushes a new entry instead – that one means "show me the map". */
+const useRestoreHomepageOnBack = (
+  homepageShown: boolean,
+  feature: Feature | null,
+  isIndex: boolean,
+  showHomepage: () => void,
+) => {
+  const keyWithHomepage = useRef<string>();
+  const shownRef = useRef(homepageShown);
+  shownRef.current = homepageShown;
+
+  useEffect(() => {
+    const onRouteChangeStart = () => {
+      if (shownRef.current) {
+        keyWithHomepage.current = window.history.state?.key;
+      }
+    };
+    Router.events.on('routeChangeStart', onRouteChangeStart);
+    return () => Router.events.off('routeChangeStart', onRouteChangeStart);
+  }, []);
+
+  useEffect(() => {
+    if (homepageShown || !keyWithHomepage.current) {
+      return;
+    }
+
+    if (
+      isIndex &&
+      feature === null &&
+      window.history.state?.key === keyWithHomepage.current &&
+      Cookies.get('hideHomepage') !== 'yes'
+    ) {
+      showHomepage();
+    }
+  }, [homepageShown, feature, isIndex, showHomepage]);
+};
 
 interface Props {
   featureFromRouter: Feature | null;
@@ -100,6 +140,7 @@ export const FeatureProvider = ({
     hideHomepage();
     Cookies.set('hideHomepage', 'yes', { expires: 30, path: '/' });
   };
+  useRestoreHomepageOnBack(homepageShown, feature, isIndex, showHomepage);
 
   if (feature) {
     setLastFeature(feature); // cleared only in onClosePanel

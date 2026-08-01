@@ -13,6 +13,7 @@ import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { setLastFeature } from '../../services/lastFeatureStorage';
 import { DirectionsButton } from '../Directions/DirectionsButton';
 import { usePanelShown } from '../utils/usePanelShown';
+import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
 
 const TopPanel = styled.div`
   position: absolute;
@@ -25,7 +26,7 @@ const TopPanel = styled.div`
 
   width: 100%;
   @media ${isDesktop} {
-    width: 410px;
+    width: ${FEATURE_PANEL_WIDTH}px;
   }
 `;
 

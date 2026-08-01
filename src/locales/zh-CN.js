@@ -112,7 +112,6 @@ export default {
   'homepage.disclaimer': `OpenStreetMap 和 OSM 是 OpenStreetMap 基金会的商标。本项目未经 <a href="https://osmfoundation.org/" target='_blank'>OpenStreetMap 基金会</a>认可或附属。`,
   'homepage.disclaimer_maptiler': `矢量地图（“基础”和“户外”）包含一些来自 Wikidata 项目的地名，更多信息<a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target='_blank'>在此</a>。`,
 
-  'homepage.important_links': `重要链接`,
   'homepage.add_new_climbing_area': `添加岩场`,
   'homepage.our_story': `我们的故事`,
   'homepage.openclimbing_description_p1': `用于绘制攀岩区域地圖和创建交互式攀岩指南的应用。`,
@@ -122,8 +121,8 @@ export default {
   'homepage.climbing.expanded_description_p1': `本应用是开源开发的，它使用`,
   'homepage.climbing.expanded_description_p2': `来存储攀岩路线，图片则通过`,
   'homepage.climbing.expanded_description_p3': `共享，从而实现简单高效的信息共享。`,
-  'homepage.discover_more_p1': `发现其他`,
-  'homepage.discover_more_p2': `区域`,
+  'homepage.discover_more': `显示所有区域`,
+  'homepage.gallery.title': `附近的攀岩区域`,
 
   'support_us.title': `支持我们`,
   'support_us.p1': `我们利用业余时间开发这个应用，因为我们乐在其中，也因为我们相信，公共空间攀岩路线的信息应该像街道名称一样可以免费获取。`,

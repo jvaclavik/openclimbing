@@ -256,7 +256,6 @@ export default {
     'OpenStreetMap e OSM sono marchi registrati della Fondazione  OpenStreetMap. Questo progetto non è approvato o affiliato con la <a href="https://osmfoundation.org/" target=\'_blank\'>Fondazione OpenStreetMap</a>.',
   'homepage.disclaimer_maptiler':
     'Le mappe vettoriali ("Base" e "Esterna") contengono alcuni nomi di luogi dal progetto Wikidata, maggiori informazioni <a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target=\'_blank\'>qui</a>.',
-  'homepage.important_links': 'Link importanti',
   'homepage.add_new_climbing_area': 'Aggiungi falesia',
   'homepage.our_story': 'La nostra storia',
   'homepage.openclimbing_description_p1': 'Applicazione per mappare le aree di arrampicata e creare guide di arrampicata interattive.',
@@ -266,8 +265,8 @@ export default {
   'homepage.climbing.expanded_description_p1': 'L’applicazione è sviluppata come open-source e utilizza',
   'homepage.climbing.expanded_description_p2': 'per memorizzare le vie e le immagini sono condivise tramite',
   'homepage.climbing.expanded_description_p3': ', il che consente una condivisione semplice ed efficiente delle informazioni.',
-  'homepage.discover_more_p1': 'Scopri altre',
-  'homepage.discover_more_p2': 'aree',
+  'homepage.discover_more': 'Mostra tutte le aree',
+  'homepage.gallery.title': 'Aree di arrampicata vicine',
   'support_us.title': 'Sostienici',
   'support_us.p1':
     'Sviluppiamo questa app nel nostro tempo libero perché ci piace e perché crediamo che le informazioni sulle vie di arrampicata negli spazi pubblici debbano essere liberamente disponibili, proprio come i nomi delle strade.',

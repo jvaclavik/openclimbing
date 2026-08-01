@@ -257,7 +257,6 @@ export default {
     'OpenStreetMap y OSM son una marca registrada de la OpenStreetMap Foundation. Este proyecto no está respaldado por ni afiliado a la <a href="https://osmfoundation.org/" target=\'_blank\'>OpenStreetMap Foundation</a>.',
   'homepage.disclaimer_maptiler':
     'Los mapas vectoriales ("Basic" y "Outdoor") contienen algunos nombres de lugares del proyecto Wikidata, más <a href="https://github.com/openstreetmap/openstreetmap-website/pull/4042#issuecomment-1562761674" target=\'_blank\'>aquí</a>.',
-  'homepage.important_links': 'Enlaces importantes',
   'homepage.add_new_climbing_area': 'Añadir zona',
   'homepage.our_story': 'Nuestra historia',
   'homepage.openclimbing_description_p1': 'Aplicación para cartografiar zonas de escalada y crear guías de escalada interactivas.',
@@ -267,8 +266,8 @@ export default {
   'homepage.climbing.expanded_description_p1': 'La aplicación se desarrolla como código abierto y utiliza',
   'homepage.climbing.expanded_description_p2': 'para almacenar las vías de escalada y las imágenes se comparten a través de',
   'homepage.climbing.expanded_description_p3': ', lo que permite compartir información de forma fácil y eficiente.',
-  'homepage.discover_more_p1': 'Descubre otras',
-  'homepage.discover_more_p2': 'zonas',
+  'homepage.discover_more': 'Ver todas las zonas',
+  'homepage.gallery.title': 'Zonas de escalada cercanas',
   'support_us.title': 'Apóyanos',
   'support_us.p1':
     'Creamos esta app en nuestro tiempo libre porque nos gusta y porque creemos que la información sobre las vías de escalada en espacios públicos debería estar disponible libremente, igual que los nombres de las calles.',
