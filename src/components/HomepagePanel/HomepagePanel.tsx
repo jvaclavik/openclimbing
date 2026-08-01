@@ -24,19 +24,10 @@ export const HomepagePanel = () => {
     return null;
   }
 
-  const onClose = (_: React.TransitionEvent<HTMLDivElement>, open: boolean) => {
-    if (!open) {
-      persistHideHomepage();
-    }
-  };
-
+  // swiping the drawer down only collapses it to the preview strip (like the
+  // other pages) – the homepage is dismissed for good by the close button
   return (
-    <MobilePageDrawer
-      onClose={onClose}
-      className="homepage-drawer"
-      collapsedHeight={0}
-      topOffset={180}
-    >
+    <MobilePageDrawer className="homepage-drawer">
       <Homepage onClick={persistHideHomepage} mobileMode={isMobileMode} />
     </MobilePageDrawer>
   );

@@ -2,16 +2,12 @@ import React, { useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import SearchIcon from '@mui/icons-material/Search';
 import { CircularProgress, IconButton, Paper } from '@mui/material';
-import Router, { useRouter } from 'next/router';
-import { useFeatureContext } from '../utils/FeatureContext';
+import { useRouter } from 'next/router';
 import { AutocompleteInput } from './AutocompleteInput';
 import { t } from '../../services/intl';
-import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { isDesktop, useMobileMode } from '../helpers';
 import { SEARCH_BOX_HEIGHT } from './consts';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
-import { setLastFeature } from '../../services/lastFeatureStorage';
-import { DirectionsButton } from '../Directions/DirectionsButton';
 import { usePanelShown } from '../utils/usePanelShown';
 import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
 
@@ -65,20 +61,10 @@ const LoadingSpinner = styled(CircularProgress)`
 
 // https://docs.mapbox.com/help/troubleshooting/working-with-large-geojson-data/
 
-const useOnClosePanel = () => {
-  const { setFeature } = useFeatureContext();
-
-  return () => {
-    setFeature(null);
-    Router.push(`/${window.location.hash}`);
-    setLastFeature(null);
-  };
-};
-
 type SearchFieldProps = {
   withShadow?: boolean;
-  showDirections?: boolean;
   showHamburger?: boolean;
+  autoFocus?: boolean;
 };
 
 /**
@@ -87,14 +73,12 @@ type SearchFieldProps = {
  */
 export const SearchField = ({
   withShadow = false,
-  showDirections = true,
   showHamburger = false,
+  autoFocus = false,
 }: SearchFieldProps) => {
   const isMobileMode = useMobileMode();
-  const { featureShown } = useFeatureContext();
   const [isLoading, setIsLoading] = useState(false);
   const autocompleteRef = useRef();
-  const onClosePanel = useOnClosePanel();
 
   return (
     <StyledPaper $withShadow={withShadow} elevation={1} ref={autocompleteRef}>
@@ -105,16 +89,10 @@ export const SearchField = ({
       <AutocompleteInput
         autocompleteRef={autocompleteRef}
         setIsLoading={setIsLoading}
+        autoFocus={autoFocus}
       />
 
       {isLoading && <LoadingSpinner />}
-      {!isMobileMode && featureShown && (
-        <ClosePanelButton onClick={onClosePanel} />
-      )}
-
-      {showDirections && (!featureShown || isMobileMode) && (
-        <DirectionsButton />
-      )}
       {showHamburger && isMobileMode && <HamburgerMenu />}
     </StyledPaper>
   );

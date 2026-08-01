@@ -13,7 +13,6 @@ import {
   Tooltip,
 } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
-import HelpIcon from '@mui/icons-material/Help';
 import styled from '@emotion/styled';
 import { useBoolState } from '../../helpers';
 import { t } from '../../../services/intl';
@@ -28,15 +27,12 @@ import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
-import TerrainIcon from '@mui/icons-material/Terrain';
 import Link from 'next/link';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserHeader } from './UserHeader';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import { MyListsSection } from './MyListsSection';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import ContrastIcon from '@mui/icons-material/Contrast';
-import { AddNewCragMenuItem } from './AddNewCrag/AddNewCragMenuItem';
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
@@ -67,21 +63,6 @@ const EditLink = () => {
   );
 };
 
-const AboutLink = ({ closeMenu }) => {
-  const { persistShowHomepage } = useFeatureContext();
-  const handleClick = () => {
-    persistShowHomepage();
-    closeMenu();
-  };
-  return (
-    <MenuItem onClick={handleClick} title={process.env.sentryRelease}>
-      <ListItemIcon>
-        <HelpIcon />
-      </ListItemIcon>
-      <ListItemText>{t('map.about_link')}</ListItemText>
-    </MenuItem>
-  );
-};
 const GithubLink = () => (
   <Tooltip title={t('map.github_title')}>
     <IconButton
@@ -92,26 +73,6 @@ const GithubLink = () => (
       <StyledGithubIcon width={22} height={22} />
     </IconButton>
   </Tooltip>
-);
-const ClimbingForumLink = () => (
-  <MenuItem
-    href="https://community.openclimbing.org"
-    component={Link}
-    target="_blank"
-  >
-    <ListItemIcon>
-      <QuestionAnswerIcon />
-    </ListItemIcon>
-    <ListItemText>{t('climbing.forum')} </ListItemText>
-  </MenuItem>
-);
-const ClimbingAreasLink = ({ closeMenu }) => (
-  <MenuItem href="/climbing-areas" component={Link} onClick={closeMenu}>
-    <ListItemIcon>
-      <TerrainIcon />
-    </ListItemIcon>
-    <ListItemText>{t('climbingareas.title')}</ListItemText>
-  </MenuItem>
 );
 const ClimbingGradesTableLink = ({ closeMenu }) => (
   <MenuItem href="/climbing-grades" component={Link} onClick={closeMenu}>
@@ -177,11 +138,7 @@ const ThemeSelection = () => {
 // https://github.com/mui-org/material-ui/issues/22912
 // https://github.com/mui-org/material-ui/issues?q=is%3Aissue+is%3Aopen+menuitem+keyboard
 
-export const HamburgerMenu = ({
-  forceMenuIcon = false,
-}: {
-  forceMenuIcon?: boolean;
-}) => {
+export const HamburgerMenu = () => {
   const anchorRef = useRef();
   const [opened, open, close] = useBoolState(false);
   const isOpenClimbing = PROJECT_ID === 'openclimbing';
@@ -205,23 +162,17 @@ export const HamburgerMenu = ({
             )}
             {(hasClimbingLayer || isOpenClimbing) && (
               <>
-                <ClimbingAreasLink closeMenu={close} />
                 <ClimbingGradesTableLink closeMenu={close} />
                 <TickScoringLink closeMenu={close} />
                 {isOpenClimbing && (
-                  <>
-                    <ClimbingLeaderboardLink closeMenu={close} />
-                    <AddNewCragMenuItem closeMenu={close} />
-                  </>
+                  <ClimbingLeaderboardLink closeMenu={close} />
                 )}
               </>
             )}
           </div>
           <div>
-            <AboutLink closeMenu={close} />
             <Divider />
             <Box mb={2}>
-              {isOpenClimbing && <ClimbingForumLink />}
               <EditLink />
             </Box>
             <Divider />
@@ -236,11 +187,7 @@ export const HamburgerMenu = ({
         </Stack>
       </Drawer>
 
-      <HamburgerMenuButton
-        anchorRef={anchorRef}
-        onClick={open}
-        forceMenuIcon={forceMenuIcon}
-      />
+      <HamburgerMenuButton anchorRef={anchorRef} onClick={open} />
     </>
   );
 };

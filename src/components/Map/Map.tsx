@@ -9,7 +9,6 @@ import { SHOW_PROTOTYPE_UI } from '../../config.mjs';
 import { LayerSwitcherButton } from '../LayerSwitcher/LayerSwitcherButton';
 import { MaptilerLogo } from './MapFooter/MaptilerLogo';
 import { useMapStateContext } from '../utils/MapStateContext';
-import { Weather } from './Weather/Weather';
 import { MapFilter } from './MapFilter/MapFilter';
 import { SunShadow } from './SunShadow/SunShadow';
 import { Radar } from './Radar/Radar';
@@ -102,7 +101,6 @@ const Map = () => {
       <BottomLeft>
         {SHOW_PROTOTYPE_UI && <BugReportButton />}
         <MaptilerLogo />
-        <Weather />
         <MapFooter />
       </BottomLeft>
       <BottomRight>

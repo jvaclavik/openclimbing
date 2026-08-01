@@ -100,19 +100,6 @@ export const UserSettingsDialog = ({ onClose, isOpened }: Props) => {
         <PanelLabel>{t('user_settings.general')}</PanelLabel>
         <List>
           <ListItem>
-            <ListItemText>
-              {t('user_settings.show_weather_widget')}
-            </ListItemText>
-            <Switch
-              color="primary"
-              edge="end"
-              onChange={(e) => {
-                setUserSetting('weather.enabled', e.target.checked);
-              }}
-              checked={userSettings['weather.enabled']}
-            />
-          </ListItem>
-          <ListItem>
             <ListItemText>{t('user_settings.is_imperial')}</ListItemText>
             <Switch
               color="primary"

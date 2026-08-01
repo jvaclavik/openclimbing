@@ -22,7 +22,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Router from 'next/router';
 import { t } from '../../../services/intl';
 import { useMyListsContext } from '../../utils/MyListsContext';
-import { usePersistedState } from '../../utils/usePersistedState';
 import { UserList } from '../../../services/my-lists/myListsTypes';
 import { CreateListDialog } from '../../MyLists/CreateListDialog';
 import { EditListDialog } from '../../MyLists/EditListDialog';
@@ -125,10 +124,7 @@ export const MyListsSection = ({ closeMenu }: Props) => {
     useMyListsContext();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingList, setEditingList] = useState<UserList | null>(null);
-  const [expanded, setExpanded] = usePersistedState<boolean>(
-    'myLists.menuExpanded',
-    false,
-  );
+  const [expanded, setExpanded] = useState(false);
 
   const handleOpen = (list: UserList) => {
     closeMenu();

@@ -12,18 +12,16 @@ import { dotToOptionalBr } from '../helpers';
 import { intl, t, Translation } from '../../services/intl';
 import { TooltipButton } from '../utils/TooltipButton';
 import { useQuery } from 'react-query';
+import { CLIMBING_STATS_URL } from '../../services/climbing-areas/getClimbingStats';
 import { fetchJson } from '../../services/fetch';
 import type { ClimbingStatsResponse } from '../../types';
 import { nl2br } from '../utils/nl2br';
-import { CLIMBING_TILES_HOST } from '../../services/osm/consts';
 
 const getLocalTime = (lastRefresh: string) =>
   lastRefresh ? new Date(lastRefresh).toLocaleString(intl.lang) : null;
 
 const fetchClimbingStats = () =>
-  fetchJson<ClimbingStatsResponse>(
-    `${CLIMBING_TILES_HOST}api/climbing-tiles/stats`,
-  );
+  fetchJson<ClimbingStatsResponse>(CLIMBING_STATS_URL);
 
 const ClimbingSecondaryInner = () => {
   const { data, error, isFetching } = useQuery([], () => fetchClimbingStats());

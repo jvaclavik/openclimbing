@@ -6,13 +6,19 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import GithubIcon from '../../assets/GithubIcon';
 import { LogoMaptiler } from '../../assets/LogoMaptiler';
 import { intl, t } from '../../services/intl';
 import { useMobileMode } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
+import {
+  ClimbingNumbers,
+  GradientHeading,
+  SectionHeading,
+  useClimbingStats,
+} from '../utils/panelUi';
 import { PanelContent, PanelScrollbars } from '../utils/PanelHelpers';
 import { DividerOpenClimbing } from './DividerOpenClimbing';
 import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
@@ -30,72 +36,44 @@ const Content = styled.div`
   padding: 20px 2em 0 2em;
 `;
 
-const SectionHeading = ({ children }: { children: ReactNode }) => (
-  <Typography
-    variant="overline"
-    component="h2"
-    color="text.secondary"
-    sx={{ display: 'block', mb: 1, fontWeight: 700, letterSpacing: 1.5 }}
-  >
-    {children}
-  </Typography>
+const Brand = styled(GradientHeading)`
+  font-size: 46px;
+  text-align: center;
+`;
+
+const Header = () => (
+  <Stack component="section" alignItems="center" mt={2} mb={2}>
+    <Brand>OpenClimbing</Brand>
+    <Typography
+      component="p"
+      variant="subtitle2"
+      color="secondary"
+      textTransform="lowercase"
+    >
+      {t('project.openclimbing.description')}
+    </Typography>
+  </Stack>
 );
 
-const Header = () => {
-  const isMobileMode = useMobileMode();
-
-  return (
-    <Stack
-      component="section"
-      alignItems={isMobileMode ? 'flex-start' : 'center'}
-      sx={{
-        mt: isMobileMode ? 1 : 4,
-        mb: 2,
-      }}
-    >
-      <Typography
-        component="h1"
-        variant="h2"
-        color="inherit"
-        fontWeight={600}
-        lineHeight={1.1}
-      >
-        OpenClimbing
-      </Typography>
-      <Typography
-        component="p"
-        variant="subtitle2"
-        color="secondary"
-        textTransform="lowercase"
-      >
-        {t('project.openclimbing.description')}
-      </Typography>
-    </Stack>
-  );
-};
-
-const Description = () => {
-  const isMobileMode = useMobileMode();
-
-  return (
-    <Typography
-      variant="body2"
-      component="p"
-      color="text.secondary"
-      sx={{
-        maxWidth: 380,
-        mx: 'auto',
-        lineHeight: 1.6,
-        textAlign: isMobileMode ? 'left' : 'center',
-      }}
-    >
-      {t('homepage.openclimbing_description_p1')}{' '}
-      <Box component="strong" color="text.primary">
-        {t('homepage.openclimbing_description_p2')}
-      </Box>
-    </Typography>
-  );
-};
+const Description = () => (
+  <Typography
+    variant="body2"
+    component="p"
+    color="text.secondary"
+    sx={{
+      maxWidth: 380,
+      mx: 'auto',
+      mb: 3,
+      lineHeight: 1.6,
+      textAlign: 'center',
+    }}
+  >
+    {t('homepage.openclimbing_description_p1')}{' '}
+    <Box component="strong" color="text.primary">
+      {t('homepage.openclimbing_description_p2')}
+    </Box>
+  </Typography>
+);
 
 const AboutOpenStreetMap = () => (
   <Typography variant="body2">
@@ -126,7 +104,7 @@ const Buttons = ({ onClose }) => {
   };
 
   return (
-    <Stack spacing={1} mt={3}>
+    <Stack spacing={1} mt={4}>
       {isMobileMode && (
         <Button
           variant="contained"
@@ -182,6 +160,10 @@ const StyledGithubIcon = styled(GithubIcon)`
 
 const FooterLink = styled.a`
   display: flex;
+  align-items: center;
+`;
+
+const GithubLink = styled(FooterLink)`
   opacity: 0.65;
 
   &:hover {
@@ -191,19 +173,20 @@ const FooterLink = styled.a`
 
 const Gallery = () => (
   <Box mt={4}>
-    <SectionHeading>{t('homepage.gallery.title')}</SectionHeading>
+    <SectionHeading centered>{t('homepage.gallery.title')}</SectionHeading>
     <HomepageOpenClimbingGallery />
-    <Button
-      component={Link}
-      href="/climbing-areas"
-      locale={intl.lang}
-      variant="text"
-      fullWidth
-      endIcon={<ArrowForwardIcon />}
-      sx={{ mt: 1 }}
-    >
-      {t('homepage.discover_more')}
-    </Button>
+    <Stack alignItems="center" mt={1}>
+      <Button
+        component={Link}
+        href="/climbing-areas"
+        locale={intl.lang}
+        variant="text"
+        size="small"
+        endIcon={<ArrowForwardIcon />}
+      >
+        {t('homepage.discover_more')}
+      </Button>
+    </Stack>
   </Box>
 );
 
@@ -231,22 +214,22 @@ const Footer = () => (
     pb={2}
   >
     <Stack direction="row" alignItems="center" spacing={2}>
-      <a
+      <FooterLink
         href="https://www.maptiler.com"
         target="_blank"
         aria-label="MapTiler"
         title="MapTiler"
       >
         <LogoMaptiler width={120} />
-      </a>
-      <FooterLink
+      </FooterLink>
+      <GithubLink
         href="https://github.com/jvaclavik/openclimbing"
         target="_blank"
         aria-label={t('map.github_title')}
         title={t('map.github_title')}
       >
         <StyledGithubIcon width="22" />
-      </FooterLink>
+      </GithubLink>
     </Stack>
     <Typography variant="caption" color="secondary" letterSpacing={1}>
       Made in Prague with ♥
@@ -255,6 +238,8 @@ const Footer = () => (
 );
 
 export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
+  const stats = useClimbingStats();
+
   return (
     <PanelContent>
       <PanelScrollbars>
@@ -264,8 +249,9 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
             <Stack flex={1} justifyContent="center">
               <Header />
               <Description />
-              <Buttons onClose={onClose} />
+              <ClimbingNumbers stats={stats} />
               <Gallery />
+              <Buttons onClose={onClose} />
             </Stack>
 
             <Divider>

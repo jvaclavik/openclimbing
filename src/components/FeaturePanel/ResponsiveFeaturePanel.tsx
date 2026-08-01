@@ -4,7 +4,6 @@ import { FeaturePanelInDrawer } from './FeaturePanelInDrawer';
 import { FeaturePanelOnSide } from './FeaturePanelOnSide';
 import React, { useEffect, useRef } from 'react';
 import { useMapStateContext } from '../utils/MapStateContext';
-import { Scrollbars } from 'react-custom-scrollbars';
 import { useRouter } from 'next/router';
 import { getMapViewFromHash } from '../App/helpers';
 import { getFeatureBbox } from '../../services/getCenter';
@@ -70,28 +69,19 @@ const useUpdateViewFromFeature = () => {
 };
 
 const useScrollToTopWhenRouteChanged = () => {
-  const isMobileMode = useMobileMode();
-  const desktopScrollRef = useRef<Scrollbars>(null);
-  const mobileScrollRef = useRef<HTMLDivElement>(null);
-  const scrollRef = isMobileMode ? mobileScrollRef : desktopScrollRef;
+  const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     const routeChangeComplete = () => {
-      if (scrollRef?.current) {
-        if (isMobileMode) {
-          (scrollRef as any).current?.scrollTo?.(0, 0);
-        } else {
-          (scrollRef as any).current?.scrollToTop?.();
-        }
-      }
+      scrollRef.current?.scrollTo(0, 0);
     };
     router.events.on('routeChangeComplete', routeChangeComplete);
 
     return () => {
       router.events.off('routeChangeComplete', routeChangeComplete);
     };
-  }, [isMobileMode, router.events, scrollRef]);
+  }, [router.events]);
 
   return scrollRef;
 };
@@ -101,7 +91,7 @@ const useScrollToTopWhenRouteChanged = () => {
 export const ResponsiveFeaturePanel = () => {
   const isMobileMode = useMobileMode();
   const { featureShown } = useFeatureContext();
-  const scrollRef = useScrollToTopWhenRouteChanged() as any;
+  const scrollRef = useScrollToTopWhenRouteChanged();
   useUpdateViewFromFeature();
 
   if (!featureShown) {

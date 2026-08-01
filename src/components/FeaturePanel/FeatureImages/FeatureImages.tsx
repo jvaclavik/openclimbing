@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
-import { Scrollbars } from 'react-custom-scrollbars';
 import { Image } from './Image/Image';
 import { useLoadImages } from './useLoadImages';
 import { NoImage } from './NoImage';
@@ -22,7 +21,7 @@ export const Wrapper = styled.div`
   min-height: calc(${HEIGHT}px + 10px); // otherwise it shrinks b/c of flex
 `;
 
-const StyledScrollbars = styled(Scrollbars)`
+const StyledSlider = styled.div`
   width: 100%;
   height: 100%;
   white-space: nowrap;
@@ -33,11 +32,7 @@ const StyledScrollbars = styled(Scrollbars)`
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 `;
-export const Slider = ({ children }) => (
-  <StyledScrollbars universal autoHide suppressHydrationWarning={true}>
-    {children}
-  </StyledScrollbars>
-);
+export const Slider = ({ children }) => <StyledSlider>{children}</StyledSlider>;
 
 export const FeatureImages = () => {
   const { feature } = useFeatureContext();

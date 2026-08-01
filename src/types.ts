@@ -14,6 +14,9 @@ export type ClimbingStatsResponse = {
   groupsCount: number;
   groupsWithNameCount: number;
   routesCount: number;
+  areasCount: number;
+  routesWithPhotoCount: number;
+  countriesCount: number;
 };
 
 // @see climbingTilesSource#processFeature()

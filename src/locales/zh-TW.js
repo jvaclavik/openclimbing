@@ -33,7 +33,6 @@ export default {
   'user.user_settings': '設定',
 
   'user_settings.general': '一般',
-  'user_settings.show_weather_widget': '顯示天氣小工具',
   'user_settings.climbing': '攀岩',
   'user_settings.default_grade_system': '預設難度系統',
   'user_settings.show_grades_in_pictures': '在照片中顯示難度',
@@ -458,8 +457,6 @@ export default {
   'osmtype.way.description': '由多個節點組成的線。',
   'osmtype.relation': '關係 (Relation)',
   'osmtype.relation.description': '由其他元素（路徑、節點，甚至其他關係）組成的群組。',
-
-  weather: '天氣',
 
   'climbing_tiles.stats': `刷新頻率：約每月1次 (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">直到 Overpass 問題解決為止</a>)<br />上次刷新：__lastRefresh__<br />OSM 時間戳：__osmTime__<br/>CDN 快取：1 小時`,
   'climbing.type.ferrata': '鐵索攀岩道',

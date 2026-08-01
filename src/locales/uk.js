@@ -86,7 +86,6 @@ export default {
   'add_new_crag.zoom_in': 'Будь ласка, збільшіть масштаб, щоб додати скелю.',
 
   'user_settings.general': 'Загальні',
-  'user_settings.show_weather_widget': 'Показувати віджет погоди',
   'user_settings.climbing': 'Лазіння',
   'user_settings.default_grade_system': 'Система категорій за замовчуванням',
   'user_settings.show_grades_in_pictures': 'Показувати категорії на фото',
@@ -730,7 +729,6 @@ export default {
   'osmtype.way.description': 'Лінія, що складається з кількох (багатьох) вузлів.',
   'osmtype.relation': 'Відношення',
   'osmtype.relation.description': 'Група інших елементів – ліній, вузлів і навіть інших відношень.',
-  weather: 'Погода',
   'climbing_tiles.stats':
     'Оновлено: ~1× / місяць (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">доки не вирішено проблеми overpass</a>)<br />Останнє оновлення: __lastRefresh__<br />Мітка часу OSM: __osmTime__<br/>Кеш CDN: 1 година',
   'climbing.type.ferrata': 'Via Ferrata',

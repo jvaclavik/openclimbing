@@ -2,7 +2,14 @@ import { useMediaQuery } from '@mui/material';
 import { grey, red } from '@mui/material/colors';
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles';
 import Cookies from 'js-cookie';
-import { createContext, useContext, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Setter } from '../types';
 
 const sharedThemeOptions: ThemeOptions = {
@@ -114,7 +121,7 @@ const darkTheme = createTheme({
     background: {
       default: '#000000bb',
       elevation: '#1d1d1ddd',
-      paper: '#111',
+      paper: '#111111ee',
       hover: grey['700'],
       searchBox: '#963838',
       searchInput: 'rgba(0,0,0,0.5)',
@@ -162,6 +169,28 @@ const useGetCurrentTheme = (userTheme: UserTheme) => {
   }, [userTheme, prefersDarkMode]);
 };
 
+// Alt+T flips between light and dark, never back to 'system'
+const useToggleThemeShortcut = (
+  currentTheme: Theme,
+  setUserTheme: (choice: UserTheme) => void,
+) => {
+  useEffect(() => {
+    const onKeydown = (e: KeyboardEvent) => {
+      // `key` is unusable here - Option+T types '†' on macOS
+      if (e.code !== 'KeyT' || !e.altKey || e.ctrlKey || e.metaKey) {
+        return;
+      }
+      e.preventDefault();
+      setUserTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    };
+
+    window.addEventListener('keydown', onKeydown);
+    return () => {
+      window.removeEventListener('keydown', onKeydown);
+    };
+  }, [currentTheme, setUserTheme]);
+};
+
 export const UserThemeProvider = ({ children, userThemeCookie }) => {
   const [userTheme, setUserThemeState] = useState<UserTheme>(
     userThemeCookie ?? 'system',
@@ -169,10 +198,12 @@ export const UserThemeProvider = ({ children, userThemeCookie }) => {
   const currentTheme = useGetCurrentTheme(userTheme);
   const theme = currentTheme === 'dark' ? darkTheme : lightTheme;
 
-  const setUserTheme = (choice: UserTheme) => {
+  const setUserTheme = useCallback((choice: UserTheme) => {
     setUserThemeState(choice);
     Cookies.set('userTheme', choice, { expires: 30 * 12 * 10, path: '/' });
-  };
+  }, []);
+
+  useToggleThemeShortcut(currentTheme, setUserTheme);
 
   const value: UserThemeContextType = {
     userTheme,

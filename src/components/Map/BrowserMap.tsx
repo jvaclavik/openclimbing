@@ -100,6 +100,24 @@ const useSuppressMapSelection = (
   }, [containerRef]);
 };
 
+// On mobile the homepage stays on screen as a collapsed drawer strip. A tap on
+// the map can only reach it once the drawer is collapsed (its backdrop catches
+// the first one), and it clearly means the user is done with the homepage.
+const useHideCollapsedHomepage = (
+  map: MaplibreMap | undefined,
+  persistHideHomepage: () => void,
+  enabled: boolean,
+) => {
+  useEffect(() => {
+    if (!map || !enabled) return undefined;
+
+    map.on('click', persistHideHomepage);
+    return () => {
+      map.off('click', persistHideHomepage);
+    };
+  }, [map, persistHideHomepage, enabled]);
+};
+
 const NotSupportedMessage = () => (
   <span
     style={{ position: 'absolute', left: '48%', top: '48%', maxWidth: '350px' }}
@@ -113,7 +131,8 @@ const BrowserMap = () => {
   const { showToast } = useSnackbar();
   const { userLayers } = useMapStateContext();
   const mobileMode = useMobileMode();
-  const { setFeature } = useFeatureContext();
+  const { setFeature, homepageShown, persistHideHomepage } =
+    useFeatureContext();
   const { mapLoaded, setMapLoaded, mapClickOverrideRef } = useMapStateContext();
   const { currentTheme } = useUserThemeContext();
 
@@ -121,6 +140,11 @@ const BrowserMap = () => {
   useSuppressMapSelection(containerRef);
   useAddTopRightControls(map, mobileMode);
   useOnMapClicked(map, setFeature, mapClickOverrideRef);
+  useHideCollapsedHomepage(
+    map,
+    persistHideHomepage,
+    mobileMode && homepageShown,
+  );
   useOnMapLongPressed(map, setFeature);
   useOnMapLoaded(map, setMapLoaded);
   useFeatureMarker(map);

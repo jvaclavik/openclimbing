@@ -35,11 +35,13 @@ const AutocompleteConfigured = (
 type AutocompleteInputProps = {
   autocompleteRef: React.MutableRefObject<undefined>;
   setIsLoading: Setter<boolean>;
+  autoFocus?: boolean;
 };
 
 export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   autocompleteRef,
   setIsLoading,
+  autoFocus,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { inputValue, valueRef, setInputValue, lastSyncedValue } =
@@ -77,7 +79,11 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       onChange={onSelected}
       onHighlightChange={onHighlight}
       renderOption={renderOptionFactory(inputValue)}
-      renderInput={renderInputFactory(setInputValue, autocompleteRef)}
+      renderInput={renderInputFactory(
+        setInputValue,
+        autocompleteRef,
+        autoFocus,
+      )}
       filterOptions={(option) => option}
       getOptionDisabled={(option) =>
         option.type === 'loader' || option.type === 'separator'

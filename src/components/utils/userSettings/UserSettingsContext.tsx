@@ -26,7 +26,6 @@ export type TickDefaults = {
 
 export type UserSettingsType = Partial<{
   isImperial: boolean;
-  'weather.enabled': boolean;
   'climbing.gradeSystem': GradeSystem;
   'climbing.isGradesOnPhotosVisible': boolean;
   'climbing.defaultClimbingStyle': TickStyle;
@@ -63,7 +62,6 @@ export type UserSettingsContextType = {
 const initialUserSettings: UserSettingsType = {
   // TODO remove initial settings and handle it as default in the usage code
   isImperial: false,
-  'weather.enabled': false,
   'climbing.gradeSystem': null,
   'climbing.isGradesOnPhotosVisible': true,
   'climbing.defaultClimbingStyle': 'OS',

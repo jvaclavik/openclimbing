@@ -86,7 +86,6 @@ export default {
   'add_new_crag.zoom_in': 'Per favore, ingrandisci per aggiungere una falesia.',
 
   'user_settings.general': 'Generale',
-  'user_settings.show_weather_widget': 'Mostra il widget meteo',
   'user_settings.climbing': 'Arrampicata',
   'user_settings.default_grade_system': 'Sistema di gradi predefinito',
   'user_settings.show_grades_in_pictures': 'Mostra i gradi nelle foto',
@@ -732,7 +731,6 @@ export default {
   'osmtype.way.description': 'Linea composta da diversi (molti) nodi.',
   'osmtype.relation': 'Relazione',
   'osmtype.relation.description': 'Gruppo di altri elementi – percorsi, nodi e persino altre relazioni.',
-  weather: 'Meteo',
   'climbing_tiles.stats':
     'Aggiornato: ~1× / mese (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">finché i problemi di overpass non saranno risolti</a>)<br />Ultimo aggiornamento: __lastRefresh__<br />Timestamp OSM: __osmTime__<br/>Cache CDN: 1 ora',
   'climbing.type.ferrata': 'Via Ferrata',

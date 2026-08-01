@@ -136,10 +136,10 @@ export const FeatureProvider = ({
       showHomepage();
     });
   };
-  const persistHideHomepage = () => {
+  const persistHideHomepage = useCallback(() => {
     hideHomepage();
     Cookies.set('hideHomepage', 'yes', { expires: 30, path: '/' });
-  };
+  }, [hideHomepage]);
   useRestoreHomepageOnBack(homepageShown, feature, isIndex, showHomepage);
 
   if (feature) {

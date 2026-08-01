@@ -33,7 +33,6 @@ export default {
   'user.user_settings': '设置',
 
   'user_settings.general': '通用',
-  'user_settings.show_weather_widget': '显示天气小部件',
   'user_settings.climbing': '攀岩',
   'user_settings.default_grade_system': '默认难度等级系统',
   'user_settings.show_grades_in_pictures': '在图片中显示难度等级',
@@ -459,8 +458,6 @@ export default {
   'osmtype.way.description': '由多个（许多）节点组成的线。',
   'osmtype.relation': '关系 (Relation)',
   'osmtype.relation.description': '其他元素的集合——可以是路径、节点，甚至是其他关系。',
-
-  weather: '天气',
 
   'climbing_tiles.stats': `刷新：约每月1次 (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">直到 Overpass 问题解决为止</a>)<br />上次刷新：__lastRefresh__<br />OSM 时间戳：__osmTime__<br/>CDN 缓存：1小时`,
   'climbing.type.ferrata': '铁索栈道',

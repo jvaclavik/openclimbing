@@ -86,7 +86,6 @@ export default {
   'add_new_crag.zoom_in': "Veuillez zoomer pour ajouter un site d'escalade.",
 
   'user_settings.general': 'Général',
-  'user_settings.show_weather_widget': 'Afficher le widget météo',
   'user_settings.climbing': 'Escalade',
   'user_settings.default_grade_system': 'Système de cotation par défaut',
   'user_settings.show_grades_in_pictures': 'Afficher les cotations sur les photos',
@@ -737,7 +736,6 @@ export default {
   'osmtype.way.description': 'Ligne composée de plusieurs (nombreux) nœuds.',
   'osmtype.relation': 'Relation',
   'osmtype.relation.description': "Groupe d'autres éléments – chemins, nœuds, et même d'autres relations.",
-  weather: 'Météo',
   'climbing_tiles.stats':
     'Actualisé : ~1× / mois (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">jusqu’à la résolution des problèmes overpass</a>)<br />Dernière actualisation : __lastRefresh__<br />Horodatage OSM : __osmTime__<br/>Cache CDN : 1 heure',
   'climbing.type.ferrata': 'Via Ferrata',

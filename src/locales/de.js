@@ -86,7 +86,6 @@ export default {
   'add_new_crag.zoom_in': 'Bitte zoome heran, um einen Fels hinzuzufügen.',
 
   'user_settings.general': 'Allgemein',
-  'user_settings.show_weather_widget': 'Zeige das Wetter an',
   'user_settings.climbing': 'Klettern',
   'user_settings.default_grade_system': 'Standard-Bewertungssystem',
   'user_settings.show_grades_in_pictures': 'Grade in Bildern anzeigen',
@@ -735,7 +734,6 @@ export default {
   'osmtype.way.description': 'Linie, die aus mehreren (vielen) Knoten besteht.',
   'osmtype.relation': 'Relation',
   'osmtype.relation.description': 'Gruppe anderer Elemente – Wege, Knoten und sogar andere Relationen.',
-  weather: 'Wetter',
   'climbing_tiles.stats':
     'Aktualisiert: ~1× / Monat (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">bis die Overpass-Probleme behoben sind</a>)<br />Letzte Aktualisierung: __lastRefresh__<br />OSM-Zeitstempel: __osmTime__<br/>CDN-Cache: 1 Stunde',
   'climbing.type.ferrata': 'Klettersteig',
