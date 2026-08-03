@@ -20,16 +20,18 @@ export const linear = (
   ...(to && c ? [to, c] : []),
 ];
 
-export const sortKey = [
-  '*',
-  -1,
+export const sortKey = (priority: ExpressionSpecification | number = 0) =>
   [
-    '+',
-    ['to-number', ['get', 'routeCount']],
-    ['case', ['get', 'hasImages'], 10000, 0], // preference for items with images
-    ['case', ['to-boolean', ['get', 'name']], 2, 0], // prefer items with name
-  ],
-] as DataDrivenPropertyValueSpecification<number>;
+    '*',
+    -1,
+    [
+      '+',
+      priority, // outranks everything below - see `groupsSortKey` in groupsLayer
+      ['to-number', ['get', 'routeCount']],
+      ['case', ['get', 'hasImages'], 10000, 0], // preference for items with images
+      ['case', ['to-boolean', ['get', 'name']], 2, 0], // prefer items with name
+    ],
+  ] as DataDrivenPropertyValueSpecification<number>;
 
 export const linearByRouteCount = (
   from: number,
@@ -69,6 +71,16 @@ export const ifCrag = (
   'case',
   ['==', ['get', 'type'], 'crag'],
   crag,
+  elseValue,
+];
+
+export const ifArea = (
+  area: ExpressionSpecification | number,
+  elseValue: ExpressionSpecification | number,
+): ExpressionSpecification => [
+  'case',
+  ['==', ['get', 'type'], 'area'],
+  area,
   elseValue,
 ];
 

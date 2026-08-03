@@ -2,10 +2,12 @@ import {
   LayerSpecification,
   SymbolLayerSpecification,
 } from '@maplibre/maplibre-gl-style-spec';
+import type { DataDrivenPropertyValueSpecification } from 'maplibre-gl';
 import { AREA, CLIMBING_TILES_SOURCE, CRAG, GYM, VIA_FERRATA } from '../consts';
 import {
   byHasImages,
   hover,
+  ifArea,
   ifCrag,
   linear,
   linearByRouteCount,
@@ -15,6 +17,23 @@ import {
 const areaSize = linearByRouteCount(0, 0.4, 400, 1);
 const cragSize = linearByRouteCount(0, 0.4, 50, 0.7);
 const cragSizeBig = 0.7;
+
+// zoom where individual routes appear - from here the crag is the detail the
+// user came for, so it takes over the label from its parent area
+const AREA_HANDOVER_ZOOM = 13;
+
+// dominates routeCount / hasImages, so the type decides the collision first
+const TYPE_PRIORITY = 1000000;
+
+// an area and its only crag share the same center and routeCount, so without
+// this the winner of the collision is arbitrary (so far the crag, at all zooms)
+const groupsSortKey = [
+  'step',
+  ['zoom'],
+  sortKey(ifArea(TYPE_PRIORITY, 0)),
+  AREA_HANDOVER_ZOOM,
+  sortKey(ifArea(0, TYPE_PRIORITY)),
+] as DataDrivenPropertyValueSpecification<number>;
 
 const GROUPS_LAYOUT: SymbolLayerSpecification['layout'] = {
   'icon-image': ifCrag(byHasImages(CRAG, 'IMAGE'), byHasImages(AREA, 'IMAGE')),
@@ -46,7 +65,7 @@ const GROUPS_LAYOUT: SymbolLayerSpecification['layout'] = {
   'text-ignore-placement': false,
   'text-allow-overlap': false,
   'text-optional': true,
-  'symbol-sort-key': sortKey,
+  'symbol-sort-key': groupsSortKey,
 };
 
 export const groupsLayer: LayerSpecification = {
@@ -56,7 +75,15 @@ export const groupsLayer: LayerSpecification = {
   source: CLIMBING_TILES_SOURCE,
   minzoom: 1,
   maxzoom: 22,
-  filter: ['in', 'type', 'area', 'crag'],
+  filter: [
+    'any',
+    ['==', ['get', 'type'], 'crag'],
+    [
+      'all',
+      ['==', ['get', 'type'], 'area'],
+      ['<', ['zoom'], AREA_HANDOVER_ZOOM],
+    ],
+  ],
   layout: GROUPS_LAYOUT,
   paint: {
     'icon-opacity': hover(1, 0.6),
@@ -77,6 +104,7 @@ export const gymsLayer: LayerSpecification = {
   layout: {
     ...groupsLayer.layout,
     'icon-image': GYM.IMAGE,
+    'symbol-sort-key': sortKey(),
   },
 };
 
@@ -87,5 +115,6 @@ export const ferrataLayer: LayerSpecification = {
   layout: {
     ...groupsLayer.layout,
     'icon-image': VIA_FERRATA.IMAGE,
+    'symbol-sort-key': sortKey(),
   },
 };

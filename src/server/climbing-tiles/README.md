@@ -4,6 +4,7 @@ Vector GEOJSON TILES of custom design:
 
 - Almost every feature related to climbing is displayed with crag icon (▲) over the map, `climbing=area` with the double mountain icon (⛰️).
   - Areas are rendered up to two levels deep - areas and super-areas.
+  - Areas win the symbol collision over crags, until `AREA_HANDOVER_ZOOM` where they disappear and their crags take over. Without it an area with a single crag (same center, same `routeCount`) would never be visible.
 - Features with images are blue/red.
 - Routes are colored according to their grade in any classification system.
 - via ferratas and climbing gyms are shown with separate icons.
