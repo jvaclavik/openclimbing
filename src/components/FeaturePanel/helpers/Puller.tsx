@@ -1,69 +1,40 @@
 import styled from '@emotion/styled';
-import { grey } from '@mui/material/colors';
 import React from 'react';
-import { css } from '@emotion/react';
-import { isMobileDevice } from '../../helpers';
 
-const HANDLE_WIDTH = 30;
-const HANDLE_HIP_SLOP = 10;
+const HANDLE_WIDTH = 40;
+const HANDLE_HEIGHT = 4;
 
 const Handle = styled.div`
   width: ${HANDLE_WIDTH}px;
-  height: 6px;
-  margin: auto;
+  height: ${HANDLE_HEIGHT}px;
+  border-radius: 999px;
   background-color: ${({ theme }) =>
-    theme.palette.mode === 'light' ? grey[300] : grey[900]};
-  border-radius: 3px;
+    theme.palette.mode === 'light'
+      ? 'rgba(0, 0, 0, 0.18)'
+      : 'rgba(255, 255, 255, 0.28)'};
   -webkit-tap-highlight-color: transparent;
 `;
 
-const PullerContainer = styled.div<{
-  $isDesktop: boolean;
-  $isClosed: boolean;
-}>`
-  position: absolute;
-  top: 0;
-  left: calc(50% - ${HANDLE_WIDTH / 2}px - ${HANDLE_HIP_SLOP}px);
-  z-index: 1;
-  padding: ${HANDLE_HIP_SLOP}px;
-
-  ${({ $isDesktop, $isClosed }) =>
-    $isDesktop &&
-    css`
-      cursor: pointer;
-
-      &:hover ${Handle} {
-        opacity: 0.5;
-      }
-
-      ${$isClosed &&
-      css`
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: all;
-      `}
-    `}
+const PullerContainer = styled.button`
+  all: unset;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  // tight so the collapsed peek can be title-sized
+  padding: 6px 0 2px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 `;
 
 type Props = {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  open: boolean;
+  onTap: () => void;
 };
 
-export const Puller = ({ setOpen, open }: Props) => {
-  const isDesktop = !isMobileDevice();
-  const toggleDrawer = () => {
-    setOpen((value) => !value);
-  };
-
-  return (
-    <PullerContainer
-      $isClosed={!open}
-      $isDesktop={isDesktop}
-      onClick={isDesktop ? toggleDrawer : undefined}
-    >
-      <Handle />
-    </PullerContainer>
-  );
-};
+export const Puller = ({ onTap }: Props) => (
+  <PullerContainer type="button" aria-label="Resize panel" onClick={onTap}>
+    <Handle />
+  </PullerContainer>
+);

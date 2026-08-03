@@ -1,30 +1,30 @@
-export type Snap = 'collapsed' | 'half' | 'full';
+export type Snap = 'quarter' | 'half' | 'full';
 
 export type SnapOffsets = Record<Snap, number>;
 
-const SNAPS: Snap[] = ['full', 'half', 'collapsed'];
+const SNAPS: Snap[] = ['full', 'half', 'quarter'];
 
-const HALF_RATIO = 0.55;
+const HALF_RATIO = 0.5;
+/** Collapsed peek: puller + feature title row (not a % of the sheet). */
+const QUARTER_PEEK_PX = 62;
+
 export const FLING_VELOCITY = 0.4; // px/ms
-/** How far past the collapsed peek the sheet must travel to dismiss. */
-export const DISMISS_DISTANCE = 80;
 
 export const DRAWER_TRANSITION =
   'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
 
 /** How far the sheet is pushed down in each position (0 = full height). */
-export const getSnapOffsets = (
-  sheetHeight: number,
-  collapsedHeight: number,
-): SnapOffsets => {
-  const collapsed = Math.min(collapsedHeight, sheetHeight);
-  const half = Math.min(Math.max(sheetHeight * HALF_RATIO, collapsed), sheetHeight); // prettier-ignore
+export const getSnapOffsets = (sheetHeight: number): SnapOffsets => ({
+  full: 0,
+  half: Math.round(sheetHeight * (1 - HALF_RATIO)),
+  quarter: Math.max(0, sheetHeight - QUARTER_PEEK_PX),
+});
 
-  return {
-    full: 0,
-    half: Math.round(sheetHeight - half),
-    collapsed: Math.round(sheetHeight - collapsed),
-  };
+/** Tap on the puller: expand one step, or collapse full → half. */
+export const nextSnapOnPullerTap = (snap: Snap): Snap => {
+  if (snap === 'quarter') return 'half';
+  if (snap === 'half') return 'full';
+  return 'half';
 };
 
 export const pickSnap = (
@@ -50,13 +50,25 @@ export const pickSnap = (
   return closest;
 };
 
-export const applyOffset = (
-  sheet: HTMLElement,
-  offset: number,
-  animate: boolean,
-) => {
-  sheet.style.transition = animate ? DRAWER_TRANSITION : 'none';
-  sheet.style.transform = `translate3d(0, ${offset}px, 0)`;
+/** Instant transform – transition must already be off (see disableTransition). */
+export const applyOffset = (sheet: HTMLElement, offset: number) => {
+  // whole pixels – subpixel transforms force extra raster work on iOS
+  sheet.style.transform = `translate3d(0, ${Math.round(offset)}px, 0)`;
+};
+
+export const disableTransition = (sheet: HTMLElement) => {
+  sheet.style.transition = 'none';
+};
+
+export const enableTransition = (sheet: HTMLElement) => {
+  sheet.style.transition = DRAWER_TRANSITION;
+};
+
+/** Animate to a snap position. */
+export const animateToOffset = (sheet: HTMLElement | null, offset: number) => {
+  if (!sheet) return;
+  enableTransition(sheet);
+  applyOffset(sheet, offset);
 };
 
 /** The scrollable element under the finger, if any. */

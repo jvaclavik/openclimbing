@@ -17,7 +17,7 @@ import { CragsInArea } from './CragsInArea';
 import { EditButton } from './EditButton';
 import { EditDialog } from './EditDialog/EditDialog';
 import { FeaturedTag } from './FeaturedTag';
-import { FeatureHeading } from './FeatureHeading';
+import { FeatureHeading, FeatureStickyTitle } from './FeatureHeading';
 import { FeatureImages } from './FeatureImages/FeatureImages';
 import { FeatureOpenPlaceGuideLink } from './FeatureOpenPlaceGuideLink';
 import { FeaturePanelFooter } from './FeaturePanelFooter';
@@ -38,9 +38,10 @@ const Flex = styled.div`
 
 type FeaturePanelProps = {
   headingRef?: React.Ref<HTMLDivElement>;
+  onClose?: () => void;
 };
 
-export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
+export const FeaturePanel = ({ headingRef, onClose }: FeaturePanelProps) => {
   const { feature } = useFeatureContext();
   const [advanced, setAdvanced] = useState(false);
   const [showTags, toggleShowTags] = useToggleState(false);
@@ -66,12 +67,27 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
 
   return (
     <>
-      <PanelContent>
-        <PanelSidePadding>
-          <BackChip />
-          {!isMobileMode && <ParentLink />}
+      <PanelContent $grow={isMobileMode}>
+        {isMobileMode && (
+          <>
+            {/* sibling of the tall content below – sticky can't escape a short parent */}
+            <FeatureStickyTitle onClose={onClose} />
+            {/* below the title so the collapsed peek stays title-only */}
+            <PanelSidePadding>
+              <BackChip />
+            </PanelSidePadding>
+          </>
+        )}
 
-          <FeatureHeading ref={headingRef} />
+        <PanelSidePadding>
+          {!isMobileMode && (
+            <>
+              <BackChip />
+              <ParentLink />
+            </>
+          )}
+
+          <FeatureHeading headingRef={headingRef} />
 
           <ClimbingRestriction />
 

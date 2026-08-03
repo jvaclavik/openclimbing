@@ -2,17 +2,20 @@ import styled from '@emotion/styled';
 import React, { Ref, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'; // prettier-ignore
 import { Puller } from '../FeaturePanel/helpers/Puller';
 import {
+  animateToOffset,
   applyOffset,
-  DISMISS_DISTANCE,
-  DRAWER_TRANSITION,
+  disableTransition,
   findScroller,
-  FLING_VELOCITY,
   getSnapOffsets,
+  nextSnapOnPullerTap,
   pickSnap,
   Snap,
+  SnapOffsets,
 } from './drawerSnap';
 
 const DRAG_THRESHOLD = 6;
+/** Toggled via classList (no React render) while the finger tracks the sheet. */
+const DRAGGING_CLASS = 'drawer--dragging';
 
 const Sheet = styled.div<{ $topOffset: number }>`
   position: fixed;
@@ -25,42 +28,71 @@ const Sheet = styled.div<{ $topOffset: number }>`
   background: ${({ theme }) => theme.palette.background.paper};
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  // light edge only – blurry shadows re-rasterize every frame on iOS
+  box-shadow: 0 -0.5px 0 rgba(0, 0, 0, 0.12);
   z-index: ${({ theme }) => theme.zIndex.drawer};
-  transition: ${DRAWER_TRANSITION};
   will-change: transform;
+  transform: translate3d(0, 100%, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: layout style;
+
+  &.${DRAGGING_CLASS} {
+    // overflow+radius masking is the main drag cost; drop it while moving
+    overflow: visible;
+    box-shadow: none;
+    // skip hit-testing the heavy panel tree mid-gesture
+    & > * {
+      pointer-events: none;
+    }
+  }
 `;
 
-const Content = styled.main<{ $scrollLocked?: boolean }>`
+const Content = styled.main<{ $lockScroll?: boolean }>`
   flex: 1;
   min-height: 0;
-  overflow: ${({ $scrollLocked }) => ($scrollLocked ? 'hidden' : 'auto')};
+  overflow: auto;
   overscroll-behavior: contain;
-  // nested PanelScrollbars must not steal the gesture in the peek state
-  ${({ $scrollLocked }) =>
-    $scrollLocked &&
-    `
+  background: transparent;
+  // no transform here – it would break position:sticky inside the panel
+  -webkit-overflow-scrolling: touch;
+  // while the sheet isn't full, vertical pan is ours (resize) but horizontal
+  // must stay free for galleries etc.
+  ${({ $lockScroll }) =>
+    $lockScroll
+      ? `
+    touch-action: pan-x;
     & * {
-      overflow: hidden !important;
-      overscroll-behavior: none;
+      touch-action: pan-x;
     }
+  `
+      : `
+    touch-action: pan-x pan-y;
   `}
 `;
 
 /** Remeasured on resize – the sheet grows when the mobile URL bar hides. */
-const useSheetHeight = (sheetRef: React.RefObject<HTMLDivElement>) => {
+const useSheetHeight = (
+  sheetRef: React.RefObject<HTMLDivElement>,
+  draggingRef: React.MutableRefObject<boolean>,
+) => {
   const [height, setHeight] = useState(0);
 
   useLayoutEffect(() => {
     const sheet = sheetRef.current;
     if (!sheet) return undefined;
 
-    const observer = new ResizeObserver(() => setHeight(sheet.clientHeight));
+    const observer = new ResizeObserver(() => {
+      // ignore mid-drag – re-applying snap offsets would fight the finger
+      if (draggingRef.current) return;
+      setHeight(sheet.clientHeight);
+    });
     observer.observe(sheet);
     setHeight(sheet.clientHeight);
 
     return () => observer.disconnect();
-  }, [sheetRef]);
+  }, [sheetRef, draggingRef]);
 
   return height;
 };
@@ -75,152 +107,167 @@ const resetScroll = (root: HTMLElement) => {
 };
 
 type DragState = {
+  startX: number;
   startY: number;
-  startOffset: number;
+  offset: number;
   scroller: HTMLElement | null;
-  mode: 'undecided' | 'drag' | 'scroll';
+  /** Currently stealing the gesture to resize the sheet. */
+  resizing: boolean;
+  /** Sheet moved at least once – touchend should snap. */
+  didResize: boolean;
+  /** Locked after the first move past the threshold. */
+  axis: 'x' | 'y' | null;
   lastY: number;
   lastTime: number;
   velocity: number;
 };
 
-type UseDragToSnapProps = {
+type UseSheetGestureProps = {
   sheetRef: React.RefObject<HTMLDivElement>;
-  sheetHeight: number;
-  offsets: ReturnType<typeof getSnapOffsets>;
-  snap: Snap;
-  settle: (snap: Snap) => void;
-  onDismiss?: () => void;
+  contentRef: React.RefObject<HTMLElement>;
+  offsetsRef: React.MutableRefObject<SnapOffsets>;
+  snapRef: React.MutableRefObject<Snap>;
+  settleRef: React.MutableRefObject<(snap: Snap) => void>;
+  draggingRef: React.MutableRefObject<boolean>;
 };
 
 /**
- * Native touch handling – the sheet follows the finger and snaps to the
- * closest position on release. A drag in the content area only takes over when
- * scrolling can't continue in that direction, so the two never fight.
- * In the collapsed peek the content never scrolls: up expands, down dismisses.
+ * Google Maps-style sheet:
+ * - on quarter/half, vertical gestures only resize the sheet (no content scroll)
+ * - expanding into full continues into content scroll in the same gesture
+ * - at full + scrolled to top, pulling down shrinks the sheet again
+ * Closing is only via the X button – dragging past quarter just snaps back.
  */
-const useDragToSnap = ({
+const useSheetGesture = ({
   sheetRef,
-  sheetHeight,
-  offsets,
-  snap,
-  settle,
-  onDismiss,
-}: UseDragToSnapProps) => {
+  contentRef,
+  offsetsRef,
+  snapRef,
+  settleRef,
+  draggingRef,
+}: UseSheetGestureProps) => {
   const drag = useRef<DragState | null>(null);
-  const dismissing = useRef(false);
 
   useLayoutEffect(() => {
     const sheet = sheetRef.current;
     if (!sheet) return undefined;
 
+    const setDragging = (active: boolean) => {
+      draggingRef.current = active;
+      sheet.classList.toggle(DRAGGING_CLASS, active);
+    };
+
     const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length !== 1 || dismissing.current) {
+      if (e.touches.length !== 1) {
         drag.current = null;
         return;
       }
-      const { clientY } = e.touches[0];
+      const { clientX, clientY } = e.touches[0];
+      const offsets = offsetsRef.current;
+      const content = contentRef.current;
+      const scroller =
+        content && content.contains(e.target as Node)
+          ? content
+          : findScroller(e.target, sheet);
       drag.current = {
+        startX: clientX,
         startY: clientY,
-        startOffset: offsets[snap],
-        // peek state is drag-only – ignore nested scrollers entirely
-        scroller: snap === 'collapsed' ? null : findScroller(e.target, sheet),
-        mode: 'undecided',
+        offset: offsets[snapRef.current],
+        scroller,
+        resizing: false,
+        didResize: false,
+        axis: null,
         lastY: clientY,
         lastTime: e.timeStamp,
         velocity: 0,
       };
     };
 
-    // scroll wins whenever the content can still move in the gesture's
-    // direction – otherwise the sheet itself is dragged between snap points
-    const canScroll = (scroller: HTMLElement | null, dy: number) => {
-      if (!scroller) return false;
-      if (dy > 0) return scroller.scrollTop > 0; // finger down → scroll up
-      return (
-        scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 1
-      );
-    };
-
-    const decideMode = (state: DragState, dy: number) => {
-      if (snap === 'collapsed') return 'drag';
-      return canScroll(state.scroller, dy) ? 'scroll' : 'drag';
-    };
-
     const onTouchMove = (e: TouchEvent) => {
       const state = drag.current;
       if (!state) return;
 
-      const { clientY } = e.touches[0];
-      const dy = clientY - state.startY;
+      const { clientX, clientY } = e.touches[0];
+      const offsets = offsetsRef.current;
 
-      if (state.mode === 'undecided') {
-        if (Math.abs(dy) < DRAG_THRESHOLD) return;
-        state.mode = decideMode(state, dy);
-        state.startY = clientY; // avoid a jump when the drag takes over
-      }
-      if (state.mode !== 'drag') return;
-
-      if (e.cancelable) e.preventDefault();
-
-      const elapsed = e.timeStamp - state.lastTime;
-      if (elapsed > 0) {
-        state.velocity = (clientY - state.lastY) / elapsed;
+      if (!state.axis) {
+        const dx = clientX - state.startX;
+        const dy = clientY - state.startY;
+        if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+        // horizontal wins → leave the gesture to native gallery scrolling
+        state.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        if (state.axis === 'x') return;
         state.lastY = clientY;
         state.lastTime = e.timeStamp;
       }
 
-      const offset = state.startOffset + (clientY - state.startY);
-      // past collapsed the sheet can slide off-screen to dismiss
-      const maxOffset = onDismiss ? sheetHeight : offsets.collapsed;
-      const clamped = Math.min(Math.max(offset, 0), maxOffset);
-      applyOffset(sheet, clamped, false);
-    };
+      if (state.axis === 'x') return;
 
-    const shouldDismiss = (offset: number, velocity: number) => {
-      if (!onDismiss) return false;
-      return (
-        offset > offsets.collapsed + DISMISS_DISTANCE ||
-        (velocity > FLING_VELOCITY && offset > offsets.collapsed + 10)
-      );
+      const dy = clientY - state.lastY;
+      const elapsed = e.timeStamp - state.lastTime;
+      if (elapsed > 0) {
+        state.velocity = dy / elapsed;
+        state.lastY = clientY;
+        state.lastTime = e.timeStamp;
+      }
+
+      const scroller = state.scroller;
+      const scrollTop = scroller?.scrollTop ?? 0;
+
+      // at half/quarter every vertical pan resizes; at full only when at top
+      const shouldResize =
+        state.offset > 0 || state.resizing || (dy > 0 && scrollTop <= 0);
+      if (!shouldResize) return;
+
+      if (e.cancelable) e.preventDefault();
+
+      if (!state.resizing) {
+        // first resize frame only – keep native scroll free of these costs
+        disableTransition(sheet);
+        setDragging(true);
+      }
+      state.resizing = true;
+      state.didResize = true;
+      const next = state.offset + dy;
+      if (next <= 0) {
+        state.offset = 0;
+        // write transform directly – rAF adds a frame of latency on iOS
+        applyOffset(sheet, 0);
+        // release the gesture so later moves in this touch can be native scroll
+        state.resizing = false;
+      } else {
+        state.offset = Math.min(next, offsets.quarter);
+        applyOffset(sheet, state.offset);
+        if (scroller && scroller.scrollTop) {
+          scroller.scrollTop = 0;
+        }
+      }
     };
 
     const onTouchEnd = () => {
       const state = drag.current;
       drag.current = null;
-      if (state?.mode !== 'drag') return;
+      setDragging(false);
 
-      const current = new DOMMatrix(getComputedStyle(sheet).transform).m42;
-      if (shouldDismiss(current, state.velocity)) {
-        dismissing.current = true;
-        applyOffset(sheet, sheetHeight, true);
-        return;
-      }
-
-      settle(pickSnap(current, state.velocity, offsets));
-    };
-
-    const onTransitionEnd = (e: TransitionEvent) => {
-      if (e.target !== sheet || e.propertyName !== 'transform') return;
-      if (!dismissing.current) return;
-      dismissing.current = false;
-      onDismiss?.();
+      if (!state || state.axis !== 'y' || !state.didResize) return;
+      settleRef.current(
+        pickSnap(state.offset, state.velocity, offsetsRef.current),
+      );
     };
 
     sheet.addEventListener('touchstart', onTouchStart, { passive: true });
     sheet.addEventListener('touchmove', onTouchMove, { passive: false });
     sheet.addEventListener('touchend', onTouchEnd);
     sheet.addEventListener('touchcancel', onTouchEnd);
-    sheet.addEventListener('transitionend', onTransitionEnd);
 
     return () => {
+      sheet.classList.remove(DRAGGING_CLASS);
       sheet.removeEventListener('touchstart', onTouchStart);
       sheet.removeEventListener('touchmove', onTouchMove);
       sheet.removeEventListener('touchend', onTouchEnd);
       sheet.removeEventListener('touchcancel', onTouchEnd);
-      sheet.removeEventListener('transitionend', onTransitionEnd);
     };
-  }, [sheetRef, sheetHeight, offsets, snap, settle, onDismiss]);
+  }, [sheetRef, contentRef, offsetsRef, snapRef, settleRef, draggingRef]);
 };
 
 type Props = {
@@ -228,10 +275,8 @@ type Props = {
     e: React.TransitionEvent<HTMLDivElement>,
     open: boolean,
   ) => void;
-  onDismiss?: () => void;
   children: React.ReactNode;
   topOffset: number;
-  collapsedHeight: number;
   className: string;
   defaultOpen?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
@@ -240,69 +285,85 @@ type Props = {
 export const Drawer = ({
   children,
   topOffset,
-  collapsedHeight,
   className,
   onTransitionEnd,
-  onDismiss,
   defaultOpen = false,
   scrollRef,
 }: Props) => {
   const sheetRef = useRef<HTMLDivElement>(null);
-  const sheetHeight = useSheetHeight(sheetRef);
-  const offsets = useMemo(
-    () => getSnapOffsets(sheetHeight, collapsedHeight),
-    [sheetHeight, collapsedHeight],
+  const contentElRef = useRef<HTMLElement | null>(null);
+  const draggingRef = useRef(false);
+  const sheetHeight = useSheetHeight(sheetRef, draggingRef);
+  const offsets = useMemo(() => getSnapOffsets(sheetHeight), [sheetHeight]);
+
+  const [snap, setSnap] = useState<Snap>(defaultOpen ? 'half' : 'quarter');
+  const settled = useRef(false);
+
+  const snapRef = useRef(snap);
+  snapRef.current = snap;
+  const offsetsRef = useRef(offsets);
+  offsetsRef.current = offsets;
+
+  const setContentRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      contentElRef.current = node;
+      if (typeof scrollRef === 'function') {
+        scrollRef(node);
+      } else if (scrollRef) {
+        (scrollRef as React.MutableRefObject<HTMLDivElement | null>).current =
+          node;
+      }
+    },
+    [scrollRef],
   );
 
-  const [snap, setSnap] = useState<Snap>(defaultOpen ? 'half' : 'collapsed');
-  const settled = useRef(false);
-  const scrollLocked = snap === 'collapsed';
-
-  // the sheet is placed without animation until it first reaches its position
   useLayoutEffect(() => {
     const sheet = sheetRef.current;
-    if (!sheet || !sheetHeight) return;
+    if (!sheet || !sheetHeight || draggingRef.current) return;
 
-    applyOffset(sheet, offsets[snap], settled.current);
-    settled.current = true;
+    if (!settled.current) {
+      disableTransition(sheet);
+      applyOffset(sheet, offsets[snap]);
+      settled.current = true;
+      return;
+    }
+
+    animateToOffset(sheet, offsets[snap]);
   }, [offsets, snap, sheetHeight]);
 
-  useLayoutEffect(() => {
-    if (!scrollLocked || !sheetRef.current) return;
-    resetScroll(sheetRef.current);
-  }, [scrollLocked, sheetHeight]);
+  const settle = useCallback((target: Snap) => {
+    if (target !== 'full' && sheetRef.current) {
+      resetScroll(sheetRef.current);
+    }
+    // position is applied by the layout effect when `snap` changes
+    setSnap(target);
+  }, []);
 
-  const settle = useCallback(
-    (target: Snap) => {
-      setSnap(target);
-      applyOffset(sheetRef.current, getSnapOffsets(sheetHeight, collapsedHeight)[target], true); // prettier-ignore
-    },
-    [collapsedHeight, sheetHeight],
-  );
+  const settleRef = useRef(settle);
+  settleRef.current = settle;
 
-  useDragToSnap({
+  useSheetGesture({
     sheetRef,
-    sheetHeight,
-    offsets,
-    snap,
-    settle,
-    onDismiss,
+    contentRef: contentElRef,
+    offsetsRef,
+    snapRef,
+    settleRef,
+    draggingRef,
   });
 
-  const setOpen = (value: React.SetStateAction<boolean>) => {
-    const open = typeof value === 'function' ? value(snap !== 'collapsed') : value; // prettier-ignore
-    settle(open ? 'full' : 'collapsed');
-  };
+  const onPullerTap = useCallback(() => {
+    settle(nextSnapOnPullerTap(snapRef.current));
+  }, [settle]);
 
   return (
     <Sheet
       ref={sheetRef}
       className={className}
       $topOffset={topOffset}
-      onTransitionEnd={(e) => onTransitionEnd?.(e, snap !== 'collapsed')}
+      onTransitionEnd={(e) => onTransitionEnd?.(e, snap !== 'quarter')}
     >
-      <Puller setOpen={setOpen} open={snap !== 'collapsed'} />
-      <Content ref={scrollRef} $scrollLocked={scrollLocked}>
+      <Puller onTap={onPullerTap} />
+      <Content ref={setContentRef} $lockScroll={snap !== 'full'}>
         {children}
       </Content>
     </Sheet>

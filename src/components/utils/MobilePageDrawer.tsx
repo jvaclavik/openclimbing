@@ -11,7 +11,6 @@ type MobilePageDrawerProps = {
   children: React.ReactNode;
   onClose?: (e: React.TransitionEvent<HTMLDivElement>, open: boolean) => void;
   className: string;
-  collapsedHeight?: number;
   topOffset?: number;
 };
 
@@ -19,7 +18,6 @@ export const MobilePageDrawer = ({
   children,
   onClose,
   className,
-  collapsedHeight = DRAWER_PREVIEW_HEIGHT,
   topOffset = DRAWER_TOP_OFFSET,
 }: MobilePageDrawerProps) => {
   const isMobileMode = useMobileMode();
@@ -28,7 +26,6 @@ export const MobilePageDrawer = ({
     <Drawer
       topOffset={topOffset}
       className={className}
-      collapsedHeight={collapsedHeight}
       onTransitionEnd={onClose}
       defaultOpen
     >

@@ -119,14 +119,14 @@ const darkTheme = createTheme({
     },
 
     background: {
-      default: '#000000bb',
-      elevation: '#1d1d1ddd',
-      paper: '#111111ee',
+      default: '#1a1a1a',
+      elevation: '#2e2e2e',
+      paper: '#242424',
       hover: grey['700'],
       searchBox: '#963838',
       searchInput: 'rgba(0,0,0,0.5)',
-      searchInputSolid: 'rgb(35, 26, 26)',
-      searchInputPanel: 'rgba(0,0,0,0.7)',
+      searchInputSolid: 'rgb(42, 34, 34)',
+      searchInputPanel: 'rgba(0,0,0,0.55)',
     },
     invertFilter: 'invert(1)',
     climbing: {

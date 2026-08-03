@@ -6,7 +6,10 @@ import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 export const FEATURE_PANEL_WIDTH = 480;
 
 const PanelMain = styled.main`
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  min-height: 0;
 `;
 
 const MARGIN = 0;
@@ -42,6 +45,9 @@ type PanelScrollbarsProps = {
 };
 
 const ScrollArea = styled.div`
+  // flex when inside PanelContent; height when a direct PanelMain child
+  flex: 1;
+  min-height: 0;
   height: 100%;
   overflow: auto;
   overscroll-behavior: contain;
@@ -52,10 +58,16 @@ export const PanelScrollbars = ({
   scrollRef,
 }: PanelScrollbarsProps) => <ScrollArea ref={scrollRef}>{children}</ScrollArea>;
 
-export const PanelContent = styled.main`
+export const PanelContent = styled.main<{ $grow?: boolean }>`
   display: flex;
   flex-direction: column;
-  height: 100%;
+  ${({ $grow }) =>
+    $grow
+      ? // mobile feature sheet: grow with content so the drawer scroller + sticky work
+        `min-height: 100%;`
+      : // default: fill the panel so PanelScrollbars gets a bounded height
+        `height: 100%;
+         min-height: 0;`}
 `;
 
 export const PanelFooterWrapper = styled.footer`

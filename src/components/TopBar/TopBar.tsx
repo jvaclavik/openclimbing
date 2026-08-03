@@ -17,7 +17,7 @@ import { useFeatureContext } from '../utils/FeatureContext';
 
 const COMMUNITY_URL = 'https://community.openclimbing.org';
 
-const Bar = styled.div`
+const Bar = styled.div<{ $transparent?: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -31,11 +31,18 @@ const Bar = styled.div`
   padding: 0 10px;
   box-sizing: border-box;
 
-  background-color: ${({ theme }) => theme.palette.background.paper};
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
-  -webkit-backdrop-filter: blur(35px);
-  backdrop-filter: blur(35px);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  ${({ $transparent, theme }) =>
+    $transparent
+      ? `
+    background-color: transparent;
+  `
+      : `
+    background-color: ${theme.palette.background.paper};
+    border-bottom: 1px solid ${theme.palette.divider};
+    -webkit-backdrop-filter: blur(35px);
+    backdrop-filter: blur(35px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  `}
 `;
 
 const BrandLink = styled.a`
@@ -156,7 +163,7 @@ const Brand = () => {
   );
 };
 
-// on mobile only the two in-app pages fit, community lives in the hamburger
+// on mobile only climbing areas stay in the bar; about + community are in the menu
 const NavLinks = ({ compact = false }: { compact?: boolean }) => {
   const router = useRouter();
   const { homepageShown, persistShowHomepage } = useFeatureContext();
@@ -184,18 +191,19 @@ const NavLinks = ({ compact = false }: { compact?: boolean }) => {
         active={areasActive}
         compact={compact}
       />
-      <NavButton
-        label={t('topbar.about')}
-        href="/about"
-        active={aboutActive}
-        compact={compact}
-      />
       {!compact && (
-        <NavButton
-          label={t('topbar.community')}
-          href={COMMUNITY_URL}
-          target="_blank"
-        />
+        <>
+          <NavButton
+            label={t('topbar.about')}
+            href="/about"
+            active={aboutActive}
+          />
+          <NavButton
+            label={t('topbar.community')}
+            href={COMMUNITY_URL}
+            target="_blank"
+          />
+        </>
       )}
     </Stack>
   );
@@ -228,7 +236,7 @@ export const TopBar = () => {
   if (isMobileMode) {
     if (searchOpen && !isDirections) {
       return (
-        <Bar>
+        <Bar $transparent>
           <SearchSlot>
             <SearchField autoFocus />
           </SearchSlot>
@@ -243,7 +251,7 @@ export const TopBar = () => {
     }
 
     return (
-      <Bar>
+      <Bar $transparent>
         <Brand />
         <NavLinks compact />
         <Box sx={{ flexGrow: 1 }} />

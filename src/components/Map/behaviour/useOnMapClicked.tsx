@@ -83,9 +83,9 @@ export const getSkeleton = (
 };
 
 const coordsClicked = (map: Map, coords: LonLat, setFeature: SetFeature) => {
+  // on mobile an empty tap must not close the open feature – coords come from
+  // long-press, and the panel closes only via the X button
   if (isMobileDevice()) {
-    setFeature(null); // handled by useOnMapLongPressed
-    pushFeatureToRouter(null);
     return;
   }
 

@@ -1,5 +1,6 @@
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
@@ -14,7 +15,7 @@ import {
 } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
 import styled from '@emotion/styled';
-import { useBoolState } from '../../helpers';
+import { useBoolState, useMobileMode } from '../../helpers';
 import { t } from '../../../services/intl';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useMapStateContext } from '../../utils/MapStateContext';
@@ -98,6 +99,14 @@ const ClimbingLeaderboardLink = ({ closeMenu }) => (
     <ListItemText>{t('leaderboard.menu_link')}</ListItemText>
   </MenuItem>
 );
+const AboutLink = ({ closeMenu }) => (
+  <MenuItem href="/about" component={Link} onClick={closeMenu}>
+    <ListItemIcon>
+      <InfoOutlinedIcon />
+    </ListItemIcon>
+    <ListItemText>{t('topbar.about')}</ListItemText>
+  </MenuItem>
+);
 
 const themeOptions = {
   system: {
@@ -141,6 +150,7 @@ const ThemeSelection = () => {
 export const HamburgerMenu = () => {
   const anchorRef = useRef();
   const [opened, open, close] = useBoolState(false);
+  const isMobileMode = useMobileMode();
   const isOpenClimbing = PROJECT_ID === 'openclimbing';
   const { activeLayers } = useMapStateContext();
   const hasClimbingLayer = activeLayers.includes('climbing');
@@ -169,6 +179,7 @@ export const HamburgerMenu = () => {
                 )}
               </>
             )}
+            {isMobileMode && <AboutLink closeMenu={close} />}
           </div>
           <div>
             <Divider />

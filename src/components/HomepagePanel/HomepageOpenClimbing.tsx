@@ -249,8 +249,10 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
             <Stack flex={1} justifyContent="center">
               <Header />
               <Description />
-              <ClimbingNumbers stats={stats} />
               <Gallery />
+              <Box mt={3}>
+                <ClimbingNumbers stats={stats} />
+              </Box>
               <Buttons onClose={onClose} />
             </Stack>
 
