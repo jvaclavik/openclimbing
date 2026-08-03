@@ -6,6 +6,27 @@ import { ClimbingFeaturesRow } from '../db/types';
 // rows or columns count
 const COUNT = 500;
 
+const isBetterForCell = (
+  feature: ClimbingTilesFeature,
+  current: ClimbingTilesFeature | null,
+): boolean => {
+  if (!current) {
+    return true;
+  }
+
+  const count = feature.properties.routeCount ?? 0;
+  const currentCount = current.properties.routeCount ?? 0;
+  if (count !== currentCount) {
+    return count > currentCount;
+  }
+
+  // an area with a single crag has the same routeCount as the crag - the area
+  // is the one to show at these zooms, see AREA_HANDOVER_ZOOM in groupsLayer
+  return (
+    feature.properties.type === 'area' && current.properties.type !== 'area'
+  );
+};
+
 const optimizeFeaturesToGrid = (
   features: ClimbingTilesFeature[],
   [west, south, east, north]: BBox,
@@ -26,13 +47,7 @@ const optimizeFeaturesToGrid = (
     if (lon >= west && lon <= east && lat >= south && lat <= north) {
       const xIndex = Math.floor((lon - west) / intervalX);
       const yIndex = Math.floor((lat - south) / intervalY);
-      const current = grid[xIndex][yIndex];
-      const shouldReplaceCell =
-        !current ||
-        !current.properties.routeCount ||
-        current.properties.routeCount < feature.properties.routeCount;
-
-      if (shouldReplaceCell) {
+      if (isBetterForCell(feature, grid[xIndex][yIndex])) {
         grid[xIndex][yIndex] = feature;
       }
     }
