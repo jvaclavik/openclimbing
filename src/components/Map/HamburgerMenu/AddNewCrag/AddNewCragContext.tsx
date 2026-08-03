@@ -37,8 +37,14 @@ const AddNewCragContext = createContext<AddNewCragContextType>(undefined);
 export const AddNewCragProvider: React.FC = ({ children }) => {
   const [isActive, setIsActive] = useState(false);
   const markerRef = useRef<maplibregl.Marker>();
+  /** Bumps on each start() so an older async import can't leave an orphan pin. */
+  const startEpochRef = useRef(0);
   const { setFeature } = useFeatureContext();
-  const { open } = useEditDialogContext();
+  const {
+    open,
+    close: closeEditDialog,
+    opened: editDialogOpened,
+  } = useEditDialogContext();
   const panelShown = usePanelShown();
 
   const removeMarker = useCallback(() => {
@@ -52,21 +58,42 @@ export const AddNewCragProvider: React.FC = ({ children }) => {
       if (!map) {
         return;
       }
+
+      const epoch = ++startEpochRef.current;
       removeMarker();
+      // previous confirm left a feature marker on the map – drop it
+      if (editDialogOpened) {
+        closeEditDialog();
+      }
+      setFeature(null);
+
       // Import maplibre-gl on demand so it stays out of the shared _app bundle;
       // by the time a crag is added the map's chunk is already loaded.
       const { Marker } = await import('maplibre-gl');
+      if (epoch !== startEpochRef.current) {
+        return;
+      }
+
+      removeMarker();
       const options = createCragMarkerOptions();
-      markerRef.current = new Marker(options)
+      const marker = new Marker(options)
         .setLngLat(getVisibleCenter(map, panelShown && !ignorePanel))
         .addTo(map);
+
+      if (epoch !== startEpochRef.current) {
+        marker.remove();
+        return;
+      }
+
+      markerRef.current = marker;
       animateMarkerDrop(options.element);
       setIsActive(true);
     },
-    [panelShown, removeMarker],
+    [closeEditDialog, editDialogOpened, panelShown, removeMarker, setFeature],
   );
 
   const cancel = useCallback(() => {
+    startEpochRef.current += 1;
     removeMarker();
     setIsActive(false);
   }, [removeMarker]);

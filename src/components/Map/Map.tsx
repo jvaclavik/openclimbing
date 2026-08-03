@@ -10,8 +10,14 @@ import { LayerSwitcherButton } from '../LayerSwitcher/LayerSwitcherButton';
 import { MaptilerLogo } from './MapFooter/MaptilerLogo';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { MapFilter } from './MapFilter/MapFilter';
-import { SunShadow } from './SunShadow/SunShadow';
-import { Radar } from './Radar/Radar';
+import { SunShadowMapButton, SunShadowProvider } from './SunShadow/SunShadow';
+import { RadarMapButton, RadarProvider } from './Radar/Radar';
+import { DRAWER_MOTION, QUARTER_PEEK_PX } from '../utils/drawerSnap';
+import {
+  BOTTOM_RIGHT_Z_DEFAULT,
+  BOTTOM_RIGHT_Z_RAISED,
+  useMapChrome,
+} from '../utils/mapChromeRegistry';
 
 const BrowserMapDynamic = dynamic(() => import('./BrowserMap'), {
   ssr: false,
@@ -56,20 +62,19 @@ const BottomLeft = styled.div`
   align-items: flex-start;
   padding: 0 0 4px 4px;
 `;
-const BottomRight = styled.div`
+
+const BottomRight = styled.div<{ $zIndex: number; $bottom: number }>`
   position: absolute;
   right: 6px;
-  bottom: 6px;
+  bottom: ${({ $bottom }) => $bottom}px;
   pointer-events: none;
-  z-index: 998;
-`;
+  z-index: ${({ $zIndex }) => $zIndex};
+  transition: bottom ${DRAWER_MOTION};
 
-// Keep the filter / shadow buttons above the (desktop, persistent) layer
-// switcher drawer paper so they stay visible and clickable over the sidebar.
-const ControlAboveDrawer = styled.div`
-  position: relative;
-  z-index: 1300;
-  display: inline-flex;
+  // every control icon must receive clicks; parent is pointer-events: none
+  & > * {
+    pointer-events: all;
+  }
 `;
 
 const BugReportButton = () => (
@@ -90,6 +95,7 @@ const NoscriptMessage = () => (
 const Map = () => {
   const { mapLoaded, activeLayers } = useMapStateContext();
   const hasClimbingLayer = activeLayers.includes('climbing');
+  const { layersOpen, drawerPeek } = useMapChrome();
 
   return (
     <>
@@ -103,22 +109,24 @@ const Map = () => {
         <MaptilerLogo />
         <MapFooter />
       </BottomLeft>
-      <BottomRight>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <ControlAboveDrawer>
-            <Radar />
-          </ControlAboveDrawer>
-          <ControlAboveDrawer>
-            <SunShadow />
-          </ControlAboveDrawer>
-          {hasClimbingLayer && (
-            <ControlAboveDrawer>
-              <MapFilter />
-            </ControlAboveDrawer>
-          )}
-          <LayerSwitcherDynamic />
-        </Stack>
-      </BottomRight>
+      {/* providers only wrap controls that need them – pan/zoom must not re-render the map tree */}
+      <SunShadowProvider>
+        <RadarProvider>
+          <BottomRight
+            $zIndex={
+              layersOpen ? BOTTOM_RIGHT_Z_RAISED : BOTTOM_RIGHT_Z_DEFAULT
+            }
+            $bottom={drawerPeek ? QUARTER_PEEK_PX + 8 : 6}
+          >
+            <Stack direction="row" alignItems="center" gap={1}>
+              <RadarMapButton />
+              <SunShadowMapButton />
+              {hasClimbingLayer && <MapFilter />}
+              <LayerSwitcherDynamic />
+            </Stack>
+          </BottomRight>
+        </RadarProvider>
+      </SunShadowProvider>
     </>
   );
 };

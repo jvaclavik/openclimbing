@@ -17,6 +17,7 @@ import React from 'react';
 import { intl, t } from '../../services/intl';
 import { TranslationId } from '../../services/types';
 import type { ClimbingStatsResponse } from '../../types';
+import { useMobileMode } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
@@ -235,24 +236,27 @@ type AboutPanelProps = {
 
 export const AboutPanel = ({ stats: initialStats = null }: AboutPanelProps) => {
   const stats = useClimbingStats(initialStats);
+  const isMobileMode = useMobileMode();
   const handleClose = () => {
     Router.push('/');
   };
 
+  const body = (
+    <PanelSidePadding>
+      <ClosePanelButton right onClick={handleClose} />
+      <Hero />
+      <ClimbingNumbers stats={stats} />
+      <AllAreasLink />
+      <Comparison />
+      <Features />
+      <Cta />
+    </PanelSidePadding>
+  );
+
   return (
     <MobilePageDrawer className="about-drawer">
-      <PanelContent>
-        <PanelScrollbars>
-          <PanelSidePadding>
-            <ClosePanelButton right onClick={handleClose} />
-            <Hero />
-            <ClimbingNumbers stats={stats} />
-            <AllAreasLink />
-            <Comparison />
-            <Features />
-            <Cta />
-          </PanelSidePadding>
-        </PanelScrollbars>
+      <PanelContent $grow={isMobileMode}>
+        {isMobileMode ? body : <PanelScrollbars>{body}</PanelScrollbars>}
       </PanelContent>
     </MobilePageDrawer>
   );

@@ -1,12 +1,14 @@
 import React from 'react';
 import PersonAdd from '@mui/icons-material/PersonAdd';
-import { isViewInsideBbox, LayersHeader } from './helpers';
+import { isViewInsideBbox, LayersHeader, StyledList } from './helpers';
 import { osmappLayers } from './osmappLayers';
 import { Layer, useMapStateContext, View } from '../utils/MapStateContext';
 import { Overlays } from './Overlays';
-import { AddUserLayerButton } from './AddLayerButton';
 import { BaseLayers } from './BaseLayers';
-import { Divider } from '@mui/material';
+import { Box, Divider, Typography } from '@mui/material';
+import { t } from '../../services/intl';
+import { SunShadowPanel } from '../Map/SunShadow/SunShadow';
+import { RadarPanel } from '../Map/Radar/Radar';
 
 type AllLayers = {
   basemapLayers: Layer[];
@@ -40,6 +42,20 @@ const getAllLayers = (userLayers: Layer[], view: View): AllLayers => {
   };
 };
 
+const MapExtras = () => (
+  <>
+    <Box px={2} pt={1.5} pb={0.5}>
+      <Typography variant="body2" color="text.secondary">
+        {t('layerswitcher.extras')}
+      </Typography>
+    </Box>
+    <StyledList dense>
+      <SunShadowPanel />
+      <RadarPanel />
+    </StyledList>
+  </>
+);
+
 export const LayerSwitcherContent = () => {
   const { view, userLayers } = useMapStateContext();
   const { basemapLayers, overlayLayers } = getAllLayers(userLayers, view);
@@ -50,9 +66,10 @@ export const LayerSwitcherContent = () => {
       <Divider />
 
       <BaseLayers baseLayers={basemapLayers} />
+      <Divider />
+      <MapExtras />
+      <Divider />
       <Overlays overlayLayers={overlayLayers} />
-
-      <AddUserLayerButton />
     </>
   );
 };

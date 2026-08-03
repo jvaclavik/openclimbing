@@ -4,34 +4,32 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { LoginIconButton } from './LoginIconButton';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
-import { isDesktopResolution, useMobileMode } from '../../helpers';
+import { useMobileMode } from '../../helpers';
 import { convertHexToRgba } from '../../utils/colorUtils';
 
-const UserIconButton = styled(IconButton)`
-  padding: 3px;
+// match maplibre ctrl-group buttons (geolocate / compass) so top-bar actions
+// stay readable on the map
+const mapControlButtonCss = ({ theme }) => `
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: ${convertHexToRgba(theme.palette.background.paper, 0.7)};
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 
-  @media ${isDesktopResolution} {
-    background: ${({ theme }) =>
-      convertHexToRgba(theme.palette.background.paper, 0.7)};
-    backdrop-filter: blur(15px);
-
-    &:hover {
-      background: ${({ theme }) => theme.palette.background.paper};
-    }
+  &:hover {
+    background: ${theme.palette.background.paper};
   }
 `;
 
-const MenuIconButton = styled(IconButton)`
-  @media ${isDesktopResolution} {
-    background: ${({ theme }) =>
-      convertHexToRgba(theme.palette.background.paper, 0.7)};
-    backdrop-filter: blur(15px);
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+const UserIconButton = styled(IconButton)`
+  ${mapControlButtonCss}
+  padding: 4px;
+`;
 
-    &:hover {
-      background: ${({ theme }) => theme.palette.background.paper};
-    }
-  }
+const MenuIconButton = styled(IconButton)`
+  ${mapControlButtonCss}
 
   svg {
     fill: ${({ theme }) => theme.palette.text.primary};

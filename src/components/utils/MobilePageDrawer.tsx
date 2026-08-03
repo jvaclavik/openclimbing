@@ -27,7 +27,7 @@ export const MobilePageDrawer = ({
       topOffset={topOffset}
       className={className}
       onTransitionEnd={onClose}
-      defaultOpen
+      defaultSnap="full"
     >
       {children}
     </Drawer>

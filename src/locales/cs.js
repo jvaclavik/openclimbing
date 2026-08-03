@@ -587,6 +587,12 @@ export default {
   'layerswitcher.heading': 'Mapové vrstvy',
   'layerswitcher.intro': 'Díky tomu, že OpenStreetMap nabízí zdrojová data, tak kdokoliv může vyrobit různé varianty mapy.',
   'layerswitcher.add_layer_button': 'Přidat vlastní vrstvu',
+  'layerswitcher.more_maps': 'Další mapy',
+  'layerswitcher.more_overlays': 'Další překryvy',
+  'layerswitcher.extras': 'Nástroje mapy',
+  'layerswitcher.shadows': 'Stíny',
+  'layerswitcher.radar': 'Srážkový radar',
+  'layerswitcher.radar_unavailable': 'Dostupné v Česku a okolí',
   'layerswitcher.overlays': 'Překryvné vrstvy',
 
   'layers.basic': 'Základní',

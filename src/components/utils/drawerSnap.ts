@@ -6,12 +6,12 @@ const SNAPS: Snap[] = ['full', 'half', 'quarter'];
 
 const HALF_RATIO = 0.5;
 /** Collapsed peek: puller + feature title row (not a % of the sheet). */
-const QUARTER_PEEK_PX = 62;
+export const QUARTER_PEEK_PX = 62;
 
 export const FLING_VELOCITY = 0.4; // px/ms
 
-export const DRAWER_TRANSITION =
-  'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
+export const DRAWER_MOTION = '260ms cubic-bezier(0.22, 1, 0.36, 1)';
+export const DRAWER_TRANSITION = `transform ${DRAWER_MOTION}`;
 
 /** How far the sheet is pushed down in each position (0 = full height). */
 export const getSnapOffsets = (sheetHeight: number): SnapOffsets => ({

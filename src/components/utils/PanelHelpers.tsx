@@ -24,8 +24,6 @@ const Container = styled.div`
   color: ${({ theme }) => theme.palette.text.primary};
   overflow: hidden;
   z-index: 1100;
-  //border-radius: 20px;
-  backdrop-filter: blur(50px);
 
   width: 100%;
   @media ${isDesktop} {

@@ -6,6 +6,7 @@ import { PROJECT_URL } from '../services/project';
 // Static content pages worth emitting hreflang links for (besides homepage and
 // OSM feature pages).
 const SEO_STATIC_PATHS = [
+  '/about',
   '/climbing-areas',
   '/climbing-grades',
   '/climbing-leaderboard',

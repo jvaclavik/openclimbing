@@ -12,6 +12,7 @@ import {
   Snap,
   SnapOffsets,
 } from './drawerSnap';
+import { setDrawerSnap } from './mapChromeRegistry';
 
 const DRAG_THRESHOLD = 6;
 /** Toggled via classList (no React render) while the finger tracks the sheet. */
@@ -32,13 +33,13 @@ const Sheet = styled.div<{ $topOffset: number }>`
   // light edge only – blurry shadows re-rasterize every frame on iOS
   box-shadow: 0 -0.5px 0 rgba(0, 0, 0, 0.12);
   z-index: ${({ theme }) => theme.zIndex.drawer};
-  will-change: transform;
   transform: translate3d(0, 100%, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   contain: layout style;
 
   &.${DRAGGING_CLASS} {
+    will-change: transform;
     // overflow+radius masking is the main drag cost; drop it while moving
     overflow: visible;
     box-shadow: none;
@@ -72,6 +73,14 @@ const Content = styled.main<{ $lockScroll?: boolean }>`
   `}
 `;
 
+/** Sits on the sheet (not in the scrollport) so gallery layers can't cover it. */
+const Overlay = styled.div`
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 10;
+`;
+
 /** Remeasured on resize – the sheet grows when the mobile URL bar hides. */
 const useSheetHeight = (
   sheetRef: React.RefObject<HTMLDivElement>,
@@ -97,13 +106,8 @@ const useSheetHeight = (
   return height;
 };
 
-const resetScroll = (root: HTMLElement) => {
-  root.scrollTop = 0;
-  root.querySelectorAll('*').forEach((node) => {
-    if (node instanceof HTMLElement && node.scrollTop) {
-      node.scrollTop = 0;
-    }
-  });
+const resetScroll = (content: HTMLElement | null) => {
+  if (content) content.scrollTop = 0;
 };
 
 type DragState = {
@@ -278,8 +282,11 @@ type Props = {
   children: React.ReactNode;
   topOffset: number;
   className: string;
-  defaultOpen?: boolean;
+  /** Initial snap – feature peek uses quarter; page panels use full. */
+  defaultSnap?: Snap;
   scrollRef?: Ref<HTMLDivElement>;
+  /** Rendered above the scrollport (e.g. close button). */
+  overlay?: React.ReactNode;
 };
 
 export const Drawer = ({
@@ -287,8 +294,9 @@ export const Drawer = ({
   topOffset,
   className,
   onTransitionEnd,
-  defaultOpen = false,
+  defaultSnap = 'quarter',
   scrollRef,
+  overlay,
 }: Props) => {
   const sheetRef = useRef<HTMLDivElement>(null);
   const contentElRef = useRef<HTMLElement | null>(null);
@@ -296,13 +304,18 @@ export const Drawer = ({
   const sheetHeight = useSheetHeight(sheetRef, draggingRef);
   const offsets = useMemo(() => getSnapOffsets(sheetHeight), [sheetHeight]);
 
-  const [snap, setSnap] = useState<Snap>(defaultOpen ? 'half' : 'quarter');
+  const [snap, setSnap] = useState<Snap>(defaultSnap);
   const settled = useRef(false);
 
   const snapRef = useRef(snap);
   snapRef.current = snap;
   const offsetsRef = useRef(offsets);
   offsetsRef.current = offsets;
+
+  useLayoutEffect(() => {
+    setDrawerSnap(snap);
+    return () => setDrawerSnap(null);
+  }, [snap]);
 
   const setContentRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -332,8 +345,8 @@ export const Drawer = ({
   }, [offsets, snap, sheetHeight]);
 
   const settle = useCallback((target: Snap) => {
-    if (target !== 'full' && sheetRef.current) {
-      resetScroll(sheetRef.current);
+    if (target !== 'full') {
+      resetScroll(contentElRef.current);
     }
     // position is applied by the layout effect when `snap` changes
     setSnap(target);
@@ -363,6 +376,7 @@ export const Drawer = ({
       onTransitionEnd={(e) => onTransitionEnd?.(e, snap !== 'quarter')}
     >
       <Puller onTap={onPullerTap} />
+      {overlay != null && <Overlay>{overlay}</Overlay>}
       <Content ref={setContentRef} $lockScroll={snap !== 'full'}>
         {children}
       </Content>

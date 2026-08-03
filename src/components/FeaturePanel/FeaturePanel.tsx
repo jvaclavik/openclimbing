@@ -38,10 +38,9 @@ const Flex = styled.div`
 
 type FeaturePanelProps = {
   headingRef?: React.Ref<HTMLDivElement>;
-  onClose?: () => void;
 };
 
-export const FeaturePanel = ({ headingRef, onClose }: FeaturePanelProps) => {
+export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
   const { feature } = useFeatureContext();
   const [advanced, setAdvanced] = useState(false);
   const [showTags, toggleShowTags] = useToggleState(false);
@@ -71,7 +70,7 @@ export const FeaturePanel = ({ headingRef, onClose }: FeaturePanelProps) => {
         {isMobileMode && (
           <>
             {/* sibling of the tall content below – sticky can't escape a short parent */}
-            <FeatureStickyTitle onClose={onClose} />
+            <FeatureStickyTitle />
             {/* below the title so the collapsed peek stays title-only */}
             <PanelSidePadding>
               <BackChip />

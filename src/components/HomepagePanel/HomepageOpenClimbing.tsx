@@ -10,16 +10,22 @@ import React from 'react';
 import GithubIcon from '../../assets/GithubIcon';
 import { LogoMaptiler } from '../../assets/LogoMaptiler';
 import { intl, t } from '../../services/intl';
-import { useMobileMode } from '../helpers';
+import { isMobileMode, useMobileMode } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
+import { DRAWER_MOTION } from '../utils/drawerSnap';
+import { useMapChrome } from '../utils/mapChromeRegistry';
 import {
   ClimbingNumbers,
   GradientHeading,
   SectionHeading,
   useClimbingStats,
 } from '../utils/panelUi';
-import { PanelContent, PanelScrollbars } from '../utils/PanelHelpers';
+import {
+  PANEL_GAP,
+  PanelContent,
+  PanelScrollbars,
+} from '../utils/PanelHelpers';
 import { DividerOpenClimbing } from './DividerOpenClimbing';
 import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
 import { LinkCard, LinkRow } from './LinkCard';
@@ -36,23 +42,55 @@ const Content = styled.div`
   padding: 20px 2em 0 2em;
 `;
 
-const Brand = styled(GradientHeading)`
-  font-size: 46px;
-  text-align: center;
+/** CSS media hide/show – avoids useMediaQuery SSR flashes. */
+const MobileOnly = styled.div`
+  display: none;
+  @media ${isMobileMode} {
+    display: block;
+  }
 `;
 
-const Header = () => (
-  <Stack component="section" alignItems="center" mt={2} mb={2}>
-    <Brand>OpenClimbing</Brand>
-    <Typography
-      component="p"
-      variant="subtitle2"
-      color="secondary"
-      textTransform="lowercase"
-    >
-      {t('project.openclimbing.description')}
-    </Typography>
-  </Stack>
+const DesktopOnly = styled.div`
+  @media ${isMobileMode} {
+    display: none;
+  }
+`;
+
+const Brand = styled(GradientHeading, {
+  shouldForwardProp: (prop) => prop !== '$peek',
+})<{ $peek?: boolean }>`
+  text-align: center;
+  font-size: ${({ $peek }) => ($peek ? '32px' : '46px')};
+  line-height: ${({ $peek }) => ($peek ? 1.15 : 1.2)};
+  transition:
+    font-size ${DRAWER_MOTION},
+    transform ${DRAWER_MOTION};
+  transform: translateY(${({ $peek }) => ($peek ? '0' : '10px')});
+`;
+
+/** Peek: compact + centered in the strip. Expanded: larger, slightly lower. */
+const BrandBar = styled.div<{ $peek: boolean }>`
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  // equal side padding so the title stays optically centered next to close
+  padding: ${({ $peek }) => ($peek ? '0 48px 2px' : `${PANEL_GAP} 48px 8px`)};
+  background: ${({ theme }) => theme.palette.background.paper};
+  transition: padding ${DRAWER_MOTION};
+`;
+
+const Subtitle = () => (
+  <Typography
+    component="p"
+    variant="subtitle2"
+    color="secondary"
+    textTransform="lowercase"
+  >
+    {t('project.openclimbing.description')}
+  </Typography>
 );
 
 const Description = () => (
@@ -95,7 +133,6 @@ const STORY_URL = (lang) =>
     : 'https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac';
 
 const Buttons = ({ onClose }) => {
-  const isMobileMode = useMobileMode();
   const { start } = useAddNewCragContext();
 
   const addNewCrag = () => {
@@ -105,7 +142,7 @@ const Buttons = ({ onClose }) => {
 
   return (
     <Stack spacing={1} mt={4}>
-      {isMobileMode && (
+      <MobileOnly>
         <Button
           variant="contained"
           color="primary"
@@ -116,7 +153,7 @@ const Buttons = ({ onClose }) => {
         >
           {t('homepage.go_to_map_button')}
         </Button>
-      )}
+      </MobileOnly>
       <Button
         variant="outlined"
         color="primary"
@@ -239,32 +276,50 @@ const Footer = () => (
 
 export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
   const stats = useClimbingStats();
+  const isMobileMode = useMobileMode();
+  // homepage drawer defaults to full – treat unknown (SSR / before mount) as expanded
+  const { drawerSnap } = useMapChrome();
+  const isPeek = drawerSnap === 'quarter';
+
+  const body = (
+    <>
+      <MobileOnly>
+        <BrandBar $peek={isPeek}>
+          <Brand $peek={isPeek}>OpenClimbing</Brand>
+        </BrandBar>
+      </MobileOnly>
+      <ClosePanelButton right onClick={onClose} style={{ zIndex: 6 }} />
+      <Content>
+        <Stack height="100%">
+          <Stack flex={1} justifyContent="center">
+            <Stack component="section" alignItems="center" mt={2} mb={2}>
+              <DesktopOnly>
+                <Brand>OpenClimbing</Brand>
+              </DesktopOnly>
+              <Subtitle />
+            </Stack>
+            <Description />
+            <Gallery />
+            <Box mt={3}>
+              <ClimbingNumbers stats={stats} />
+            </Box>
+            <Buttons onClose={onClose} />
+          </Stack>
+
+          <Divider>
+            <DividerOpenClimbing width="100%" />
+          </Divider>
+
+          <ImportantLinks />
+          <Footer />
+        </Stack>
+      </Content>
+    </>
+  );
 
   return (
-    <PanelContent>
-      <PanelScrollbars>
-        <ClosePanelButton right onClick={onClose} />
-        <Content>
-          <Stack height="100%">
-            <Stack flex={1} justifyContent="center">
-              <Header />
-              <Description />
-              <Gallery />
-              <Box mt={3}>
-                <ClimbingNumbers stats={stats} />
-              </Box>
-              <Buttons onClose={onClose} />
-            </Stack>
-
-            <Divider>
-              <DividerOpenClimbing width="100%" />
-            </Divider>
-
-            <ImportantLinks />
-            <Footer />
-          </Stack>
-        </Content>
-      </PanelScrollbars>
+    <PanelContent $grow={isMobileMode}>
+      {isMobileMode ? body : <PanelScrollbars>{body}</PanelScrollbars>}
     </PanelContent>
   );
 }

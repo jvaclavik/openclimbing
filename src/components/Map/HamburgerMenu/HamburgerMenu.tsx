@@ -1,6 +1,6 @@
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
@@ -28,6 +28,7 @@ import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Link from 'next/link';
 import { UserHeader } from './UserHeader';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
@@ -99,6 +100,27 @@ const ClimbingLeaderboardLink = ({ closeMenu }) => (
     <ListItemText>{t('leaderboard.menu_link')}</ListItemText>
   </MenuItem>
 );
+const ClimbingAreasLink = ({ closeMenu }) => {
+  const { persistShowHomepage } = useFeatureContext();
+
+  return (
+    <MenuItem
+      href="/"
+      component={Link}
+      onClick={(e) => {
+        e.preventDefault();
+        persistShowHomepage();
+        closeMenu();
+      }}
+    >
+      <ListItemIcon>
+        <MapOutlinedIcon />
+      </ListItemIcon>
+      <ListItemText>{t('topbar.climbing_areas')}</ListItemText>
+    </MenuItem>
+  );
+};
+
 const AboutLink = ({ closeMenu }) => (
   <MenuItem href="/about" component={Link} onClick={closeMenu}>
     <ListItemIcon>
@@ -157,12 +179,24 @@ export const HamburgerMenu = () => {
   const { loggedIn } = useOsmAuthContext();
   return (
     <>
-      <Drawer open={opened} onClose={close} anchor="right">
+      <Drawer
+        open={opened}
+        onClose={close}
+        anchor="right"
+        // above map controls (1300) and the layers panel (1200)
+        sx={{ zIndex: 1500 }}
+      >
         <Stack direction="column" justifyContent="space-between" height="100%">
           <div>
             <UserHeader closeMenu={close} />
             <Divider sx={{ mt: 1, mb: 2 }} />
             {isOpenClimbing && <MyClimbingProfileMenuItem closeMenu={close} />}
+            {isMobileMode && (
+              <>
+                <ClimbingAreasLink closeMenu={close} />
+                <AboutLink closeMenu={close} />
+              </>
+            )}
             {loggedIn && (
               <>
                 <Divider sx={{ my: 1 }} />
@@ -179,7 +213,6 @@ export const HamburgerMenu = () => {
                 )}
               </>
             )}
-            {isMobileMode && <AboutLink closeMenu={close} />}
           </div>
           <div>
             <Divider />

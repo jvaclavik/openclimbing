@@ -7,7 +7,7 @@ import {
   View,
   useMapStateContext,
 } from '../utils/MapStateContext';
-import { t, Translation } from '../../services/intl';
+import { t } from '../../services/intl';
 
 type RemoveUserLayerActionProps = {
   url: string;
@@ -35,19 +35,11 @@ export const RemoveUserLayerAction = ({ url }: RemoveUserLayerActionProps) => {
 };
 
 export const LayersHeader = () => (
-  <>
-    <Box m={2}>
-      <Typography variant="h5" color="textPrimary">
-        {t('layerswitcher.heading')}
-      </Typography>
-    </Box>
-
-    <Box m={2}>
-      <Typography variant="body2" color="textSecondary">
-        <Translation id="layerswitcher.intro" />
-      </Typography>
-    </Box>
-  </>
+  <Box m={2}>
+    <Typography variant="h5" color="textPrimary">
+      {t('layerswitcher.heading')}
+    </Typography>
+  </Box>
 );
 
 export const LayerIcon = ({ Icon }: { Icon: LayerIconType }) => (

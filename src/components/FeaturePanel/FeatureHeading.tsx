@@ -1,11 +1,10 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Stack, Typography, useMediaQuery } from '@mui/material';
 import React from 'react';
 import { getLabel, getSecondaryLabel } from '../../helpers/featureLabel';
 import { PROJECT_ID } from '../../services/project';
 import { useMobileMode } from '../helpers';
-import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { PANEL_GAP } from '../utils/PanelHelpers';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { PoiDescription } from './helpers/PoiDescription';
@@ -19,9 +18,11 @@ const Container = styled.div<{ $isStandalone: boolean; $compact?: boolean }>`
 const StickyTitle = styled.div`
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 5;
   flex-shrink: 0;
   padding: 0 ${PANEL_GAP} 4px;
+  // room for the sheet overlay close button
+  padding-right: 48px;
   // same solid as Drawer Sheet so scroll-under content can't tint the title
   background: ${({ theme }) => theme.palette.background.paper};
 `;
@@ -35,50 +36,37 @@ const HeadingsWrapper = styled.div`
   margin-bottom: 8px;
 `;
 
-const TitleRow = ({ onClose }: { onClose?: () => void }) => {
+const TitleRow = () => {
   const isMobileMode = useMobileMode();
-  const theme = useTheme();
   const { feature } = useFeatureContext();
   const label = getLabel(feature);
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1}>
-      <Typography
-        variant="h1"
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          textDecoration: feature?.deleted ? 'line-through' : 'none',
-          ...(isMobileMode && {
-            fontSize: 32,
-            lineHeight: 1.15,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }),
-        }}
-      >
-        {label}
-      </Typography>
-      {isMobileMode && onClose && (
-        <ClosePanelButton
-          onClick={onClose}
-          style={{
-            flexShrink: 0,
-            backgroundColor: theme.palette.action.hover,
-            color: theme.palette.text.secondary,
-          }}
-        />
-      )}
-    </Stack>
+    <Typography
+      variant="h1"
+      sx={{
+        minWidth: 0,
+        textDecoration: feature?.deleted ? 'line-through' : 'none',
+        ...(isMobileMode && {
+          fontSize: 32,
+          lineHeight: 1.15,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }),
+      }}
+    >
+      {label}
+    </Typography>
   );
 };
 
 /** Sticky title bar – must be a direct child of the scrolling column, not nested
- *  inside a short heading wrapper (sticky can't escape its parent's height). */
-export const FeatureStickyTitle = ({ onClose }: { onClose?: () => void }) => (
+ *  inside a short heading wrapper (sticky can't escape its parent's height).
+ *  Close lives on the Drawer overlay so the gallery can't cover it. */
+export const FeatureStickyTitle = () => (
   <StickyTitle>
-    <TitleRow onClose={onClose} />
+    <TitleRow />
   </StickyTitle>
 );
 

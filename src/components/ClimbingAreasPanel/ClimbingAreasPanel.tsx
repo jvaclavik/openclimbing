@@ -240,6 +240,7 @@ const CountryAccordion = ({
 
 export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
   const router = useRouter();
+  const isMobileMode = useMobileMode();
   const { bbox } = useMapStateContext();
   const { setPreview } = useFeatureContext();
   const [sortBy, setSortBy] = useState<SortBy>('photos');
@@ -276,77 +277,81 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
   );
   const backTarget = encodeURIComponent(router.asPath);
 
+  const body = (
+    <>
+      <PanelSidePadding>
+        <ClosePanelButton right onClick={handleClose} />
+        <h1>{t('climbingareas.title')}</h1>
+        {data && (
+          <>
+            <TextField
+              select
+              size="small"
+              fullWidth
+              label={t('climbingareas.sort_label')}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              sx={{ mb: 1 }}
+            >
+              {SORT_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {t(option.labelId)}
+                </MenuItem>
+              ))}
+            </TextField>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={filterViewport}
+                  onChange={(e) => setFilterViewport(e.target.checked)}
+                />
+              }
+              label={t('climbingareas.filter_viewport')}
+              sx={{ mb: 1, display: 'block' }}
+            />
+            {groups.length === 0 && (
+              <Typography color="text.secondary" sx={{ mb: 2 }}>
+                {t('climbingareas.no_areas_in_viewport')}
+              </Typography>
+            )}
+          </>
+        )}
+      </PanelSidePadding>
+
+      {data ? (
+        groups.map((group) => (
+          <CountryAccordion
+            key={group.countryCode ?? 'unknown'}
+            group={group}
+            defaultExpanded={false}
+            backTarget={backTarget}
+          />
+        ))
+      ) : isError ? (
+        <PanelSidePadding>
+          <Typography color="error" variant="body2">
+            {t('error')}
+          </Typography>
+        </PanelSidePadding>
+      ) : (
+        isLoading && (
+          <Box display="flex" justifyContent="center" p={4}>
+            <Stack alignItems="center" spacing={2}>
+              <CircularProgress color="secondary" />
+              <Typography variant="body2" color="text.secondary">
+                {t('loading')}
+              </Typography>
+            </Stack>
+          </Box>
+        )
+      )}
+    </>
+  );
+
   return (
     <MobilePageDrawer className="climbing-areas-drawer">
-      <PanelContent>
-        <PanelScrollbars>
-          <PanelSidePadding>
-            <ClosePanelButton right onClick={handleClose} />
-            <h1>{t('climbingareas.title')}</h1>
-            {data && (
-              <>
-                <TextField
-                  select
-                  size="small"
-                  fullWidth
-                  label={t('climbingareas.sort_label')}
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortBy)}
-                  sx={{ mb: 1 }}
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {t(option.labelId)}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={filterViewport}
-                      onChange={(e) => setFilterViewport(e.target.checked)}
-                    />
-                  }
-                  label={t('climbingareas.filter_viewport')}
-                  sx={{ mb: 1, display: 'block' }}
-                />
-                {groups.length === 0 && (
-                  <Typography color="text.secondary" sx={{ mb: 2 }}>
-                    {t('climbingareas.no_areas_in_viewport')}
-                  </Typography>
-                )}
-              </>
-            )}
-          </PanelSidePadding>
-
-          {data ? (
-            groups.map((group) => (
-              <CountryAccordion
-                key={group.countryCode ?? 'unknown'}
-                group={group}
-                defaultExpanded={false}
-                backTarget={backTarget}
-              />
-            ))
-          ) : isError ? (
-            <PanelSidePadding>
-              <Typography color="error" variant="body2">
-                {t('error')}
-              </Typography>
-            </PanelSidePadding>
-          ) : (
-            isLoading && (
-              <Box display="flex" justifyContent="center" p={4}>
-                <Stack alignItems="center" spacing={2}>
-                  <CircularProgress color="secondary" />
-                  <Typography variant="body2" color="text.secondary">
-                    {t('loading')}
-                  </Typography>
-                </Stack>
-              </Box>
-            )
-          )}
-        </PanelScrollbars>
+      <PanelContent $grow={isMobileMode}>
+        {isMobileMode ? body : <PanelScrollbars>{body}</PanelScrollbars>}
       </PanelContent>
     </MobilePageDrawer>
   );

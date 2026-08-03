@@ -1,4 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styled from '@emotion/styled';
 import { useQuery } from 'react-query';
 import RadarIcon from '@mui/icons-material/Radar';
@@ -8,6 +16,9 @@ import {
   Badge,
   Box,
   IconButton,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Slider,
   Stack,
   Switch,
@@ -16,9 +27,10 @@ import {
 } from '@mui/material';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { getGlobalMap } from '../../../services/mapStorage';
+import { useMapStateContext } from '../../utils/MapStateContext';
+import { t } from '../../../services/intl';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
-import { useMapStateContext } from '../../utils/MapStateContext';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
 import { applyRadar, isInRadarCoverage, removeRadar } from './radarLayer';
 
@@ -28,11 +40,17 @@ const RADAR_COLOR = '#f5a623';
 const FRAME_INTERVAL_MS = 450;
 const DEFAULT_OPACITY = 0.75;
 
-const StyledIconButton = styled(IconButton, {
+const Panel = styled.div<{ $inset?: boolean }>`
+  width: 260px;
+  padding: ${({ $inset }) => ($inset ? '0 16px 8px 52px' : '8px 12px 4px')};
+  pointer-events: all;
+`;
+
+const MapControlButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $isOpened: boolean }>`
   pointer-events: all;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1); // same as LayerSwitcherButton
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(15px);
 
   background-color: ${({ theme, $isOpened }) =>
@@ -43,12 +61,6 @@ const StyledIconButton = styled(IconButton, {
   &:hover {
     background-color: ${({ theme }) => theme.palette.background.paper};
   }
-`;
-
-const Panel = styled.div`
-  width: 260px;
-  padding: 8px 12px 4px;
-  pointer-events: all;
 `;
 
 const RADAR_SLIDER_SX = {
@@ -83,29 +95,6 @@ const fetchFrames = async (): Promise<RadarFrame[]> => {
 const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-type RadarButtonProps = {
-  open: boolean;
-  active: boolean;
-  onClick: (event: React.MouseEvent<HTMLElement>) => void;
-};
-
-const RadarButton = ({ open, active, onClick }: RadarButtonProps) => {
-  const isMobileMode = useMobileMode();
-  return (
-    <Badge color="success" variant="dot" overlap="circular" invisible={!active}>
-      <Tooltip title="Srážkový radar (ČHMÚ)" arrow>
-        <StyledIconButton
-          onClick={onClick}
-          $isOpened={open}
-          size={isMobileMode ? 'large' : 'medium'}
-        >
-          <RadarIcon fontSize="small" color={active ? 'primary' : 'inherit'} />
-        </StyledIconButton>
-      </Tooltip>
-    </Badge>
-  );
-};
-
 type RadarControlsProps = {
   frames: RadarFrame[] | undefined;
   isLoading: boolean;
@@ -115,6 +104,7 @@ type RadarControlsProps = {
   togglePlay: () => void;
   opacity: number;
   setOpacity: (v: number) => void;
+  inset?: boolean;
 };
 
 const RadarControls = ({
@@ -126,10 +116,11 @@ const RadarControls = ({
   togglePlay,
   opacity,
   setOpacity,
+  inset,
 }: RadarControlsProps) => {
   if (isLoading || !frames) {
     return (
-      <Panel>
+      <Panel $inset={inset}>
         <Typography variant="caption" color="text.secondary">
           Načítám radarová data…
         </Typography>
@@ -139,7 +130,7 @@ const RadarControls = ({
 
   if (!frames.length) {
     return (
-      <Panel>
+      <Panel $inset={inset}>
         <Typography variant="caption" color="text.secondary">
           Radarová data se nepodařilo načíst.
         </Typography>
@@ -151,7 +142,7 @@ const RadarControls = ({
   const isLatest = index >= frames.length - 1;
 
   return (
-    <Panel>
+    <Panel $inset={inset}>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Tooltip title={playing ? 'Zastavit' : 'Přehrát'} arrow>
           <IconButton
@@ -224,20 +215,42 @@ const RadarControls = ({
   );
 };
 
-export const Radar = () => {
+type RadarContextValue = {
+  inCoverage: boolean;
+  enabled: boolean;
+  setEnabled: (v: boolean) => void;
+  frames: RadarFrame[] | undefined;
+  isLoading: boolean;
+  index: number;
+  onSliderIndex: (v: number) => void;
+  playing: boolean;
+  togglePlay: () => void;
+  opacity: number;
+  setOpacity: (v: number) => void;
+};
+
+const RadarContext = createContext<RadarContextValue | null>(null);
+
+const useRadarContext = () => {
+  const ctx = useContext(RadarContext);
+  if (!ctx) {
+    throw new Error('RadarPanel must be used within RadarProvider');
+  }
+  return ctx;
+};
+
+/** Keeps radar overlay effects alive while the layer-switcher drawer is closed. */
+export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
   const { view } = useMapStateContext();
   const [, latStr, lonStr] = view;
   const inCoverage = isInRadarCoverage(parseFloat(latStr), parseFloat(lonStr));
 
-  const { open, toggle } = useExclusiveMapControl('radar');
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [opacity, setOpacity] = useState(DEFAULT_OPACITY);
   const [followLatest, setFollowLatest] = useState(true);
 
-  // Only draw / fetch while the button is actually offered (map centre in range).
   const active = enabled && inCoverage;
 
   const { data: frames, isLoading } = useQuery(
@@ -250,8 +263,6 @@ export const Radar = () => {
     },
   );
 
-  // Keep the newest values reachable from the style-reload handler without
-  // re-subscribing on every change.
   const framesRef = useRef<RadarFrame[] | undefined>(frames);
   framesRef.current = frames;
   const indexRef = useRef(index);
@@ -259,16 +270,12 @@ export const Radar = () => {
   const opacityRef = useRef(opacity);
   opacityRef.current = opacity;
 
-  // Jump to the latest frame whenever the list refreshes, unless the user has
-  // scrubbed back in time.
   useEffect(() => {
     if (frames?.length && followLatest) {
       setIndex(frames.length - 1);
     }
   }, [frames, followLatest]);
 
-  // Add/remove the overlay on toggle and re-add it after a base-layer switch
-  // (setStyle wipes custom sources/layers).
   useEffect(() => {
     const map = getGlobalMap();
     if (!map || !active) {
@@ -289,7 +296,6 @@ export const Radar = () => {
     };
   }, [active]);
 
-  // Swap the frame / opacity in place (no flicker) when they change.
   useEffect(() => {
     const map = getGlobalMap();
     if (!map || !active || !frames?.length) {
@@ -298,7 +304,6 @@ export const Radar = () => {
     applyRadar(map, frames[Math.min(index, frames.length - 1)].ts, opacity);
   }, [active, frames, index, opacity]);
 
-  // Animation loop.
   useEffect(() => {
     if (!playing || !active || !frames?.length) {
       return undefined;
@@ -309,37 +314,137 @@ export const Radar = () => {
     return () => clearInterval(id);
   }, [playing, active, frames]);
 
-  const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-    toggle();
-  };
+  // Leaving the coverage area should not leave a stale overlay behind.
+  useEffect(() => {
+    if (!inCoverage && enabled) {
+      setEnabled(false);
+      setPlaying(false);
+    }
+  }, [inCoverage, enabled]);
 
-  const onSliderIndex = (v: number) => {
-    setPlaying(false);
-    setFollowLatest(frames ? v >= frames.length - 1 : true);
-    setIndex(v);
-  };
+  const onSliderIndex = useCallback(
+    (v: number) => {
+      setPlaying(false);
+      setFollowLatest(frames ? v >= frames.length - 1 : true);
+      setIndex(v);
+    },
+    [frames],
+  );
 
-  const togglePlay = () => {
-    // Restart from the beginning if we're parked on the last frame.
+  const togglePlay = useCallback(() => {
     if (!playing && frames?.length && index >= frames.length - 1) {
       setIndex(0);
     }
     setFollowLatest(false);
     setPlaying((p) => !p);
-  };
+  }, [playing, frames, index]);
 
-  // Radar data only covers Czechia and its surroundings – hide the control
-  // entirely when the map is centred elsewhere.
+  const value = useMemo(
+    () => ({
+      inCoverage,
+      enabled,
+      setEnabled,
+      frames,
+      isLoading,
+      index,
+      onSliderIndex,
+      playing,
+      togglePlay,
+      opacity,
+      setOpacity,
+    }),
+    [
+      inCoverage,
+      enabled,
+      frames,
+      isLoading,
+      index,
+      onSliderIndex,
+      playing,
+      togglePlay,
+      opacity,
+    ],
+  );
+
+  return (
+    <RadarContext.Provider value={value}>{children}</RadarContext.Provider>
+  );
+};
+
+/** Toggle only – settings live on the map icon once enabled. */
+export const RadarPanel = () => {
+  const { inCoverage, enabled, setEnabled } = useRadarContext();
+
   if (!inCoverage) {
-    return null;
+    return (
+      <ListItemButton disabled sx={{ py: 0.5 }}>
+        <ListItemIcon sx={{ minWidth: 45 }}>
+          <RadarIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText
+          primary={t('layerswitcher.radar')}
+          secondary={t('layerswitcher.radar_unavailable')}
+        />
+      </ListItemButton>
+    );
   }
 
   return (
+    <ListItemButton onClick={() => setEnabled(!enabled)} sx={{ py: 0.5 }}>
+      <ListItemIcon sx={{ minWidth: 45 }}>
+        <RadarIcon fontSize="small" color={enabled ? 'primary' : 'inherit'} />
+      </ListItemIcon>
+      <ListItemText primary={t('layerswitcher.radar')} />
+      <Switch
+        edge="end"
+        size="small"
+        checked={enabled}
+        onClick={(e) => e.stopPropagation()}
+        onChange={(e) => setEnabled(e.target.checked)}
+      />
+    </ListItemButton>
+  );
+};
+
+/** Floating map control – only while radar is on and in coverage. */
+export const RadarMapButton = () => {
+  const isMobileMode = useMobileMode();
+  const { open, toggle, setOpen } = useExclusiveMapControl('radar');
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const {
+    inCoverage,
+    enabled,
+    setEnabled,
+    frames,
+    isLoading,
+    index,
+    onSliderIndex,
+    playing,
+    togglePlay,
+    opacity,
+    setOpacity,
+  } = useRadarContext();
+
+  if (!enabled || !inCoverage) return null;
+
+  return (
     <>
-      <RadarButton open={open} active={enabled} onClick={handleToggle} />
+      <Badge color="success" variant="dot" overlap="circular">
+        <Tooltip title={t('layerswitcher.radar')} arrow>
+          <MapControlButton
+            $isOpened={open}
+            size={isMobileMode ? 'large' : 'medium'}
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget);
+              toggle();
+            }}
+          >
+            <RadarIcon fontSize="small" color="primary" />
+          </MapControlButton>
+        </Tooltip>
+      </Badge>
       <PopperWithArrow
-        title="Radar"
+        title={t('layerswitcher.radar')}
         isOpen={open}
         anchorEl={anchorEl}
         placement="top-end"
@@ -349,28 +454,25 @@ export const Radar = () => {
           <Switch
             size="small"
             checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
+            onChange={(e) => {
+              setEnabled(e.target.checked);
+              if (!e.target.checked) setOpen(false);
+            }}
             sx={{ mr: 1 }}
           />
         }
       >
         <Box sx={{ p: 1, pt: 0.5, pointerEvents: 'all' }}>
-          {enabled ? (
-            <RadarControls
-              frames={frames}
-              isLoading={isLoading}
-              index={index}
-              setIndex={onSliderIndex}
-              playing={playing}
-              togglePlay={togglePlay}
-              opacity={opacity}
-              setOpacity={setOpacity}
-            />
-          ) : (
-            <Typography variant="caption" sx={{ pl: 1 }}>
-              Zapni radar přepínačem vpravo nahoře.
-            </Typography>
-          )}
+          <RadarControls
+            frames={frames}
+            isLoading={isLoading}
+            index={index}
+            setIndex={onSliderIndex}
+            playing={playing}
+            togglePlay={togglePlay}
+            opacity={opacity}
+            setOpacity={setOpacity}
+          />
         </Box>
       </PopperWithArrow>
     </>

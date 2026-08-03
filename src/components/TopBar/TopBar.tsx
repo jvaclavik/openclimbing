@@ -8,11 +8,12 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
 import { t } from '../../services/intl';
-import { isDesktop, useMobileMode } from '../helpers';
+import { isDesktop, isMobileMode } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 import { SearchField } from '../SearchBox/SearchBox';
+import { convertHexToRgba } from '../utils/colorUtils';
 import { useFeatureContext } from '../utils/FeatureContext';
 
 const COMMUNITY_URL = 'https://community.openclimbing.org';
@@ -45,6 +46,24 @@ const Bar = styled.div<{ $transparent?: boolean }>`
   `}
 `;
 
+// Both bars stay in the SSR HTML; CSS picks the visible one – no useMediaQuery flash.
+const DesktopBar = styled(Bar)`
+  @media ${isMobileMode} {
+    display: none;
+  }
+`;
+
+const MobileBar = styled(Bar)`
+  display: none;
+  @media ${isMobileMode} {
+    display: flex;
+    align-items: flex-start;
+    padding: 6px;
+    height: auto;
+    min-height: 0;
+  }
+`;
+
 const BrandLink = styled.a`
   display: flex;
   align-items: center;
@@ -60,14 +79,13 @@ const BrandLink = styled.a`
 `;
 
 // the weight stays the same in both states, otherwise the items would resize
-const navButtonSx = (active: boolean, compact: boolean) =>
+const navButtonSx = (active: boolean) =>
   ({
     whiteSpace: 'nowrap',
     textTransform: 'none',
     textDecoration: 'none',
-    fontSize: compact ? 14 : 15,
+    fontSize: 15,
     minWidth: 'auto',
-    px: compact ? 1 : undefined,
     color: active ? 'primary.main' : 'text.primary',
     '&:hover, &:focus': { textDecoration: 'none' },
   }) as const;
@@ -97,7 +115,6 @@ type NavButtonProps = {
   label: string;
   href: string;
   active?: boolean;
-  compact?: boolean;
   target?: string;
   onClick?: (e: React.MouseEvent) => void;
 };
@@ -106,7 +123,6 @@ const NavButton = ({
   label,
   href,
   active = false,
-  compact = false,
   target,
   onClick,
 }: NavButtonProps) => (
@@ -116,22 +132,34 @@ const NavButton = ({
       href={href}
       target={target}
       onClick={onClick}
-      sx={navButtonSx(active, compact)}
+      sx={navButtonSx(active)}
     >
       {label}
     </Button>
   </NavItem>
 );
 
-// tighter icons so the two nav links still fit on a narrow phone
+// frosted circles matching maplibre geolocate / compass controls
+const MapControlIconButton = styled(IconButton)`
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: ${({ theme }) =>
+    convertHexToRgba(theme.palette.background.paper, 0.7)};
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: ${({ theme }) => theme.palette.background.paper};
+  }
+`;
+
 const MobileActions = styled.div`
   display: flex;
   align-items: center;
   flex-shrink: 0;
-
-  .MuiIconButton-root {
-    padding: 6px;
-  }
+  gap: 8px;
 `;
 
 const SearchSlot = styled.div`
@@ -157,14 +185,18 @@ const Brand = () => {
   };
 
   return (
-    <BrandLink href="/" onClick={handleClick} aria-label="OpenClimbing">
+    <BrandLink
+      href="/"
+      onClick={handleClick}
+      aria-label={t('topbar.climbing_areas')}
+    >
       <LogoOpenClimbing width={36} style={{ minWidth: 36 }} />
     </BrandLink>
   );
 };
 
-// on mobile only climbing areas stay in the bar; about + community are in the menu
-const NavLinks = ({ compact = false }: { compact?: boolean }) => {
+// desktop only – on mobile the logo opens climbing areas / homepage
+const NavLinks = () => {
   const router = useRouter();
   const { homepageShown, persistShowHomepage } = useFeatureContext();
 
@@ -181,7 +213,7 @@ const NavLinks = ({ compact = false }: { compact?: boolean }) => {
       direction="row"
       alignItems="center"
       alignSelf="stretch"
-      spacing={compact ? 0 : 0.5}
+      spacing={0.5}
       minWidth={0}
     >
       <NavButton
@@ -189,22 +221,13 @@ const NavLinks = ({ compact = false }: { compact?: boolean }) => {
         href="/"
         onClick={openHomepage}
         active={areasActive}
-        compact={compact}
       />
-      {!compact && (
-        <>
-          <NavButton
-            label={t('topbar.about')}
-            href="/about"
-            active={aboutActive}
-          />
-          <NavButton
-            label={t('topbar.community')}
-            href={COMMUNITY_URL}
-            target="_blank"
-          />
-        </>
-      )}
+      <NavButton label={t('topbar.about')} href="/about" active={aboutActive} />
+      <NavButton
+        label={t('topbar.community')}
+        href={COMMUNITY_URL}
+        target="_blank"
+      />
     </Stack>
   );
 };
@@ -226,58 +249,52 @@ const AddClimbingCta = () => {
 };
 
 export const TopBar = () => {
-  const isMobileMode = useMobileMode();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
 
   // The directions page brings its own top-left search UI.
   const isDirections = router.asPath.startsWith('/directions');
 
-  if (isMobileMode) {
-    if (searchOpen && !isDirections) {
-      return (
-        <Bar $transparent>
+  return (
+    <>
+      <DesktopBar>
+        <Brand />
+        <NavLinks />
+        <Box sx={{ flexGrow: 1 }} />
+        <SearchSlot>{!isDirections && <SearchField />}</SearchSlot>
+        <AddClimbingCta />
+        <HamburgerMenu />
+      </DesktopBar>
+
+      {searchOpen && !isDirections ? (
+        <MobileBar $transparent>
           <SearchSlot>
             <SearchField autoFocus />
           </SearchSlot>
-          <IconButton
+          <MapControlIconButton
             onClick={() => setSearchOpen(false)}
             aria-label={t('close_panel')}
           >
             <CloseIcon />
-          </IconButton>
-        </Bar>
-      );
-    }
-
-    return (
-      <Bar $transparent>
-        <Brand />
-        <NavLinks compact />
-        <Box sx={{ flexGrow: 1 }} />
-        <MobileActions>
-          {!isDirections && (
-            <IconButton
-              onClick={() => setSearchOpen(true)}
-              aria-label={t('searchbox.placeholder')}
-            >
-              <SearchIcon />
-            </IconButton>
-          )}
-          <HamburgerMenu />
-        </MobileActions>
-      </Bar>
-    );
-  }
-
-  return (
-    <Bar>
-      <Brand />
-      <NavLinks />
-      <Box sx={{ flexGrow: 1 }} />
-      <SearchSlot>{!isDirections && <SearchField />}</SearchSlot>
-      <AddClimbingCta />
-      <HamburgerMenu />
-    </Bar>
+          </MapControlIconButton>
+        </MobileBar>
+      ) : (
+        <MobileBar $transparent>
+          <Brand />
+          <Box sx={{ flexGrow: 1 }} />
+          <MobileActions>
+            {!isDirections && (
+              <MapControlIconButton
+                onClick={() => setSearchOpen(true)}
+                aria-label={t('searchbox.placeholder')}
+              >
+                <SearchIcon />
+              </MapControlIconButton>
+            )}
+            <HamburgerMenu />
+          </MobileActions>
+        </MobileBar>
+      )}
+    </>
   );
 };

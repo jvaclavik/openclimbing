@@ -1,4 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styled from '@emotion/styled';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -9,6 +17,9 @@ import {
   Box,
   Button,
   IconButton,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Slider,
   Stack,
   Switch,
@@ -19,6 +30,7 @@ import {
 import { useMapStateContext } from '../../utils/MapStateContext';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { getGlobalMap } from '../../../services/mapStorage';
+import { t } from '../../../services/intl';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
@@ -29,11 +41,11 @@ import {
   SHADOW_MIN_ZOOM,
 } from './sunShadowLayer';
 
-const StyledIconButton = styled(IconButton, {
+const MapControlButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $isOpened: boolean }>`
   pointer-events: all;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1); // same as LayerSwitcherButton
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(15px);
 
   background-color: ${({ theme, $isOpened }) =>
@@ -46,9 +58,9 @@ const StyledIconButton = styled(IconButton, {
   }
 `;
 
-const Panel = styled.div`
+const Panel = styled.div<{ $inset?: boolean }>`
   width: 240px;
-  padding: 4px 8px 0;
+  padding: ${({ $inset }) => ($inset ? '0 16px 8px 52px' : '4px 8px 0')};
 `;
 
 const DateInput = styled.input`
@@ -230,6 +242,7 @@ type SunControlsProps = {
   min: number;
   max: number;
   lowZoom: boolean;
+  inset?: boolean;
 };
 
 const SunControls: React.FC<SunControlsProps> = ({
@@ -244,8 +257,9 @@ const SunControls: React.FC<SunControlsProps> = ({
   min,
   max,
   lowZoom,
+  inset,
 }) => (
-  <Panel>
+  <Panel $inset={inset}>
     {lowZoom && (
       <Box sx={WARNING_BOX_SX}>
         <WarningAmberIcon sx={{ fontSize: 17, flexShrink: 0 }} />
@@ -324,18 +338,18 @@ const useSunQuickActions = (
   }, [sunTimes]);
 
   // "Dopoledne" = halfway between sunrise and solar noon.
-  const onMorning = () => {
+  const onMorning = useCallback(() => {
     if (sunTimes?.sunrise != null && sunTimes?.noon != null) {
       setMinutes(Math.round((sunTimes.sunrise + sunTimes.noon) / 2));
     }
-  };
+  }, [sunTimes, setMinutes]);
 
   // "Odpoledne" = halfway between solar noon and sunset.
-  const onAfternoon = () => {
+  const onAfternoon = useCallback(() => {
     if (sunTimes?.noon != null && sunTimes?.sunset != null) {
       setMinutes(Math.round((sunTimes.noon + sunTimes.sunset) / 2));
     }
-  };
+  }, [sunTimes, setMinutes]);
 
   return { marks, range, onMorning, onAfternoon };
 };
@@ -387,99 +401,6 @@ const useSunHillshadeEffect = (
   }, [enabled, day, minutes, latLonRef]);
 };
 
-type ShadowButtonProps = {
-  open: boolean;
-  active: boolean;
-  lowZoom: boolean;
-  onClick: (event: React.MouseEvent<HTMLElement>) => void;
-};
-
-const ShadowButton = ({
-  open,
-  active,
-  lowZoom,
-  onClick,
-}: ShadowButtonProps) => {
-  const isMobileMode = useMobileMode();
-  // Shadows are on but hidden because the map is zoomed too far out.
-  const hiddenByZoom = active && lowZoom;
-  return (
-    <Badge
-      color="success"
-      variant="dot"
-      overlap="circular"
-      invisible={!active || hiddenByZoom}
-    >
-      <Tooltip
-        title={
-          hiddenByZoom
-            ? 'Přibliž mapu, aby se stíny zobrazily'
-            : 'Mapa stínů (slunce)'
-        }
-        arrow
-      >
-        <StyledIconButton
-          onClick={onClick}
-          $isOpened={open}
-          size={isMobileMode ? 'large' : 'medium'}
-        >
-          {hiddenByZoom ? (
-            <WarningAmberIcon fontSize="small" color="warning" />
-          ) : (
-            <WbSunnyIcon
-              fontSize="small"
-              color={active ? 'primary' : 'inherit'}
-            />
-          )}
-        </StyledIconButton>
-      </Tooltip>
-    </Badge>
-  );
-};
-
-type ShadowPopoverProps = {
-  open: boolean;
-  anchorEl: HTMLElement | null;
-  enabled: boolean;
-  setEnabled: (v: boolean) => void;
-  controls: React.ReactNode;
-};
-
-const ShadowPopover = ({
-  open,
-  anchorEl,
-  enabled,
-  setEnabled,
-  controls,
-}: ShadowPopoverProps) => (
-  <PopperWithArrow
-    title="Stíny"
-    isOpen={open}
-    anchorEl={anchorEl}
-    placement="top-end"
-    offset={[0, 10]}
-    paperSx={GLASS_PAPER_SX}
-    addition={
-      <Switch
-        size="small"
-        checked={enabled}
-        onChange={(e) => setEnabled(e.target.checked)}
-        sx={{ mr: 1 }}
-      />
-    }
-  >
-    <Box sx={{ p: 1, pt: 0.5, pointerEvents: 'all' }}>
-      {enabled ? (
-        controls
-      ) : (
-        <Typography variant="caption" sx={{ pl: 1 }}>
-          Zapni stíny přepínačem vpravo nahoře.
-        </Typography>
-      )}
-    </Box>
-  </PopperWithArrow>
-);
-
 const useLowZoom = (enabled: boolean) => {
   const [lowZoom, setLowZoom] = useState(false);
   useEffect(() => {
@@ -498,14 +419,43 @@ const useLowZoom = (enabled: boolean) => {
   return lowZoom;
 };
 
-export const SunShadow = () => {
+type SunShadowContextValue = {
+  enabled: boolean;
+  setEnabled: (v: boolean) => void;
+  day: string;
+  setDay: (v: string) => void;
+  minutes: number;
+  setMinutes: (v: number) => void;
+  setNow: () => void;
+  onMorning: () => void;
+  onAfternoon: () => void;
+  marks: SunMark[];
+  min: number;
+  max: number;
+  lowZoom: boolean;
+};
+
+const SunShadowContext = createContext<SunShadowContextValue | null>(null);
+
+const useSunShadowContext = () => {
+  const ctx = useContext(SunShadowContext);
+  if (!ctx) {
+    throw new Error('SunShadowPanel must be used within SunShadowProvider');
+  }
+  return ctx;
+};
+
+/** Keeps shadow layer effects alive while the layer-switcher drawer is closed. */
+export const SunShadowProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { view } = useMapStateContext();
   const [, latStr, lonStr] = view;
   const lat = parseFloat(latStr);
   const lon = parseFloat(lonStr);
 
-  const { open, toggle } = useExclusiveMapControl('shadow');
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [day, setDay] = useState(todayIso);
   const [minutes, setMinutes] = useState(nowMinutes);
@@ -523,37 +473,152 @@ export const SunShadow = () => {
     setMinutes,
   );
 
-  // Keep the time within the daylight range the slider exposes.
   useEffect(() => {
     if (minutes < range.min || minutes > range.max) {
       setMinutes(Math.min(Math.max(minutes, range.min), range.max));
     }
   }, [range, minutes]);
 
-  const setNow = () => {
+  const setNow = useCallback(() => {
     setDay(todayIso());
     setMinutes(Math.min(Math.max(nowMinutes(), range.min), range.max));
-  };
+  }, [range.min, range.max]);
 
-  const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-    toggle();
-  };
+  const value = useMemo(
+    () => ({
+      enabled,
+      setEnabled,
+      day,
+      setDay,
+      minutes,
+      setMinutes,
+      setNow,
+      onMorning,
+      onAfternoon,
+      marks,
+      min: range.min,
+      max: range.max,
+      lowZoom,
+    }),
+    [
+      enabled,
+      day,
+      minutes,
+      setNow,
+      onMorning,
+      onAfternoon,
+      marks,
+      range.min,
+      range.max,
+      lowZoom,
+    ],
+  );
+
+  return (
+    <SunShadowContext.Provider value={value}>
+      {children}
+    </SunShadowContext.Provider>
+  );
+};
+
+/** Toggle only – settings live on the map icon once enabled. */
+export const SunShadowPanel = () => {
+  const { enabled, setEnabled } = useSunShadowContext();
+
+  return (
+    <ListItemButton onClick={() => setEnabled(!enabled)} sx={{ py: 0.5 }}>
+      <ListItemIcon sx={{ minWidth: 45 }}>
+        <WbSunnyIcon fontSize="small" color={enabled ? 'primary' : 'inherit'} />
+      </ListItemIcon>
+      <ListItemText primary={t('layerswitcher.shadows')} />
+      <Switch
+        edge="end"
+        size="small"
+        checked={enabled}
+        onClick={(e) => e.stopPropagation()}
+        onChange={(e) => setEnabled(e.target.checked)}
+      />
+    </ListItemButton>
+  );
+};
+
+/** Floating map control – only while shadows are on. */
+export const SunShadowMapButton = () => {
+  const isMobileMode = useMobileMode();
+  const { open, toggle, setOpen } = useExclusiveMapControl('shadow');
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const {
+    enabled,
+    setEnabled,
+    day,
+    setDay,
+    minutes,
+    setMinutes,
+    setNow,
+    onMorning,
+    onAfternoon,
+    marks,
+    min,
+    max,
+    lowZoom,
+  } = useSunShadowContext();
+
+  if (!enabled) return null;
+
+  const hiddenByZoom = lowZoom;
 
   return (
     <>
-      <ShadowButton
-        open={open}
-        active={enabled}
-        lowZoom={lowZoom}
-        onClick={handleToggle}
-      />
-      <ShadowPopover
-        open={open}
+      <Badge
+        color="success"
+        variant="dot"
+        overlap="circular"
+        invisible={hiddenByZoom}
+      >
+        <Tooltip
+          title={
+            hiddenByZoom
+              ? 'Přibliž mapu, aby se stíny zobrazily'
+              : t('layerswitcher.shadows')
+          }
+          arrow
+        >
+          <MapControlButton
+            $isOpened={open}
+            size={isMobileMode ? 'large' : 'medium'}
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget);
+              toggle();
+            }}
+          >
+            {hiddenByZoom ? (
+              <WarningAmberIcon fontSize="small" color="warning" />
+            ) : (
+              <WbSunnyIcon fontSize="small" color="primary" />
+            )}
+          </MapControlButton>
+        </Tooltip>
+      </Badge>
+      <PopperWithArrow
+        title={t('layerswitcher.shadows')}
+        isOpen={open}
         anchorEl={anchorEl}
-        enabled={enabled}
-        setEnabled={setEnabled}
-        controls={
+        placement="top-end"
+        offset={[0, 10]}
+        paperSx={GLASS_PAPER_SX}
+        addition={
+          <Switch
+            size="small"
+            checked={enabled}
+            onChange={(e) => {
+              setEnabled(e.target.checked);
+              if (!e.target.checked) setOpen(false);
+            }}
+            sx={{ mr: 1 }}
+          />
+        }
+      >
+        <Box sx={{ p: 1, pt: 0.5, pointerEvents: 'all' }}>
           <SunControls
             day={day}
             setDay={setDay}
@@ -563,12 +628,12 @@ export const SunShadow = () => {
             onMorning={onMorning}
             onAfternoon={onAfternoon}
             marks={marks}
-            min={range.min}
-            max={range.max}
+            min={min}
+            max={max}
             lowZoom={lowZoom}
           />
-        }
-      />
+        </Box>
+      </PopperWithArrow>
     </>
   );
 };

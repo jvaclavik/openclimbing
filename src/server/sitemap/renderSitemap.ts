@@ -8,6 +8,7 @@ import {
 // Public content pages worth indexing besides the OSM feature detail pages.
 const STATIC_PATHS = [
   '',
+  '/about',
   '/climbing-areas',
   '/climbing-grades',
   '/climbing-leaderboard',
