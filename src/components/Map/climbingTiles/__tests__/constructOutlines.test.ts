@@ -106,6 +106,17 @@ describe('constructOutlines', () => {
     );
   });
 
+  it('gives a finite minZoom to a boulder with all routes on one node', () => {
+    const routes = wall(5, 0, 0).map((route) => ({
+      ...route,
+      geometry: { type: 'Point' as const, coordinates: [CRAG_LON, CRAG_LAT] },
+    }));
+
+    const [outline] = constructOutlines([...routes, crag]);
+
+    expect(Number.isFinite(outline.properties.minZoom)).toBe(true);
+  });
+
   it('spans the whole subtree of a nested area, not just its child crags', () => {
     const AREA_ID = 900000;
     const SUB_ID = 900001;

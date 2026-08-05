@@ -33,7 +33,10 @@ const getMeasures = (hull: GeojsonFeature<Polygon | LineString>) => {
   );
   const inflation = inflationMeters / METERS_PER_BUFFER_DEGREE;
 
-  const minZoom = Math.log2((5 * 40075016) / (diagonalMeters * 256));
+  // routes mapped on a single node give a zero diagonal (--> minZoom Infinity),
+  // yet the outline is still drawn as a circle of the inflation radius
+  const outlineMeters = Math.max(diagonalMeters, 2 * inflationMeters);
+  const minZoom = Math.log2((5 * 40075016) / (outlineMeters * 256));
 
   return { inflation, minZoom };
 };
