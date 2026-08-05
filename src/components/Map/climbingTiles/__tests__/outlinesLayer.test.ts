@@ -5,7 +5,7 @@ const evaluate = (
   property: 'line-opacity' | 'line-width',
   zoom: number,
   featureState: Record<string, unknown>,
-  minZoom = 10,
+  minZoom: number | null = 10,
 ) => {
   const paint = outlinesLayer.paint as Record<string, unknown>;
   const result = expression.createPropertyExpression(
@@ -28,6 +28,12 @@ describe('outlinesLayer', () => {
 
   it('keeps the outline hidden when zoomed out too far', () => {
     expect(evaluate('line-opacity', 8, { hover: true })).toBe(0);
+  });
+
+  it('hides the outline when minZoom is missing', () => {
+    expect(evaluate('line-opacity', 18, {}, null)).toBe(0);
+    expect(evaluate('line-opacity', 18, { hover: true }, null)).toBe(0);
+    expect(evaluate('line-opacity', 18, { selected: true }, null)).toBe(1);
   });
 
   it('shows the outline of the selected feature without hover, in any zoom', () => {

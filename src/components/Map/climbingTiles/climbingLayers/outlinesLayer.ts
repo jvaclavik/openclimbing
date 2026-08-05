@@ -24,11 +24,15 @@ const SELECTED: ExpressionSpecification = [
   false,
 ];
 
+// a missing/null minZoom would throw and maplibre would silently fall back to
+// the default line-opacity of 1 - i.e. the outline lit up all the time
+const MIN_ZOOM: ExpressionSpecification = ['coalesce', ['get', 'minZoom'], 99];
+
 const BY_ZOOM = (z: number): ExpressionSpecification => [
   'case',
   SELECTED,
   1,
-  ['>', z, ['get', 'minZoom']],
+  ['>', z, MIN_ZOOM],
   SHOULD_SHOW,
   0,
 ];
