@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import ChildFriendlyIcon from '@mui/icons-material/ChildFriendly';
+import ExploreIcon from '@mui/icons-material/Explore';
 import TerrainIcon from '@mui/icons-material/Terrain';
 import { Chip, Stack, Tooltip } from '@mui/material';
 import React from 'react';
@@ -194,6 +195,35 @@ const MaterialBadge = ({ feature }) => {
   );
 };
 
+// Which way the rock faces decides when the sun hits it – one of the first
+// things a climber checks, so it belongs next to the rock type.
+const ORIENTATION_LABELS: Record<string, TranslationId> = {
+  N: 'climbing_orientation.n',
+  NE: 'climbing_orientation.ne',
+  E: 'climbing_orientation.e',
+  SE: 'climbing_orientation.se',
+  S: 'climbing_orientation.s',
+  SW: 'climbing_orientation.sw',
+  W: 'climbing_orientation.w',
+  NW: 'climbing_orientation.nw',
+};
+
+const OrientationBadge = ({ feature }: { feature: Feature }) => {
+  const orientation = feature.tags?.['climbing:orientation'];
+  const label = ORIENTATION_LABELS[orientation?.toUpperCase()];
+  if (!label) return null;
+
+  return (
+    <Tooltip title={t('climbing_orientation.label')} arrow>
+      <StyledChip
+        label={renderTitle(label, 'yes', ExploreIcon)}
+        size="small"
+        color="warning"
+      />
+    </Tooltip>
+  );
+};
+
 const StartBadge = ({ feature }: { feature: Feature }) => {
   const start = feature.tags?.['climbing:start'];
   if (!start) return null;
@@ -267,6 +297,7 @@ export const ClimbingBadges = ({
       )}
       <StartBadge feature={feature} />
       <MaterialBadge feature={feature} />
+      <OrientationBadge feature={feature} />
     </Stack>
   );
 };

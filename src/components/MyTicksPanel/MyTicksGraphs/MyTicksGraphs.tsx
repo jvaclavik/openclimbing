@@ -23,11 +23,7 @@ export const MyTicksGraphs = ({ features }: MyTicksGraphsProps) => {
           {t('my_ticks.graphs.routes_distribution')}
         </Typography>
       </PanelSidePadding>
-      <RouteDistribution
-        features={features}
-        cutEmptyMargins={!isGrouped}
-        isGrouped={isGrouped}
-      />
+      <RouteDistribution features={features} isGrouped={isGrouped} />
       <PanelSidePadding>
         <FormControlLabel
           control={

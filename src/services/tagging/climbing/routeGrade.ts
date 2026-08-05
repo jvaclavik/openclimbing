@@ -186,3 +186,24 @@ export const getGradeIndexFromTags = (
 
   return table.indexOf(grade.grade);
 };
+
+// Easiest and hardest route of a set, expressed in the user's grade system.
+// GRADE_TABLE rows are aligned across systems, so the index doubles as a
+// system-independent difficulty rank.
+export const getGradeRange = (
+  featureTags: FeatureTags[],
+  gradeSystem: GradeSystem,
+): { min: string; max: string } | null => {
+  const table = GRADE_TABLE[gradeSystem];
+  const indexes = featureTags
+    .map(getGradeIndexFromTags)
+    .filter((index) => index !== undefined && index >= 0);
+
+  if (!table || !indexes.length) {
+    return null;
+  }
+
+  const min = table[Math.min(...indexes)];
+  const max = table[Math.max(...indexes)];
+  return min && max ? { min, max } : null;
+};

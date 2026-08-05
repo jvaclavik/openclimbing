@@ -158,7 +158,7 @@ export const FODY: ApiMock = {
 };
 
 export const MAPILLARY: ApiMock = {
-  url: `https://graph.mapillary.com/images?access_token=${process.env.NEXT_PUBLIC_API_KEY_MAPILLARY}&fields=compass_angle,computed_geometry,geometry,captured_at,thumb_1024_url,thumb_original_url,is_pano&bbox=14.4208535,50.0870654,14.421653500000001,50.0878654`,
+  url: `https://graph.mapillary.com/images?access_token=${process.env.NEXT_PUBLIC_API_KEY_MAPILLARY}&fields=compass_angle,computed_geometry,geometry,captured_at,thumb_256_url,thumb_1024_url,thumb_original_url,is_pano&bbox=14.4208535,50.0870654,14.421653500000001,50.0878654`,
   response: {
     data: [
       {
@@ -204,6 +204,7 @@ export const MAPILLARY: ApiMock = {
           coordinates: [14.421633830556, 50.087523947222],
         },
         captured_at: 1584100010500,
+        thumb_256_url: 'mapillary_url_256',
         thumb_1024_url: 'mapillary_url_1024',
         thumb_original_url: 'mapillary_url_original',
         is_pano: true,

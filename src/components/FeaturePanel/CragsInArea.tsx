@@ -14,6 +14,8 @@ import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache
 import { Feature, isInstant } from '../../services/types';
 import { ClientOnly, useMobileMode } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
+import { PANEL_GAP, PanelSidePadding } from '../utils/PanelHelpers';
+import { tint } from '../utils/panelUi';
 
 import Link from 'next/link';
 import { getInstantImage } from '../../services/images/getImageDefs';
@@ -44,12 +46,35 @@ const Ul = styled.ul`
 `;
 
 const ArrowIcon = styled(ArrowForwardIosIcon)`
-  opacity: 0.2;
-  margin-left: 12px;
+  align-self: center;
+  font-size: 11px;
+  opacity: 0.35;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 `;
 
-const Container = styled.div`
-  margin: 0 0 20px 0;
+const CARD_GAP = '12px';
+
+// Each crag is a surface of its own – with a dozen of them in an area, plain
+// stacked blocks read as one long wall of text.
+const Container = styled.div<{ $isArea?: boolean }>`
+  --content-gap: ${CARD_GAP};
+  padding: ${CARD_GAP} 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: ${({ theme }) => tint(theme, 0.035)};
+  transition: background-color 0.15s ease;
+
+  // sub-areas are signposts, not destinations – the accent sets them apart
+  ${({ $isArea, theme }) =>
+    $isArea && `border-left: 3px solid ${theme.palette.primary.main};`}
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: ${({ theme }) => tint(theme, 0.07)};
+    }
+  }
 `;
 
 const InnerContainer = styled.div`
@@ -62,6 +87,7 @@ const InnerContainer = styled.div`
   &:hover {
     ${ArrowIcon} {
       opacity: 1;
+      transform: translateX(2px);
     }
   }
 `;
@@ -69,8 +95,9 @@ const InnerContainer = styled.div`
 const CragListContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   margin-top: 12px;
+  padding: 0 ${PANEL_GAP};
 `;
 
 const CragName = styled.div`
@@ -82,61 +109,61 @@ const CragName = styled.div`
   justify-content: space-between;
 `;
 
+// No underline on the heading – the whole card is the target, and its hover
+// tint already says so. Underlining just the text would point at the text.
 const StyledLink = styled(Link)`
   text-decoration: none !important;
-  &:hover h3 {
-    text-decoration: underline;
-  }
 `;
 
 const ChipContent = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 12px;
+  white-space: nowrap;
+`;
+
+const TypeLabel = styled.span`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
 `;
 
 const Header = ({
   label,
   chipContent,
   typeLabel,
+  withArrow,
 }: {
   label: string;
   chipContent?: React.ReactNode;
   typeLabel?: string;
+  withArrow?: boolean;
 }) => (
-  <Box ml={2} mr={2}>
+  <PanelSidePadding>
     <CragName>
       <Box display="flex" alignItems="baseline" gap={1} overflow="hidden">
         <Typography
-          variant="h3"
+          variant="h4"
           component="h3"
           overflow="hidden"
           textOverflow="ellipsis"
           color="primary"
+          lineHeight={1.2}
         >
           {label}
         </Typography>
-        {typeLabel && (
-          <Typography
-            component="span"
-            fontSize={12}
-            color="secondary"
-            whiteSpace="nowrap"
-          >
-            {typeLabel}
-          </Typography>
-        )}
+        {typeLabel && <TypeLabel>{typeLabel}</TypeLabel>}
+        {withArrow && <ArrowIcon color="secondary" />}
       </Box>
-      {chipContent && (
-        <Chip
-          size="small"
-          variant="outlined"
-          label={chipContent}
-          sx={{ position: 'relative', top: 2, fontWeight: 'normal' }}
-        />
-      )}
-    </CragName>{' '}
-  </Box>
+      {chipContent}
+    </CragName>
+  </PanelSidePadding>
 );
 
 const AreaInfo = ({
@@ -297,9 +324,10 @@ const CragItem = ({
         </InnerContainer>
       </StyledLink>
       {feature.memberFeatures.length > 0 && (
-        <Box mb={2}>
-          <RouteDistribution features={feature.memberFeatures} />
-        </Box>
+        <RouteDistribution
+          features={feature.memberFeatures}
+          variant="compact"
+        />
       )}
     </Container>
   );
@@ -346,7 +374,7 @@ const AreaItem = ({ feature }: { feature: Feature }) => {
   };
 
   return (
-    <Container>
+    <Container $isArea>
       <StyledLink
         href={`/${getUrlOsmId(feature.osmMeta)}`}
         locale={intl.lang}
@@ -360,6 +388,7 @@ const AreaItem = ({ feature }: { feature: Feature }) => {
             label={getLabel(feature)}
             chipContent={chipContent}
             typeLabel={t('featurepanel.type_area')}
+            withArrow
           />
           {images.length ? <Gallery feature={feature} images={images} /> : null}
         </InnerContainer>
@@ -504,7 +533,7 @@ const AllCragsDistribution = ({ crags }: { crags: Feature[] }) => {
   }, []);
 
   if (crags.length >= 2) {
-    return <RouteDistribution features={allCragRoutes} />;
+    return <RouteDistribution features={allCragRoutes} gradePicker="label" />;
   }
   return null;
 };

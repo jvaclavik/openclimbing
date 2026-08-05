@@ -5,33 +5,9 @@ import { convertHexToRgba } from '../../utils/colorUtils';
 import { t } from '../../../services/intl';
 
 const SIZE = 14;
-const STROKE = 1.5;
-
-const describeWedge = (cx: number, cy: number, r: number, ratio: number) => {
-  const clamped = Math.max(0, Math.min(1, ratio));
-  if (clamped <= 0) {
-    return '';
-  }
-  if (clamped >= 1) {
-    // Two arcs to draw a full circle as a single path.
-    return [
-      `M ${cx} ${cy - r}`,
-      `A ${r} ${r} 0 1 1 ${cx} ${cy + r}`,
-      `A ${r} ${r} 0 1 1 ${cx} ${cy - r}`,
-      'Z',
-    ].join(' ');
-  }
-  const angle = clamped * 2 * Math.PI;
-  const endX = cx + r * Math.sin(angle);
-  const endY = cy - r * Math.cos(angle);
-  const largeArc = clamped > 0.5 ? 1 : 0;
-  return [
-    `M ${cx} ${cy}`,
-    `L ${cx} ${cy - r}`,
-    `A ${r} ${r} 0 ${largeArc} 1 ${endX} ${endY}`,
-    'Z',
-  ].join(' ');
-};
+const STROKE = 2;
+const RADIUS = (SIZE - STROKE) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 type Props = {
   total: number;
@@ -48,47 +24,52 @@ export const PhotoCoverageRing = ({ total, withPhoto }: Props) => {
   const ratio = safeWithPhoto / total;
   const percent = Math.round(ratio * 100);
 
-  const cx = SIZE / 2;
-  const cy = SIZE / 2;
-  const ringRadius = (SIZE - STROKE) / 2;
-  const wedgeRadius = ringRadius - STROKE / 2;
-
+  const center = SIZE / 2;
   const accent = theme.palette.primary.main;
-  const track = convertHexToRgba(theme.palette.secondary.main, 0.35);
+  // The track only exists so the ratio is readable, so instead of a second
+  // colour competing with the accent it's a faint tint of the accent itself.
+  // Dark surfaces swallow low-alpha strokes, hence the slightly higher value.
+  const track = convertHexToRgba(
+    accent,
+    theme.palette.mode === 'dark' ? 0.24 : 0.16,
+  );
+  const label = t('photo_coverage.tooltip', {
+    withPhoto: `${safeWithPhoto}`,
+    total: `${total}`,
+    percent: `${percent}`,
+  });
 
   return (
-    <Tooltip
-      arrow
-      enterDelay={700}
-      enterNextDelay={700}
-      title={t('photo_coverage.tooltip', {
-        withPhoto: `${safeWithPhoto}`,
-        total: `${total}`,
-        percent: `${percent}`,
-      })}
-    >
+    <Tooltip arrow enterDelay={700} enterNextDelay={700} title={label}>
       <svg
         width={SIZE}
         height={SIZE}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         style={{ display: 'block', flexShrink: 0 }}
         role="img"
-        aria-label={t('photo_coverage.tooltip', {
-          withPhoto: `${safeWithPhoto}`,
-          total: `${total}`,
-          percent: `${percent}`,
-        })}
+        aria-label={label}
       >
         <circle
-          cx={cx}
-          cy={cy}
-          r={ringRadius}
+          cx={center}
+          cy={center}
+          r={RADIUS}
           fill="none"
           stroke={track}
           strokeWidth={STROKE}
         />
         {safeWithPhoto > 0 && (
-          <path d={describeWedge(cx, cy, wedgeRadius, ratio)} fill={accent} />
+          <circle
+            cx={center}
+            cy={center}
+            r={RADIUS}
+            fill="none"
+            stroke={accent}
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            // dashes draw the arc; the rotation moves its start to 12 o'clock
+            strokeDasharray={`${ratio * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+            transform={`rotate(-90 ${center} ${center})`}
+          />
         )}
       </svg>
     </Tooltip>

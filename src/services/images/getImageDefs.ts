@@ -22,6 +22,8 @@ export type ImageType = {
   sameUrlResolvedAlsoFrom?: ImageType[]; // only 1 level
   panoramaUrl?: string; // only for street side photography (ImageDefFromCenter)
   provider?: string;
+  placeholderUrl?: string; // tiny variant of imageUrl, blurred until the full one arrives
+  ratio?: number; // width / height, so the gallery can size the tile upfront
 };
 
 const getSuffix = (y: string) => {

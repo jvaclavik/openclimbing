@@ -55,6 +55,7 @@ test('ImageFromCenter - mapillary', async () => {
   ).toEqual({
     description: 'Mapillary image from 3/13/2020, 11:46:50 AM',
     imageUrl: 'mapillary_url_1024',
+    placeholderUrl: 'mapillary_url_256',
     link: '321151246189360',
     linkUrl: 'https://www.mapillary.com/app/?focus=photo&pKey=321151246189360',
     provider: 'Mapillary',
@@ -110,6 +111,7 @@ test('image=File:', async () => {
     description: 'Wikimedia Commons (image=*)',
     imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Hlubočepské_plotny_-_Pravá_plotna.jpg/500px-Hlubočepské_plotny_-_Pravá_plotna.jpg',
+    ratio: 400 / 314,
     link: 'File:Hlubočepské plotny - Pravá plotna.jpg',
     linkUrl: 'https://commons.wikimedia.org/w/index.php?curid=145779916',
   });
@@ -128,6 +130,7 @@ test('wikimedia_commons=File:', async () => {
     description: 'Wikimedia Commons (wikimedia_commons=*)',
     imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Hlubočepské_plotny_-_Pravá_plotna.jpg/500px-Hlubočepské_plotny_-_Pravá_plotna.jpg',
+    ratio: 400 / 314,
     link: 'File:Hlubočepské plotny - Pravá plotna.jpg',
     linkUrl: 'https://commons.wikimedia.org/w/index.php?curid=145779916',
   });
@@ -167,6 +170,7 @@ test('wikipedia=*', async () => {
     description: 'Wikipedia (wikipedia=*)',
     imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg/500px-Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg',
+    ratio: 400 / 418,
     link: 'File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg',
     linkUrl:
       'https://commons.wikimedia.org/wiki/File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg',
@@ -186,6 +190,7 @@ test('wikipedia=* with lang prefix in value', async () => {
     description: 'Wikipedia (wikipedia:2=*)',
     imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg/500px-Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg',
+    ratio: 400 / 418,
     link: 'File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg',
     linkUrl:
       'https://commons.wikimedia.org/wiki/File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg',
@@ -205,6 +210,7 @@ test('wikipedia:cs=* with lang prefix in key', async () => {
     description: 'Wikipedia (wikipedia:cs=*)',
     imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg/500px-Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg',
+    ratio: 400 / 418,
     link: 'File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg',
     linkUrl:
       'https://commons.wikimedia.org/wiki/File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg',

@@ -1,13 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { Image } from './Image/Image';
 import { useLoadImages } from './useLoadImages';
 import { NoImage } from './NoImage';
-import { HEIGHT, ImageSkeleton } from './helpers';
+import { HEIGHT, ImageSkeleton, useSliderScroll } from './helpers';
 import { getClickHandler } from './Image/helpers';
+import { PhotoLightbox } from './PhotoLightbox';
 import { PROJECT_ID } from '../../../services/project';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { getHumanPoiType, getLabel } from '../../../helpers/featureLabel';
+import { t } from '../../../services/intl';
 import { isTag } from '../../../services/types';
 import { photoNameKey } from '../Climbing/utils/photo';
 import { usePhotoHighlightContext } from '../Climbing/contexts/PhotoHighlightContext';
@@ -21,6 +25,11 @@ export const Wrapper = styled.div`
   min-height: calc(${HEIGHT}px + 10px); // otherwise it shrinks b/c of flex
 `;
 
+const SliderOuter = styled.div`
+  position: relative;
+  height: 100%;
+`;
+
 const StyledSlider = styled.div`
   width: 100%;
   height: 100%;
@@ -32,13 +41,105 @@ const StyledSlider = styled.div`
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 `;
-export const Slider = ({ children }) => <StyledSlider>{children}</StyledSlider>;
+
+const EdgeFade = styled.div<{ $side: 'left' | 'right'; $visible: boolean }>`
+  position: absolute;
+  top: 0;
+  ${({ $side }) => $side}: 0;
+  width: 28px;
+  height: ${HEIGHT}px;
+  pointer-events: none;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.2s ease;
+  background: linear-gradient(
+    to ${({ $side }) => ($side === 'left' ? 'right' : 'left')},
+    ${({ theme }) => theme.palette.background.default},
+    transparent
+  );
+`;
+
+// a div, not a button – the strip is rendered inside a <Link> in CragsInArea,
+// and interactive elements must not nest inside an anchor
+const ArrowButton = styled.div<{ $side: 'left' | 'right' }>`
+  position: absolute;
+  top: ${HEIGHT / 2}px;
+  ${({ $side }) => $side}: 6px;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  @media (hover: hover) {
+    display: flex;
+    ${SliderOuter}:hover & {
+      opacity: 1;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+  }
+`;
+
+export const Slider = ({ children }) => {
+  const { ref, edges, scrollByPage } = useSliderScroll();
+
+  const onArrowClick = (direction: 1 | -1) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    scrollByPage(direction);
+  };
+
+  return (
+    <SliderOuter>
+      <StyledSlider ref={ref}>{children}</StyledSlider>
+      <EdgeFade $side="left" $visible={edges.left} />
+      <EdgeFade $side="right" $visible={edges.right} />
+      {edges.left && (
+        <ArrowButton $side="left" aria-hidden onClick={onArrowClick(-1)}>
+          <ChevronLeftIcon fontSize="small" />
+        </ArrowButton>
+      )}
+      {edges.right && (
+        <ArrowButton $side="right" aria-hidden onClick={onArrowClick(1)}>
+          <ChevronRightIcon fontSize="small" />
+        </ArrowButton>
+      )}
+    </SliderOuter>
+  );
+};
+
+const SKELETON_RATIOS = [4 / 3, 3 / 4, 3 / 2];
+
+const GallerySkeleton = ({ count }: { count: number }) => (
+  <Wrapper>
+    <Slider>
+      {SKELETON_RATIOS.slice(0, Math.max(1, count)).map((ratio) => (
+        <ImageSkeleton key={ratio} $ratio={ratio} />
+      ))}
+    </Slider>
+  </Wrapper>
+);
 
 export const FeatureImages = () => {
   const { feature } = useFeatureContext();
   const { loading, images } = useLoadImages();
   const { highlightedPhoto, highlightToken } = usePhotoHighlightContext();
   const itemRefs = useRef<Record<string, HTMLDivElement>>({});
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const poiType = getHumanPoiType(feature);
   const alt = `${poiType} ${getLabel(feature)}`;
 
@@ -60,11 +161,7 @@ export const FeatureImages = () => {
       return null;
     }
     if (loading) {
-      return (
-        <Wrapper>
-          <ImageSkeleton />
-        </Wrapper>
-      );
+      return <GallerySkeleton count={feature.imageDefs?.length ?? 1} />;
     }
     // Climbing features look cleaner without the big placeholder icon.
     const isClimbingFeature =
@@ -84,28 +181,42 @@ export const FeatureImages = () => {
     : null;
 
   return (
-    <Wrapper>
-      <Slider>
-        {images.map((item, index) => {
-          const key = isTag(item.def) ? photoNameKey(item.def.v) : null;
-          return (
-            <Image
-              key={item.image.imageUrl}
-              def={item.def}
-              image={item.image}
-              onClick={getClickHandler(feature, item.def)}
-              alt={`${alt} ${index + 1}`}
-              highlighted={!!key && key === highlightedKey}
-              wrapperRef={(el) => {
-                if (key) {
-                  if (el) itemRefs.current[key] = el;
-                  else delete itemRefs.current[key];
+    <>
+      <Wrapper>
+        <Slider>
+          {images.map((item, index) => {
+            const key = isTag(item.def) ? photoNameKey(item.def.v) : null;
+            const openTopo = getClickHandler(feature, item.def);
+            return (
+              <Image
+                key={item.image.imageUrl}
+                def={item.def}
+                image={item.image}
+                onClick={openTopo ?? (() => setLightboxIndex(index))}
+                actionLabel={
+                  openTopo
+                    ? t('featurepanel.photo_show_topo')
+                    : t('featurepanel.photo_enlarge')
                 }
-              }}
-            />
-          );
-        })}
-      </Slider>
-    </Wrapper>
+                alt={`${alt} ${index + 1}`}
+                highlighted={!!key && key === highlightedKey}
+                wrapperRef={(el) => {
+                  if (key) {
+                    if (el) itemRefs.current[key] = el;
+                    else delete itemRefs.current[key];
+                  }
+                }}
+              />
+            );
+          })}
+        </Slider>
+      </Wrapper>
+      <PhotoLightbox
+        images={images}
+        index={lightboxIndex}
+        onChange={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+      />
+    </>
   );
 };

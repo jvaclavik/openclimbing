@@ -16,6 +16,7 @@ type ImageProvider<T> = {
   getImageAngle: (img: T) => number | undefined;
   isPano: (img: T) => boolean;
   getImageUrl: (img: T) => string;
+  getPlaceholderUrl?: (img: T) => string;
   getImageDate: (img: T) => Date;
   getImageLink: (img: T) => string;
   getImageLinkUrl: (img: T) => string;
@@ -32,6 +33,7 @@ export const getImageFromCenterFactory =
       getImageAngle,
       isPano,
       getImageUrl,
+      getPlaceholderUrl,
       getImageDate,
       getImageLink,
       getImageLinkUrl,
@@ -77,6 +79,7 @@ export const getImageFromCenterFactory =
       provider,
       description,
       imageUrl: getImageUrl(imageToUse),
+      placeholderUrl: getPlaceholderUrl?.(imageToUse),
       linkUrl: getImageLinkUrl(imageToUse),
       link: getImageLink(imageToUse),
       uncertainImage: true,

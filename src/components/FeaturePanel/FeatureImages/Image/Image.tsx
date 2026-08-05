@@ -1,36 +1,38 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   getImageDefId,
   ImageType,
 } from '../../../../services/images/getImageDefs';
-import { PathsSvg } from '../PathsSvg';
-
-import { css } from '@emotion/react';
+import { getImagePlaceholderUrl } from '../../../../services/images/getImagePlaceholderUrl';
 import { ImageDef, isTag } from '../../../../services/types';
 import { isMobileMode } from '../../../helpers';
 import { FEATURE_PANEL_WIDTH, PANEL_GAP } from '../../../utils/PanelHelpers';
-import { HEIGHT } from '../helpers';
 import {
-  ImageClickHandler,
-  initialSize,
-  UncertainCover,
-  useImgError,
-  useImgSizeOnload,
-} from './helpers';
+  ProgressiveImage,
+  ProgressiveImageWrapper,
+} from '../../../utils/ProgressiveImage';
+import {
+  DEFAULT_RATIO,
+  getTileWidth,
+  HEIGHT,
+  PANORAMA_RATIO,
+  tileCss,
+} from '../helpers';
+import { PathsSvg } from '../PathsSvg';
+import { ImageClickHandler, UncertainCover, useImgError } from './helpers';
 import { InfoButton } from './InfoButton';
 import { PanoramaImg } from './PanoramaImg';
-
-const Img = styled.img<{ $hasPaths: boolean }>`
-  margin-left: 50%;
-  transform: translateX(-50%);
-
-  ${({ $hasPaths }) => $hasPaths && `opacity: 0.9;`}
-`;
+import {
+  DrawnRoutesBadge,
+  getDrawnRoutesCount,
+  HoverAction,
+  PhotoShade,
+} from './PhotoOverlay';
 
 // example wide image: relation/1515375
 const CROP_IMAGE_CSS = css`
-  overflow: hidden;
   max-width: calc(${FEATURE_PANEL_WIDTH}px - 2 * ${PANEL_GAP});
   @media ${isMobileMode} {
     max-width: calc(100% - 2 * ${PANEL_GAP});
@@ -46,23 +48,41 @@ const CROP_IMAGE_CSS = css`
 `;
 
 const ImageWrapper = styled.div<{ $hasPaths: boolean; $highlighted?: boolean }>`
-  display: inline-block;
+  ${tileCss}
   position: relative;
-  height: 238px;
-  vertical-align: top;
-  overflow: hidden;
-  border-radius: 8px;
-  transition: box-shadow 0.2s ease;
-  border: solid 2px transparent;
-  ${({ $highlighted }) => $highlighted && `border: solid 2px #ea5540;`}
+  background-color: ${({ theme }) => theme.palette.background.elevation};
 
-  margin-right: ${PANEL_GAP};
-  &:first-of-type {
-    margin-left: ${PANEL_GAP};
-  }
+  // an inset outline instead of a border, so the tile size stays exactly the
+  // reserved one and the paths overlay keeps matching the photo
+  outline: solid 2px transparent;
+  outline-offset: -2px;
+  ${({ $highlighted }) => $highlighted && `outline-color: #ea5540;`}
 
-  ${({ onClick }) => onClick && `cursor: pointer;`}
+  transition:
+    box-shadow 0.2s ease,
+    outline-color 0.2s ease;
+
+  ${({ onClick }) =>
+    onClick &&
+    `
+      cursor: pointer;
+      @media (hover: hover) {
+        &:hover {
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+        &:hover ${HoverAction} {
+          opacity: 1;
+        }
+      }
+    `}
+
   ${({ $hasPaths }) => !$hasPaths && CROP_IMAGE_CSS}
+
+  ${ProgressiveImageWrapper} {
+    width: 100%;
+    height: 100%;
+    ${({ $hasPaths }) => $hasPaths && `opacity: 0.9;`}
+  }
 `;
 
 type Props = {
@@ -72,6 +92,8 @@ type Props = {
   alt?: string;
   highlighted?: boolean;
   wrapperRef?: React.Ref<HTMLDivElement>;
+  /** shown on hover, tells what clicking the photo does */
+  actionLabel?: string;
 };
 
 export const Image = ({
@@ -81,42 +103,55 @@ export const Image = ({
   alt,
   highlighted,
   wrapperRef,
+  actionLabel,
 }: Props) => {
   const { error, onError } = useImgError();
-  const { imgRef, size, onLoad } = useImgSizeOnload();
+  const [ratio, setRatio] = useState<number | null>(image.ratio ?? null);
+
+  useEffect(() => {
+    setRatio(image.ratio ?? null);
+  }, [image.imageUrl, image.ratio]);
 
   if (error) {
     return null; // TODO perhaps offer a retry button? But it would need investment in UX.
   }
 
+  const isPanorama = !!image.panoramaUrl;
   const hasPaths =
     isTag(def) && !!(def.path?.length || def.memberPaths?.length);
 
-  const isImageLoaded = size !== initialSize;
-  const showInfo = image.panoramaUrl || isImageLoaded;
+  const knownRatio = ratio ?? (isPanorama ? PANORAMA_RATIO : DEFAULT_RATIO);
+  const size = { width: getTileWidth(knownRatio), height: HEIGHT };
+
   return (
     <ImageWrapper
       ref={wrapperRef}
       $hasPaths={hasPaths}
       $highlighted={highlighted}
       onClick={onClick}
+      style={{ width: size.width }}
     >
-      {image.panoramaUrl ? (
+      {isPanorama ? (
         <PanoramaImg small={image.imageUrl} large={image.panoramaUrl} />
       ) : (
-        <Img
+        <ProgressiveImage
           src={image.imageUrl}
-          height={HEIGHT}
+          placeholderSrc={getImagePlaceholderUrl(image)}
           alt={alt || getImageDefId(def)}
-          onLoad={onLoad}
+          onRatio={setRatio}
           onError={onError}
-          $hasPaths={hasPaths}
-          ref={imgRef}
         />
       )}
-      {hasPaths && <PathsSvg def={def} size={size} />}
-      {showInfo && <InfoButton image={image} />}
-      {image.uncertainImage && !image.panoramaUrl && <UncertainCover />}
+      {/* below the paths, so the drawn lines keep their contrast */}
+      {!isPanorama && <PhotoShade />}
+      {/* only once the tile matches the photo, otherwise the paths sit on a crop */}
+      {hasPaths && ratio !== null && <PathsSvg def={def} size={size} />}
+      <DrawnRoutesBadge count={getDrawnRoutesCount(def)} />
+      {onClick && actionLabel && !isPanorama && (
+        <HoverAction>{actionLabel}</HoverAction>
+      )}
+      {(isPanorama || ratio !== null) && <InfoButton image={image} />}
+      {image.uncertainImage && !isPanorama && <UncertainCover />}
     </ImageWrapper>
   );
 };

@@ -1,34 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import Router from 'next/router';
-import { Size } from '../types';
-import { HEIGHT } from '../helpers';
 import { getOsmappLink } from '../../../../services/helpers';
 import { removeFilePrefix } from '../../Climbing/utils/photo';
 import { Feature, ImageDef, isTag } from '../../../../services/types';
 
-export const initialSize: Size = { width: 100, height: HEIGHT }; // until image size is known, the paths are rendered using this (eg. ssr)
-
-export const useImgSizeOnload = () => {
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [size, setSize] = useState<Size>(initialSize);
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      setSize({ width: imgRef.current.width, height: imgRef.current.height }); // SSR case
-    }
-  }, []);
-
-  const onLoad = (e) => {
-    setSize({ width: e.target.width, height: e.target.height }); // browser case
-  };
-
-  return { imgRef, size, onLoad };
-};
-
 export const useImgError = () => {
   const [error, setError] = useState<boolean>(false);
-  const onError = (e) => {
-    console.error('Feature Image failed to load', e.target.url); // eslint-disable-line no-console
+  const onError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Feature Image failed to load', e.currentTarget.src); // eslint-disable-line no-console
     setError(true);
   };
   return { error, onError };

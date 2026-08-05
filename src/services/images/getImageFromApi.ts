@@ -13,6 +13,9 @@ import { t } from '../intl';
 
 type ImagePromise = Promise<ImageType | null>;
 
+const getRatio = (width?: number, height?: number) =>
+  width && height ? width / height : undefined;
+
 const getCommonsFileApiUrl = (title: string) =>
   encodeUrl`https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&iiurlwidth=${WIDTH}&format=json&titles=${title}&origin=*`;
 
@@ -26,10 +29,10 @@ const fetchCommonsFile = async (k: string, v: string): ImagePromise => {
   const image = page.imageinfo[0];
   return {
     imageUrl: decodeURI(image.thumburl),
+    ratio: getRatio(image.thumbwidth, image.thumbheight),
     description: `Wikimedia Commons (${k}=*)`,
     link: page.title,
     linkUrl: image.descriptionshorturl,
-    // portrait: images[0].thumbwidth < images[0].thumbheight,
   };
 };
 
@@ -114,28 +117,40 @@ const fetchWikipedia = async (k: string, v: string): ImagePromise => {
   }
   return {
     imageUrl: decodeURI(page.thumbnail.source), // it has to be decoded, because wikipedia encodes brackets (), but encodeURI doesnt
+    ratio: getRatio(page.thumbnail.width, page.thumbnail.height),
     description: `Wikipedia (${k}=*)`,
     link: `File:${page.pageimage}`,
     linkUrl: `https://commons.wikimedia.org/wiki/File:${page.pageimage}`,
-    // portrait: page.thumbnail.width < page.thumbnail.height,
   };
 };
 
 type MapillaryResponse = {
   is_pano: boolean;
+  thumb_256_url: string;
   thumb_1024_url: string;
   thumb_original_url: string;
+  width: number;
+  height: number;
   id: string;
 };
 
 const fetchMapillaryTag = async (k: string, v: string): ImagePromise => {
-  const fields = ['is_pano', 'thumb_1024_url', 'thumb_original_url'];
+  const fields = [
+    'is_pano',
+    'thumb_256_url',
+    'thumb_1024_url',
+    'thumb_original_url',
+    'width',
+    'height',
+  ];
   const url = `https://graph.mapillary.com/${v}?fields=thumb_1024_url&access_token=${MAPILLARY_ACCESS_TOKEN}&fields=${fields.join(',')}`;
   const data = await fetchJson<MapillaryResponse>(url);
 
   return {
     ...(data.is_pano ? { panoramaUrl: data.thumb_original_url } : {}),
     imageUrl: data.thumb_1024_url,
+    placeholderUrl: data.thumb_256_url,
+    ratio: getRatio(data.width, data.height),
     link: 'Mapillary',
     linkUrl: `https://www.mapillary.com/app/?pKey=${v}&focus=photo`,
     description: `Mapillary (${k}=*)`,

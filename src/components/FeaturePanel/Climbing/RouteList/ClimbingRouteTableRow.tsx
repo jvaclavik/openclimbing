@@ -293,6 +293,23 @@ const RouteAuthor = ({ feature }: { feature: Feature }) =>
     <RouteAuthorContainer>{feature.tags?.author}</RouteAuthorContainer>
   ) : null;
 
+const RouteLengthContainer = styled.span`
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 11px;
+  white-space: nowrap;
+`;
+
+const RouteLength = ({ feature }: { feature: Feature }) => {
+  const length = feature.tags?.['climbing:length']?.trim();
+  if (!length) {
+    return null;
+  }
+
+  // a bare number means metres in OSM, anything else already carries its unit
+  const label = /^\d+([.,]\d+)?$/.test(length) ? `${length} m` : length;
+  return <RouteLengthContainer>{label}</RouteLengthContainer>;
+};
+
 const RouteName = (props: {
   feature: Feature;
   selected: boolean;
@@ -307,6 +324,7 @@ const RouteName = (props: {
       >
         {props.feature.tags?.name}
       </Typography>
+      <RouteLength feature={props.feature} />
     </RouteNameContainer>
   );
 };

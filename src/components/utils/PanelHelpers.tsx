@@ -78,6 +78,11 @@ export const PanelFooterWrapper = styled.footer`
 
 export const PANEL_GAP = '16px';
 
+// Everything that lines up with the panel edge measures from here. Cards that
+// embed panel content (crags in an area) narrow the rhythm down by setting
+// `--content-gap` on themselves, so their children need no extra props.
+export const CONTENT_GAP = `var(--content-gap, ${PANEL_GAP})`;
+
 export const PanelSidePadding = styled.div`
-  padding: 0 ${PANEL_GAP};
+  padding: 0 ${CONTENT_GAP};
 `;

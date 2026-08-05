@@ -39,6 +39,13 @@ import { PhotoCoverageRing } from '../FeaturePanel/Climbing/PhotoCoverageRing';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { useMobileMode } from '../helpers';
 import { Bbox, useMapStateContext } from '../utils/MapStateContext';
+import { getClimbingGallery } from '../../services/climbing-areas/getClimbingGallery';
+import {
+  CommonsProgressiveImage,
+  ProgressiveImageWrapper,
+} from '../utils/ProgressiveImage';
+import { tint } from '../utils/panelUi';
+import styled from '@emotion/styled';
 
 type ClimbingAreasPanelProps = {
   areas?: ClimbingArea[] | null;
@@ -132,6 +139,42 @@ const groupByCountry = (
   return groups.sort(comparator);
 };
 
+const THUMB_WIDTH = 120; // rendered at 54px, so retina stays sharp
+
+const Thumb = styled.div`
+  width: 54px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: ${({ theme }) => tint(theme, 0.06)};
+
+  ${ProgressiveImageWrapper} {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+// The gallery already knows the best photo of every area (the one with the most
+// routes drawn on it) and the homepage keeps it cached under the same key.
+const useAreaPhotos = () => {
+  const { data } = useQuery(['climbing-gallery'], getClimbingGallery, {
+    staleTime: Infinity,
+  });
+
+  return useMemo(
+    () => new Map((data ?? []).map((item) => [item.osmId, item.photo])),
+    [data],
+  );
+};
+
+const AreaThumb = ({ photo, name }: { photo?: string; name: string }) => (
+  <Thumb>
+    {photo && (
+      <CommonsProgressiveImage photo={photo} width={THUMB_WIDTH} alt={name} />
+    )}
+  </Thumb>
+);
+
 const CountryAccordion = ({
   group,
   defaultExpanded,
@@ -144,6 +187,7 @@ const CountryAccordion = ({
   const { countryCode, name: countryName, areas, cragCount } = group;
   const { setPreview } = useFeatureContext();
   const mobileMode = useMobileMode();
+  const photos = useAreaPhotos();
 
   const handleHover = (area: ClimbingArea) => () => {
     setPreview({ center: [area.lon, area.lat] } as Feature);
@@ -186,6 +230,7 @@ const CountryAccordion = ({
           <TableHead>
             <TableRow>
               <TableCell width={1} />
+              <TableCell width={1} />
               <TableCell>{t('climbingareas.col_name')}</TableCell>
               <TableCell align="right">
                 {t('climbingareas.col_routes')}
@@ -204,6 +249,12 @@ const CountryAccordion = ({
                 onMouseLeave={mobileMode ? undefined : () => setPreview(null)}
               >
                 <TableCell width={1}>{index + 1}.</TableCell>
+                <TableCell width={1} sx={{ pr: 0 }}>
+                  <AreaThumb
+                    photo={photos.get(area.osmId)}
+                    name={area.name ?? ''}
+                  />
+                </TableCell>
                 <TableCell>
                   <Link
                     href={`/${area.osmType}/${area.osmId}?back=${backTarget}`}

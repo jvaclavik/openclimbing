@@ -9,17 +9,31 @@ type AreaAggregate = {
 };
 
 // climbing_tiles_stats is written by /refresh and knows nothing about areas,
-// so these are aggregated live - it is a single indexed scan over ~700 rows
-const getAreaAggregate = (): AreaAggregate =>
-  getDb()
-    .prepare<[], AreaAggregate>(
+// so these are aggregated live – cheap scans over a few thousand rows.
+const getAreaAggregate = (): AreaAggregate => {
+  const db = getDb();
+  const areas = db
+    .prepare<[], Pick<AreaAggregate, 'areasCount' | 'countriesCount'>>(
       `SELECT COUNT(*) AS "areasCount",
-          COALESCE(SUM("routesWithPhoto"), 0) AS "routesWithPhotoCount",
           COUNT(DISTINCT "countryCode") AS "countriesCount"
        FROM climbing_features
        WHERE type = 'area' AND "osmType" = 'relation'`,
     )
     .get();
+
+  // Sum crags (not areas): each route typically sits in one crag. Summing areas
+  // double-counted nested/overlapping areas (parent + child both include the
+  // same drawn routes).
+  const photos = db
+    .prepare<[], Pick<AreaAggregate, 'routesWithPhotoCount'>>(
+      `SELECT COALESCE(SUM("routesWithPhoto"), 0) AS "routesWithPhotoCount"
+       FROM climbing_features
+       WHERE type = 'crag'`,
+    )
+    .get();
+
+  return { ...areas, ...photos };
+};
 
 export const getClimbingStats = (): ClimbingStatsResponse => {
   const row = getDb()

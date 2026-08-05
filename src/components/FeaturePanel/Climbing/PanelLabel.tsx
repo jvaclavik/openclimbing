@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { ContentContainer } from './ContentContainer';
-import { Box } from '@mui/material';
+import { CONTENT_GAP } from '../../utils/PanelHelpers';
 
 type PanelLabelProps = {
   children: React.ReactNode;
@@ -30,13 +30,18 @@ export const Addition = styled.div`
   color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
+const LabelRow = styled.div`
+  margin-top: 32px;
+  padding: 0 ${CONTENT_GAP};
+`;
+
 export const PanelLabel = ({ children, addition }: PanelLabelProps) => (
-  <Box ml={2} mr={2} mt={4}>
+  <LabelRow>
     <ContentContainer>
       <InnerContainer>
         <Title>{children}</Title>
         <Addition>{addition}</Addition>
       </InnerContainer>
     </ContentContainer>
-  </Box>
+  </LabelRow>
 );
