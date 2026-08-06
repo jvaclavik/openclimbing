@@ -1,5 +1,9 @@
 import { getGlobalMap } from '../../../services/mapStorage';
 import { CLIMBING_TILES_SOURCE } from './consts';
+import {
+  reapplySelectedCragRoutes,
+  setSelectedCragRoutes,
+} from './selectedCragRoutes';
 
 let selectedId: number | undefined = undefined;
 
@@ -21,10 +25,12 @@ export const setSelectedOutline = (id: number | undefined) => {
   setState(selectedId, false);
   selectedId = id;
   setState(selectedId, true);
+  setSelectedCragRoutes(id);
 };
 
 // the source (or the whole style) is rebuilt behind our back - the feature
 // state has to be applied again once the new data is in
 export const reapplySelectedOutline = () => {
   setState(selectedId, true);
+  reapplySelectedCragRoutes();
 };
