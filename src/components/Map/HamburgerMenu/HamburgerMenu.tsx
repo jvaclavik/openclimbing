@@ -29,6 +29,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import Link from 'next/link';
 import { UserHeader } from './UserHeader';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
@@ -120,6 +121,19 @@ const ClimbingAreasLink = ({ closeMenu }) => {
     </MenuItem>
   );
 };
+
+const ClimbingForumLink = () => (
+  <MenuItem
+    href="https://community.openclimbing.org"
+    component={Link}
+    target="_blank"
+  >
+    <ListItemIcon>
+      <QuestionAnswerIcon />
+    </ListItemIcon>
+    <ListItemText>{t('climbing.forum')}</ListItemText>
+  </MenuItem>
+);
 
 const AboutLink = ({ closeMenu }) => (
   <MenuItem href="/about" component={Link} onClick={closeMenu}>
@@ -218,6 +232,7 @@ export const HamburgerMenu = () => {
             <Divider />
             <Box mb={2}>
               <EditLink />
+              {isOpenClimbing && <ClimbingForumLink />}
             </Box>
             <Divider />
             <Stack direction="row" justifyContent="space-between" mb={1} mt={1}>
