@@ -60,6 +60,23 @@ const getRouteNumberFromTags = ({ tags }: OsmItem) => {
 const isRoute = (member: GeojsonFeature) =>
   ['route', 'route_bottom'].includes(member.tags.climbing);
 
+const CLIMBING_VALUES = [
+  'area',
+  'crag',
+  'boulder',
+  'route',
+  'route_bottom',
+  'route_top',
+];
+
+// a `type=site` relation lists parking, approach paths, toilets... next to the
+// climbing itself - those must not be measured or counted as climbing
+const isClimbingMember = ({ tags = {} }: GeojsonFeature) =>
+  CLIMBING_VALUES.includes(tags.climbing) ||
+  tags.natural === 'cliff' ||
+  tags.natural === 'peak' ||
+  (tags.type === 'site' && tags.sport === 'climbing');
+
 // A route is "drawn on a photo" when it has a non-empty `wikimedia_commons[...]:path` tag.
 const isWikimediaCommonsPhotoPath = (tag: string) =>
   /^wikimedia_commons(:\d+)*:path$/.test(tag);
@@ -210,10 +227,12 @@ const convertRelation = (
   lookup: Lookup,
 ): GeojsonFeature => {
   const members = lookupRelationMembers(relation, lookup); // TODO lookup-members + common-fields are repeated in each pass (unneccesary)
-  const geometry = members.length
+  const climbingMembers = members.filter(isClimbingMember);
+  const measured = climbingMembers.length ? climbingMembers : members;
+  const geometry = measured.length
     ? {
         type: 'GeometryCollection' as const,
-        geometries: members.map(({ geometry }) => geometry),
+        geometries: measured.map(({ geometry }) => geometry),
       }
     : undefined;
 
