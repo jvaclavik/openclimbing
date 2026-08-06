@@ -29,6 +29,7 @@ export const routesPoints: LayerSpecification[] = [
     filter: ['==', ['get', 'parentId'], -1], // set by setSelectedCragRoutes()
     paint: {
       'circle-color': '#f60',
+      'circle-opacity': 0.35,
       // route radius + its white stroke + the ring itself
       'circle-radius': linear(
         16,
