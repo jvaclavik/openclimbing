@@ -66,3 +66,9 @@ test('site relation is centered by its climbing members only', () => {
   expect(area.center[0]).toBeCloseTo(4.593, 6);
   expect(area.center[1]).toBeCloseTo(45.7105, 6);
 });
+
+test('parking and approach path do not count as routes', () => {
+  const [area] = overpassToGeojsons(response, () => {}).relation;
+
+  expect(area.properties.routeCount).toBe(2);
+});

@@ -204,6 +204,7 @@ const getRelationProperties = (
       hasImages: hasOwnImages(relation) || members.some(hasMemberImages),
       histogram: sumMemberHistograms(members),
       routeCount: members
+        .filter(isClimbingMember)
         .map((member) => member?.properties.routeCount ?? 1)
         .reduce((acc, count) => acc + count, 0),
       routesWithPhoto: countRoutesWithPhoto(members),
