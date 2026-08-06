@@ -18,6 +18,10 @@ const ifHighlighted = (
 
 export const CRAG_ROUTES_LAYER = 'climbing route (crag highlight)';
 
+// circle-blur fades the disc from its edge inwards, so the ring has to start
+// wider to keep a visible thickness
+const HALO = 1.6;
+
 export const routesPoints: LayerSpecification[] = [
   {
     // an orange disc peeking from under the white ring - maplibre has no second
@@ -29,12 +33,14 @@ export const routesPoints: LayerSpecification[] = [
     filter: ['==', ['get', 'parentId'], -1], // set by setSelectedCragRoutes()
     paint: {
       'circle-color': '#f60',
+      'circle-opacity': 0.85,
+      'circle-blur': 1,
       // route radius + its white stroke + the ring itself
       'circle-radius': linear(
         16,
-        ifHighlighted(2 + 2 + 1.5, 1 + 0.4 + 1.5),
+        ifHighlighted((2 + 2 + 1.5) * HALO, (1 + 0.4 + 1.5) * HALO),
         21,
-        ifHighlighted(8 + 5 + 3, 6 + 1.2 + 3),
+        ifHighlighted((8 + 5 + 3) * HALO, (6 + 1.2 + 3) * HALO),
       ),
     },
   },
