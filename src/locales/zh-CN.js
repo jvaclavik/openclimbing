@@ -130,7 +130,7 @@ export default {
   'support_us.share': `将 openclimbing.org 分享给您的朋友或在社交媒体上分享`,
   'support_us.feedback': `向我们发送您的反馈`,
   'support_us.add_content': `绘制攀岩路线图`,
-  'support_us.develop': `您会编程吗？向我们的代码仓库提交一个 Pull Request。`,
+  'support_us.develop': `您会编程吗？向我们的<link>代码仓库</link>提交一个 Pull Request。`,
   'support_us.contribute_financially': `资金捐助`,
   'support_us.thanks': `谢谢您！`,
   'support_us.bitcoin_dialog_title': `用比特币支持我们`,

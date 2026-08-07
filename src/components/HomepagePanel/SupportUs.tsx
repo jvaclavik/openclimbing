@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { useUserThemeContext } from '../../helpers/theme';
-import { t } from '../../services/intl';
+import { t, Translation } from '../../services/intl';
 import { CardRow, CardTitle, LinkCard } from './LinkCard';
 
 // Dvojitý úder (“lub-dub”) + pauza, v 1s cyklu (což odpovídá cca 60 BPM).
@@ -114,7 +114,12 @@ export const SupportUs = () => {
             </li>
             <li>
               <Typography variant="body2" color="text.secondary">
-                {t('support_us.develop')}
+                <Translation
+                  id="support_us.develop"
+                  tags={{
+                    link: 'a href="https://github.com/jvaclavik/openclimbing" target="_blank"',
+                  }}
+                />
               </Typography>
             </li>
           </HelpList>
