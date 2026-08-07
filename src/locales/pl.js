@@ -273,8 +273,7 @@ export default {
   'support_us.share': 'Udostępnij openclimbing.org znajomym lub w mediach społecznościowych',
   'support_us.feedback': 'Wyślij nam swoją opinię',
   'support_us.add_content': 'Mapuj drogi wspinaczkowe',
-  'support_us.develop':
-    'Umiesz programować? Wyślij pull request do naszego <link>repozytorium</link>.',
+  'support_us.develop': 'Umiesz programować? Wyślij pull request do naszego <link>repozytorium</link>.',
   'support_us.contribute_financially': 'Wesprzyj finansowo',
   'support_us.thanks': 'Dziękujemy!',
   'support_us.bitcoin_dialog_title': 'Wesprzyj nas Bitcoinem',

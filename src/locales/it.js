@@ -274,8 +274,7 @@ export default {
   'support_us.share': 'Condividi openclimbing.org con i tuoi amici o sui social media',
   'support_us.feedback': 'Inviaci il tuo feedback',
   'support_us.add_content': 'Mappa le vie di arrampicata',
-  'support_us.develop':
-    'Sai programmare? Invia una pull request al nostro <link>repository</link>.',
+  'support_us.develop': 'Sai programmare? Invia una pull request al nostro <link>repository</link>.',
   'support_us.contribute_financially': 'Contribuisci economicamente',
   'support_us.thanks': 'Grazie!',
   'support_us.bitcoin_dialog_title': 'Sostienici con Bitcoin',

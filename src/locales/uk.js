@@ -274,8 +274,7 @@ export default {
   'support_us.share': 'Поділіться openclimbing.org із друзями або в соцмережах',
   'support_us.feedback': 'Надішліть нам свій відгук',
   'support_us.add_content': 'Картографуйте скелелазні маршрути',
-  'support_us.develop':
-    'Умієте програмувати? Надішліть pull request до нашого <link>репозиторію</link>.',
+  'support_us.develop': 'Умієте програмувати? Надішліть pull request до нашого <link>репозиторію</link>.',
   'support_us.contribute_financially': 'Підтримайте фінансово',
   'support_us.thanks': 'Дякуємо!',
   'support_us.bitcoin_dialog_title': 'Підтримайте нас через Bitcoin',
