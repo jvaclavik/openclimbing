@@ -277,7 +277,8 @@ export default {
   'support_us.share': 'Partagez openclimbing.org avec vos amis ou sur les réseaux sociaux',
   'support_us.feedback': 'Envoyez-nous vos retours',
   'support_us.add_content': "Cartographiez les voies d'escalade",
-  'support_us.develop': 'Vous savez coder ? Soumettez une pull request à notre dépôt.',
+  'support_us.develop':
+    'Vous savez coder ? Soumettez une pull request à notre <link>dépôt</link>.',
   'support_us.contribute_financially': 'Contribuez financièrement',
   'support_us.thanks': 'Merci !',
   'support_us.bitcoin_dialog_title': 'Soutenez-nous avec du Bitcoin',

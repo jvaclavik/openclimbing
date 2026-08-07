@@ -284,7 +284,7 @@ export default {
   'support_us.share': `Sdílejte openclimbing.org mezi svými kamarády nebo na sociálních sítích`,
   'support_us.feedback': `Napište nám zpětnou vazbu`,
   'support_us.add_content': `Zakreslete lezecké cesty`,
-  'support_us.develop': `Umíte programovat? Pošlete pull request do repozitáře.`,
+  'support_us.develop': `Umíte programovat? Pošlete pull request do <link>repozitáře</link>.`,
   'support_us.contribute_financially': `Přispějte finančně`,
   'support_us.thanks': `Děkujeme`,
   'support_us.bitcoin_dialog_title': `Podpořte nás Bitcoinem`,
