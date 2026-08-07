@@ -24,15 +24,15 @@ const HALO = 1.6;
 
 export const routesPoints: LayerSpecification[] = [
   {
-    // an orange disc peeking from under the white ring - maplibre has no second
-    // stroke on a circle, so the ring has to be a layer of its own
+    // a disc peeking from under the white ring - maplibre has no second stroke
+    // on a circle, so the ring has to be a layer of its own
     id: CRAG_ROUTES_LAYER,
     type: 'circle',
     source: CLIMBING_TILES_SOURCE,
     minzoom: 13,
     filter: ['==', ['get', 'parentId'], -1], // set by setSelectedCragRoutes()
     paint: {
-      'circle-color': '#f60',
+      'circle-color': '#ffffff',
       'circle-opacity': 0.85,
       'circle-blur': 1,
       // route radius + its white stroke + the ring itself
