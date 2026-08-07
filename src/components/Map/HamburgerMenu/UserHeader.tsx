@@ -21,11 +21,15 @@ import { profilePathForOsmDisplayName } from '../../../services/my-ticks/profile
 
 type UserLoginProps = {
   closeMenu: () => void;
+  openUserSettings: () => void;
 };
 
-const HeaderIcons = (props: { onClick: () => void }) => (
+const HeaderIcons = (props: {
+  onClick: () => void;
+  openUserSettings: () => void;
+}) => (
   <Stack direction="row">
-    <UserSettingsItem />
+    <UserSettingsItem openUserSettings={props.openUserSettings} />
     <IconButton onClick={props.onClick}>
       <CloseIcon />
     </IconButton>
@@ -99,7 +103,12 @@ const OsmUserLink = ({
   );
 };
 
-const LoggedUserHeader = ({ onClose }: { onClose: () => void }) => {
+type HeaderProps = {
+  onClose: () => void;
+  openUserSettings: () => void;
+};
+
+const LoggedUserHeader = ({ onClose, openUserSettings }: HeaderProps) => {
   const { osmUser, handleLogout } = useOsmAuthContext();
 
   return (
@@ -121,12 +130,12 @@ const LoggedUserHeader = ({ onClose }: { onClose: () => void }) => {
           <LogoutButton onClick={handleLogout} />
         </Stack>
       </Stack>
-      <HeaderIcons onClick={onClose} />
+      <HeaderIcons onClick={onClose} openUserSettings={openUserSettings} />
     </Stack>
   );
 };
 
-const LoggedOutUserHeader = ({ onClose }: { onClose: () => void }) => {
+const LoggedOutUserHeader = ({ onClose, openUserSettings }: HeaderProps) => {
   const { handleLogin } = useOsmAuthContext();
 
   return (
@@ -143,17 +152,27 @@ const LoggedOutUserHeader = ({ onClose }: { onClose: () => void }) => {
         </ListItemIcon>
         <ListItemText>{t('user.login_register')}</ListItemText>
       </MenuItem>
-      <HeaderIcons onClick={onClose} />
+      <HeaderIcons onClick={onClose} openUserSettings={openUserSettings} />
     </Stack>
   );
 };
 
-export const UserHeader = ({ closeMenu }) => {
+export const UserHeader = ({ closeMenu, openUserSettings }: UserLoginProps) => {
   const { osmUser } = useOsmAuthContext();
   if (osmUser) {
-    return <LoggedUserHeader onClose={closeMenu} />;
+    return (
+      <LoggedUserHeader
+        onClose={closeMenu}
+        openUserSettings={openUserSettings}
+      />
+    );
   }
 
-  return <LoggedOutUserHeader onClose={closeMenu} />;
+  return (
+    <LoggedOutUserHeader
+      onClose={closeMenu}
+      openUserSettings={openUserSettings}
+    />
+  );
 };
 UserHeader.displayName = 'UserHeader';

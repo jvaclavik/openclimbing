@@ -35,6 +35,7 @@ import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import { MyListsSection } from './MyListsSection';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import ContrastIcon from '@mui/icons-material/Contrast';
+import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
@@ -172,13 +173,26 @@ const ThemeSelection = () => {
 export const HamburgerMenu = () => {
   const anchorRef = useRef();
   const [opened, open, close] = useBoolState(false);
+  const [userSettingsOpened, openUserSettings, closeUserSettings] =
+    useBoolState(false);
   const isMobileMode = useMobileMode();
   const isOpenClimbing = PROJECT_ID === 'openclimbing';
   const { activeLayers } = useMapStateContext();
   const hasClimbingLayer = activeLayers.includes('climbing');
   const { loggedIn } = useOsmAuthContext();
+
+  const handleOpenUserSettings = () => {
+    close();
+    openUserSettings();
+  };
+
   return (
     <>
+      <UserSettingsDialog
+        isOpened={userSettingsOpened}
+        onClose={closeUserSettings}
+      />
+
       <Drawer
         open={opened}
         onClose={close}
@@ -188,7 +202,10 @@ export const HamburgerMenu = () => {
       >
         <Stack direction="column" justifyContent="space-between" height="100%">
           <div>
-            <UserHeader closeMenu={close} />
+            <UserHeader
+              closeMenu={close}
+              openUserSettings={handleOpenUserSettings}
+            />
             <Divider sx={{ mt: 1, mb: 2 }} />
             {isOpenClimbing && <MyClimbingProfileMenuItem closeMenu={close} />}
             {isMobileMode && (
