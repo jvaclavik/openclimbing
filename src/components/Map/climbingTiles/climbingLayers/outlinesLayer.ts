@@ -5,16 +5,18 @@ import {
 } from '@maplibre/maplibre-gl-style-spec';
 import { CLIMBING_TILES_SOURCE } from '../consts';
 
+const OPACITY = 0.5;
+
 const HOVER: ExpressionSpecification = [
   'case',
   ['boolean', ['feature-state', 'hover'], false],
-  1,
+  OPACITY,
   0,
 ];
 
 const SHOULD_SHOW: ExpressionInputType | ExpressionSpecification =
   global.window?.localStorage.getItem('show_all_climbing_outlines') === 'true'
-    ? 1
+    ? OPACITY
     : HOVER;
 
 // feature opened in the FeaturePanel - it stays lit regardless of hover/zoom
@@ -31,7 +33,7 @@ const MIN_ZOOM: ExpressionSpecification = ['coalesce', ['get', 'minZoom'], 99];
 const BY_ZOOM = (z: number): ExpressionSpecification => [
   'case',
   SELECTED,
-  1,
+  OPACITY,
   ['>', z, MIN_ZOOM],
   SHOULD_SHOW,
   0,
