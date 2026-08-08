@@ -3,6 +3,7 @@ import type { Snap } from './drawerSnap';
 
 /**
  * Stacking for map chrome:
+ *   hamburger overlays   1600  (dialogs/menus opened from inside the hamburger)
  *   hamburger            1500
  *   bottom-right raised  1300  (layers panel open – button must stay on top)
  *   drawer / layers      1200
@@ -11,6 +12,8 @@ import type { Snap } from './drawerSnap';
 export const BOTTOM_RIGHT_Z_DEFAULT = 1100;
 export const BOTTOM_RIGHT_Z_RAISED = 1300;
 export const LAYERS_DRAWER_Z = 1200;
+export const HAMBURGER_DRAWER_Z = 1500;
+export const HAMBURGER_OVERLAY_Z = 1600;
 
 type ChromeState = {
   layersOpen: boolean;

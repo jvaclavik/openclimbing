@@ -36,6 +36,11 @@ import { MyListsSection } from './MyListsSection';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import { UserSettingsDialog } from '../../HomepagePanel/UserSettingsDialog';
+import { Theme, ThemeProvider } from '@mui/material/styles';
+import {
+  HAMBURGER_DRAWER_Z,
+  HAMBURGER_OVERLAY_Z,
+} from '../../utils/mapChromeRegistry';
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
@@ -165,6 +170,17 @@ const ThemeSelection = () => {
   );
 };
 
+// MUI has no modal stacking - everything opened from inside the drawer would
+// render at theme.zIndex.modal (1300), ie. under the drawer itself
+const overlayTheme = (theme: Theme) => ({
+  ...theme,
+  zIndex: {
+    ...theme.zIndex,
+    modal: HAMBURGER_OVERLAY_Z,
+    tooltip: HAMBURGER_OVERLAY_Z + 1,
+  },
+});
+
 // TODO custom Item components are not keyboard accesible
 // seems like a bug in material-ui
 // https://github.com/mui-org/material-ui/issues/22912
@@ -198,54 +214,67 @@ export const HamburgerMenu = () => {
         onClose={close}
         anchor="right"
         // above map controls (1300) and the layers panel (1200)
-        sx={{ zIndex: 1500 }}
+        sx={{ zIndex: HAMBURGER_DRAWER_Z }}
       >
-        <Stack direction="column" justifyContent="space-between" height="100%">
-          <div>
-            <UserHeader
-              closeMenu={close}
-              openUserSettings={handleOpenUserSettings}
-            />
-            <Divider sx={{ mt: 1, mb: 2 }} />
-            {isOpenClimbing && <MyClimbingProfileMenuItem closeMenu={close} />}
-            {isMobileMode && (
-              <>
-                <ClimbingAreasLink closeMenu={close} />
-                <AboutLink closeMenu={close} />
-              </>
-            )}
-            {loggedIn && (
-              <>
-                <Divider sx={{ my: 1 }} />
-                <MyListsSection closeMenu={close} />
-                <Divider sx={{ my: 1 }} />
-              </>
-            )}
-            {(hasClimbingLayer || isOpenClimbing) && (
-              <>
-                <ClimbingGradesTableLink closeMenu={close} />
-                <TickScoringLink closeMenu={close} />
-                {isOpenClimbing && (
-                  <ClimbingLeaderboardLink closeMenu={close} />
-                )}
-              </>
-            )}
-          </div>
-          <div>
-            <Divider />
-            <Box mb={2}>
-              <EditLink />
-            </Box>
-            <Divider />
-            <Stack direction="row" justifyContent="space-between" mb={1} mt={1}>
-              <LangSwitcher />
-              <div>
-                <ThemeSelection />
-                <GithubLink />
-              </div>
-            </Stack>
-          </div>
-        </Stack>
+        <ThemeProvider theme={overlayTheme}>
+          <Stack
+            direction="column"
+            justifyContent="space-between"
+            height="100%"
+          >
+            <div>
+              <UserHeader
+                closeMenu={close}
+                openUserSettings={handleOpenUserSettings}
+              />
+              <Divider sx={{ mt: 1, mb: 2 }} />
+              {isOpenClimbing && (
+                <MyClimbingProfileMenuItem closeMenu={close} />
+              )}
+              {isMobileMode && (
+                <>
+                  <ClimbingAreasLink closeMenu={close} />
+                  <AboutLink closeMenu={close} />
+                </>
+              )}
+              {loggedIn && (
+                <>
+                  <Divider sx={{ my: 1 }} />
+                  <MyListsSection closeMenu={close} />
+                  <Divider sx={{ my: 1 }} />
+                </>
+              )}
+              {(hasClimbingLayer || isOpenClimbing) && (
+                <>
+                  <ClimbingGradesTableLink closeMenu={close} />
+                  <TickScoringLink closeMenu={close} />
+                  {isOpenClimbing && (
+                    <ClimbingLeaderboardLink closeMenu={close} />
+                  )}
+                </>
+              )}
+            </div>
+            <div>
+              <Divider />
+              <Box mb={2}>
+                <EditLink />
+              </Box>
+              <Divider />
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                mb={1}
+                mt={1}
+              >
+                <LangSwitcher />
+                <div>
+                  <ThemeSelection />
+                  <GithubLink />
+                </div>
+              </Stack>
+            </div>
+          </Stack>
+        </ThemeProvider>
       </Drawer>
 
       <HamburgerMenuButton anchorRef={anchorRef} onClick={open} />
