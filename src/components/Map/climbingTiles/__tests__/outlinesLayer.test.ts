@@ -23,7 +23,7 @@ const evaluate = (
 describe('outlinesLayer', () => {
   it('hides the outline until hovered', () => {
     expect(evaluate('line-opacity', 14, {})).toBe(0);
-    expect(evaluate('line-opacity', 14, { hover: true })).toBe(0.5);
+    expect(evaluate('line-opacity', 14, { hover: true })).toBe(0.3);
   });
 
   it('keeps the outline hidden when zoomed out too far', () => {
@@ -33,12 +33,12 @@ describe('outlinesLayer', () => {
   it('hides the outline when minZoom is missing', () => {
     expect(evaluate('line-opacity', 18, {}, null)).toBe(0);
     expect(evaluate('line-opacity', 18, { hover: true }, null)).toBe(0);
-    expect(evaluate('line-opacity', 18, { selected: true }, null)).toBe(0.5);
+    expect(evaluate('line-opacity', 18, { selected: true }, null)).toBe(0.3);
   });
 
   it('shows the outline of the selected feature without hover, in any zoom', () => {
-    expect(evaluate('line-opacity', 14, { selected: true })).toBe(0.5);
-    expect(evaluate('line-opacity', 8, { selected: true })).toBe(0.5);
+    expect(evaluate('line-opacity', 14, { selected: true })).toBe(0.3);
+    expect(evaluate('line-opacity', 8, { selected: true })).toBe(0.3);
     expect(evaluate('line-width', 14, { selected: true })).toBe(3);
     expect(evaluate('line-width', 14, {})).toBe(2);
   });

@@ -5,7 +5,7 @@ import {
 } from '@maplibre/maplibre-gl-style-spec';
 import { CLIMBING_TILES_SOURCE } from '../consts';
 
-const OPACITY = 0.5;
+const OPACITY = 0.3;
 
 const HOVER: ExpressionSpecification = [
   'case',
