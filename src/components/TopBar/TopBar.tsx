@@ -223,11 +223,7 @@ const NavLinks = () => {
         active={areasActive}
       />
       <NavButton label={t('topbar.about')} href="/about" active={aboutActive} />
-      <NavButton
-        label={t('topbar.community')}
-        href={COMMUNITY_URL}
-        target="_blank"
-      />
+      <NavButton label={t('topbar.community')} href={COMMUNITY_URL} />
     </Stack>
   );
 };
