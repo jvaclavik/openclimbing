@@ -2,14 +2,10 @@ import styled from '@emotion/styled';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { Box, Chip, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
-import {
-  getOsmappLink,
-  getReactKey,
-  getShortId,
-  getUrlOsmId,
-} from '../../services/helpers';
+import { getOsmappLink, getShortId, getUrlOsmId } from '../../services/helpers';
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 import { Feature, isInstant } from '../../services/types';
 import { ClientOnly, useMobileMode } from '../helpers';
@@ -20,7 +16,6 @@ import { tint } from '../utils/panelUi';
 import Link from 'next/link';
 import { getInstantImage } from '../../services/images/getImageDefs';
 import { intl, t } from '../../services/intl';
-import { PROJECT_ID } from '../../services/project';
 import { CragsInAreaSort } from './Climbing/CragsInAreaSort/CragsInAreaSort';
 import { useCragsInAreaSort } from './Climbing/CragsInAreaSort/utils/useCragsInAreaSort';
 import { CragsInAreaFilter } from './Climbing/Filter/CragsInAreaFilter';
@@ -38,12 +33,24 @@ import { getClickHandler } from './FeatureImages/Image/helpers';
 import { Image } from './FeatureImages/Image/Image';
 import { MemberItem } from './MemberFeatures/MemberItem';
 
-const isOpenClimbing = PROJECT_ID === 'openclimbing';
+const MAX_CRAG_CARD_IMAGES = 3;
 
-const Ul = styled.ul`
-  padding: 0;
-  list-style: none;
-`;
+const findScrollParent = (el: HTMLElement | null): HTMLElement | undefined => {
+  let node = el?.parentElement ?? null;
+  while (node) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY === 'auto' || overflowY === 'scroll') {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return undefined;
+};
+
+type ListItem =
+  | { kind: 'area'; feature: Feature }
+  | { kind: 'crag'; feature: Feature }
+  | { kind: 'other'; feature: Feature };
 
 const ArrowIcon = styled(ArrowForwardIosIcon)`
   align-self: center;
@@ -93,11 +100,13 @@ const InnerContainer = styled.div`
 `;
 
 const CragListContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   margin-top: 12px;
   padding: 0 ${PANEL_GAP};
+  min-height: 1px;
+`;
+
+const ListRow = styled.div`
+  padding-bottom: 12px;
 `;
 
 const CragName = styled.div`
@@ -232,11 +241,13 @@ const Gallery = ({ images, feature }) => {
   );
 };
 
-const getFeatureImages = (feature: Feature) =>
-  feature?.imageDefs?.filter(isInstant)?.map((def) => ({
-    def,
-    image: getInstantImage(def),
-  })) ?? [];
+const getFeatureImages = (feature: Feature, limit = MAX_CRAG_CARD_IMAGES) =>
+  (
+    feature?.imageDefs?.filter(isInstant)?.map((def) => ({
+      def,
+      image: getInstantImage(def),
+    })) ?? []
+  ).slice(0, limit);
 
 const countRoutesInArea = (feature: Feature): number =>
   (feature.memberFeatures ?? []).reduce((acc, child) => {
@@ -265,7 +276,9 @@ const countRoutesWithPhotoInArea = (feature: Feature): number =>
 
 const collectAreaImages = (feature: Feature, limit = 20) => {
   const ownImages = getFeatureImages(feature);
-  const childImages = (feature.memberFeatures ?? []).flatMap(getFeatureImages);
+  const childImages = (feature.memberFeatures ?? []).flatMap((child) =>
+    getFeatureImages(child),
+  );
   return [...ownImages, ...childImages].slice(0, limit);
 };
 
@@ -405,49 +418,49 @@ const CragList = ({
   subAreas: Feature[];
 }) => {
   const { feature } = useFeatureContext();
-  const otherFeatures = feature.memberFeatures.filter(
-    ({ tags }) => tags.climbing !== 'crag' && tags.climbing !== 'area',
-  );
   const hasMixed = subAreas.length > 0 && crags.length > 0;
-  const [visibleCount, setVisibleCount] = useState(50);
-  const visibleCrags = crags.slice(0, visibleCount);
-  const hasMore = crags.length > visibleCount;
+
+  const [scrollParent, setScrollParent] = useState<HTMLElement | undefined>();
+
+  const setListEl = (el: HTMLDivElement | null) => {
+    setScrollParent(el ? findScrollParent(el) : undefined);
+  };
+
+  const items = useMemo<ListItem[]>(() => {
+    const otherFeatures = feature.memberFeatures.filter(
+      ({ tags }) => tags.climbing !== 'crag' && tags.climbing !== 'area',
+    );
+    return [
+      ...subAreas.map((f) => ({ kind: 'area' as const, feature: f })),
+      ...crags.map((f) => ({ kind: 'crag' as const, feature: f })),
+      ...otherFeatures.map((f) => ({ kind: 'other' as const, feature: f })),
+    ];
+  }, [crags, feature.memberFeatures, subAreas]);
 
   return (
     <Box mt={2} mb={4}>
-      <CragListContainer>
-        {subAreas.map((item) => (
-          <AreaItem key={getOsmappLink(item)} feature={item} />
-        ))}
-        {visibleCrags.map((item) => (
-          <CragItem
-            key={getOsmappLink(item)}
-            feature={item}
-            showTypeLabel={hasMixed}
+      <CragListContainer ref={setListEl}>
+        {scrollParent && items.length > 0 ? (
+          <Virtuoso
+            customScrollParent={scrollParent}
+            data={items}
+            increaseViewportBy={{ top: 1200, bottom: 1600 }}
+            defaultItemHeight={160}
+            computeItemKey={(index, item) =>
+              `${item.kind}-${getOsmappLink(item.feature)}-${index}`
+            }
+            itemContent={(_index, item) => (
+              <ListRow>
+                {item.kind === 'area' && <AreaItem feature={item.feature} />}
+                {item.kind === 'crag' && (
+                  <CragItem feature={item.feature} showTypeLabel={hasMixed} />
+                )}
+                {item.kind === 'other' && <MemberItem feature={item.feature} />}
+              </ListRow>
+            )}
           />
-        ))}
-        {hasMore && (
-          <Box display="flex" justifyContent="center" py={1}>
-            <Chip
-              clickable
-              color="primary"
-              variant="outlined"
-              label={t('featurepanel.show_more_crags', {
-                count: crags.length - visibleCount,
-              })}
-              onClick={() => setVisibleCount((n) => n + 50)}
-            />
-          </Box>
-        )}
+        ) : null}
       </CragListContainer>
-
-      {otherFeatures.length > 0 && (
-        <Ul>
-          {otherFeatures.map((item) => (
-            <MemberItem key={getReactKey(item)} feature={item} />
-          ))}
-        </Ul>
-      )}
     </Box>
   );
 };
