@@ -10,14 +10,14 @@ import {
   getDifficulty,
 } from '../services/tagging/climbing/routeGrade';
 import { getGradeSystemName } from '../services/tagging/climbing/gradeSystems';
-import { CLIMBING_ROCK_OPTIONS } from '../services/tagging/climbing/climbingRockData';
+import { getClimbingRockTranslationKey } from '../services/tagging/climbing/climbingRockData';
 
 const translateClimbingTypes = (types: string[]) =>
   types.map((type) => t(`climbing_badges.${type}_label` as TranslationId));
 
 const translateRock = (rock: string) => {
-  const option = CLIMBING_ROCK_OPTIONS.find((item) => item.value === rock);
-  return option ? t(option.translationKey) : rock;
+  const key = getClimbingRockTranslationKey(rock);
+  return key ? t(key as TranslationId) : rock;
 };
 
 const isClimbingRouteTags = (feature: Feature) =>

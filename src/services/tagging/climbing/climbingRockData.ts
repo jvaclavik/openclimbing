@@ -3,7 +3,8 @@ export const CLIMBING_ROCK_OPTIONS = [
   { value: 'sandstone', translationKey: 'climbing_rock.sandstone' },
   { value: 'granite', translationKey: 'climbing_rock.granite' },
   { value: 'quartzite', translationKey: 'climbing_rock.quartzite' },
-  { value: 'gneiss', translationKey: 'climbing_rock.gneiss' },
+  { value: 'orthogneiss', translationKey: 'climbing_rock.orthogneiss' },
+  { value: 'paragneiss', translationKey: 'climbing_rock.paragneiss' },
   { value: 'gritstone', translationKey: 'climbing_rock.gritstone' },
   { value: 'porphyry', translationKey: 'climbing_rock.porphyry' },
   { value: 'conglomerate', translationKey: 'climbing_rock.conglomerate' },
@@ -24,3 +25,13 @@ export const CLIMBING_ROCK_OPTIONS = [
   { value: 'trachyandesite', translationKey: 'climbing_rock.trachyandesite' },
   { value: 'tuff', translationKey: 'climbing_rock.tuff' },
 ] as const;
+
+/** Kept for displaying existing OSM tags no longer offered in the select. */
+const LEGACY_CLIMBING_ROCK_KEYS: Record<string, string> = {
+  gneiss: 'climbing_rock.gneiss',
+};
+
+export const getClimbingRockTranslationKey = (value: string) => {
+  const option = CLIMBING_ROCK_OPTIONS.find((item) => item.value === value);
+  return option?.translationKey ?? LEGACY_CLIMBING_ROCK_KEYS[value] ?? null;
+};

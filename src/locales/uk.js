@@ -803,6 +803,8 @@ export default {
   'climbing_rock.granite': 'граніт',
   'climbing_rock.quartzite': 'кварцит',
   'climbing_rock.gneiss': 'гнейс',
+  'climbing_rock.orthogneiss': 'ортогнейс',
+  'climbing_rock.paragneiss': 'парагнейс',
   'climbing_rock.gritstone': 'гритстоун',
   'climbing_rock.porphyry': 'порфір',
   'climbing_rock.conglomerate': 'конгломерат',

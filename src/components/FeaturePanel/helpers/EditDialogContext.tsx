@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import Router from 'next/router';
 import { isBrowser } from '../../helpers';
 import { Setter } from '../../../types';
+import { consumeEditDialogResume } from '../../../services/wikimedia/auth/oauthFlow';
 
 type Tag = string;
 
@@ -22,6 +23,13 @@ export const EditDialogProvider = ({ children }) => {
   const initialState = isBrowser() ? Router.query.all?.[2] === 'edit' : false;
   const [opened, setOpened] = useState<boolean | Tag>(initialState);
   const [redirectOnClose, setRedirectOnClose] = useState<string | undefined>();
+
+  // Standalone PWA: restore Edit after OAuth redirect / photo-picker process kill
+  useEffect(() => {
+    if (consumeEditDialogResume()) {
+      setOpened(true);
+    }
+  }, []);
 
   const close = () => {
     if (redirectOnClose) {

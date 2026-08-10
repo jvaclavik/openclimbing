@@ -22,7 +22,10 @@ import {
   ClimbingFilterOption,
   INCLINATION_FILTER_OPTIONS,
 } from './climbingFilterOptions';
-import { CLIMBING_ROCK_OPTIONS } from '../../../../services/tagging/climbing/climbingRockData';
+import {
+  CLIMBING_ROCK_OPTIONS,
+  getClimbingRockTranslationKey,
+} from '../../../../services/tagging/climbing/climbingRockData';
 
 const Label = styled.div`
   font-size: 0.85rem;
@@ -109,8 +112,8 @@ export const AdvancedFilters = ({
 
   const materialOptions = CLIMBING_ROCK_OPTIONS.map((option) => option.value);
   const getMaterialLabel = (value: string) => {
-    const option = CLIMBING_ROCK_OPTIONS.find((item) => item.value === value);
-    return option ? t(option.translationKey) : value;
+    const key = getClimbingRockTranslationKey(value);
+    return key ? t(key as TranslationId) : value;
   };
 
   return (

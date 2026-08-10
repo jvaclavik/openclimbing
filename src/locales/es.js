@@ -808,6 +808,8 @@ export default {
   'climbing_rock.granite': 'granito',
   'climbing_rock.quartzite': 'cuarcita',
   'climbing_rock.gneiss': 'gneis',
+  'climbing_rock.orthogneiss': 'ortogneis',
+  'climbing_rock.paragneiss': 'paragneis',
   'climbing_rock.gritstone': 'gritstone',
   'climbing_rock.porphyry': 'pórfido',
   'climbing_rock.conglomerate': 'conglomerado',

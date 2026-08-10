@@ -8,12 +8,12 @@
     <div id="noredirect">
       <h1>OpenClimbing – Wikimedia Commons auth</h1>
       <p>
-        [en] If this popup doesn't close automatically, it is probably an error.
+        [en] If this page doesn't continue automatically, it is probably an error.
         Please, let us know at
         <a href="https://github.com/jvaclavik/openclimbing/issues">the issue tracker</a>.
       </p>
       <p>
-        [cs] Pokud se toto okno automaticky nezavře, pravděpodobně došlo k chybě.
+        [cs] Pokud se tato stránka automaticky neposune dál, pravděpodobně došlo k chybě.
         Prosím, dejte nám vědět
         <a href="https://github.com/jvaclavik/openclimbing/issues">zde</a>.
       </p>
@@ -28,10 +28,35 @@
 
       const params = new URLSearchParams(location.search);
       if (params.has('code') || params.has('error')) {
-        new BroadcastChannel('wikimedia-commons-auth-complete').postMessage(
-          location.href,
-        );
-        window.close();
+        var hasOpener = false;
+        try {
+          hasOpener = !!(window.opener && !window.opener.closed);
+        } catch (e) {
+          hasOpener = false;
+        }
+
+        if (hasOpener) {
+          try {
+            new BroadcastChannel('wikimedia-commons-auth-complete').postMessage(
+              location.href,
+            );
+          } catch (e) {}
+          window.close();
+        } else {
+          // Standalone PWA / full-page redirect: hand the callback back to the app.
+          try {
+            localStorage.setItem('wikimediaOAuthCallbackUrl', location.href);
+          } catch (e) {}
+          var returnUrl = '/';
+          try {
+            var raw = localStorage.getItem('wikimediaOAuthReturn');
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              if (parsed && parsed.url) returnUrl = parsed.url;
+            }
+          } catch (e) {}
+          location.replace(returnUrl);
+        }
       }
     </script>
   </body>

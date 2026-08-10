@@ -5,7 +5,7 @@ import TerrainIcon from '@mui/icons-material/Terrain';
 import { Chip, Stack, Tooltip } from '@mui/material';
 import React from 'react';
 import { t } from '../../../services/intl';
-import { CLIMBING_ROCK_OPTIONS } from '../../../services/tagging/climbing/climbingRockData';
+import { getClimbingRockTranslationKey } from '../../../services/tagging/climbing/climbingRockData';
 import { CLIMBING_START_OPTIONS } from '../../../services/tagging/climbing/climbingAttributes';
 import { Feature, TranslationId } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
@@ -172,9 +172,7 @@ const MaterialBadge = ({ feature }) => {
   const material = feature.tags?.['climbing:rock'];
   if (!material) return null;
 
-  const translationItem = CLIMBING_ROCK_OPTIONS.find(
-    ({ value }) => value === material,
-  );
+  const translationKey = getClimbingRockTranslationKey(material);
   return (
     material && (
       <StyledChip
@@ -182,9 +180,7 @@ const MaterialBadge = ({ feature }) => {
           <Stack direction="row" gap={0.4} alignItems="center">
             <TerrainIcon fontSize="inherit" />
             <span>
-              {translationItem?.translationKey
-                ? t(translationItem.translationKey)
-                : material}
+              {translationKey ? t(translationKey as TranslationId) : material}
             </span>
           </Stack>
         }

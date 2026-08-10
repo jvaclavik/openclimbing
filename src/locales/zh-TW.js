@@ -532,6 +532,8 @@ export default {
   'climbing_rock.granite': '花崗岩',
   'climbing_rock.quartzite': '石英岩',
   'climbing_rock.gneiss': '片麻岩',
+  'climbing_rock.orthogneiss': '正片麻岩',
+  'climbing_rock.paragneiss': '副片麻岩',
   'climbing_rock.gritstone': '粗砂岩',
   'climbing_rock.porphyry': '斑岩',
   'climbing_rock.conglomerate': '礫岩',

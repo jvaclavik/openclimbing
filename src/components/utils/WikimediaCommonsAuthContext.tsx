@@ -3,6 +3,7 @@ import {
   loginToWikimediaCommons,
   logoutFromWikimediaCommons,
   readWikimediaUserFromCookies,
+  resumeWikimediaOAuthIfPending,
   WikimediaCommonsUser,
 } from '../../services/wikimedia/auth/session';
 import { useSnackbar } from './SnackbarContext';
@@ -31,12 +32,36 @@ export const WikimediaCommonsAuthProvider: React.FC<Props> = ({
 }) => {
   const [user, setUser] = useState<WikimediaCommonsUser | undefined>(undefined);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useSnackbar();
 
-  // Hydrate from localStorage after mount (SSR has no access).
+  // Hydrate from localStorage after mount (SSR has no access). Also finish a
+  // standalone-PWA OAuth redirect that landed back on this page.
   useEffect(() => {
     setUser(readWikimediaUserFromCookies(cookies));
-  }, [cookies]);
-  const { showToast } = useSnackbar();
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const resumed = await resumeWikimediaOAuthIfPending();
+        if (cancelled || !resumed) return;
+        setUser(resumed);
+        showToast(
+          t('wikimedia.logged_in_as', { user: resumed.username }),
+          'success',
+        );
+      } catch (e) {
+        if (cancelled) return;
+        showToast(
+          t('wikimedia.login_failed', { error: String(e?.message ?? e) }),
+          'error',
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cookies, showToast]);
 
   const handleLogin = async () => {
     setLoading(true);

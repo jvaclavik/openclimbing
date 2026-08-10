@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { Box, Chip, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
 import {
   getOsmappLink,
@@ -409,6 +409,9 @@ const CragList = ({
     ({ tags }) => tags.climbing !== 'crag' && tags.climbing !== 'area',
   );
   const hasMixed = subAreas.length > 0 && crags.length > 0;
+  const [visibleCount, setVisibleCount] = useState(50);
+  const visibleCrags = crags.slice(0, visibleCount);
+  const hasMore = crags.length > visibleCount;
 
   return (
     <Box mt={2} mb={4}>
@@ -416,13 +419,26 @@ const CragList = ({
         {subAreas.map((item) => (
           <AreaItem key={getOsmappLink(item)} feature={item} />
         ))}
-        {crags.map((item) => (
+        {visibleCrags.map((item) => (
           <CragItem
             key={getOsmappLink(item)}
             feature={item}
             showTypeLabel={hasMixed}
           />
         ))}
+        {hasMore && (
+          <Box display="flex" justifyContent="center" py={1}>
+            <Chip
+              clickable
+              color="primary"
+              variant="outlined"
+              label={t('featurepanel.show_more_crags', {
+                count: crags.length - visibleCount,
+              })}
+              onClick={() => setVisibleCount((n) => n + 50)}
+            />
+          </Box>
+        )}
       </CragListContainer>
 
       {otherFeatures.length > 0 && (

@@ -5,7 +5,10 @@ import {
   WIKIMEDIA_TOKEN_COOKIE,
   WIKIMEDIA_USER_COOKIE,
 } from '../consts';
-import { startWikimediaOAuthFlow } from './oauthFlow';
+import {
+  startWikimediaOAuthFlow,
+  completePendingWikimediaOAuth,
+} from './oauthFlow';
 
 export type WikimediaCommonsUser = {
   username: string;
@@ -142,17 +145,33 @@ const fetchProfile = async (
 export const loginToWikimediaCommons =
   async (): Promise<WikimediaCommonsUser> => {
     const tokenResponse = await startWikimediaOAuthFlow();
-    const stored: StoredToken = {
-      accessToken: tokenResponse.access_token,
-      refreshToken: tokenResponse.refresh_token,
-      expiresAt: Date.now() + tokenResponse.expires_in * 1000,
-    };
-    writeToken(stored);
-
-    const user = await fetchProfile(stored.accessToken);
-    writeUser(user);
-    return user;
+    return persistTokenAndUser(tokenResponse);
   };
+
+/** Finishes a standalone-PWA redirect login if a callback was stored. */
+export const resumeWikimediaOAuthIfPending =
+  async (): Promise<WikimediaCommonsUser | null> => {
+    const tokenResponse = await completePendingWikimediaOAuth();
+    if (!tokenResponse) return null;
+    return persistTokenAndUser(tokenResponse);
+  };
+
+const persistTokenAndUser = async (tokenResponse: {
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+}): Promise<WikimediaCommonsUser> => {
+  const stored: StoredToken = {
+    accessToken: tokenResponse.access_token,
+    refreshToken: tokenResponse.refresh_token,
+    expiresAt: Date.now() + tokenResponse.expires_in * 1000,
+  };
+  writeToken(stored);
+
+  const user = await fetchProfile(stored.accessToken);
+  writeUser(user);
+  return user;
+};
 
 export const logoutFromWikimediaCommons = () => {
   clearToken();

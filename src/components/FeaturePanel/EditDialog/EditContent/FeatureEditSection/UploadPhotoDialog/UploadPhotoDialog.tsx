@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { t } from '../../../../../../services/intl';
+import { markEditDialogForResume } from '../../../../../../services/wikimedia/auth/oauthFlow';
 import { useFeatureContext } from '../../../../../utils/FeatureContext';
 import { useWikimediaCommonsAuthContext } from '../../../../../utils/WikimediaCommonsAuthContext';
 import { UploadDialogAuthBar } from './UploadDialogAuthBar';
@@ -35,7 +36,13 @@ const ChooseFileStage: React.FC<{
     <Typography variant="body2" color="text.secondary">
       {t('uploaddialog.choose_file_hint')}
     </Typography>
-    <Button component="label" variant="contained" size="large" fullWidth>
+    <Button
+      component="label"
+      variant="contained"
+      size="large"
+      fullWidth
+      onClick={() => markEditDialogForResume()}
+    >
       {t('uploaddialog.choose_file')}
       <input
         type="file"

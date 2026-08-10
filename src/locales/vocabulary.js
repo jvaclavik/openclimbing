@@ -461,6 +461,7 @@ export default {
   'featurepanel.type_crag': 'Crag',
   'featurepanel.routes': 'routes',
   'featurepanel.hidden_crags': 'hidden crags',
+  'featurepanel.show_more_crags': 'Show __count__ more',
   'featurepanel.drawn_routes': 'Drawn on this photo: __count__',
   'featurepanel.gallery_scroll_left': 'Scroll left',
   'featurepanel.gallery_scroll_right': 'Scroll right',
@@ -962,7 +963,9 @@ export default {
   'climbing_rock.sandstone': 'sandstone',
   'climbing_rock.granite': 'granite',
   'climbing_rock.quartzite': 'quartzite',
-  'climbing_rock.gneiss': 'gneiss',
+  'climbing_rock.gneiss': 'gneiss', // legacy OSM value
+  'climbing_rock.orthogneiss': 'orthogneiss',
+  'climbing_rock.paragneiss': 'paragneiss',
   'climbing_rock.gritstone': 'gritstone',
   'climbing_rock.porphyry': 'porphyry',
   'climbing_rock.conglomerate': 'conglomerate',

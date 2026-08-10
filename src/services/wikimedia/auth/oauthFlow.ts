@@ -11,6 +11,9 @@ import {
 } from './pkce';
 
 const PKCE_STORAGE_KEY = 'wikimediaPkce';
+const RETURN_STORAGE_KEY = 'wikimediaOAuthReturn';
+const CALLBACK_STORAGE_KEY = 'wikimediaOAuthCallbackUrl';
+export const EDIT_DIALOG_RESUME_KEY = 'editDialogResume';
 
 type PkceState = {
   verifier: string;
@@ -18,17 +21,41 @@ type PkceState = {
   redirectUri: string;
 };
 
+type OAuthReturnState = {
+  url: string;
+  reopenEdit?: boolean;
+};
+
+type TokenResponse = {
+  access_token: string;
+  refresh_token?: string;
+  token_type: string;
+  expires_in: number;
+};
+
+const isBrowser = () => typeof window !== 'undefined';
+
+/** Home-screen PWA (iOS/Android) – popups are unreliable or blocked. */
+export const isStandalonePwa = () => {
+  if (!isBrowser()) return false;
+  const nav = window.navigator as Navigator & { standalone?: boolean };
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    nav.standalone === true
+  );
+};
+
 const storePkceState = (state: PkceState) => {
-  sessionStorage.setItem(PKCE_STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(PKCE_STORAGE_KEY, JSON.stringify(state));
 };
 
 const readPkceState = (): PkceState | null => {
-  const raw = sessionStorage.getItem(PKCE_STORAGE_KEY);
+  const raw = localStorage.getItem(PKCE_STORAGE_KEY);
   return raw ? (JSON.parse(raw) as PkceState) : null;
 };
 
 const clearPkceState = () => {
-  sessionStorage.removeItem(PKCE_STORAGE_KEY);
+  localStorage.removeItem(PKCE_STORAGE_KEY);
 };
 
 const getRedirectUri = () =>
@@ -56,13 +83,6 @@ const buildAuthorizeUrl = async () => {
   });
 
   return `${WIKIMEDIA_OAUTH_AUTHORIZE_URL}?${params}`;
-};
-
-type TokenResponse = {
-  access_token: string;
-  refresh_token?: string;
-  token_type: string;
-  expires_in: number;
 };
 
 const exchangeCodeForToken = async (
@@ -126,10 +146,95 @@ const waitForCallback = (state: string): Promise<URL> =>
     };
   });
 
+/** Persist that Edit dialog should reopen after OAuth / photo-picker resume. */
+export const markEditDialogForResume = () => {
+  if (!isBrowser()) return;
+  localStorage.setItem(
+    EDIT_DIALOG_RESUME_KEY,
+    JSON.stringify({ path: window.location.pathname, ts: Date.now() }),
+  );
+};
+
+export const consumeEditDialogResume = (): boolean => {
+  if (!isBrowser()) return false;
+  const raw = localStorage.getItem(EDIT_DIALOG_RESUME_KEY);
+  if (!raw) return false;
+  localStorage.removeItem(EDIT_DIALOG_RESUME_KEY);
+  try {
+    const data = JSON.parse(raw) as { path?: string; ts?: number };
+    if (!data.path || !data.ts) return false;
+    if (Date.now() - data.ts > 30 * 60 * 1000) return false;
+    return data.path === window.location.pathname;
+  } catch {
+    return false;
+  }
+};
+
+const finishWithCallbackUrl = async (
+  callbackHref: string,
+): Promise<TokenResponse> => {
+  const pkce = readPkceState();
+  if (!pkce) throw new Error('Missing Wikimedia OAuth PKCE state');
+
+  const callbackUrl = new URL(callbackHref);
+  const returnedState = callbackUrl.searchParams.get('state');
+  if (returnedState !== pkce.state) {
+    throw new Error('Wikimedia OAuth state mismatch');
+  }
+  const error = callbackUrl.searchParams.get('error');
+  if (error) {
+    throw new Error(
+      `${error}: ${callbackUrl.searchParams.get('error_description') ?? ''}`,
+    );
+  }
+  const code = callbackUrl.searchParams.get('code');
+  if (!code) throw new Error('Authorization code missing in callback');
+
+  try {
+    return await exchangeCodeForToken(code, pkce.verifier, pkce.redirectUri);
+  } finally {
+    clearPkceState();
+    localStorage.removeItem(RETURN_STORAGE_KEY);
+    localStorage.removeItem(CALLBACK_STORAGE_KEY);
+  }
+};
+
+/**
+ * After a full-page OAuth redirect (standalone PWA), the callback page stores
+ * the result URL and sends the user back. Call this on app boot to finish login.
+ */
+export const completePendingWikimediaOAuth =
+  async (): Promise<TokenResponse | null> => {
+    if (!isBrowser()) return null;
+    const callbackHref = localStorage.getItem(CALLBACK_STORAGE_KEY);
+    if (!callbackHref) return null;
+    return finishWithCallbackUrl(callbackHref);
+  };
+
+/**
+ * Starts Wikimedia OAuth. In standalone PWA uses a full-page redirect (no
+ * popup). Resolves with tokens for the popup path; for redirect the page
+ * navigates away and this promise never settles.
+ */
 export const startWikimediaOAuthFlow = async (): Promise<TokenResponse> => {
   const authorizeUrl = await buildAuthorizeUrl();
   const pkce = readPkceState();
   if (!pkce) throw new Error('Failed to initialize Wikimedia OAuth');
+
+  if (isStandalonePwa()) {
+    markEditDialogForResume();
+    localStorage.setItem(
+      RETURN_STORAGE_KEY,
+      JSON.stringify({
+        url: window.location.href,
+        reopenEdit: true,
+      } satisfies OAuthReturnState),
+    );
+    window.location.assign(authorizeUrl);
+    // Page is navigating away – keep the promise pending so callers don't
+    // treat navigation as a failed login.
+    return new Promise<TokenResponse>(() => {});
+  }
 
   const popup = window.open(
     authorizeUrl,

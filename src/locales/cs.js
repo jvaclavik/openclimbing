@@ -415,6 +415,7 @@ export default {
   'featurepanel.type_crag': 'Sektor',
   'featurepanel.routes': 'cest',
   'featurepanel.hidden_crags': 'skrytých sektorů',
+  'featurepanel.show_more_crags': 'Zobrazit dalších __count__',
   'featurepanel.drawn_routes': 'Zakresleno na fotce: __count__',
   'featurepanel.gallery_scroll_left': 'Posunout doleva',
   'featurepanel.gallery_scroll_right': 'Posunout doprava',
@@ -894,7 +895,9 @@ export default {
   'climbing_rock.sandstone': 'pískovec',
   'climbing_rock.granite': 'žula',
   'climbing_rock.quartzite': 'křemenec',
-  'climbing_rock.gneiss': 'rula',
+  'climbing_rock.gneiss': 'rula', // legacy OSM value
+  'climbing_rock.orthogneiss': 'ortorula',
+  'climbing_rock.paragneiss': 'pararula',
   'climbing_rock.gritstone': 'arkóza',
   'climbing_rock.porphyry': 'porfyr',
   'climbing_rock.conglomerate': 'slepenec',
