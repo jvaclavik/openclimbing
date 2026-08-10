@@ -9,6 +9,7 @@ import {
   generateCodeVerifier,
   generateState,
 } from './pkce';
+import { isAndroid, isIOS } from '../../../helpers/platforms';
 
 const PKCE_STORAGE_KEY = 'wikimediaPkce';
 const RETURN_STORAGE_KEY = 'wikimediaOAuthReturn';
@@ -44,6 +45,10 @@ export const isStandalonePwa = () => {
     nav.standalone === true
   );
 };
+
+/** Mobile Safari/Chrome block or mishandle OAuth popups – use full-page redirect. */
+const shouldUseRedirectOAuth = () =>
+  isStandalonePwa() || isIOS() || isAndroid();
 
 const storePkceState = (state: PkceState) => {
   localStorage.setItem(PKCE_STORAGE_KEY, JSON.stringify(state));
@@ -212,16 +217,16 @@ export const completePendingWikimediaOAuth =
   };
 
 /**
- * Starts Wikimedia OAuth. In standalone PWA uses a full-page redirect (no
- * popup). Resolves with tokens for the popup path; for redirect the page
- * navigates away and this promise never settles.
+ * Starts Wikimedia OAuth. On mobile / standalone PWA uses a full-page redirect
+ * (popups are blocked or unreliable). On desktop keeps a popup. For redirect
+ * the page navigates away and this promise never settles.
  */
 export const startWikimediaOAuthFlow = async (): Promise<TokenResponse> => {
   const authorizeUrl = await buildAuthorizeUrl();
   const pkce = readPkceState();
   if (!pkce) throw new Error('Failed to initialize Wikimedia OAuth');
 
-  if (isStandalonePwa()) {
+  if (shouldUseRedirectOAuth()) {
     markEditDialogForResume();
     localStorage.setItem(
       RETURN_STORAGE_KEY,
