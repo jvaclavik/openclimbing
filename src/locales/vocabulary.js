@@ -866,6 +866,9 @@ export default {
   'crag_filter.type_gym': 'Climbing gym',
   'crag_filter.advanced': 'Advanced filters',
   'crag_filter.material_placeholder': 'Any material',
+  'crag_filter.photo_drawn': 'Photo',
+  'crag_filter.photo_drawn_with': 'with photo',
+  'crag_filter.photo_drawn_without': 'without photo',
 
   'member_features.subitems': 'Subitems',
   'member_features.climbing': 'Climbing routes',

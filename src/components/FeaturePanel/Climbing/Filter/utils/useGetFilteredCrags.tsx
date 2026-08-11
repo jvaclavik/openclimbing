@@ -2,6 +2,7 @@ import { getGradeIndexFromTags } from '../../../../../services/tagging/climbing/
 import { Feature, FeatureTags } from '../../../../../services/types';
 import { useFeatureContext } from '../../../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
+import { hasWikimediaCommons } from '../../utils/photo';
 
 export const useGetMemberCrags = () => {
   const { feature } = useFeatureContext();
@@ -19,6 +20,12 @@ const someFeatureTags = (
   predicate(crag.tags) ||
   crag.memberFeatures.some(({ tags }) => predicate(tags));
 
+// Same signal as map marker colour (hasImages): any wikimedia_commons* tag
+// on the crag or its routes.
+const hasPhoto = (crag: Feature) =>
+  hasWikimediaCommons(crag.tags) ||
+  (crag.memberFeatures ?? []).some((route) => hasWikimediaCommons(route.tags));
+
 export const useGetFilteredCrags = (crags: Feature[]): Feature[] => {
   const { climbingFilter } = useUserSettingsContext();
   const {
@@ -31,6 +38,7 @@ export const useGetFilteredCrags = (crags: Feature[]): Feature[] => {
     inclinations,
     materials,
     familyFriendly,
+    photoDrawn,
   } = climbingFilter;
   const [minIndex, maxIndex] = gradeInterval;
 
@@ -71,12 +79,19 @@ export const useGetFilteredCrags = (crags: Feature[]): Feature[] => {
     !familyFriendly ||
     someFeatureTags(crag, (tags) => isTagSet(tags['climbing:family_friendly']));
 
+  const matchesPhoto = (crag: Feature) => {
+    if (photoDrawn === 'any') return true;
+    const withPhoto = hasPhoto(crag);
+    return photoDrawn === 'with' ? withPhoto : !withPhoto;
+  };
+
   return crags.filter(
     (crag) =>
       matchesGrade(crag) &&
       matchesClimbingTypes(crag) &&
       matchesInclinations(crag) &&
       matchesMaterials(crag) &&
-      matchesFamilyFriendly(crag),
+      matchesFamilyFriendly(crag) &&
+      matchesPhoto(crag),
   );
 };

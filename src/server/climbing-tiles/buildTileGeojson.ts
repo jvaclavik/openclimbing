@@ -78,12 +78,18 @@ export const getProperties = (
   const name = record.name || record.nameRaw;
 
   if (type === 'area' || type === 'crag') {
-    const { routeCount = 0, hasImages, histogramCode } = record;
+    const {
+      routeCount = 0,
+      hasImages,
+      histogramCode,
+      routesWithPhoto,
+    } = record;
     return {
       type,
       name,
       parentId,
       routeCount,
+      routesWithPhoto: routesWithPhoto ?? 0,
       hasImages: hasImages > 0, // TODO maybe use number as in sqlite?
       histogramCode,
       ...getAttributeProperties(record),
@@ -91,13 +97,14 @@ export const getProperties = (
   }
 
   if (type === 'route' || type === 'route_top') {
-    const { gradeId, gradeTxt } = record;
+    const { gradeId, gradeTxt, hasImages } = record;
     return {
       type,
       name,
       parentId,
       gradeId,
       gradeTxt,
+      hasImages: hasImages > 0 ? true : undefined,
       ...getAttributeProperties(record),
     };
   }

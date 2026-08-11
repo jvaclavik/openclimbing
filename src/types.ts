@@ -28,6 +28,7 @@ export type ClimbingTilesProperties = {
 
   // group only:
   routeCount?: number;
+  routesWithPhoto?: number; // drawn topo lines; routes use 0/1
   hasImages?: boolean;
   histogramCode?: string;
 

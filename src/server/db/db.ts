@@ -190,6 +190,15 @@ const runPendingMigrations = (db: Database) => {
 
     console.log(`Database ${DB_PATH} migrated from version 8 to 9`); // eslint-disable-line no-console
   }
+  if (getDbVersion(db) === 9) {
+    // Tile GeoJSON now includes routesWithPhoto – drop stale cache built without it.
+    db.transaction(() => {
+      db.exec('DELETE FROM climbing_tiles_cache');
+      db.pragma('user_version = 10');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 9 to 10`); // eslint-disable-line no-console
+  }
 };
 
 // global to allow hot-reload in dev
@@ -205,10 +214,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 9');
+        db.pragma('user_version = 10');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 9`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 10`); // eslint-disable-line no-console
     }
 
     store.db = db;

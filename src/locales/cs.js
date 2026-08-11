@@ -801,6 +801,9 @@ export default {
   'crag_filter.type_gym': 'Lezecké stěny',
   'crag_filter.advanced': 'Rozšířené filtry',
   'crag_filter.material_placeholder': 'Libovolný materiál',
+  'crag_filter.photo_drawn': 'Fotka',
+  'crag_filter.photo_drawn_with': 's fotkou',
+  'crag_filter.photo_drawn_without': 'bez fotky',
 
   'member_features.subitems': 'Položky',
   'member_features.climbing': 'Lezecké cesty',

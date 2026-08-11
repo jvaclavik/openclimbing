@@ -13,6 +13,7 @@ const baseParams = {
   inclinations: [] as string[],
   materials: [] as string[],
   familyFriendly: false,
+  photoDrawn: 'any' as const,
 };
 
 describe('filterClimbingTilesFeatures', () => {
@@ -71,5 +72,58 @@ describe('filterClimbingTilesFeatures', () => {
     });
 
     expect(filtered.map((f) => f.properties.type)).toEqual(['ferrata']);
+  });
+
+  it('filters crags by hasImages (map marker colour)', () => {
+    const features: ClimbingTilesFeature[] = [
+      {
+        type: 'Feature',
+        id: 1,
+        geometry: pt(),
+        properties: {
+          type: 'crag',
+          name: 'With photo',
+          routeCount: 5,
+          hasImages: true,
+          histogramCode: 'x',
+        },
+      },
+      {
+        type: 'Feature',
+        id: 2,
+        geometry: pt(),
+        properties: {
+          type: 'crag',
+          name: 'Without photo',
+          routeCount: 5,
+          hasImages: false,
+          histogramCode: 'x',
+        },
+      },
+    ];
+
+    const without = filterClimbingTilesFeatures(features, {
+      ...baseParams,
+      gradeInterval: [0, 75],
+      minimumRoutes: 1,
+      isDefaultFilter: false,
+      isGradeIntervalDefault: true,
+      isMinimumRoutesDefault: true,
+      poiTypes: { rock: true, ferrata: true, gym: true },
+      photoDrawn: 'without',
+    });
+    expect(without.map((f) => f.properties.name)).toEqual(['Without photo']);
+
+    const withPhoto = filterClimbingTilesFeatures(features, {
+      ...baseParams,
+      gradeInterval: [0, 75],
+      minimumRoutes: 1,
+      isDefaultFilter: false,
+      isGradeIntervalDefault: true,
+      isMinimumRoutesDefault: true,
+      poiTypes: { rock: true, ferrata: true, gym: true },
+      photoDrawn: 'with',
+    });
+    expect(withPhoto.map((f) => f.properties.name)).toEqual(['With photo']);
   });
 });

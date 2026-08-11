@@ -23,11 +23,15 @@ import { mapClimbingFilter } from '../../utils/userSettings/mapClimbingFilter';
 import { decodeHistogram } from '../../../server/climbing-tiles/overpass/histogram';
 import { constructOutlines } from './constructOutlines';
 import { reapplySelectedOutline } from './selectedOutline';
-import { Interval, PoiTypes } from '../../utils/userSettings/getClimbingFilter';
+import {
+  Interval,
+  PhotoDrawnFilter,
+  PoiTypes,
+} from '../../utils/userSettings/getClimbingFilter';
 
 const getTileJson = async ({ z, x, y }: Tile) => {
   try {
-    const url = `${CLIMBING_TILES_HOST}api/climbing-tiles/tile?z=${z}&x=${x}&y=${y}`;
+    const url = `${CLIMBING_TILES_HOST}api/climbing-tiles/tile?z=${z}&x=${x}&y=${y}&v=2`;
     const data = await fetchJson(url); // this is cached by fetchCache
     return (data.features || []) as ClimbingTilesFeature[];
   } catch (e) {
@@ -93,11 +97,18 @@ type FilterParams = {
   inclinations: string[];
   materials: string[];
   familyFriendly: boolean;
+  photoDrawn: PhotoDrawnFilter;
 };
 
 const matchesAttributeFilters = (
   feature: ClimbingTilesFeature,
-  { climbingTypes, inclinations, materials, familyFriendly }: FilterParams,
+  {
+    climbingTypes,
+    inclinations,
+    materials,
+    familyFriendly,
+    photoDrawn,
+  }: FilterParams,
 ): boolean => {
   const props = feature.properties;
 
@@ -121,6 +132,12 @@ const matchesAttributeFilters = (
   }
   if (familyFriendly && !props.familyFriendly) {
     return false;
+  }
+  if (photoDrawn !== 'any') {
+    const withPhoto = !!props.hasImages;
+    if (photoDrawn === 'with' ? !withPhoto : withPhoto) {
+      return false;
+    }
   }
   return true;
 };
@@ -186,6 +203,7 @@ const doClimbingFilter = (features: ClimbingTilesFeature[]) =>
     inclinations: mapClimbingFilter.inclinations ?? [],
     materials: mapClimbingFilter.materials ?? [],
     familyFriendly: mapClimbingFilter.familyFriendly ?? false,
+    photoDrawn: mapClimbingFilter.photoDrawn ?? 'any',
   });
 
 const updateData = async () => {

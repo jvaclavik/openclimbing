@@ -42,6 +42,7 @@ import {
   getWikimediaCommonsPhotoPathKeys,
   isRouteDrawnOnPhoto,
 } from '../utils/photo';
+import { formatRouteLengthAndAuthor } from '../utils/formatClimbingLength';
 import { usePhotoHighlightContext } from '../contexts/PhotoHighlightContext';
 
 const Container = styled.div`
@@ -288,26 +289,9 @@ const RouteDescription = ({ feature }: { feature: Feature }) =>
     </RouteDescriptionContainer>
   ) : null;
 
-const RouteAuthor = ({ feature }: { feature: Feature }) =>
-  feature.tags?.author ? (
-    <RouteAuthorContainer>{feature.tags?.author}</RouteAuthorContainer>
-  ) : null;
-
-const RouteLengthContainer = styled.span`
-  color: ${({ theme }) => theme.palette.text.secondary};
-  font-size: 11px;
-  white-space: nowrap;
-`;
-
-const RouteLength = ({ feature }: { feature: Feature }) => {
-  const length = feature.tags?.['climbing:length']?.trim();
-  if (!length) {
-    return null;
-  }
-
-  // a bare number means metres in OSM, anything else already carries its unit
-  const label = /^\d+([.,]\d+)?$/.test(length) ? `${length} m` : length;
-  return <RouteLengthContainer>{label}</RouteLengthContainer>;
+const RouteAuthor = ({ feature }: { feature: Feature }) => {
+  const meta = formatRouteLengthAndAuthor(feature.tags ?? {});
+  return meta ? <RouteAuthorContainer>{meta}</RouteAuthorContainer> : null;
 };
 
 const RouteName = (props: {
@@ -324,7 +308,6 @@ const RouteName = (props: {
       >
         {props.feature.tags?.name}
       </Typography>
-      <RouteLength feature={props.feature} />
     </RouteNameContainer>
   );
 };

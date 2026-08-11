@@ -78,6 +78,7 @@ type AdvancedFiltersProps = {
   showInclination: boolean;
   showMaterial: boolean;
   showFamilyFriendly: boolean;
+  showPhotoDrawn: boolean;
 };
 
 export const AdvancedFilters = ({
@@ -85,6 +86,7 @@ export const AdvancedFilters = ({
   showInclination,
   showMaterial,
   showFamilyFriendly,
+  showPhotoDrawn,
 }: AdvancedFiltersProps) => {
   const { climbingFilter } = useUserSettingsContext();
   const {
@@ -96,17 +98,21 @@ export const AdvancedFilters = ({
     setMaterials,
     familyFriendly,
     setFamilyFriendly,
+    photoDrawn,
+    setPhotoDrawn,
     isClimbingTypesDefault,
     isInclinationsDefault,
     isMaterialsDefault,
     isFamilyFriendlyDefault,
+    isPhotoDrawnDefault,
   } = climbingFilter;
 
   const hasActiveAdvanced =
     (showClimbingType && !isClimbingTypesDefault) ||
     (showInclination && !isInclinationsDefault) ||
     (showMaterial && !isMaterialsDefault) ||
-    (showFamilyFriendly && !isFamilyFriendlyDefault);
+    (showFamilyFriendly && !isFamilyFriendlyDefault) ||
+    (showPhotoDrawn && !isPhotoDrawnDefault);
 
   const [open, setOpen] = useState(hasActiveAdvanced);
 
@@ -114,6 +120,10 @@ export const AdvancedFilters = ({
   const getMaterialLabel = (value: string) => {
     const key = getClimbingRockTranslationKey(value);
     return key ? t(key as TranslationId) : value;
+  };
+
+  const togglePhotoDrawn = (value: 'with' | 'without') => {
+    setPhotoDrawn(photoDrawn === value ? 'any' : value);
   };
 
   return (
@@ -178,6 +188,27 @@ export const AdvancedFilters = ({
                   />
                 )}
               />
+            </Box>
+          )}
+          {showPhotoDrawn && (
+            <Box>
+              <Label>{t('crag_filter.photo_drawn')}</Label>
+              <Stack direction="row" gap={0.5} flexWrap="wrap">
+                <Chip
+                  label={t('crag_filter.photo_drawn_with')}
+                  size="small"
+                  color={photoDrawn === 'with' ? 'primary' : 'default'}
+                  variant={photoDrawn === 'with' ? 'filled' : 'outlined'}
+                  onClick={() => togglePhotoDrawn('with')}
+                />
+                <Chip
+                  label={t('crag_filter.photo_drawn_without')}
+                  size="small"
+                  color={photoDrawn === 'without' ? 'primary' : 'default'}
+                  variant={photoDrawn === 'without' ? 'filled' : 'outlined'}
+                  onClick={() => togglePhotoDrawn('without')}
+                />
+              </Stack>
             </Box>
           )}
           {showFamilyFriendly && (

@@ -21,6 +21,7 @@ import { findInItems } from '../context/utils';
 import { getDifficulties } from '../../../../services/tagging/climbing/routeGrade';
 import { ConvertedRouteDifficultyBadge } from '../../Climbing/ConvertedRouteDifficultyBadge';
 import { usePhotoHighlightContext } from '../../Climbing/contexts/PhotoHighlightContext';
+import { formatRouteLengthAndAuthor } from '../../Climbing/utils/formatClimbingLength';
 import { isRouteDrawnOnPhoto } from '../../Climbing/utils/photo';
 
 const StyledListItem = styled(ListItem)`
@@ -53,6 +54,7 @@ const getLabel = (dataItem: EditDataItem, highlighted?: boolean) => {
       k.startsWith('climbing:grade:'),
     );
     const routeDifficulties = getDifficulties(dataItem.tags);
+    const meta = formatRouteLengthAndAuthor(dataItem.tags);
     return (
       <Stack
         direction="row"
@@ -66,6 +68,11 @@ const getLabel = (dataItem: EditDataItem, highlighted?: boolean) => {
           <Typography fontWeight={highlighted ? 700 : undefined}>
             {dataItem.tags.name}{' '}
           </Typography>
+          {meta ? (
+            <Typography color="secondary" variant="caption">
+              {meta}
+            </Typography>
+          ) : null}
           <StyledPresetLabel color="secondary" variant="caption">
             {dataItem.presetLabel}
           </StyledPresetLabel>

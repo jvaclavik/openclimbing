@@ -19,7 +19,7 @@ import { EditDialogUploadHost } from '../../EditDialogUploadHost';
 
 const basicMajorKeys = ['name', 'description', 'website'];
 const nonClimbingMajorKeys = ['phone', 'opening_hours'];
-const climbingRouteMajorKeys = ['author', 'climbing:length'];
+const climbingRouteMajorKeys = ['climbing:length', 'author'];
 export const majorKeys = [...basicMajorKeys, ...nonClimbingMajorKeys];
 
 const getData = (numberOfWikimediaItems: number, tags: FeatureTags) => {
