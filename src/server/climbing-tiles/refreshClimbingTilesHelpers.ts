@@ -93,6 +93,8 @@ export const recordsFactory = (log: (message: string) => void) => {
       climbingTypes: encodeList(attributes.climbingTypes),
       inclinations: encodeList(attributes.inclinations),
       familyFriendly: attributes.familyFriendly ? 1 : 0,
+      lengthMin: attributes.lengthMin ?? null,
+      lengthMax: attributes.lengthMax ?? null,
       tags: feature.tags ? JSON.stringify(feature.tags) : null,
       members: feature.members ? JSON.stringify(feature.members) : null,
     };

@@ -790,6 +790,7 @@ export default {
   'crag_filter.grade': 'V obtížnosti',
   'crag_filter.grade_from': 'od',
   'crag_filter.grade_to': 'do',
+  'crag_filter.length': 'Délka',
   'crag_filter.show_at_least': 'zobrazit sektory s alespoň',
   'crag_filter.routes': 'cestami',
   'crag_filter.reset': 'Reset',

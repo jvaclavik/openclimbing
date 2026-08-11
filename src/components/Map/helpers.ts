@@ -57,7 +57,13 @@ export const convertMapIdToOsmId = (feature): OsmId | false => {
   const mapTypeToOsm =
     feature.source === 'ofr_planet'
       ? { 1: 'node', 2: 'way', 3: 'relation' } // planetiler uses 1/2/3 - https://github.com/onthegomap/planetiler/issues/1120
-      : { 0: 'node', 1: 'way', 4: 'relation' };
+      : {
+          0: 'node',
+          1: 'way',
+          // route LineString start-points use suffix 2 (see addRouteStarts)
+          2: 'way',
+          4: 'relation',
+        };
 
   const mapId = `${feature.id}`;
   const id = Number(mapId.substring(0, mapId.length - 1));

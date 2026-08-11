@@ -10,11 +10,13 @@ import {
 } from '../FeaturePanel/Climbing/utils/photo';
 import { convertOsmIdToMapId } from '../../services/fetchCrags';
 import { Feature, isTag } from '../../services/types';
+import { setClimbingFeatureState } from './climbingTiles/climbingFeatureState';
+import { CLIMBING_TILES_SOURCE } from './climbingTiles/consts';
 
 // The legacy overlay source ('climbing', from fetchCrags) and the climbing
 // tiles source ('climbing-tiles', used in production) both id their features
 // with convertOsmIdToMapId, so the same feature-state works for either.
-const CLIMBING_SOURCES = ['climbing', 'climbing-tiles'];
+const CLIMBING_SOURCES = ['climbing', CLIMBING_TILES_SOURCE];
 
 /**
  * Emphasizes (via `feature-state: highlighted`) the climbing route dots on the
@@ -35,7 +37,15 @@ const useHighlightDrawnRoutesOnMap = (
 
     const setHighlighted = (id: number, highlighted: boolean) => {
       sources.forEach((source) => {
-        map.setFeatureState({ source, id }, { highlighted });
+        if (source === CLIMBING_TILES_SOURCE) {
+          setClimbingFeatureState(map, id, { highlighted });
+          return;
+        }
+        try {
+          map.setFeatureState({ source, id }, { highlighted });
+        } catch {
+          // Feature may be missing from the GeoJSON source.
+        }
       });
     };
 

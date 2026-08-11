@@ -4,6 +4,12 @@ import { createMapEffectHook } from '../../helpers';
 import { convertOsmIdToMapId, layersWithOsmId } from '../helpers';
 import { Feature } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { setClimbingFeatureState } from '../climbingTiles/climbingFeatureState';
+import { CLIMBING_TILES_SOURCE } from '../climbingTiles/consts';
+import {
+  clearVectorTileFeature,
+  setVectorTileFeatureState,
+} from './safeMapFeatureState';
 
 const FEATURE_MARKER = {
   color: '#eb5757',
@@ -25,8 +31,19 @@ const setPoiIconVisibility = (
     validate: false,
   });
 
-  if (results.length) {
-    map.setFeatureState(results[0], { hideIcon });
+  if (!results.length) {
+    return;
+  }
+
+  const hit = results[0];
+  if (hit.source === CLIMBING_TILES_SOURCE) {
+    setClimbingFeatureState(map, hit.id as number, { hideIcon });
+    return;
+  }
+  if (hideIcon) {
+    setVectorTileFeatureState(map, hit, { hideIcon: true });
+  } else {
+    clearVectorTileFeature(map, hit);
   }
 };
 
@@ -54,18 +71,19 @@ export const useFeatureMarker = (map: Map) => {
   const { feature } = useFeatureContext();
   useUpdateFeatureMarker(map, feature);
 
-  // hide the icon when tiles are fetched TODO sometimes broken (zoom problem)
+  // Re-hide the basemap icon after tiles reload (zoom clears VT feature-state).
   useEffect(() => {
     if (!map) {
-      return;
+      return undefined;
     }
-    const handle = setInterval(() => {
-      if (map.areTilesLoaded()) {
+    const reapply = () => {
+      if (feature?.center && map.areTilesLoaded()) {
         setPoiIconVisibility(map, feature, true);
-        clearInterval(handle);
       }
-    }, 200);
-    // We want to run it only on Init
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map]);
+    };
+    map.on('idle', reapply);
+    return () => {
+      map.off('idle', reapply);
+    };
+  }, [map, feature]);
 };

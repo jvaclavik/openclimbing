@@ -168,26 +168,48 @@ type Props = {
   subtle?: boolean;
 };
 
-const MaterialBadge = ({ feature }) => {
-  const material = feature.tags?.['climbing:rock'];
-  if (!material) return null;
+const collectRockMaterials = (feature: Feature): string[] => {
+  const rocks = new Set<string>();
+  const walk = (f: Feature) => {
+    const rock = f.tags?.['climbing:rock']?.trim();
+    if (rock) {
+      rocks.add(rock);
+    }
+    f.memberFeatures?.forEach(walk);
+  };
+  walk(feature);
+  return [...rocks];
+};
 
-  const translationKey = getClimbingRockTranslationKey(material);
+const MaterialBadges = ({ feature }: { feature: Feature }) => {
+  const materials = collectRockMaterials(feature);
+  if (!materials.length) {
+    return null;
+  }
+
   return (
-    material && (
-      <StyledChip
-        label={
-          <Stack direction="row" gap={0.4} alignItems="center">
-            <TerrainIcon fontSize="inherit" />
-            <span>
-              {translationKey ? t(translationKey as TranslationId) : material}
-            </span>
-          </Stack>
-        }
-        size="small"
-        color="success"
-      />
-    )
+    <>
+      {materials.map((material) => {
+        const translationKey = getClimbingRockTranslationKey(material);
+        return (
+          <StyledChip
+            key={material}
+            label={
+              <Stack direction="row" gap={0.4} alignItems="center">
+                <TerrainIcon fontSize="inherit" />
+                <span>
+                  {translationKey
+                    ? t(translationKey as TranslationId)
+                    : material}
+                </span>
+              </Stack>
+            }
+            size="small"
+            color="success"
+          />
+        );
+      })}
+    </>
   );
 };
 
@@ -292,7 +314,7 @@ export const ClimbingBadges = ({
         },
       )}
       <StartBadge feature={feature} />
-      <MaterialBadge feature={feature} />
+      <MaterialBadges feature={feature} />
       <OrientationBadge feature={feature} />
     </Stack>
   );

@@ -26,6 +26,7 @@ import {
   CLIMBING_ROCK_OPTIONS,
   getClimbingRockTranslationKey,
 } from '../../../../services/tagging/climbing/climbingRockData';
+import { LengthFilter } from './LengthFilter';
 
 const Label = styled.div`
   font-size: 0.85rem;
@@ -79,6 +80,7 @@ type AdvancedFiltersProps = {
   showMaterial: boolean;
   showFamilyFriendly: boolean;
   showPhotoDrawn: boolean;
+  showLength: boolean;
 };
 
 export const AdvancedFilters = ({
@@ -87,6 +89,7 @@ export const AdvancedFilters = ({
   showMaterial,
   showFamilyFriendly,
   showPhotoDrawn,
+  showLength,
 }: AdvancedFiltersProps) => {
   const { climbingFilter } = useUserSettingsContext();
   const {
@@ -105,6 +108,7 @@ export const AdvancedFilters = ({
     isMaterialsDefault,
     isFamilyFriendlyDefault,
     isPhotoDrawnDefault,
+    isLengthIntervalDefault,
   } = climbingFilter;
 
   const hasActiveAdvanced =
@@ -112,7 +116,8 @@ export const AdvancedFilters = ({
     (showInclination && !isInclinationsDefault) ||
     (showMaterial && !isMaterialsDefault) ||
     (showFamilyFriendly && !isFamilyFriendlyDefault) ||
-    (showPhotoDrawn && !isPhotoDrawnDefault);
+    (showPhotoDrawn && !isPhotoDrawnDefault) ||
+    (showLength && !isLengthIntervalDefault);
 
   const [open, setOpen] = useState(hasActiveAdvanced);
 
@@ -190,6 +195,7 @@ export const AdvancedFilters = ({
               />
             </Box>
           )}
+          {showLength && <LengthFilter />}
           {showPhotoDrawn && (
             <Box>
               <Label>{t('crag_filter.photo_drawn')}</Label>

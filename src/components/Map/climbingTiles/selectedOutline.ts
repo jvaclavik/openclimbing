@@ -1,5 +1,6 @@
 import { getGlobalMap } from '../../../services/mapStorage';
-import { CLIMBING_TILES_SOURCE } from './consts';
+import { toOutlineMapId } from './consts';
+import { setClimbingFeatureState } from './climbingFeatureState';
 import {
   reapplySelectedCragRoutes,
   setSelectedCragRoutes,
@@ -12,10 +13,9 @@ const setState = (id: number | undefined, selected: boolean) => {
     return;
   }
   const map = getGlobalMap();
-  if (!map?.getSource(CLIMBING_TILES_SOURCE)) {
-    return;
-  }
-  map.setFeatureState({ source: CLIMBING_TILES_SOURCE, id }, { selected });
+  setClimbingFeatureState(map, id, { selected });
+  // Outline uses a dedicated map id so the GeoJSON source stays unique.
+  setClimbingFeatureState(map, toOutlineMapId(id), { selected });
 };
 
 export const setSelectedOutline = (id: number | undefined) => {

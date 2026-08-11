@@ -7,6 +7,10 @@ import {
   DEFAULT_GRADE_SYSTEM,
   GradeSystem,
 } from '../../../services/tagging/climbing/gradeSystems';
+import {
+  DEFAULT_LENGTH_INTERVAL,
+  LENGTH_FILTER_MAX_M,
+} from '../../../services/tagging/climbing/parseClimbingLength';
 import { Setter } from '../../../types';
 import { updateMapFilter } from './mapClimbingFilter';
 
@@ -30,6 +34,7 @@ export type ClimbingFilterSettings = {
   materials: string[];
   familyFriendly: boolean;
   photoDrawn: PhotoDrawnFilter;
+  lengthInterval: Interval | null;
 };
 
 type SetFilter = <T extends keyof ClimbingFilterSettings>(
@@ -65,6 +70,9 @@ export type ClimbingFilter = {
   setFamilyFriendly: Setter<boolean>;
   photoDrawn: PhotoDrawnFilter;
   setPhotoDrawn: Setter<PhotoDrawnFilter>;
+  lengthInterval: Interval;
+  setLengthInterval: Setter<Interval>;
+  lengthFilterMax: number;
   isDefaultFilter: boolean;
   isGradeIntervalDefault: boolean;
   isMinimumRoutesDefault: boolean;
@@ -74,6 +82,7 @@ export type ClimbingFilter = {
   isMaterialsDefault: boolean;
   isFamilyFriendlyDefault: boolean;
   isPhotoDrawnDefault: boolean;
+  isLengthIntervalDefault: boolean;
   numberOfActiveFilters: number;
   reset: () => void;
 };
@@ -122,6 +131,10 @@ export const getClimbingFilter = (
   const setPhotoDrawn = (next: PhotoDrawnFilter) =>
     setFilter('photoDrawn', next);
 
+  const lengthInterval = data?.lengthInterval ?? DEFAULT_LENGTH_INTERVAL;
+  const setLengthInterval = (interval: Interval) =>
+    setFilter('lengthInterval', interval);
+
   const isGradeIntervalDefault = isSameInterval(
     gradeInterval,
     defaultGradeInterval,
@@ -133,6 +146,10 @@ export const getClimbingFilter = (
   const isMaterialsDefault = materials.length === 0;
   const isFamilyFriendlyDefault = !familyFriendly;
   const isPhotoDrawnDefault = photoDrawn === 'any';
+  const isLengthIntervalDefault = isSameInterval(
+    lengthInterval,
+    DEFAULT_LENGTH_INTERVAL,
+  );
 
   const isDefaultFilter =
     isGradeIntervalDefault &&
@@ -142,7 +159,8 @@ export const getClimbingFilter = (
     isInclinationsDefault &&
     isMaterialsDefault &&
     isFamilyFriendlyDefault &&
-    isPhotoDrawnDefault;
+    isPhotoDrawnDefault &&
+    isLengthIntervalDefault;
 
   const numberOfActiveFilters = [
     isGradeIntervalDefault,
@@ -153,6 +171,7 @@ export const getClimbingFilter = (
     isMaterialsDefault,
     isFamilyFriendlyDefault,
     isPhotoDrawnDefault,
+    isLengthIntervalDefault,
   ].filter((isDefault) => !isDefault).length;
 
   updateMapFilter({
@@ -165,9 +184,11 @@ export const getClimbingFilter = (
     materials,
     familyFriendly,
     photoDrawn,
+    lengthInterval,
     isDefaultFilter,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
+    isLengthIntervalDefault,
   });
 
   return {
@@ -188,6 +209,9 @@ export const getClimbingFilter = (
     setFamilyFriendly,
     photoDrawn,
     setPhotoDrawn,
+    lengthInterval,
+    setLengthInterval,
+    lengthFilterMax: LENGTH_FILTER_MAX_M,
     isDefaultFilter,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
@@ -197,6 +221,7 @@ export const getClimbingFilter = (
     isMaterialsDefault,
     isFamilyFriendlyDefault,
     isPhotoDrawnDefault,
+    isLengthIntervalDefault,
     numberOfActiveFilters,
     reset: () => setUserSetting(SETTINGS_KEY, {} as ClimbingFilterSettings),
   };

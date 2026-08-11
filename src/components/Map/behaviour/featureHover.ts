@@ -1,5 +1,4 @@
 import {
-  FeatureIdentifier,
   Map,
   MapGeoJSONFeature,
   MapMouseEvent,
@@ -8,7 +7,15 @@ import {
 import { climbingLayers } from '../climbingTiles/climbingLayers/climbingLayers';
 import { isMobileDevice } from '../../helpers';
 import { setHoveredCragRoutes } from '../climbingTiles/selectedCragRoutes';
-import { CLIMBING_TILES_SOURCE } from '../climbingTiles/consts';
+import { CLIMBING_TILES_SOURCE, toOutlineMapId } from '../climbingTiles/consts';
+import {
+  registerClimbingHoverReset,
+  setClimbingFeatureState,
+} from '../climbingTiles/climbingFeatureState';
+import {
+  clearVectorTileFeature,
+  setVectorTileFeatureState,
+} from './safeMapFeatureState';
 
 const HOVER_EXPRESSION = ['case', ['boolean', ['feature-state', 'hover'], false], 0.5, 1]; // prettier-ignore
 const ICON_OPACITY = ['case', ['boolean', ['feature-state', 'hideIcon'], false], 0, HOVER_EXPRESSION]; // prettier-ignore
@@ -35,49 +42,103 @@ const getHoveredCragId = (feature: MapGeoJSONFeature | null) =>
     ? (feature.id as number)
     : undefined;
 
-export const setUpHover = (map: Map, layersWithOsmId: string[]) => {
-  let lastHover = null;
+type HoverMap = Map & {
+  __hoverLayers?: string[];
+  __hoverSetup?: boolean;
+};
 
-  const setHoverOn = (feature: FeatureIdentifier | null) =>
-    feature && map.setFeatureState(feature, { hover: true });
-  const setHoverOff = (feature: FeatureIdentifier | null) =>
-    feature && map.setFeatureState(feature, { hover: false });
+export const setUpHover = (map: Map, layersWithOsmId: string[]) => {
+  const hoverMap = map as HoverMap;
+  // Style rebuilds call this again — keep the layer list fresh, bind listeners once.
+  hoverMap.__hoverLayers = layersWithOsmId;
+  if (hoverMap.__hoverSetup) {
+    return;
+  }
+  hoverMap.__hoverSetup = true;
+
+  let lastHover: MapGeoJSONFeature | null = null;
+
+  const setHover = (feature: MapGeoJSONFeature | null, hover: boolean) => {
+    if (!feature) return;
+    if (feature.source === CLIMBING_TILES_SOURCE) {
+      const id = feature.id as number;
+      setClimbingFeatureState(map, id, { hover });
+      const type = feature.properties?.type;
+      if (type === 'crag' || type === 'area') {
+        setClimbingFeatureState(map, toOutlineMapId(id), { hover });
+      }
+      return;
+    }
+    if (hover) {
+      setVectorTileFeatureState(map, feature, { hover: true });
+    } else {
+      clearVectorTileFeature(map, feature);
+    }
+  };
 
   const featureHovered = (feature: MapGeoJSONFeature) => {
     if (feature !== lastHover) {
-      setHoverOff(lastHover);
-      setHoverOn(feature);
+      setHover(lastHover, false);
+      setHover(feature, true);
       setHoveredCragRoutes(getHoveredCragId(feature));
       lastHover = feature;
       map.getCanvas().style.cursor = 'pointer'; // eslint-disable-line no-param-reassign
     }
   };
 
-  const onMouseMove = (
-    e: MapMouseEvent & { features?: MapGeoJSONFeature[] },
-  ) => {
-    cancelHover();
-    if (e.features && e.features.length > 0) {
-      featureHovered(e.features[0]);
-    }
-  };
-
   const cancelHover = () => {
-    setHoverOff(lastHover);
+    setHover(lastHover, false);
     setHoveredCragRoutes(undefined);
     lastHover = null;
-    // TODO delay 200ms
     map.getCanvas().style.cursor = ''; // eslint-disable-line no-param-reassign
   };
 
-  layersWithOsmId.forEach((layer) => {
-    map.on('mousemove', layer, onMouseMove); // TODO unregister
-    map.on('mouseleave', layer, cancelHover);
+  const abandonHover = () => {
+    lastHover = null;
+    setHoveredCragRoutes(undefined);
+    map.getCanvas().style.cursor = ''; // eslint-disable-line no-param-reassign
+  };
+
+  const queryHoverLayers = (point: MapMouseEvent['point']) => {
+    const layers = (hoverMap.__hoverLayers ?? []).filter((id) =>
+      map.getLayer(id),
+    );
+    if (!layers.length) {
+      return [] as MapGeoJSONFeature[];
+    }
+    return map.queryRenderedFeatures(point, { layers });
+  };
+
+  // Own query (guarded via installMapFeatureStateGuard) — avoids MapLibre's
+  // per-layer mousemove path that throws mid tile-reload.
+  const onMouseMove = (e: MapMouseEvent) => {
+    const features = queryHoverLayers(e.point);
+    if (!features.length) {
+      cancelHover();
+      return;
+    }
+    featureHovered(features[0]);
+  };
+
+  registerClimbingHoverReset(() => {
+    lastHover = null;
+    setHoveredCragRoutes(undefined);
   });
 
+  map.on('zoomstart', abandonHover);
+  map.on('mousemove', onMouseMove);
+  map.getCanvas().addEventListener('mouseleave', cancelHover);
+
   if (isMobileDevice()) {
-    CLIMBING_CLICKABLE_LAYERS.forEach((layer) => {
-      map.on('click', layer, onMouseMove);
+    map.on('click', (e: MapMouseEvent) => {
+      const layers = CLIMBING_CLICKABLE_LAYERS.filter((id) => map.getLayer(id));
+      if (!layers.length) {
+        return;
+      }
+      const features = map.queryRenderedFeatures(e.point, { layers });
+      if (features.length) {
+        featureHovered(features[0]);
+      }
     });
   }
 };

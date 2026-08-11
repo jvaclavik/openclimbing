@@ -9,6 +9,7 @@ import {
   polygonSmooth,
 } from '@turf/turf';
 import { Feature as GeojsonFeature, LineString, Polygon } from 'geojson';
+import { toOutlineMapId } from './consts';
 
 // buffer() measures its `degrees` radius on a great circle, so it is a plain
 // ground distance regardless of latitude
@@ -133,7 +134,7 @@ export const constructOutlines = (features: ClimbingTilesFeature[]) => {
     return [
       {
         ...smooth.features[0],
-        id: mapId,
+        id: toOutlineMapId(mapId),
         properties: {
           type: 'outline',
           minZoom,

@@ -1,6 +1,7 @@
 import { GradeSystem } from '../../../services/tagging/climbing/gradeSystems';
 import isEqual from 'lodash/isEqual';
 import { Interval, PhotoDrawnFilter, PoiTypes } from './getClimbingFilter';
+import { DEFAULT_LENGTH_INTERVAL } from '../../../services/tagging/climbing/parseClimbingLength';
 
 export type MapClimbingFilterState = {
   userSystem: GradeSystem | undefined;
@@ -12,9 +13,11 @@ export type MapClimbingFilterState = {
   materials: string[];
   familyFriendly: boolean;
   photoDrawn: PhotoDrawnFilter;
+  lengthInterval: Interval;
   isDefaultFilter: boolean;
   isGradeIntervalDefault: boolean;
   isMinimumRoutesDefault: boolean;
+  isLengthIntervalDefault: boolean;
 };
 
 export const mapClimbingFilter: MapClimbingFilterState & {
@@ -29,9 +32,11 @@ export const mapClimbingFilter: MapClimbingFilterState & {
   materials: [],
   familyFriendly: false,
   photoDrawn: 'any',
+  lengthInterval: DEFAULT_LENGTH_INTERVAL,
   isDefaultFilter: false,
   isGradeIntervalDefault: true,
   isMinimumRoutesDefault: true,
+  isLengthIntervalDefault: true,
   callback: () => {},
 };
 
@@ -45,7 +50,8 @@ export const updateMapFilter = (next: MapClimbingFilterState) => {
     !isEqual(mapClimbingFilter.inclinations, next.inclinations) ||
     !isEqual(mapClimbingFilter.materials, next.materials) ||
     mapClimbingFilter.familyFriendly != next.familyFriendly ||
-    mapClimbingFilter.photoDrawn != next.photoDrawn
+    mapClimbingFilter.photoDrawn != next.photoDrawn ||
+    !isEqual(mapClimbingFilter.lengthInterval, next.lengthInterval)
   ) {
     Object.assign(mapClimbingFilter, next);
     mapClimbingFilter.callback();

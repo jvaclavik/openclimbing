@@ -32,6 +32,12 @@ export const GYM = {
 
 export const CLIMBING_TILES_SOURCE = 'climbing-tiles';
 
+// Relation mapIds end with 4 (see convertOsmIdToMapId). Outlines used to reuse
+// that same id, which put two GeoJSON features with one id into the source and
+// made MapLibre throw "feature index out of bounds" on setFeatureState.
+export const toOutlineMapId = (relationMapId: number) =>
+  Math.floor(relationMapId / 10) * 10 + 5;
+
 export const CLIMBING_SPRITE = {
   id: 'climbing',
   url: `${window.location.protocol}//${window.location.host}/icons-climbing/sprites/climbing`,

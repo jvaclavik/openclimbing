@@ -1,7 +1,8 @@
 import { BBox, Feature as GeojsonFeature, Geometry } from 'geojson';
 import { ClimbingTilesFeature, ClimbingTilesProperties } from '../../types';
-import { LineString, OsmId, Point } from '../../services/types';
+import { LineString, OsmId } from '../../services/types';
 import { ClimbingFeaturesRow } from '../db/types';
+import { parseClimbingLengthMeters } from '../../services/tagging/climbing/parseClimbingLength';
 
 // rows or columns count
 const COUNT = 500;
@@ -64,11 +65,39 @@ export const convertOsmIdToMapId = (apiId: OsmId) => {
 const decodeList = (value?: string | null): string[] | undefined =>
   value ? value.split(',') : undefined;
 
+const lengthFromRecord = (record: ClimbingFeaturesRow) => {
+  if (record.lengthMin != null || record.lengthMax != null) {
+    return {
+      lengthMin: record.lengthMin ?? record.lengthMax ?? undefined,
+      lengthMax: record.lengthMax ?? record.lengthMin ?? undefined,
+    };
+  }
+  if (!record.tags) {
+    return {};
+  }
+  try {
+    const tags = JSON.parse(record.tags) as Record<string, string>;
+    const values = [
+      parseClimbingLengthMeters(tags['climbing:length']),
+      parseClimbingLengthMeters(tags['climbing:length:min']),
+      parseClimbingLengthMeters(tags['climbing:length:max']),
+    ].filter(Boolean);
+    if (values.length === 0) return {};
+    return {
+      lengthMin: Math.min(...values.map((v) => v!.min)),
+      lengthMax: Math.max(...values.map((v) => v!.max)),
+    };
+  } catch {
+    return {};
+  }
+};
+
 const getAttributeProperties = (record: ClimbingFeaturesRow) => ({
   materials: decodeList(record.materials),
   climbingTypes: decodeList(record.climbingTypes),
   inclinations: decodeList(record.inclinations),
   familyFriendly: record.familyFriendly ? true : undefined,
+  ...lengthFromRecord(record),
 });
 
 export const getProperties = (
@@ -134,14 +163,19 @@ const isRouteLineString = (
 };
 
 const firstPointGeometry = (
-  feature: GeojsonFeature<LineString>,
-): GeojsonFeature<Point> => ({
-  ...feature,
-  geometry: {
-    type: 'Point',
-    coordinates: feature.geometry.coordinates[0],
-  },
-});
+  feature: GeojsonFeature<LineString, ClimbingTilesProperties>,
+): ClimbingTilesFeature => {
+  // Unique id (suffix 2) — sharing the LineString id breaks MapLibre feature-state.
+  const osmId = Math.floor(Number(feature.id) / 10);
+  return {
+    ...feature,
+    id: osmId * 10 + 2,
+    geometry: {
+      type: 'Point',
+      coordinates: feature.geometry.coordinates[0],
+    },
+  };
+};
 
 const addRouteStarts = (features: ClimbingTilesFeature[]) => [
   ...features,

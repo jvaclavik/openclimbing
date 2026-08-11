@@ -64,6 +64,8 @@ const relation = (
 const getSizeMeters = (features: ClimbingTilesFeature[]) => {
   const outlines = constructOutlines(features);
   expect(outlines).toHaveLength(1);
+  expect(outlines[0].id).toBe(RELATION_ID * 10 + 5);
+  expect(outlines[0].id).not.toBe(crag.id);
   const [minX, minY, maxX, maxY] = bbox(outlines[0]);
   return {
     width: distance([minX, minY], [maxX, minY], { units: 'meters' }),
@@ -129,7 +131,7 @@ describe('constructOutlines', () => {
     ];
 
     const [minX, , maxX] = bbox(
-      constructOutlines(features).find((o) => o.id === AREA_ID * 10 + 4),
+      constructOutlines(features).find((o) => o.id === AREA_ID * 10 + 5),
     );
     const width = distance([minX, CRAG_LAT], [maxX, CRAG_LAT], {
       units: 'meters',

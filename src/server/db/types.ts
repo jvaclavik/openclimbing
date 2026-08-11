@@ -20,6 +20,8 @@ export type ClimbingFeaturesRow = {
   climbingTypes?: string | null; // comma-joined climbing types
   inclinations?: string | null; // comma-joined inclinations
   familyFriendly?: number | null; // bool
+  lengthMin?: number | null; // metres, from climbing:length
+  lengthMax?: number | null;
   tags?: string | null; // JSON object of all OSM tags
   members?: string | null; // JSON array of relation members (relations only)
   countryCode?: string | null; // ISO country code resolved from lon/lat

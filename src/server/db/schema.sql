@@ -1,4 +1,4 @@
--- SQLite schema v9 (see db.ts migrations when bumping user_version)
+-- SQLite schema v12 (see db.ts migrations when bumping user_version)
 
 CREATE TABLE climbing_features
 (
@@ -22,6 +22,8 @@ CREATE TABLE climbing_features
   "climbingTypes" TEXT, -- comma-joined climbing types (sport, trad, ...)
   inclinations    TEXT, -- comma-joined inclinations (slab, vertical, ...)
   "familyFriendly" INTEGER, -- bool
+  "lengthMin"     REAL, -- metres from climbing:length (parsed)
+  "lengthMax"     REAL,
   tags            TEXT, -- JSON object of all OSM tags
   members         TEXT, -- JSON array of relation members (relations only)
   "countryCode"   TEXT -- ISO country code resolved from lon/lat during refresh

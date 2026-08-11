@@ -855,6 +855,7 @@ export default {
   'crag_filter.grade': 'With grade',
   'crag_filter.grade_from': 'from',
   'crag_filter.grade_to': 'to',
+  'crag_filter.length': 'Length',
   'crag_filter.show_at_least': 'show crags with at least',
   'crag_filter.routes': 'routes',
   'crag_filter.reset': 'Reset',

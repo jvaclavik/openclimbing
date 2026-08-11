@@ -588,7 +588,8 @@ const CragsInAreaInner = () => {
   const { sortByFn, sortBy, setSortBy } = useCragsInAreaSort();
   const unfilteredCrags = useGetMemberCrags();
   const crags = useGetFilteredCrags(unfilteredCrags).sort(sortByFn(sortBy));
-  const subAreas = useGetMemberAreas();
+  const unfilteredSubAreas = useGetMemberAreas();
+  const subAreas = useGetFilteredCrags(unfilteredSubAreas);
 
   return (
     <>

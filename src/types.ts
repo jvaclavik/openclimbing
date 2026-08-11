@@ -42,6 +42,8 @@ export type ClimbingTilesProperties = {
   climbingTypes?: string[];
   inclinations?: string[];
   familyFriendly?: boolean;
+  lengthMin?: number; // metres
+  lengthMax?: number;
 };
 
 // Relation ancestor of a search result (climbing area / site), nearest first.

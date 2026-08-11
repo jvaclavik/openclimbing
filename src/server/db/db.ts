@@ -1,6 +1,7 @@
 import BetterSqlite3, { type Database } from 'better-sqlite3';
 import { readFileSync } from 'fs';
 import path from 'path';
+import { backfillClimbingLengthAggregates } from '../climbing-tiles/backfillClimbingLengthAggregates';
 
 const DB_PATH = path.resolve(process.cwd(), 'data/db.sqlite');
 const SCHEMA_PATH = path.resolve(process.cwd(), 'src/server/db/schema.sql');
@@ -199,6 +200,46 @@ const runPendingMigrations = (db: Database) => {
 
     console.log(`Database ${DB_PATH} migrated from version 9 to 10`); // eslint-disable-line no-console
   }
+  if (getDbVersion(db) === 10) {
+    db.transaction(() => {
+      const existingColumns = db
+        .prepare<[], { name: string }>(`PRAGMA table_info(climbing_features)`)
+        .all()
+        .map((c) => c.name);
+      if (!existingColumns.includes('lengthMin')) {
+        db.exec(`ALTER TABLE climbing_features ADD COLUMN "lengthMin" REAL;`);
+      }
+      if (!existingColumns.includes('lengthMax')) {
+        db.exec(`ALTER TABLE climbing_features ADD COLUMN "lengthMax" REAL;`);
+      }
+      // New fields need a tiles refresh; clear cache so rebuilds pick them up.
+      db.exec('DELETE FROM climbing_tiles_cache');
+      db.pragma('user_version = 11');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 10 to 11`); // eslint-disable-line no-console
+  }
+  if (getDbVersion(db) === 11) {
+    // Populate lengthMin/Max from existing tags so map length filter works
+    // without waiting for a full climbing-tiles refresh.
+    db.transaction(() => {
+      backfillClimbingLengthAggregates(db);
+      db.exec('DELETE FROM climbing_tiles_cache');
+      db.pragma('user_version = 12');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 11 to 12`); // eslint-disable-line no-console
+  }
+  if (getDbVersion(db) === 12) {
+    // Re-aggregate lengths via relation members (route.parentId is often null).
+    db.transaction(() => {
+      backfillClimbingLengthAggregates(db);
+      db.exec('DELETE FROM climbing_tiles_cache');
+      db.pragma('user_version = 13');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 12 to 13`); // eslint-disable-line no-console
+  }
 };
 
 // global to allow hot-reload in dev
@@ -214,10 +255,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 10');
+        db.pragma('user_version = 13');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 10`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 13`); // eslint-disable-line no-console
     }
 
     store.db = db;

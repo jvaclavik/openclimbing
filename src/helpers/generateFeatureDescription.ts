@@ -51,6 +51,17 @@ const collectRoutes = (feature: Feature): Feature[] => {
   return routes;
 };
 
+const collectClimbingSubtree = (feature: Feature): Feature[] => {
+  const features: Feature[] = [];
+  const walk = (f?: Feature) => {
+    if (!f) return;
+    features.push(f);
+    f.memberFeatures?.forEach((child) => walk(child as Feature));
+  };
+  walk(feature);
+  return features;
+};
+
 const getGradeRangeLabel = (features: Feature[]): string | null => {
   const graded = features
     .map((feature) => getDifficulty(feature.tags))
@@ -118,10 +129,11 @@ export const generateFeatureDescription = (feature: Feature): string | null => {
     if (gradeRange) {
       parts.push(t('seo.grades', { range: gradeRange }));
     }
-    const attrs = mergeClimbingAttributes([
-      getClimbingAttributes(tags),
-      ...routes.map((route) => getClimbingAttributes(route.tags)),
-    ]);
+    const attrs = mergeClimbingAttributes(
+      collectClimbingSubtree(feature).map((item) =>
+        getClimbingAttributes(item.tags),
+      ),
+    );
     if (attrs.climbingTypes.length) {
       parts.push(translateClimbingTypes(attrs.climbingTypes).join(', '));
     }
