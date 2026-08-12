@@ -18,6 +18,15 @@ const getRefLabel = (feature: Feature) =>
 
 const getName = ({ tags }: Feature) => tags[`name:${intl.lang}`] || tags.name;
 
+export const getDescription = ({ tags }: Feature) => {
+  const localized = tags[`description:${intl.lang}`];
+  if (localized) return localized;
+  if (tags.description) return tags.description;
+
+  const langKey = Object.keys(tags).find((k) => k.startsWith('description:'));
+  return langKey ? tags[langKey] : undefined;
+};
+
 export const hasName = (feature: Feature) =>
   feature.point || getName(feature) || getBuiltAddress(feature); // we dont want to show "No name" for point
 

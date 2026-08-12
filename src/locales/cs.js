@@ -562,6 +562,11 @@ export default {
   'editdialog.members.convert_button': 'Změnit na relaci',
   'editdialog.location_change_current_item': 'Upravit',
   'editdialog.description_helper_text': 'Zadávejte prosím vlastní popis nebo s písemným souhlasem autora.',
+  'editdialog.description_lang': 'Jazyk',
+  'editdialog.description_lang_default': 'Výchozí',
+  'editdialog.description_lang_custom': 'Vlastní…',
+  'editdialog.description_lang_custom_code': 'kód',
+  'editdialog.add_description_translation': 'Přidat překlad',
   'editdialog.download_osc': 'Stáhnout osmChange',
   'editdialog.members_climbing_info':
     'Do relace lze přidat i jiné relevantní objekty, jako třeba parkoviště nebo referenci na konkrétní vrchol či sráz (natural=cliff).',

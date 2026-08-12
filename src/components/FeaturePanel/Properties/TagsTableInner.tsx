@@ -9,6 +9,7 @@ import { LonLat } from '../../../services/types';
 
 const isAddr = (k: string) => k.match(/^addr:|uir_adr|:addr/);
 const isName = (k: string) => k.match(/^name(:|$)/);
+const isDescription = (k: string) => k.match(/^description(:|$)/);
 const isShortName = (k: string) => k.match(/^short_name(:|$)/);
 const isAltName = (k: string) => k.match(/^alt_name(:|$)/);
 const isOfficialName = (k: string) => k.match(/^official_name(:|$)/);
@@ -121,6 +122,7 @@ export const TagsTableInner = ({
 
   const addrs = tagsEntries.filter(([k]) => isAddr(k));
   const names = tagsEntries.filter(([k]) => isName(k));
+  const descriptions = tagsEntries.filter(([k]) => isDescription(k));
   const shortNames = tagsEntries.filter(([k]) => isShortName(k));
   const altNames = tagsEntries.filter(([k]) => isAltName(k));
   const officialNames = tagsEntries.filter(([k]) => isOfficialName(k));
@@ -135,6 +137,7 @@ export const TagsTableInner = ({
   const rest = tagsEntries.filter(
     ([k]) =>
       !isName(k) &&
+      !isDescription(k) &&
       !isShortName(k) &&
       !isAltName(k) &&
       !isOfficialName(k) &&
@@ -155,6 +158,14 @@ export const TagsTableInner = ({
         label={names.length === 1 ? names[0][0] : 'name:*'}
         value={truncate(tags.name, { length: 25 })}
         hideArrow={names.length === 1}
+      />
+      <TagsGroup
+        tags={descriptions}
+        label={descriptions.length === 1 ? descriptions[0][0] : 'description:*'}
+        value={truncate(tags.description || descriptions[0]?.[1], {
+          length: 25,
+        })}
+        hideArrow={descriptions.length === 1}
       />
       <TagsGroup
         tags={shortNames}

@@ -5,7 +5,7 @@ import { getUtfStrikethrough, join } from '../utils';
 import { Feature } from '../services/types';
 import { useFeatureContext } from '../components/utils/FeatureContext';
 import { getFullOsmappLink, getShortId } from '../services/helpers';
-import { getLabel, getParentLabel } from './featureLabel';
+import { getLabel, getParentLabel, getDescription } from './featureLabel';
 import { generateFeatureDescription } from './generateFeatureDescription';
 import {
   PROJECT_ID,
@@ -76,7 +76,7 @@ export const TitleAndMetaTags = () => {
     const titleLabel = getTitleLabel(feature);
     const title = `${titleLabel} | ${PROJECT_NAME}`;
     const description =
-      feature.tags.description ||
+      getDescription(feature) ||
       generateFeatureDescription(feature) ||
       t(PROJECT_SERP_DESCRIPTION);
     const { center } = feature;

@@ -19,7 +19,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { LogoOpenClimbing } from '../../../assets/LogoOpenClimbing';
 
-import { getLabel } from '../../../helpers/featureLabel';
+import { getLabel, getDescription } from '../../../helpers/featureLabel';
 import { getFullOsmappLink, getShortId } from '../../../services/helpers';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
@@ -430,7 +430,7 @@ const FeatureHazardAlert = ({ feature }: { feature: Feature }) => {
  * hazard badges, plus an access-restriction warning.
  */
 const FeatureExtras = ({ feature }: { feature: Feature }) => {
-  const description = feature.tags?.description;
+  const description = getDescription(feature);
   // Bail out cheaply when nothing to show. ClimbingBadges renders an empty
   // wrapper for features with no relevant tags, but it still mounts MUI Stack,
   // which we'd rather avoid in the printed tree.
@@ -823,7 +823,7 @@ const RoutesSummary = ({
           );
           const difficulties = getDifficulties(route.feature.tags);
           const name = route.feature.tags?.name || '—';
-          const description = route.feature.tags?.description;
+          const description = getDescription(route.feature);
           const rawLength = route.feature.tags?.['climbing:length'];
           // OSM stores climbing:length as a bare number in meters by default;
           // append "m" only when there isn't already a non-digit suffix.

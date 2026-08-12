@@ -1,7 +1,11 @@
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { getWikimediaCommonsPhotoKeys } from './utils/photo';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
-import { getHumanPoiType, getLabel } from '../../../helpers/featureLabel';
+import {
+  getHumanPoiType,
+  getLabel,
+  getDescription,
+} from '../../../helpers/featureLabel';
 import { generateFeatureDescription } from '../../../helpers/generateFeatureDescription';
 import { getFullOsmappLink } from '../../../services/helpers';
 import { Feature } from '../../../services/types';
@@ -19,7 +23,7 @@ const generateScriptContent = (feature, userSettings) => {
   const isClimbingRoute = feature.tags.climbing === 'route_bottom';
   const poiType = getHumanPoiType(feature);
   const description =
-    feature.tags.description || generateFeatureDescription(feature);
+    getDescription(feature) || generateFeatureDescription(feature);
 
   if (isClimbingArea) {
     return {

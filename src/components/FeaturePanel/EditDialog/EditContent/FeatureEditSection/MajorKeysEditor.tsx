@@ -14,6 +14,7 @@ import {
 import { useCurrentItem } from '../../context/EditContext';
 import { MajorKeysFieldList } from './MajorKeysFieldList';
 import { MajorKeysInactivePicker } from './MajorKeysInactivePicker';
+import { isDescriptionKey, isNameKey } from './DescriptionEditor';
 import { FeatureTags } from '../../../../../services/types';
 import { EditDialogUploadHost } from '../../EditDialogUploadHost';
 
@@ -71,6 +72,16 @@ const getMajorKeyHelperText = (k: string) => {
   return undefined;
 };
 
+const hasTagForMajorKey = (k: string, tags: FeatureTags) => {
+  if (k === 'description') {
+    return Object.keys(tags).some(isDescriptionKey);
+  }
+  if (k === 'name') {
+    return Object.keys(tags).some(isNameKey);
+  }
+  return !!tags[k];
+};
+
 export const MajorKeysEditor: React.FC = () => {
   const { focusTag } = useEditDialogContext();
   const { tags, setTag } = useCurrentItem();
@@ -80,7 +91,7 @@ export const MajorKeysEditor: React.FC = () => {
   const data = getData(nextWikimediaCommonsIndex + 1, tags);
 
   const [activeMajorKeys, setActiveMajorKeys] = useState(() =>
-    data.keys.filter((k) => !!tags[k]),
+    data.keys.filter((k) => hasTagForMajorKey(k, tags)),
   );
 
   const inactiveMajorKeys = data.keys.filter(

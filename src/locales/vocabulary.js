@@ -610,6 +610,11 @@ export default {
   'editdialog.members.convert_button': 'Convert to relation',
   'editdialog.location_change_current_item': 'Edit',
   'editdialog.description_helper_text': 'Please enter your own description or with written approval of its author.',
+  'editdialog.description_lang': 'Language',
+  'editdialog.description_lang_default': 'Default',
+  'editdialog.description_lang_custom': 'Custom…',
+  'editdialog.description_lang_custom_code': 'code',
+  'editdialog.add_description_translation': 'Add translation',
   'editdialog.download_osc': 'Download osmChange',
   'editdialog.members_climbing_info':
     'Members of climbing crag can also be other relevant objects, like parking or reference to specific peak or cliff (natural=cliff).',

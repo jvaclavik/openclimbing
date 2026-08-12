@@ -30,6 +30,7 @@ import { Properties } from './Properties/Properties';
 import { PublicTransport } from './PublicTransport/PublicTransport';
 import { Runways } from './Runways/Runways';
 import { Sockets } from './Sockets/Sockets';
+import { useFeaturePanelShortcuts } from './useFeaturePanelShortcuts';
 
 const Flex = styled.div`
   flex: 1;
@@ -45,6 +46,7 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
   const [advanced, setAdvanced] = useState(false);
   const [showTags, toggleShowTags] = useToggleState(false);
   const isMobileMode = useMobileMode();
+  useFeaturePanelShortcuts();
 
   const { tags, skeleton, deleted } = feature;
   const showTagsTable = deleted || showTags || (!skeleton && !feature.schema);

@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import { OpeningHoursEditor } from './OpeningHoursEditor/OpeningHoursEditor';
 import { TextFieldWithCharacterCount } from './helpers';
 import { WikimediaCommonsGallery } from './WikimediaCommonsGallery';
+import { DescriptionEditor, NameEditor } from './DescriptionEditor';
 import { FeatureTags } from '../../../../../services/types';
 import { isWikimediaCommonsFileSlotKey } from '../../../Climbing/utils/photo';
 import { mergeActiveMajorKeysAfterRemap } from './wikimediaCommonsGalleryModel';
@@ -36,6 +37,30 @@ export const MajorKeysFieldList: React.FC<Props> = ({
 
     if (k === 'opening_hours') {
       return <OpeningHoursEditor />;
+    }
+
+    if (k === 'name') {
+      return (
+        <NameEditor
+          autoFocus={focusTag === k}
+          helperText={getHelperText(k)}
+          onEmpty={() =>
+            setActiveMajorKeys((prev) => prev.filter((key) => key !== k))
+          }
+        />
+      );
+    }
+
+    if (k === 'description') {
+      return (
+        <DescriptionEditor
+          autoFocus={focusTag === k}
+          helperText={getHelperText(k)}
+          onEmpty={() =>
+            setActiveMajorKeys((prev) => prev.filter((key) => key !== k))
+          }
+        />
+      );
     }
 
     return (

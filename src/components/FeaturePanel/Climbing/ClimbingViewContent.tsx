@@ -20,6 +20,7 @@ import { FeaturedTags, getFeaturedTagKeys } from '../FeaturedTags';
 import { PanelLabel } from './PanelLabel';
 import { RouteDistribution } from './RouteDistribution';
 import { useGetCragViewLayout } from './utils/useCragViewLayout';
+import { getDescription } from '../../../helpers/featureLabel';
 
 const CragMapDynamic = dynamic(() => import('./CragMap'), {
   ssr: false,
@@ -104,12 +105,12 @@ export const ClimbingViewContent = ({ isMapVisible, setIsMapVisible }) => {
         </HideOnNarrowPanel>
 
         <ContentContainer>
-          {feature.tags.description ? (
+          {getDescription(feature) ? (
             <HideOnNarrowPanel>
               <PanelLabel>{t('climbingview.description')}</PanelLabel>
 
               <Typography ml={2} mr={2}>
-                {feature.tags.description}
+                {getDescription(feature)}
               </Typography>
             </HideOnNarrowPanel>
           ) : null}

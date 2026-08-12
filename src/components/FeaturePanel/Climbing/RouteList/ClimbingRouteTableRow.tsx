@@ -38,6 +38,7 @@ import { ClimbingBadges } from '../ClimbingBadges';
 import { ConvertedRouteDifficultyBadge } from '../ConvertedRouteDifficultyBadge';
 import { RouteNumber } from '../RouteNumber';
 import { useMoreMenu } from '../useMoreMenu';
+import { getDescription } from '../../../../helpers/featureLabel';
 import {
   getWikimediaCommonsPhotoPathKeys,
   isRouteDrawnOnPhoto,
@@ -289,14 +290,16 @@ const MoreMenu = ({ feature }: MoreMenuProps) => {
 const getRouteDetailUrl = (feature: Feature) =>
   `${getOsmappLink(feature)}${typeof window !== 'undefined' ? window.location.hash : ''}`;
 
-const RouteDescription = ({ feature }: { feature: Feature }) =>
-  feature.tags?.description ? (
+const RouteDescription = ({ feature }: { feature: Feature }) => {
+  const description = getDescription(feature);
+  return description ? (
     <RouteDescriptionContainer>
       <Typography variant="inherit" component="p">
-        {feature.tags?.description}
+        {description}
       </Typography>
     </RouteDescriptionContainer>
   ) : null;
+};
 
 const RouteAuthor = ({ feature }: { feature: Feature }) =>
   feature.tags?.author ? (

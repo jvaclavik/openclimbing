@@ -13,6 +13,7 @@ import { FeaturedKeyRenderer } from '../../services/tagging/featuredKeys';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { Typography } from '@mui/material';
 import { ScaleRenderer } from './renderers/ScaleRenderer';
+import { getDescription } from '../../helpers/featureLabel';
 
 const Wrapper = styled.div`
   position: relative;
@@ -74,7 +75,7 @@ type Props = {
 
 export const FeaturedTag = ({ k, renderer }: Props) => {
   const { feature } = useFeatureContext();
-  const value = feature.tags[k];
+  const value = k === 'description' ? getDescription(feature) : feature.tags[k];
 
   const Renderer = components[renderer];
   if (!Renderer || !value) {
