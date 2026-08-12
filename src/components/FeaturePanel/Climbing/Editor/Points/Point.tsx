@@ -62,7 +62,9 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
   const {
     setPointSelectedIndex,
     setIsPointClicked,
+    isPointClickedRef,
     setIsProtectionPointClicked,
+    isProtectionPointClickedRef,
     setRouteIndexHovered,
     photoZoom,
     getCurrentPath,
@@ -96,12 +98,20 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
     setRouteIndexHovered(null);
   };
 
-  const onPointMouseDown = (e) => {
+  // Use pointerdown (not touchstart/mousedown) so the grab flag is set in the
+  // same event stream as SVG pointermove — and write the ref synchronously so
+  // the first move after press doesn't race the React re-render.
+  // Do NOT stopPropagation: the SVG handler must still see this pointerdown to
+  // record gestureStartRef (drag threshold). Background taps ignore it because
+  // event.target is the point, not the SVG root.
+  const onPointPointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
     setIsPanningDisabled(true);
+    isProtectionPointClickedRef.current = false;
     setIsProtectionPointClicked(false);
     setPointSelectedIndex(index);
+    isPointClickedRef.current = true;
     setIsPointClicked(true);
-    e.stopPropagation();
   };
 
   const onPointMouseUp = usePointClickHandler(index);
@@ -109,10 +119,8 @@ export const Point = ({ x, y, type, index, routeIndex }: Props) => {
 
   const commonProps = {
     className: PANNING_EXCLUDED_CLASS,
-    onMouseDown: onPointMouseDown,
-    onMouseUp: onPointMouseUp,
-    onTouchStart: onPointMouseDown,
-    onTouchEnd: onPointMouseUp,
+    onPointerDown: onPointPointerDown,
+    onPointerUp: onPointMouseUp,
     onClick: onPointClick,
     cursor: 'pointer',
     ...(isMobileMode

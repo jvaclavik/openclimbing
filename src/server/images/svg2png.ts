@@ -1,10 +1,15 @@
 // https://canvg.js.org/examples/nodejs
 import { DOMParser } from '@xmldom/xmldom';
-import canvas from 'canvas';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
 import fetch from 'isomorphic-unfetch';
 import { Canvg, presets } from 'canvg';
 
-const preset = presets.node({ DOMParser, canvas, fetch });
+// Prebuilt Skia binaries — no Cairo/gyp (needed for Vercel install).
+const preset = presets.node({
+  DOMParser,
+  canvas: { createCanvas, loadImage },
+  fetch,
+});
 
 type Size = { width: number; height: number };
 
@@ -19,5 +24,5 @@ export const svg2png = async (
   const v = Canvg.fromString(ctx, svg, preset);
   await v.render(); // Render only first frame, ignoring animations.
 
-  return picture.toBuffer();
+  return picture.toBuffer('image/png');
 };

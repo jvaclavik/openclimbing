@@ -11,6 +11,8 @@ next-env.d.ts
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.yarn-cache
+.yarn-local-cache
 /public/tmp
 /.vercel
 .env.local

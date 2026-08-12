@@ -29,10 +29,10 @@ export const ProtectionPointsLayer = () => {
     return null;
   }
 
-  // While actively placing protection the overlay must stay visible so the
-  // user can see what they add, even on small screens where it is hidden by
-  // default. Otherwise honor the (screen-aware) visibility setting.
-  if (!showProtectionPoints && !isPlacingProtectionPoints) {
+  // On small screens the overlay is hidden by default (see
+  // useShowProtectionPoints). Still show it while editing or placing so
+  // recognized bolts stay visible for route snapping.
+  if (!showProtectionPoints && !isPlacingProtectionPoints && !isEditMode) {
     return null;
   }
 
@@ -54,8 +54,9 @@ export const ProtectionPointsLayer = () => {
   const pointerEvents = canInteract ? 'auto' : 'none';
 
   // On small screens the gear overlay competes with the route lines, so make
-  // it more subtle unless the user is actively placing points.
-  const layerOpacity = isMobileMode && !isPlacingProtectionPoints ? 0.45 : 1;
+  // it more subtle in view mode. Full opacity while editing / placing.
+  const layerOpacity =
+    isMobileMode && !isPlacingProtectionPoints && !isEditMode ? 0.45 : 1;
 
   const xOffset = 15;
 

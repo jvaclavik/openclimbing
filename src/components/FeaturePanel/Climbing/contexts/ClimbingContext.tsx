@@ -134,6 +134,8 @@ type ClimbingContextType = {
   isAddingPointBlockedRef: React.MutableRefObject<any>;
   isZoomingRef: React.MutableRefObject<any>;
   pointWasDraggedRef: React.MutableRefObject<boolean>;
+  isPointClickedRef: React.MutableRefObject<boolean>;
+  isProtectionPointClickedRef: React.MutableRefObject<boolean>;
   arePointerEventsDisabled: boolean; // @TODO do we need it?
   setArePointerEventsDisabled: Setter<boolean>;
   preparePhotos: (cragPhotos: Array<string>) => void;
@@ -225,6 +227,8 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
   // through to opening the PointMenu, whose modal backdrop then swallows all
   // further touches and makes dragging appear to stop working.
   const pointWasDraggedRef = useRef(false);
+  const isPointClickedRef = useRef(false);
+  const isProtectionPointClickedRef = useRef(false);
   const [photoPaths, setPhotoPaths] = useState<Array<string>>(null);
   const [photoPath, setPhotoPath] = useState<string>(null); // photo URL (pathname), should be null
   const { debugMode: showDebugMenu } = useDebugMode();
@@ -643,6 +647,8 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
     isAddingPointBlockedRef,
     isZoomingRef,
     pointWasDraggedRef,
+    isPointClickedRef,
+    isProtectionPointClickedRef,
     arePointerEventsDisabled,
     setArePointerEventsDisabled,
     preparePhotos,

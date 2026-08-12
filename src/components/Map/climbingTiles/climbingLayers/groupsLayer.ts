@@ -18,8 +18,9 @@ const areaSize = linearByRouteCount(0, 0.4, 400, 1);
 const cragSize = linearByRouteCount(0, 0.4, 50, 0.7);
 const cragSizeBig = 0.7;
 
-// zoom where individual routes appear - from here the crag is the detail the
-// user came for, so it takes over the label from its parent area
+// Below this zoom areas win label collisions over their child crags; from here
+// crags take priority (routes appear ~z13). Areas stay on the map either way —
+// they still render when collision detection finds room.
 const AREA_HANDOVER_ZOOM = 13;
 
 // dominates routeCount / hasImages, so the type decides the collision first
@@ -78,11 +79,7 @@ export const groupsLayer: LayerSpecification = {
   filter: [
     'any',
     ['==', ['get', 'type'], 'crag'],
-    [
-      'all',
-      ['==', ['get', 'type'], 'area'],
-      ['<', ['zoom'], AREA_HANDOVER_ZOOM],
-    ],
+    ['==', ['get', 'type'], 'area'],
   ],
   layout: GROUPS_LAYOUT,
   paint: {

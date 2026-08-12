@@ -37,6 +37,8 @@ export const useRoutesLayerSvgHandlers = () => {
     photoZoom,
     isZoomingRef,
     pointWasDraggedRef,
+    isPointClickedRef,
+    isProtectionPointClickedRef,
     isEditMode,
     isPlacingProtectionPoints,
     addProtectionPoint,
@@ -221,8 +223,12 @@ export const useRoutesLayerSvgHandlers = () => {
         pointWasDraggedRef.current ||
         dx * dx + dy * dy >= DRAG_START_THRESHOLD_PX * DRAG_START_THRESHOLD_PX;
 
+      const pointGrabbed = isPointClickedRef.current || isPointClicked;
+      const protectionGrabbed =
+        isProtectionPointClickedRef.current || isProtectionPointClicked;
+
       if (
-        isProtectionPointClicked &&
+        protectionGrabbed &&
         protectionPointSelectedIndex !== null &&
         hasDragIntent &&
         !isZoomingRef.current &&
@@ -248,7 +254,7 @@ export const useRoutesLayerSvgHandlers = () => {
       }
 
       if (
-        isPointClicked &&
+        pointGrabbed &&
         hasDragIntent &&
         !isZoomingRef.current &&
         !isMultiTouch
@@ -283,7 +289,9 @@ export const useRoutesLayerSvgHandlers = () => {
       findCloserPoint,
       getPercentagePosition,
       isPointClicked,
+      isPointClickedRef,
       isProtectionPointClicked,
+      isProtectionPointClickedRef,
       isZoomingRef,
       machine,
       photoZoom,
@@ -305,7 +313,7 @@ export const useRoutesLayerSvgHandlers = () => {
     useRafThrottle(processMove);
 
   const onPointerMove = useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.PointerEvent) => {
       scheduleMove({
         clientX: event.clientX,
         clientY: event.clientY,
@@ -327,6 +335,8 @@ export const useRoutesLayerSvgHandlers = () => {
     // setIsPointMoving(true) commits, the stale-false guard skipped the reset
     // and isPointClicked stayed on — the point then kept following the cursor
     // with no button held ("sticky drag" that needed a second click to drop).
+    isPointClickedRef.current = false;
+    isProtectionPointClickedRef.current = false;
     setIsPointClicked(false);
     setIsProtectionPointClicked(false);
     setIsPanningDisabled(false);
@@ -348,7 +358,9 @@ export const useRoutesLayerSvgHandlers = () => {
     }
   }, [
     cancelMove,
+    isPointClickedRef,
     isPointMoving,
+    isProtectionPointClickedRef,
     isProtectionPointMoving,
     pointWasDraggedRef,
     setIsPanningDisabled,
@@ -381,6 +393,8 @@ export const useRoutesLayerSvgHandlers = () => {
       // finger left after it ends keeps dragging the previously pressed point.
       if (activePointersRef.current.size > 1) {
         cancelMove();
+        isPointClickedRef.current = false;
+        isProtectionPointClickedRef.current = false;
         setIsPointClicked(false);
         setIsProtectionPointClicked(false);
       }
@@ -389,6 +403,8 @@ export const useRoutesLayerSvgHandlers = () => {
     },
     [
       cancelMove,
+      isPointClickedRef,
+      isProtectionPointClickedRef,
       isZoomingRef,
       onBackgroundPointerDown,
       pointWasDraggedRef,

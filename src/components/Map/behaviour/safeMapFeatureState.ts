@@ -1,9 +1,38 @@
-import type { Map, MapGeoJSONFeature } from 'maplibre-gl';
+import type { Map, MapGeoJSONFeature, Source } from 'maplibre-gl';
 import { CLIMBING_TILES_SOURCE } from '../climbingTiles/consts';
 
 const isFeatureIndexCrash = (error: unknown) =>
   error instanceof Error &&
   error.message.includes('feature index out of bounds');
+
+/** Source-layer ids used by a vector source (tileset + style layers). */
+const getVectorSourceLayers = (map: Map, sourceId: string): string[] => {
+  const layers = new Set<string>();
+
+  try {
+    // vectorLayerIds lives on Source; VectorTileSource's public typings omit it in 5.24
+    const source = map.getSource(sourceId) as Source | undefined;
+    source?.vectorLayerIds?.forEach((id) => layers.add(id));
+  } catch {
+    // Style may be mid-swap.
+  }
+
+  const styleLayers = map.getStyle()?.layers;
+  if (styleLayers) {
+    for (const layer of styleLayers) {
+      if (
+        'source' in layer &&
+        layer.source === sourceId &&
+        'source-layer' in layer &&
+        typeof layer['source-layer'] === 'string'
+      ) {
+        layers.add(layer['source-layer']);
+      }
+    }
+  }
+
+  return [...layers];
+};
 
 /** Drop feature-state on every vector source (orphaned VT ids crash MapLibre). */
 export const clearVectorTileFeatureStates = (map: Map | undefined) => {
@@ -15,10 +44,18 @@ export const clearVectorTileFeatureStates = (map: Map | undefined) => {
     if (source.type !== 'vector') {
       continue;
     }
-    try {
-      map.removeFeatureState({ source: sourceId });
-    } catch {
-      // Source may be mid-reload.
+    const sourceLayers = getVectorSourceLayers(map, sourceId);
+    // MapLibre ≥5.24 requires sourceLayer for vector sources — calling without
+    // it fires a map error and leaves stale state that can blank the map.
+    if (sourceLayers.length === 0) {
+      continue;
+    }
+    for (const sourceLayer of sourceLayers) {
+      try {
+        map.removeFeatureState({ source: sourceId, sourceLayer });
+      } catch {
+        // Source may be mid-reload.
+      }
     }
   }
 };
@@ -60,6 +97,9 @@ export const clearVectorTileFeature = (
   ) {
     return;
   }
+  if (!feature.sourceLayer) {
+    return;
+  }
   try {
     map.removeFeatureState({
       source: feature.source,
@@ -90,7 +130,7 @@ const clearAllFeatureStates = (map: Map) => {
  */
 export const installMapFeatureStateGuard = (map: Map) => {
   // Bump when the guard gains new patches so HMR / old maps re-install.
-  const GUARD_VERSION = 2;
+  const GUARD_VERSION = 3;
   if ((map as any).__featureStateGuard === GUARD_VERSION) {
     return;
   }

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { PathWithBorder } from './PathWithBorder';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PositionPx } from '../types';
+import { useMobileMode } from '../../../helpers';
 
 type Props = {
   routeIndex: number;
 };
 
 export const MouseTrackingLine = ({ routeIndex }: Props) => {
+  const isMobileMode = useMobileMode();
   const {
     mousePosition,
     isRouteSelected,
@@ -20,6 +22,7 @@ export const MouseTrackingLine = ({ routeIndex }: Props) => {
 
   const [isAltDown, setIsAltDown] = useState(false);
   useEffect(() => {
+    if (isMobileMode) return undefined;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Alt') setIsAltDown(true);
     };
@@ -32,7 +35,11 @@ export const MouseTrackingLine = ({ routeIndex }: Props) => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, []);
+  }, [isMobileMode]);
+
+  // Touch has no cursor hover — a leftover mousePosition after a tap would
+  // leave a phantom preview line stuck on the photo.
+  if (isMobileMode) return null;
 
   const closerMousePositionPoint = mousePosition
     ? findCloserPoint(getPercentagePosition(mousePosition), {

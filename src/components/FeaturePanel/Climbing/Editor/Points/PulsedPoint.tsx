@@ -27,6 +27,7 @@ const PulsedPointElement = styled.circle`
   animation-name: ${pulseAnimation};
   animation-duration: 8s;
   animation-iteration-count: infinite;
+  pointer-events: none;
 `;
 
 export const PulsedPoint = ({ x, y }) => {

@@ -6,16 +6,18 @@ import { RoutingResult } from './routing/types';
 import { isTabletResolution, useBoolState, useMobileMode } from '../helpers';
 import { DirectionsForm } from './DirectionsForm';
 import { useDirectionsContext } from './DirectionsContext';
+import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 
 const Wrapper = styled(Stack, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $isMobileMode: boolean }>`
   position: absolute;
-  top: 8px;
+  // Below TopBar (z-index 1200) — same offset as FeaturePanel
+  top: ${SEARCH_BOX_HEIGHT + 8}px;
   left: 8px;
   right: 8px;
   z-index: 1101; // over the LayerSwitcherButton and FeaturePanel
-  max-height: calc(100vh - 16px);
+  max-height: calc(100vh - ${SEARCH_BOX_HEIGHT + 16}px);
   box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.12);
 
   @media ${isTabletResolution} {

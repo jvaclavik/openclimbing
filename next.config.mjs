@@ -34,6 +34,8 @@ const nextConfig = {
       '@mui/system',
     ],
   },
+  // Keep native Skia binary out of the webpack bundle (OG / precip PNG APIs).
+  serverExternalPackages: ['@napi-rs/canvas'],
   i18n: {
     locales: ['default', ...Object.keys(LANGUAGES)], // we let next only handle URL, but chosen locale is in getServerIntl()
     defaultLocale: 'default',
@@ -48,6 +50,7 @@ const nextConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         'better-sqlite3': false,
+        '@napi-rs/canvas': false,
       };
       config.resolve.fallback = {
         ...config.resolve.fallback,

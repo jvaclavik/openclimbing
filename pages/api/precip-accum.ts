@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createCanvas } from 'canvas';
+import { createCanvas } from '@napi-rs/canvas';
 import * as hdf5 from 'jsfive';
 import { precipColor } from '../../src/components/Map/Radar/precipScale';
 

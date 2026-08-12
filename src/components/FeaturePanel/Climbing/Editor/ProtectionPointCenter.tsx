@@ -15,7 +15,6 @@ const PointElement = styled.circle<{
   $isPointSelected: boolean;
 }>`
   transition: all 0.1s ease-in-out;
-  pointer-events: all;
   touch-action: none;
   ${({ $isHovered, $isPointSelected }) =>
     `${
@@ -65,6 +64,8 @@ export const ProtectionPointCenter = ({
     photoZoom,
     setIsPanningDisabled,
     setIsPointClicked,
+    isPointClickedRef,
+    isProtectionPointClickedRef,
     setProtectionPointSelectedIndex,
     setIsProtectionPointClicked,
   } = useClimbingContext();
@@ -84,13 +85,14 @@ export const ProtectionPointCenter = ({
     setIsHovered(false);
   };
 
-  const onPointMouseDown = (e: React.MouseEvent) => {
+  const onPointMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     if (!interactive) return;
     setIsPanningDisabled(true);
     setIsPointClicked(false);
+    isPointClickedRef.current = false;
+    isProtectionPointClickedRef.current = true;
     setIsProtectionPointClicked(true);
     setProtectionPointSelectedIndex(index);
-    e.stopPropagation();
   };
 
   const commonProps = interactive
@@ -104,6 +106,7 @@ export const ProtectionPointCenter = ({
           onPointMouseUp as unknown as TouchEventHandler<SVGCircleElement>,
         onClick: onPointClick,
         cursor: 'pointer' as const,
+        pointerEvents: 'all' as const,
         ...(isMobileMode
           ? {}
           : {
@@ -114,7 +117,11 @@ export const ProtectionPointCenter = ({
         cy: 0,
       }
     : {
-        onClick: onPointClick,
+        // While drawing a route, clicks must fall through to the SVG so
+        // addPointToEnd / snap-to-bolt can run. SVG children with
+        // pointer-events:all still receive hits even under a parent with
+        // pointer-events:none — so force none here.
+        pointerEvents: 'none' as const,
         cx: 0,
         cy: 0,
       };
@@ -182,8 +189,8 @@ export const ProtectionPointCenter = ({
             r={pointRadius}
             $isHovered={false}
             $isPointSelected={isSelected}
-            cx={0}
-            cy={0}
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...commonProps}
           >
             {title}
           </PointElement>

@@ -1,7 +1,5 @@
 import React from 'react';
 import { useClimbingContext } from '../contexts/ClimbingContext';
-import { Point } from './Points/Point';
-import { MouseTrackingLine } from './MouseTrackingLine';
 import { useConfig } from '../config';
 
 const NonEditablePoint = ({ x, y, isSelected }) => {
@@ -34,6 +32,9 @@ type Props = {
   routeIndex: number;
 };
 
+/** View-mode marker for a route that has only its start point on this photo.
+ * Editable handles live in RouteMarks — do not duplicate them here (overlapping
+ * hit targets break touch dragging of the first point on mobile). */
 export const StartPoint = ({ routeIndex }: Props) => {
   const {
     isRouteSelected,
@@ -47,22 +48,19 @@ export const StartPoint = ({ routeIndex }: Props) => {
   const path = getPathForRoute(route);
   if (!route || !path || path?.length === 0) return null;
 
+  const isSelected = isRouteSelected(routeIndex);
+  if (
+    isSelected &&
+    (machine.currentStateName === 'editRoute' ||
+      machine.currentStateName === 'extendRoute')
+  ) {
+    return null;
+  }
+
   const { x, y } = getPixelPosition({
     ...path[0],
     units: 'percentage',
   });
-  const isSelected = isRouteSelected(routeIndex);
 
-  return (
-    <>
-      {isSelected &&
-      (machine.currentStateName === 'editRoute' ||
-        machine.currentStateName === 'extendRoute') ? (
-        <Point x={x} y={y} index={0} routeIndex={routeIndex} type={undefined} />
-      ) : (
-        <NonEditablePoint isSelected={isSelected} x={x} y={y} />
-      )}
-      <MouseTrackingLine routeIndex={routeIndex} />
-    </>
-  );
+  return <NonEditablePoint isSelected={isSelected} x={x} y={y} />;
 };
