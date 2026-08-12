@@ -33,6 +33,11 @@ import { emptyStyle } from '../styles/emptyStyle';
 import { shortbreadShadowStyle } from '../styles/shortbreadShadowStyle';
 import { shortbreadColorfulStyle } from '../styles/shortbreadColorfulStyle';
 import { ShowToast } from '../../utils/SnackbarContext';
+import {
+  ensureTerrainControl,
+  shouldKeepTerrain3d,
+  TERRAIN_3D,
+} from './useToggleTerrainControl';
 
 const ofrBasicStyle = {
   ...basicStyle,
@@ -160,6 +165,8 @@ const shortbreadCheck = (activeLayers: string[], showToast: ShowToast) => {
   prevLayers = activeLayers;
 };
 
+let languageControl: OpenMapTilesLanguage | null = null;
+
 export const useUpdateStyle = createMapEffectHook(
   (
     map,
@@ -193,12 +200,28 @@ export const useUpdateStyle = createMapEffectHook(
     }
 
     style.projection = { type: 'globe' };
+
+    // setStyle diff clears terrain when the next style JSON omits it — keep 3D
+    // across basemap switches while the camera is pitched / terrain is enabled.
+    const keepTerrain = shouldKeepTerrain3d(map) && !!style.sources?.terrain3d;
+    if (keepTerrain) {
+      style.terrain = { ...TERRAIN_3D };
+    }
+
     map.setStyle(style, { diff: mapLoaded });
 
-    const languageControl = new OpenMapTilesLanguage({
-      defaultLanguage: intl.lang,
-    });
-    map.addControl(languageControl);
+    if (keepTerrain) {
+      ensureTerrainControl(map);
+      map.setMaxPitch(85);
+    }
+
+    // OpenMapTilesLanguage mutates layer fields; only attach once.
+    if (!languageControl) {
+      languageControl = new OpenMapTilesLanguage({
+        defaultLanguage: intl.lang,
+      });
+      map.addControl(languageControl);
+    }
 
     setUpHover(map, layersWithOsmId(style));
 
