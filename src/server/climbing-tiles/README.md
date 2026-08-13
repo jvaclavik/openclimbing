@@ -56,6 +56,12 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 - for zoom 12 we return even all routes
 - finally we cache that tile in `climbing_tiles_cache` table
 
+`/api/climbing-tiles/crags.csv`:
+
+- CSV (`;` separated) of all `area` + `crag` features of the given countries, one line per feature
+- columns `url;name;horosvaz;lat;lon;country` - `horosvaz` is the OSM `website` tag (for Czech crags it usually points to horosvaz.cz, hence the column name), `country` is the `countryCode` resolved during refresh
+- `?country=cz,sk` selects the countries (lowercase ISO 3166-1), defaults to `cz,sk`
+
 Browser
 
 - see `climbingTilesSource.ts`
