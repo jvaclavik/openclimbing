@@ -59,7 +59,8 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 `/api/climbing-tiles/crags.csv`:
 
 - CSV (`;` separated) of `area` + `crag` **relations** of the given countries which have at least one route drawn on a photo (`routesWithPhoto > 0`), one line per relation
-- columns `url;name;horosvaz;lat;lon;country` - `horosvaz` is the horosvaz.cz link taken from whichever website tag holds it (`website`, `website:2`, `contact:website`, ...), empty when the crag has none; `country` is the `countryCode` resolved during refresh
+- columns `url;name;type;routes;horosvaz;lat;lon;country` - `horosvaz` is the horosvaz.cz link taken from whichever website tag holds it (`website`, `website:2`, `contact:website`, ...), empty when the crag has none; `country` is the `countryCode` resolved during refresh
+- `type` is `crag`, `area` or `superarea` - OSM has only `climbing=area/crag`, so `superarea` is derived: an area which has another area among its members. `routes` is the (recursive) `routeCount`, `0` when unknown
 - `?country=cz,sk` selects the countries (lowercase ISO 3166-1), defaults to `cz,sk`
 
 Browser

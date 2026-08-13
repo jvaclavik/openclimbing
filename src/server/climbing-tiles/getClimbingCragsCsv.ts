@@ -4,7 +4,16 @@ import { OsmType } from '../../services/types';
 export const CRAGS_CSV_DEFAULT_COUNTRIES = ['cz', 'sk'];
 
 const DELIMITER = ';';
-const COLUMNS = ['url', 'name', 'horosvaz', 'lat', 'lon', 'country'] as const;
+const COLUMNS = [
+  'url',
+  'name',
+  'type',
+  'routes',
+  'horosvaz',
+  'lat',
+  'lon',
+  'country',
+] as const;
 
 const COORDINATE_DECIMALS = 7;
 
@@ -12,6 +21,8 @@ type Row = {
   osmType: OsmType;
   osmId: number;
   name: string | null;
+  type: string;
+  routeCount: number | null;
   tags: string | null;
   countryCode: string | null;
   lon: number;
@@ -20,12 +31,18 @@ type Row = {
 
 // Only relations with at least one route drawn on a photo – these are the crags
 // actually usable as a guide, `routesWithPhoto` is aggregated during refresh.
+// OSM knows just climbing=area/crag, so a `superarea` is derived – an area which
+// has another area among its members (`parentId` is the parent relation osmId).
 const getRows = (countryCodes: string[]): Row[] => {
   const placeholders = countryCodes.map(() => '?').join(',');
   return getDb()
     .prepare<string[], Row>(
       `SELECT "osmType", "osmId", COALESCE("name", "nameRaw") AS name, tags,
-        "countryCode", lon, lat
+        "countryCode", lon, lat, "routeCount",
+        CASE WHEN type = 'area' AND "osmId" IN (
+          SELECT "parentId" FROM climbing_features
+          WHERE type = 'area' AND "parentId" IS NOT NULL
+        ) THEN 'superarea' ELSE type END AS type
        FROM climbing_features
        WHERE type IN ('area', 'crag') AND "osmType" = 'relation'
          AND "routesWithPhoto" > 0 AND "countryCode" IN (${placeholders})
@@ -76,8 +93,9 @@ export const parseCountriesParam = (param: string | string[] | undefined) => {
 /**
  * CSV listing of climbing areas and crags of given countries – one line per
  * relation which has at least one route drawn on a photo, `;` separated. The
- * `horosvaz` column is the horosvaz.cz link found in any of the website tags
- * (empty when the crag has none).
+ * `type` column is `crag`, `area` or `superarea` (an area of areas), `routes`
+ * is the recursive route count and `horosvaz` is the horosvaz.cz link found in
+ * any of the website tags (empty when the crag has none).
  */
 export const getClimbingCragsCsv = (
   baseUrl: string,
@@ -87,6 +105,8 @@ export const getClimbingCragsCsv = (
     toCsvLine([
       `${baseUrl}/${row.osmType}/${row.osmId}`,
       row.name ?? '',
+      row.type,
+      String(row.routeCount ?? 0),
       getHorosvazUrl(row.tags),
       row.lat.toFixed(COORDINATE_DECIMALS),
       row.lon.toFixed(COORDINATE_DECIMALS),

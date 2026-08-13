@@ -21,6 +21,8 @@ type SeedRow = {
   nameRaw: string;
   countryCode?: string;
   routesWithPhoto?: number;
+  routeCount?: number;
+  parentId?: number;
   tags?: Record<string, string>;
 };
 
@@ -34,6 +36,8 @@ const CRAG: SeedRow = {
   nameRaw: 'Hlavni oblast - patro',
   countryCode: 'cz',
   routesWithPhoto: 3,
+  routeCount: 25,
+  parentId: 100,
   tags: { website: 'https://www.horosvaz.cz/skaly-skala-285/' },
 };
 const AREA: SeedRow = {
@@ -45,6 +49,20 @@ const AREA: SeedRow = {
   nameRaw: 'Zupanovice',
   countryCode: 'cz',
   routesWithPhoto: 1,
+  routeCount: 12,
+  parentId: 90,
+};
+// area of areas - AREA lists it as its parent
+const SUPERAREA: SeedRow = {
+  type: 'area',
+  osmType: 'relation',
+  osmId: 90,
+  lon: 14.3,
+  lat: 49.7,
+  nameRaw: 'Ceske stredohori',
+  countryCode: 'cz',
+  routesWithPhoto: 4,
+  routeCount: 42,
 };
 // horosvaz link hidden behind an openclimbing selflink in `website`
 const CRAG_SECONDARY_WEBSITE: SeedRow = {
@@ -152,10 +170,10 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
   const insert = db.prepare(`
     INSERT INTO climbing_features
       (type, lon, lat, "osmType", "osmId", "name", "nameRaw", "countryCode",
-       "routesWithPhoto", tags)
+       "routesWithPhoto", "routeCount", "parentId", tags)
     VALUES
       (@type, @lon, @lat, @osmType, @osmId, @name, @nameRaw, @countryCode,
-       @routesWithPhoto, @tags)
+       @routesWithPhoto, @routeCount, @parentId, @tags)
   `);
   for (const r of rows) {
     insert.run({
@@ -168,6 +186,8 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
       nameRaw: r.nameRaw,
       countryCode: r.countryCode ?? null,
       routesWithPhoto: r.routesWithPhoto ?? null,
+      routeCount: r.routeCount ?? null,
+      parentId: r.parentId ?? null,
       tags: r.tags ? JSON.stringify(r.tags) : null,
     });
   }
@@ -181,6 +201,7 @@ describe('getClimbingCragsCsv', () => {
     mockDb = buildDummyDb([
       CRAG,
       AREA,
+      SUPERAREA,
       CRAG_SECONDARY_WEBSITE,
       SLOVAK_CRAG,
       AUSTRIAN_CRAG,
@@ -199,16 +220,36 @@ describe('getClimbingCragsCsv', () => {
   it('renders the header and one line per matching relation', () => {
     const lines = getClimbingCragsCsv(BASE_URL).trim().split('\n');
 
-    expect(lines[0]).toBe('url;name;horosvaz;lat;lon;country');
-    expect(lines).toHaveLength(6);
+    expect(lines[0]).toBe('url;name;type;routes;horosvaz;lat;lon;country');
+    expect(lines).toHaveLength(7);
   });
 
-  it('renders url, name, horosvaz link, coordinates and country code', () => {
-    const [, first] = getClimbingCragsCsv(BASE_URL).split('\n');
+  it('renders url, name, type, route count, horosvaz link, coordinates and country code', () => {
+    const line = getClimbingCragsCsv(BASE_URL)
+      .split('\n')
+      .find((l) => l.includes('relation/100'));
 
-    expect(first).toBe(
-      'https://openclimbing.org/relation/100;Zupanovice;;49.6500000;14.2500000;cz',
+    expect(line).toBe(
+      'https://openclimbing.org/relation/100;Zupanovice;area;12;;49.6500000;14.2500000;cz',
     );
+  });
+
+  it('marks an area containing another area as superarea', () => {
+    const line = getClimbingCragsCsv(BASE_URL)
+      .split('\n')
+      .find((l) => l.includes('relation/90'));
+
+    expect(line).toBe(
+      'https://openclimbing.org/relation/90;Ceske stredohori;superarea;42;;49.7000000;14.3000000;cz',
+    );
+  });
+
+  it('renders zero routes when the route count is unknown', () => {
+    const line = getClimbingCragsCsv(BASE_URL)
+      .split('\n')
+      .find((l) => l.includes('relation/200'));
+
+    expect(line).toContain(';crag;0;');
   });
 
   it('uses the name with diacritics and the website tag', () => {
@@ -217,7 +258,7 @@ describe('getClimbingCragsCsv', () => {
       .find((l) => l.includes('17087286'));
 
     expect(line).toBe(
-      'https://openclimbing.org/relation/17087286;Hlavní oblast - patro;https://www.horosvaz.cz/skaly-skala-285/;49.4622294;14.1962423;cz',
+      'https://openclimbing.org/relation/17087286;Hlavní oblast - patro;crag;25;https://www.horosvaz.cz/skaly-skala-285/;49.4622294;14.1962423;cz',
     );
   });
 
@@ -236,7 +277,7 @@ describe('getClimbingCragsCsv', () => {
       .find((l) => l.includes('relation/800'));
 
     expect(line).toBe(
-      'https://openclimbing.org/relation/800;Jen source;;49.4000000;14.2000000;cz',
+      'https://openclimbing.org/relation/800;Jen source;crag;0;;49.4000000;14.2000000;cz',
     );
   });
 
