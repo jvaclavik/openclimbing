@@ -39,6 +39,7 @@ import { Setter } from '../../../../types';
 import { parseProtectionPointsByPhoto } from '../utils/protectionPathTags';
 import { useEditUndoHistory } from './useEditUndoHistory';
 import { useHeldPointType } from '../utils/useHeldPointType';
+import { useSyncClimbingFromFeature } from '../utils/useSyncClimbingFromFeature';
 
 type LoadedPhotos = Record<string, Record<number, boolean>>;
 type ImageSize = {
@@ -342,6 +343,17 @@ export const ClimbingContextProvider = ({ children, feature }: Props) => {
           stableStringify(protectionPointsByPhoto)),
     [isEditMode, editSnapshot, routes, protectionPointsByPhoto],
   );
+
+  useSyncClimbingFromFeature({
+    feature,
+    isEditMode,
+    hasUnsavedEdits,
+    setRoutes,
+    setProtectionPointsByPhoto,
+    setPhotoPaths,
+    setEditSnapshot,
+    editSnapshotRef,
+  });
 
   const [pointElement, setPointElement] = useState<null | HTMLElement>(null);
   const [routeListTopOffsets, setRouteListTopOffsets] = useState<Array<number>>(

@@ -21,6 +21,7 @@ import { useClimbingContext } from './contexts/ClimbingContext';
 import { useSaveCragFactory } from './useSaveCragFactory';
 import { confirmDiscardUnsavedClimbingEdits } from './utils/confirmDiscardUnsavedClimbingEdits';
 import { getWikimediaCommonsPhotoKeys, removeFilePrefix } from './utils/photo';
+import { useEditDialogContext } from '../helpers/EditDialogContext';
 
 const Flex = styled.div`
   display: flex;
@@ -72,17 +73,54 @@ export const ClimbingCragDialog = ({
     loadPhotoRelatedData,
     discardEdits,
     hasUnsavedEdits,
+    setIsPanningDisabled,
+    setIsPointClicked,
+    setIsPointMoving,
+    setIsProtectionPointClicked,
+    setIsProtectionPointMoving,
+    isPointClickedRef,
+    isProtectionPointClickedRef,
   } = useClimbingContext();
   const { feature } = useFeatureContext();
   const saveCrag = useSaveCragFactory(setIsEditMode);
   const router = useRouter();
   const isMobileMode = useMobileMode();
+  const { opened: isEditDialogOpened } = useEditDialogContext();
   const featureLink = getOsmappLink(feature);
   // Hide the dialog synchronously when the user clicks close. Router.push can
   // take a moment to actually unmount us (it re-runs getServerSideProps on the
   // catch-all route), and without this the X felt like it didn't respond on the
   // first click. The component remounts on each open, so no reset effect needed.
   const [closing, setClosing] = useState(false);
+
+  // Nested EditDialog (add photo, etc.) can't receive clicks while this
+  // dialog's focus trap / leftover drawing pointer state is still active.
+  useEffect(() => {
+    if (!isEditDialogOpened) return;
+    isPointClickedRef.current = false;
+    isProtectionPointClickedRef.current = false;
+    setIsPointClicked(false);
+    setIsPointMoving(false);
+    setIsProtectionPointClicked(false);
+    setIsProtectionPointMoving(false);
+    setIsPanningDisabled(false);
+    if (
+      machine.currentStateName === 'pointMenu' ||
+      machine.currentStateName === 'protectionPointMenu'
+    ) {
+      machine.execute('cancelPointMenu');
+    }
+  }, [
+    isEditDialogOpened,
+    isPointClickedRef,
+    isProtectionPointClickedRef,
+    machine,
+    setIsPanningDisabled,
+    setIsPointClicked,
+    setIsPointMoving,
+    setIsProtectionPointClicked,
+    setIsProtectionPointMoving,
+  ]);
 
   useEffect(() => {
     const tags = routes[routeNumber]?.feature?.tags || {};
@@ -170,6 +208,9 @@ export const ClimbingCragDialog = ({
       open={!closing}
       onClose={handleClose}
       disableEscapeKeyDown={isEditMode}
+      disableEnforceFocus={isEditDialogOpened}
+      disableAutoFocus={isEditDialogOpened}
+      disableRestoreFocus={isEditDialogOpened}
       slotProps={{
         paper: {
           elevation: 0,
@@ -209,7 +250,7 @@ export const ClimbingCragDialog = ({
             </LeftActions>
             <div>
               <Stack spacing={2} direction="row">
-                <Button autoFocus onClick={handleCancel}>
+                <Button onClick={handleCancel}>
                   {t('editdialog.cancel_button')}
                 </Button>
 

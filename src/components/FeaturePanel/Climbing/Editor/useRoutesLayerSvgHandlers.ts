@@ -4,6 +4,7 @@ import { useRafThrottle } from './useRafThrottle';
 import { updateElementOnIndex } from '../utils/array';
 import { getPositionInImageFromMouse } from '../utils/mousePositionUtils';
 import { useBackgroundTap } from './useBackgroundTap';
+import { clearDrawAction, isDrawDoubleClick, recordDrawAction } from './utils';
 
 // A press only turns into a point drag after travelling this far from the
 // pointer-down position. Fingers (and fast mouse clicks) always jitter a few
@@ -56,6 +57,7 @@ export const useRoutesLayerSvgHandlers = () => {
   // the finger that happened to land on one, and not for the finger that stays
   // down after the pinch ends.
   const activePointersRef = useRef<Set<number>>(new Set());
+  const cancelMoveRef = useRef<() => void>(() => {});
 
   // Where the current gesture's first pointer landed — the reference for the
   // drag-start threshold.
@@ -87,9 +89,39 @@ export const useRoutesLayerSvgHandlers = () => {
   // reaches window — the id then leaked and every following one-finger drag was
   // misread as multi-touch, i.e. dragging died for the rest of the session.
   // The capture phase completes before any bubble handler can interfere.
+  //
+  // Also drop the grab flags here. A point's own pointerup used to
+  // stopPropagation, so the SVG never reset isPointClickedRef and the point
+  // kept following the cursor with no button held.
   useEffect(() => {
     const release = (event: PointerEvent) => {
-      activePointersRef.current.delete(event.pointerId);
+      const wasTracked = activePointersRef.current.delete(event.pointerId);
+      if (activePointersRef.current.size > 0) return;
+
+      const hadGrab =
+        isPointClickedRef.current ||
+        isProtectionPointClickedRef.current ||
+        pointWasDraggedRef.current;
+
+      isPointClickedRef.current = false;
+      isProtectionPointClickedRef.current = false;
+      gestureStartRef.current = null;
+
+      // Clicks in nested dialogs (add photo / Edit) never started on the SVG.
+      // setState here would re-render the climbing tree mid-click and swallow
+      // the button press (Cancel, upload, …).
+      if (!wasTracked && !hadGrab) return;
+
+      cancelMoveRef.current();
+      setIsPointClicked(false);
+      setIsProtectionPointClicked(false);
+      setIsPanningDisabled(false);
+      if (pointWasDraggedRef.current) {
+        setPointSelectedIndex(null);
+        setIsPointMoving(false);
+        setProtectionPointSelectedIndex(null);
+        setIsProtectionPointMoving(false);
+      }
     };
     window.addEventListener('pointerup', release, { capture: true });
     window.addEventListener('pointercancel', release, { capture: true });
@@ -97,7 +129,18 @@ export const useRoutesLayerSvgHandlers = () => {
       window.removeEventListener('pointerup', release, { capture: true });
       window.removeEventListener('pointercancel', release, { capture: true });
     };
-  }, []);
+  }, [
+    isPointClickedRef,
+    isProtectionPointClickedRef,
+    pointWasDraggedRef,
+    setIsPanningDisabled,
+    setIsPointClicked,
+    setIsPointMoving,
+    setIsProtectionPointClicked,
+    setIsProtectionPointMoving,
+    setPointSelectedIndex,
+    setProtectionPointSelectedIndex,
+  ]);
 
   const runTapAction = useCallback(
     (event: React.PointerEvent) => {
@@ -135,7 +178,13 @@ export const useRoutesLayerSvgHandlers = () => {
       }
 
       if (machine.currentStateName === 'extendRoute') {
+        if (isDrawDoubleClick(event.clientX, event.clientY)) {
+          machine.execute('finishRoute');
+          clearDrawAction();
+          return;
+        }
         machine.execute('addPointToEnd', event);
+        recordDrawAction(event.clientX, event.clientY);
         return;
       }
 
@@ -201,7 +250,13 @@ export const useRoutesLayerSvgHandlers = () => {
   // them to one update per animation frame keeps the preview line and point
   // dragging smooth (one re-render per frame instead of one per event).
   const processMove = useCallback(
-    (move: { clientX: number; clientY: number; altKey: boolean }) => {
+    (move: {
+      clientX: number;
+      clientY: number;
+      altKey: boolean;
+      buttons: number;
+      pointerType: string;
+    }) => {
       if (!isEditMode) {
         setMousePosition(null);
         return;
@@ -214,18 +269,31 @@ export const useRoutesLayerSvgHandlers = () => {
 
       const isMultiTouch = activePointersRef.current.size > 1;
 
+      // A point may only move while the pointer is actually held down.
+      // Without this, a leftover isPointClickedRef after a click made the
+      // point follow the cursor with no button pressed.
+      const isHeldMouse =
+        move.pointerType === 'mouse' && (move.buttons & 1) === 1;
+      const isHeldTouch =
+        move.pointerType !== 'mouse' && activePointersRef.current.size === 1;
+      const isPointerHeld = isHeldMouse || isHeldTouch;
+
       // Once the threshold is crossed (pointWasDraggedRef set below), the drag
       // keeps applying even if the pointer returns close to the start.
       const start = gestureStartRef.current;
       const dx = start ? move.clientX - start.x : 0;
       const dy = start ? move.clientY - start.y : 0;
       const hasDragIntent =
-        pointWasDraggedRef.current ||
-        dx * dx + dy * dy >= DRAG_START_THRESHOLD_PX * DRAG_START_THRESHOLD_PX;
+        isPointerHeld &&
+        (pointWasDraggedRef.current ||
+          dx * dx + dy * dy >=
+            DRAG_START_THRESHOLD_PX * DRAG_START_THRESHOLD_PX);
 
-      const pointGrabbed = isPointClickedRef.current || isPointClicked;
+      const pointGrabbed =
+        isPointerHeld && (isPointClickedRef.current || isPointClicked);
       const protectionGrabbed =
-        isProtectionPointClickedRef.current || isProtectionPointClicked;
+        isPointerHeld &&
+        (isProtectionPointClickedRef.current || isProtectionPointClicked);
 
       if (
         protectionGrabbed &&
@@ -311,6 +379,7 @@ export const useRoutesLayerSvgHandlers = () => {
 
   const { schedule: scheduleMove, cancel: cancelMove } =
     useRafThrottle(processMove);
+  cancelMoveRef.current = cancelMove;
 
   const onPointerMove = useCallback(
     (event: React.PointerEvent) => {
@@ -318,6 +387,8 @@ export const useRoutesLayerSvgHandlers = () => {
         clientX: event.clientX,
         clientY: event.clientY,
         altKey: event.altKey,
+        buttons: event.buttons,
+        pointerType: event.pointerType,
       });
     },
     [scheduleMove],

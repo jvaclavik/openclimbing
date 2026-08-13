@@ -31,6 +31,7 @@ const CustomizedDialog: React.FC = ({ children }) => {
       open={opened}
       onClose={handleClose}
       disableEscapeKeyDown={isModified && !successInfo}
+      disableEnforceFocus
       aria-labelledby="edit-dialog-title"
       slotProps={{
         paper: {

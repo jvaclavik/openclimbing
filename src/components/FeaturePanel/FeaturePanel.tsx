@@ -31,6 +31,7 @@ import { PublicTransport } from './PublicTransport/PublicTransport';
 import { Runways } from './Runways/Runways';
 import { Sockets } from './Sockets/Sockets';
 import { useFeaturePanelShortcuts } from './useFeaturePanelShortcuts';
+import { useRouter } from 'next/router';
 
 const Flex = styled.div`
   flex: 1;
@@ -46,6 +47,8 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
   const [advanced, setAdvanced] = useState(false);
   const [showTags, toggleShowTags] = useToggleState(false);
   const isMobileMode = useMobileMode();
+  const router = useRouter();
+  const isClimbingDialog = router.query.all?.[2] === 'climbing';
   useFeaturePanelShortcuts();
 
   const { tags, skeleton, deleted } = feature;
@@ -132,7 +135,10 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
                 <Sockets />
                 <FeatureOpenPlaceGuideLink />
                 <EditButton />
-                <EditDialog />
+                {/* Climbing dialog already mounts EditDialog. A second instance
+                    stacks two fullscreen modals and the top one stops receiving
+                    clicks (Cancel, add photo, …). */}
+                {!isClimbingDialog && <EditDialog />}
               </PanelSidePadding>
             </>
           )}

@@ -4,6 +4,7 @@ import { usePhotoChange } from './usePhotoChange';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { confirmDiscardUnsavedClimbingEdits } from './confirmDiscardUnsavedClimbingEdits';
 import { isTypingInFormField } from '../../../../helpers/hooks';
+import { useReloadClimbingDialog } from './useReloadClimbingDialog';
 
 export const useClimbingViewShortcuts = () => {
   const {
@@ -18,9 +19,22 @@ export const useClimbingViewShortcuts = () => {
   } = useClimbingContext();
   const onPhotoChange = usePhotoChange();
   const { userSettings, setUserSetting } = useUserSettingsContext();
+  const { reload } = useReloadClimbingDialog();
   useEffect(() => {
     const downHandler = (e) => {
       if (isTypingInFormField(e.target)) return;
+
+      if (
+        e.altKey &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        e.code === 'KeyR'
+      ) {
+        e.preventDefault();
+        void reload();
+        return;
+      }
 
       if (e.ctrlKey && e.key === 'h') {
         setIsRoutesLayerVisible(!isRoutesLayerVisible);
@@ -78,5 +92,6 @@ export const useClimbingViewShortcuts = () => {
     hasUnsavedEdits,
     setUserSetting,
     userSettings,
+    reload,
   ]);
 };

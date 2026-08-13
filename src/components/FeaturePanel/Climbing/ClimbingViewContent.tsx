@@ -1,5 +1,14 @@
 import styled from '@emotion/styled';
-import { Box, Button, ButtonGroup, Typography } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import {
   CLIMBING_ROUTE_ROW_HEIGHT,
   DIALOG_TOP_BAR_HEIGHT,
@@ -21,6 +30,7 @@ import { PanelLabel } from './PanelLabel';
 import { RouteDistribution } from './RouteDistribution';
 import { useGetCragViewLayout } from './utils/useCragViewLayout';
 import { getDescription } from '../../../helpers/featureLabel';
+import { useReloadClimbingDialog } from './utils/useReloadClimbingDialog';
 
 const CragMapDynamic = dynamic(() => import('./CragMap'), {
   ssr: false,
@@ -47,6 +57,32 @@ const HideOnNarrowPanel = styled.div`
     display: none;
   }
 `;
+
+const ReloadFromOsmButton = () => {
+  const { reload, isReloading } = useReloadClimbingDialog();
+
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5 }}>
+      <Tooltip title={`${t('featurepanel.reload_fresh_data')} (Alt+R)`}>
+        <span>
+          <IconButton
+            size="small"
+            onClick={() => void reload()}
+            disabled={isReloading}
+            aria-label={t('featurepanel.reload_fresh_data')}
+            sx={{ color: 'text.disabled' }}
+          >
+            {isReloading ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : (
+              <RefreshIcon fontSize="small" />
+            )}
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Box>
+  );
+};
 
 export const ClimbingViewContent = ({ isMapVisible, setIsMapVisible }) => {
   const { showDebugMenu, routes } = useClimbingContext();
@@ -128,6 +164,7 @@ export const ClimbingViewContent = ({ isMapVisible, setIsMapVisible }) => {
 
         <EditButton />
         <EditDialog />
+        <ReloadFromOsmButton />
       </ContentBelowRouteList>
     </>
   );

@@ -11,6 +11,41 @@ import { useClimbingContext } from '../contexts/ClimbingContext';
 // synchronously against the DOM target, which closes that race.
 export const PANNING_EXCLUDED_CLASS = 'climbing-no-pan';
 
+// Shared across point clicks and background taps so a double-click can finish
+// drawing even when the first click added a point and the second lands on it.
+// `detail` on pointerup is 0, so we can't use the click-count from the event.
+export const DRAW_DOUBLE_CLICK_MS = 350;
+export const DRAW_DOUBLE_CLICK_PX = 16;
+export const lastDrawAction = {
+  at: 0,
+  x: 0,
+  y: 0,
+};
+
+export const isDrawDoubleClick = (
+  clientX: number,
+  clientY: number,
+  now = Date.now(),
+) => {
+  if (!lastDrawAction.at) return false;
+  const dx = clientX - lastDrawAction.x;
+  const dy = clientY - lastDrawAction.y;
+  return (
+    now - lastDrawAction.at < DRAW_DOUBLE_CLICK_MS &&
+    dx * dx + dy * dy <= DRAW_DOUBLE_CLICK_PX * DRAW_DOUBLE_CLICK_PX
+  );
+};
+
+export const recordDrawAction = (clientX: number, clientY: number) => {
+  lastDrawAction.at = Date.now();
+  lastDrawAction.x = clientX;
+  lastDrawAction.y = clientY;
+};
+
+export const clearDrawAction = () => {
+  lastDrawAction.at = 0;
+};
+
 // Keeps the touch gesture of a point drag alive. On touch, the browser only
 // refrains from hijacking a gesture (scroll/pan, followed by a pointercancel
 // that kills the drag) if the first touchmove is preventDefault-ed.
@@ -66,6 +101,7 @@ export const useProtectionPointClickHandler = () => {
     isProtectionPointMoving,
     setIsProtectionPointClicked,
     setIsProtectionPointMoving,
+    isProtectionPointClickedRef,
     pointWasDraggedRef,
   } = useClimbingContext();
 
@@ -84,10 +120,9 @@ export const useProtectionPointClickHandler = () => {
     }
     machine.execute('showProtectionPointMenu');
 
+    isProtectionPointClickedRef.current = false;
     setIsProtectionPointClicked(false);
     setIsProtectionPointMoving(false);
-    e.stopPropagation();
-    e.preventDefault();
   };
 };
 
@@ -99,7 +134,7 @@ export const usePointClickHandler = (index: number) => {
     setPointSelectedIndex,
     setIsPointMoving,
     setIsPointClicked,
-    pointSelectedIndex,
+    isPointClickedRef,
     machine,
     getCurrentPath,
     pointWasDraggedRef,
@@ -118,18 +153,30 @@ export const usePointClickHandler = (index: number) => {
       return;
     }
 
-    machine.execute('showPointMenu');
-    const isDoubleClick = e.detail === 2;
+    isPointClickedRef.current = false;
+    setIsPointClicked(false);
+    setIsPointMoving(false);
+
     const lastPointIndex = path.length - 1;
-    if (isDoubleClick && pointSelectedIndex === lastPointIndex) {
+    const isLastPoint = index === lastPointIndex;
+    const isDoubleClick =
+      e.detail === 2 ||
+      (typeof e.clientX === 'number' &&
+        isDrawDoubleClick(e.clientX, e.clientY));
+
+    if (isLastPoint && isDoubleClick) {
       machine.execute('finishRoute');
+      setPointElement(null);
+      clearDrawAction();
+      return;
     }
 
+    if (typeof e.clientX === 'number') {
+      recordDrawAction(e.clientX, e.clientY);
+    }
+
+    machine.execute('showPointMenu');
     setPointElement(pointElement !== null ? null : e.currentTarget);
     setPointSelectedIndex(index);
-    setIsPointMoving(false);
-    setIsPointClicked(false);
-    e.stopPropagation();
-    e.preventDefault();
   };
 };

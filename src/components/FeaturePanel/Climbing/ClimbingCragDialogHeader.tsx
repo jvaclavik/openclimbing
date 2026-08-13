@@ -295,9 +295,7 @@ export const ClimbingCragDialogHeader = ({
 
         {showMobileEditActions ? (
           <Stack direction="row" spacing={1} alignItems="center">
-            <Button autoFocus onClick={onCancel}>
-              {t('editdialog.cancel_button')}
-            </Button>
+            <Button onClick={onCancel}>{t('editdialog.cancel_button')}</Button>
             <Button onClick={onSave} variant="contained" color="primary">
               {t('editdialog.save_button_edit')}
             </Button>
