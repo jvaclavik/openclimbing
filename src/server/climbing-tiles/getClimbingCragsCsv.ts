@@ -18,6 +18,8 @@ type Row = {
   lat: number;
 };
 
+// Only relations with at least one route drawn on a photo – these are the crags
+// actually usable as a guide, `routesWithPhoto` is aggregated during refresh.
 const getRows = (countryCodes: string[]): Row[] => {
   const placeholders = countryCodes.map(() => '?').join(',');
   return getDb()
@@ -25,19 +27,31 @@ const getRows = (countryCodes: string[]): Row[] => {
       `SELECT "osmType", "osmId", COALESCE("name", "nameRaw") AS name, tags,
         "countryCode", lon, lat
        FROM climbing_features
-       WHERE type IN ('area', 'crag') AND "countryCode" IN (${placeholders})
-       ORDER BY "countryCode", "osmType", "osmId"`,
+       WHERE type IN ('area', 'crag') AND "osmType" = 'relation'
+         AND "routesWithPhoto" > 0 AND "countryCode" IN (${placeholders})
+       ORDER BY "countryCode", "osmId"`,
     )
     .all(...countryCodes);
 };
 
-const getWebsite = (tagsJson: string | null): string => {
+const HOROSVAZ_URL_REGEX = /^https?:\/\/([^/]*\.)?horosvaz\.cz(\/|$)/i;
+
+// `website`, `website:2`, `contact:website`, ... – the horosvaz link sits in an
+// arbitrary one of them (`website` itself often holds an openclimbing selflink).
+const isWebsiteKey = (key: string) => /(^|:)website(:\d+)?$/.test(key);
+
+const getHorosvazUrl = (tagsJson: string | null): string => {
   if (!tagsJson) {
     return '';
   }
   try {
     const tags = JSON.parse(tagsJson) as Record<string, string>;
-    return tags.website ?? '';
+    const [url] = Object.keys(tags)
+      .filter(isWebsiteKey)
+      .sort() // deterministic pick when a crag links horosvaz from several tags
+      .map((key) => (tags[key] ?? '').trim())
+      .filter((value) => HOROSVAZ_URL_REGEX.test(value));
+    return url ?? '';
   } catch {
     return '';
   }
@@ -60,9 +74,10 @@ export const parseCountriesParam = (param: string | string[] | undefined) => {
 };
 
 /**
- * CSV listing of all climbing areas and crags of given countries – one line per
- * feature, `;` separated. The `horosvaz` column is the OSM `website` tag, which
- * for Czech crags usually points to horosvaz.cz (hence the legacy column name).
+ * CSV listing of climbing areas and crags of given countries – one line per
+ * relation which has at least one route drawn on a photo, `;` separated. The
+ * `horosvaz` column is the horosvaz.cz link found in any of the website tags
+ * (empty when the crag has none).
  */
 export const getClimbingCragsCsv = (
   baseUrl: string,
@@ -72,7 +87,7 @@ export const getClimbingCragsCsv = (
     toCsvLine([
       `${baseUrl}/${row.osmType}/${row.osmId}`,
       row.name ?? '',
-      getWebsite(row.tags),
+      getHorosvazUrl(row.tags),
       row.lat.toFixed(COORDINATE_DECIMALS),
       row.lon.toFixed(COORDINATE_DECIMALS),
       row.countryCode ?? '',

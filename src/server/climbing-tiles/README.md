@@ -58,8 +58,8 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 
 `/api/climbing-tiles/crags.csv`:
 
-- CSV (`;` separated) of all `area` + `crag` features of the given countries, one line per feature
-- columns `url;name;horosvaz;lat;lon;country` - `horosvaz` is the OSM `website` tag (for Czech crags it usually points to horosvaz.cz, hence the column name), `country` is the `countryCode` resolved during refresh
+- CSV (`;` separated) of `area` + `crag` **relations** of the given countries which have at least one route drawn on a photo (`routesWithPhoto > 0`), one line per relation
+- columns `url;name;horosvaz;lat;lon;country` - `horosvaz` is the horosvaz.cz link taken from whichever website tag holds it (`website`, `website:2`, `contact:website`, ...), empty when the crag has none; `country` is the `countryCode` resolved during refresh
 - `?country=cz,sk` selects the countries (lowercase ISO 3166-1), defaults to `cz,sk`
 
 Browser
