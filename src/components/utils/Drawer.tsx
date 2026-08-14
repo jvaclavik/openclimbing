@@ -76,8 +76,8 @@ const Content = styled.main<{ $lockScroll?: boolean }>`
 /** Sits on the sheet (not in the scrollport) so gallery layers can't cover it. */
 const Overlay = styled.div`
   position: absolute;
-  top: 4px;
-  right: 6px;
+  top: 8px;
+  right: 8px;
   z-index: 10;
 `;
 

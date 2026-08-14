@@ -1,16 +1,28 @@
 import { useState } from 'react';
-import { MenuItem } from '@mui/material';
+import { Stack } from '@mui/material';
 import React from 'react';
 import { t } from '../../../../services/intl';
-import { PopperWithArrow } from '../../../utils/PopperWithArrow';
+import { TranslationId } from '../../../../services/types';
+import {
+  GLASS_PAPER_SX,
+  PopperWithArrow,
+} from '../../../utils/PopperWithArrow';
 import { CragsInAreaSortButton } from './CragsInAreaSortButton';
 import { SortBy } from './types';
 import { Setter } from '../../../../types';
+import { FilterBody, FilterCard, FilterOption } from '../Filter/filterUi';
 
 type CragsInAreaSortProps = {
   sortBy: SortBy;
   setSortBy: Setter<SortBy>;
 };
+
+const OPTIONS: { value: SortBy; label: TranslationId }[] = [
+  { value: 'default', label: 'crag_sort.option_default' },
+  { value: 'routes', label: 'crag_sort.option_routes' },
+  { value: 'photos', label: 'crag_sort.option_photos' },
+  { value: 'alphabetical', label: 'crag_sort.option_alphabetical' },
+];
 
 export const CragsInAreaSort = ({
   sortBy,
@@ -23,14 +35,7 @@ export const CragsInAreaSort = ({
     setOpen(!open);
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleSortClick = (sortBy: SortBy) => () => {
-    setSortBy(sortBy);
-    handleClose();
-  };
+  const handleClose = () => setOpen(false);
 
   return (
     <>
@@ -43,33 +48,34 @@ export const CragsInAreaSort = ({
         title={t('crag_sort.title')}
         isOpen={open}
         anchorEl={anchorEl}
-        placement="left-start"
-        offset={[-10, 15]}
+        placement="bottom-end"
+        offset={[0, 8]}
+        sx={{ minWidth: 240 }}
+        paperSx={GLASS_PAPER_SX}
+        onClickAway={(event) => {
+          if (anchorEl?.contains(event.target as Node)) return;
+          handleClose();
+        }}
       >
-        <MenuItem
-          selected={sortBy === 'default'}
-          onClick={handleSortClick('default')}
-        >
-          {t('crag_sort.option_default')}
-        </MenuItem>
-        <MenuItem
-          selected={sortBy === 'routes'}
-          onClick={handleSortClick('routes')}
-        >
-          {t('crag_sort.option_routes')}
-        </MenuItem>
-        <MenuItem
-          selected={sortBy === 'photos'}
-          onClick={handleSortClick('photos')}
-        >
-          {t('crag_sort.option_photos')}
-        </MenuItem>
-        <MenuItem
-          selected={sortBy === 'alphabetical'}
-          onClick={handleSortClick('alphabetical')}
-        >
-          {t('crag_sort.option_alphabetical')}
-        </MenuItem>
+        <FilterBody>
+          <FilterCard>
+            <Stack gap={0.5}>
+              {OPTIONS.map(({ value, label }) => (
+                <FilterOption
+                  key={value}
+                  type="button"
+                  $selected={sortBy === value}
+                  onClick={() => {
+                    setSortBy(value);
+                    handleClose();
+                  }}
+                >
+                  {t(label)}
+                </FilterOption>
+              ))}
+            </Stack>
+          </FilterCard>
+        </FilterBody>
       </PopperWithArrow>
     </>
   );

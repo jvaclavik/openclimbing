@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
   Autocomplete,
+  Badge,
   Box,
   Button,
   Chip,
   Collapse,
-  Divider,
   FormControlLabel,
   Stack,
   Switch,
@@ -27,12 +27,8 @@ import {
   getClimbingRockTranslationKey,
 } from '../../../../services/tagging/climbing/climbingRockData';
 import { LengthFilter } from './LengthFilter';
-
-const Label = styled.div`
-  font-size: 0.85rem;
-  opacity: 0.8;
-  margin-bottom: 4px;
-`;
+import { FilterCard, FilterSectionLabel, chipOutline } from './filterUi';
+import { tint } from '../../../utils/panelUi';
 
 const ExpandIcon = styled(ExpandMoreIcon, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -55,7 +51,7 @@ type ChipGroupProps = {
 
 const ChipGroup = ({ label, options, selected, onChange }: ChipGroupProps) => (
   <Box>
-    <Label>{t(label)}</Label>
+    <FilterSectionLabel>{t(label)}</FilterSectionLabel>
     <Stack direction="row" gap={0.5} flexWrap="wrap">
       {options.map((option) => {
         const isSelected = selected.includes(option.value);
@@ -67,6 +63,11 @@ const ChipGroup = ({ label, options, selected, onChange }: ChipGroupProps) => (
             color={isSelected ? 'primary' : 'default'}
             variant={isSelected ? 'filled' : 'outlined'}
             onClick={() => onChange(toggle(selected, option.value))}
+            sx={(theme) => ({
+              fontWeight: 600,
+              borderRadius: '8px',
+              ...(isSelected ? undefined : chipOutline(theme)),
+            })}
           />
         );
       })}
@@ -132,21 +133,30 @@ export const AdvancedFilters = ({
   };
 
   return (
-    <Box ml={2} mr={2} sx={{ paddingBottom: 1 }}>
-      <Divider sx={{ mb: 0.5 }} />
+    <FilterCard>
       <Button
         fullWidth
         size="small"
         color="inherit"
         onClick={() => setOpen((prev) => !prev)}
-        startIcon={<TuneIcon fontSize="small" />}
+        startIcon={
+          <Badge
+            variant="dot"
+            color="primary"
+            invisible={!hasActiveAdvanced}
+            overlap="circular"
+          >
+            <TuneIcon fontSize="small" />
+          </Badge>
+        }
         endIcon={<ExpandIcon open={open} fontSize="small" />}
         sx={{
           justifyContent: 'space-between',
           textTransform: 'none',
-          fontWeight: 600,
+          fontWeight: 700,
           color: 'text.primary',
-          px: 0.5,
+          px: 0.25,
+          minHeight: 36,
         }}
       >
         <Box component="span" sx={{ flexGrow: 1, textAlign: 'left' }}>
@@ -154,7 +164,7 @@ export const AdvancedFilters = ({
         </Box>
       </Button>
       <Collapse in={open}>
-        <Stack gap={1.5} sx={{ paddingTop: 1, paddingBottom: 1 }}>
+        <Stack gap={1.5} sx={{ paddingTop: 1, paddingBottom: 0.5 }}>
           {showClimbingType && (
             <ChipGroup
               label="climbing_badges.type_label"
@@ -173,7 +183,9 @@ export const AdvancedFilters = ({
           )}
           {showMaterial && (
             <Box>
-              <Label>{t('climbing_rock.label')}</Label>
+              <FilterSectionLabel>
+                {t('climbing_rock.label')}
+              </FilterSectionLabel>
               <Autocomplete
                 multiple
                 size="small"
@@ -190,6 +202,15 @@ export const AdvancedFilters = ({
                         ? t('crag_filter.material_placeholder')
                         : undefined
                     }
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '10px',
+                        bgcolor: (theme) => tint(theme, 0.03),
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: (theme) => tint(theme, 0.18),
+                      },
+                    }}
                   />
                 )}
               />
@@ -198,7 +219,9 @@ export const AdvancedFilters = ({
           {showLength && <LengthFilter />}
           {showPhotoDrawn && (
             <Box>
-              <Label>{t('crag_filter.photo_drawn')}</Label>
+              <FilterSectionLabel>
+                {t('crag_filter.photo_drawn')}
+              </FilterSectionLabel>
               <Stack direction="row" gap={0.5} flexWrap="wrap">
                 <Chip
                   label={t('crag_filter.photo_drawn_with')}
@@ -206,6 +229,11 @@ export const AdvancedFilters = ({
                   color={photoDrawn === 'with' ? 'primary' : 'default'}
                   variant={photoDrawn === 'with' ? 'filled' : 'outlined'}
                   onClick={() => togglePhotoDrawn('with')}
+                  sx={(theme) => ({
+                    fontWeight: 600,
+                    borderRadius: '8px',
+                    ...(photoDrawn === 'with' ? undefined : chipOutline(theme)),
+                  })}
                 />
                 <Chip
                   label={t('crag_filter.photo_drawn_without')}
@@ -213,12 +241,27 @@ export const AdvancedFilters = ({
                   color={photoDrawn === 'without' ? 'primary' : 'default'}
                   variant={photoDrawn === 'without' ? 'filled' : 'outlined'}
                   onClick={() => togglePhotoDrawn('without')}
+                  sx={(theme) => ({
+                    fontWeight: 600,
+                    borderRadius: '8px',
+                    ...(photoDrawn === 'without'
+                      ? undefined
+                      : chipOutline(theme)),
+                  })}
                 />
               </Stack>
             </Box>
           )}
           {showFamilyFriendly && (
             <FormControlLabel
+              sx={{
+                mx: 0,
+                px: 0.5,
+                justifyContent: 'space-between',
+                ml: 0,
+                mr: 0,
+              }}
+              labelPlacement="start"
               control={
                 <Switch
                   checked={familyFriendly}
@@ -227,10 +270,13 @@ export const AdvancedFilters = ({
                 />
               }
               label={t('climbing_badges.family_friendly_label')}
+              slotProps={{
+                typography: { fontWeight: 600, fontSize: '0.85rem' },
+              }}
             />
           )}
         </Stack>
       </Collapse>
-    </Box>
+    </FilterCard>
   );
 };

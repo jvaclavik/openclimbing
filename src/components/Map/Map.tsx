@@ -13,6 +13,7 @@ import { MapFilter } from './MapFilter/MapFilter';
 import { SunShadowMapButton, SunShadowProvider } from './SunShadow/SunShadow';
 import { RadarMapButton, RadarProvider } from './Radar/Radar';
 import { PrecipAccumMapButton, PrecipAccumProvider } from './Radar/PrecipAccum';
+import { Terrain3dMapButton, Terrain3dProvider } from './Terrain3d/Terrain3d';
 import { DRAWER_MOTION, QUARTER_PEEK_PX } from '../utils/drawerSnap';
 import {
   BOTTOM_RIGHT_Z_DEFAULT,
@@ -114,20 +115,23 @@ const Map = () => {
       <SunShadowProvider>
         <RadarProvider>
           <PrecipAccumProvider>
-            <BottomRight
-              $zIndex={
-                layersOpen ? BOTTOM_RIGHT_Z_RAISED : BOTTOM_RIGHT_Z_DEFAULT
-              }
-              $bottom={drawerPeek ? QUARTER_PEEK_PX + 8 : 6}
-            >
-              <Stack direction="row" alignItems="center" gap={1}>
-                <RadarMapButton />
-                <PrecipAccumMapButton />
-                <SunShadowMapButton />
-                {hasClimbingLayer && <MapFilter />}
-                <LayerSwitcherDynamic />
-              </Stack>
-            </BottomRight>
+            <Terrain3dProvider>
+              <BottomRight
+                $zIndex={
+                  layersOpen ? BOTTOM_RIGHT_Z_RAISED : BOTTOM_RIGHT_Z_DEFAULT
+                }
+                $bottom={drawerPeek ? QUARTER_PEEK_PX + 8 : 6}
+              >
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <RadarMapButton />
+                  <PrecipAccumMapButton />
+                  <SunShadowMapButton />
+                  <Terrain3dMapButton />
+                  {hasClimbingLayer && <MapFilter />}
+                  <LayerSwitcherDynamic />
+                </Stack>
+              </BottomRight>
+            </Terrain3dProvider>
           </PrecipAccumProvider>
         </RadarProvider>
       </SunShadowProvider>

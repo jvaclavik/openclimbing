@@ -1,64 +1,47 @@
-/* eslint-disable  no-underscore-dangle */
-import maplibregl, { type Map } from 'maplibre-gl';
-import { createMapEventHook } from '../../helpers';
+import type { Map } from 'maplibre-gl';
 
 export const TERRAIN_3D = {
   source: 'terrain3d',
   exaggeration: 1,
 } as const;
 
-const turnOnTerrain = (map: Map) => {
+export const PREVIEW_PITCH = 60;
+export const PREVIEW_MIN_ZOOM = 12;
+export const PREVIEW_ZOOM = 13;
+
+let wanted = false;
+
+export const setTerrain3dWanted = (value: boolean) => {
+  wanted = value;
+};
+
+export const turnOnTerrain = (map: Map) => {
   map.setTerrain(TERRAIN_3D);
   map.setMaxPitch(85);
 };
 
-const turnOffTerrain = (map: Map) => {
+export const turnOffTerrain = (map: Map) => {
   map.setTerrain(null);
   map.setMaxPitch(60);
 };
 
-class OsmappTerrainControl extends maplibregl.TerrainControl {
-  _toggleTerrain = () => {
-    if (this._map.getTerrain()) {
-      turnOffTerrain(this._map);
-    } else {
-      turnOnTerrain(this._map);
-    }
-    this._updateTerrainIcon();
-  };
-}
-
-const terrainControl = new OsmappTerrainControl(TERRAIN_3D);
-
-let controlAdded = false;
-
-/** Show the terrain toggle control (idempotent). */
-export const ensureTerrainControl = (map: Map) => {
-  if (!controlAdded) {
-    map.addControl(terrainControl);
-    controlAdded = true;
-  }
-};
-
-/** Enter 3D terrain mode: control + DEM mesh. */
+/** Enter 3D terrain mode: DEM mesh + higher max pitch. */
 export const enableTerrain3d = (map: Map) => {
-  ensureTerrainControl(map);
-  if (!map.getTerrain()) {
-    turnOnTerrain(map);
-  } else {
-    map.setMaxPitch(85);
+  try {
+    if (!map.getTerrain()) {
+      turnOnTerrain(map);
+    } else {
+      map.setMaxPitch(85);
+    }
+  } catch {
+    try {
+      map.setMaxPitch(85);
+    } catch {
+      // style still swapping – caller may retry
+    }
   }
 };
 
-/** Keep 3D terrain across basemap switches when the user is pitched or terrain is on. */
+/** Keep 3D terrain across basemap switches while the user left 3D on. */
 export const shouldKeepTerrain3d = (map: Map) =>
-  !!map.getTerrain() || map.getPitch() > 0;
-
-export const useToggleTerrainControl = createMapEventHook((map) => ({
-  eventType: 'move',
-  eventHandler: () => {
-    if (map.getPitch() > 0) {
-      enableTerrain3d(map);
-    }
-  },
-}));
+  wanted || !!map.getTerrain() || map.getPitch() > 0;

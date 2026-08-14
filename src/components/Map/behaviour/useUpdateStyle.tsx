@@ -33,11 +33,7 @@ import { emptyStyle } from '../styles/emptyStyle';
 import { shortbreadShadowStyle } from '../styles/shortbreadShadowStyle';
 import { shortbreadColorfulStyle } from '../styles/shortbreadColorfulStyle';
 import { ShowToast } from '../../utils/SnackbarContext';
-import {
-  ensureTerrainControl,
-  shouldKeepTerrain3d,
-  TERRAIN_3D,
-} from './useToggleTerrainControl';
+import { shouldKeepTerrain3d, TERRAIN_3D } from './useToggleTerrainControl';
 
 const ofrBasicStyle = {
   ...basicStyle,
@@ -211,7 +207,6 @@ export const useUpdateStyle = createMapEffectHook(
     map.setStyle(style, { diff: mapLoaded });
 
     if (keepTerrain) {
-      ensureTerrainControl(map);
       map.setMaxPitch(85);
     }
 

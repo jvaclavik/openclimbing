@@ -10,6 +10,7 @@ import { t } from '../../services/intl';
 import { SunShadowPanel } from '../Map/SunShadow/SunShadow';
 import { RadarPanel } from '../Map/Radar/Radar';
 import { PrecipAccumPanel } from '../Map/Radar/PrecipAccum';
+import { Terrain3dPanel } from '../Map/Terrain3d/Terrain3d';
 
 type AllLayers = {
   basemapLayers: Layer[];
@@ -51,6 +52,7 @@ const MapExtras = () => (
       </Typography>
     </Box>
     <StyledList dense>
+      <Terrain3dPanel />
       <SunShadowPanel />
       <RadarPanel />
       <PrecipAccumPanel />

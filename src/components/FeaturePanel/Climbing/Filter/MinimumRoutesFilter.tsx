@@ -2,6 +2,7 @@ import { Slider, Stack } from '@mui/material';
 import { t } from '../../../../services/intl';
 import React from 'react';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { FilterCard, FilterSectionLabel, filterSliderSx } from './filterUi';
 
 export const MinimumRoutesFilter = () => {
   const { climbingFilter } = useUserSettingsContext();
@@ -12,12 +13,26 @@ export const MinimumRoutesFilter = () => {
   };
 
   return (
-    <Stack gap={1} ml={2} mr={2} sx={{ paddingBottom: 2 }}>
-      <div>
-        {t('crag_filter.show_at_least')} <strong>{minimumRoutes}</strong>{' '}
-        {t('crag_filter.routes')}
-      </div>
-      <Slider value={minimumRoutes} onChange={onChange} min={1} max={80} />
-    </Stack>
+    <FilterCard>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="baseline"
+      >
+        <FilterSectionLabel $flush>
+          {t('crag_filter.show_at_least')}
+        </FilterSectionLabel>
+        <strong>
+          {minimumRoutes} {t('crag_filter.routes')}
+        </strong>
+      </Stack>
+      <Slider
+        value={minimumRoutes}
+        onChange={onChange}
+        min={1}
+        max={80}
+        sx={filterSliderSx}
+      />
+    </FilterCard>
   );
 };

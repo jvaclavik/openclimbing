@@ -13,6 +13,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
   Badge,
   Box,
+  CircularProgress,
   IconButton,
   ListItemButton,
   ListItemIcon,
@@ -33,6 +34,8 @@ import { t } from '../../../services/intl';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
+import { MapControlAppear } from '../MapControlAppear';
+import { useMapSourceLoading } from '../useMapSourceLoading';
 import {
   applyOverlay,
   isInRadarCoverage,
@@ -58,6 +61,7 @@ const MapControlButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $isOpened: boolean }>`
   pointer-events: all;
+  position: relative;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(15px);
 
@@ -147,7 +151,7 @@ const Legend = () => (
       color="text.secondary"
       sx={{ display: 'block', mb: 0.5 }}
     >
-      Úhrn [mm]
+      {t('layerswitcher.precip_legend')}
     </Typography>
     <Stack
       direction="row"
@@ -204,7 +208,16 @@ const AccumControls = ({
       color="primary"
       value={hours}
       onChange={(_, v: Hours | null) => v && setHours(v)}
-      sx={{ mb: 1 }}
+      sx={{
+        mb: 1,
+        '& .MuiToggleButton-root': {
+          fontWeight: 700,
+          borderColor: (theme) =>
+            theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.28)'
+              : 'rgba(0, 0, 0, 0.22)',
+        },
+      }}
     >
       {HOUR_OPTIONS.map((h) => (
         <ToggleButton key={h} value={h}>
@@ -215,7 +228,7 @@ const AccumControls = ({
 
     {isLoading || !latest ? (
       <Typography variant="caption" color="text.secondary">
-        Načítám data srážek…
+        {t('layerswitcher.precip_loading')}
       </Typography>
     ) : (
       <Stack
@@ -224,10 +237,12 @@ const AccumControls = ({
         alignItems="baseline"
       >
         <Typography variant="body2" fontWeight={700} color="primary">
-          Úhrn za {hours} h
+          {t('layerswitcher.precip_for_hours', { hours })}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          k {formatDateTime(latest.time)}
+          {t('layerswitcher.precip_as_of', {
+            time: formatDateTime(latest.time),
+          })}
         </Typography>
       </Stack>
     )}
@@ -239,7 +254,7 @@ const AccumControls = ({
       color="text.secondary"
       sx={{ display: 'block', mt: 1 }}
     >
-      Průhlednost
+      {t('layerswitcher.opacity')}
     </Typography>
     <Slider
       size="small"
@@ -256,7 +271,7 @@ const AccumControls = ({
       color="text.secondary"
       sx={{ display: 'block', mt: 0.5 }}
     >
-      Data © ČHMÚ · úhrn srážek · Česko a okolí
+      {t('layerswitcher.precip_credit')}
     </Typography>
   </Panel>
 );
@@ -271,6 +286,7 @@ type PrecipAccumContextValue = {
   isLoading: boolean;
   opacity: number;
   setOpacity: (v: number) => void;
+  waitingForMap: boolean;
 };
 
 const PrecipAccumContext = createContext<PrecipAccumContextValue | null>(null);
@@ -310,6 +326,12 @@ export const PrecipAccumProvider = ({
   );
 
   const latest = frames?.length ? frames[frames.length - 1] : undefined;
+  const sourceLoading = useMapSourceLoading(
+    ACCUM_IDS.sourceId,
+    active && !!latest,
+    { untilVisible: true },
+  );
+  const waitingForMap = active && (!latest || sourceLoading);
 
   const hoursRef = useRef(hours);
   hoursRef.current = hours;
@@ -370,8 +392,9 @@ export const PrecipAccumProvider = ({
       isLoading,
       opacity,
       setOpacity,
+      waitingForMap,
     }),
-    [inCoverage, enabled, hours, latest, isLoading, opacity],
+    [inCoverage, enabled, hours, latest, isLoading, opacity, waitingForMap],
   );
 
   return (
@@ -422,42 +445,48 @@ export const PrecipAccumMapButton = () => {
     isLoading,
     opacity,
     setOpacity,
+    waitingForMap,
   } = usePrecipAccumContext();
 
   if (!enabled) return null;
 
   return (
     <>
-      <Badge
-        color="success"
-        variant="dot"
-        overlap="circular"
-        invisible={!inCoverage}
-      >
-        <Tooltip
-          title={
-            inCoverage
-              ? t('layerswitcher.precip_accum')
-              : t('layerswitcher.radar_unavailable')
-          }
-          arrow
+      <MapControlAppear>
+        <Badge
+          color={inCoverage ? 'success' : 'error'}
+          variant="dot"
+          overlap="circular"
+          invisible={waitingForMap && inCoverage}
         >
-          <MapControlButton
-            $isOpened={open}
-            size={isMobileMode ? 'large' : 'medium'}
-            onClick={(e) => {
-              setAnchorEl(e.currentTarget);
-              toggle();
-            }}
+          <Tooltip
+            title={
+              inCoverage
+                ? t('layerswitcher.precip_accum')
+                : t('layerswitcher.radar_unavailable')
+            }
+            arrow
           >
-            {inCoverage ? (
+            <MapControlButton
+              $isOpened={open}
+              size={isMobileMode ? 'large' : 'medium'}
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+                toggle();
+              }}
+            >
+              {waitingForMap && (
+                <CircularProgress
+                  size={isMobileMode ? 36 : 28}
+                  thickness={4}
+                  sx={{ position: 'absolute', inset: 0, margin: 'auto' }}
+                />
+              )}
               <WaterIcon fontSize="small" color="primary" />
-            ) : (
-              <WarningAmberIcon fontSize="small" color="warning" />
-            )}
-          </MapControlButton>
-        </Tooltip>
-      </Badge>
+            </MapControlButton>
+          </Tooltip>
+        </Badge>
+      </MapControlAppear>
       <PopperWithArrow
         title={t('layerswitcher.precip_accum')}
         isOpen={open}
@@ -465,6 +494,7 @@ export const PrecipAccumMapButton = () => {
         placement="top-end"
         offset={[0, 10]}
         paperSx={GLASS_PAPER_SX}
+        loading={waitingForMap}
         addition={
           <Switch
             size="small"

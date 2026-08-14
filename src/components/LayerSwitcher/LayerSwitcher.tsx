@@ -60,7 +60,7 @@ const LayerSwitcher = () => {
             PaperProps={{ sx: { zIndex: LAYERS_DRAWER_Z } }}
           >
             <div role="presentation" style={{ width: '280px', height: '100%' }}>
-              <ClosePanelButton right onClick={close} style={{ top: 13 }} />
+              <ClosePanelButton right onClick={close} />
               {/* unmount when closed – persistent desktop drawer otherwise keeps the full tree */}
               {opened && <LayerSwitcherContent />}
             </div>

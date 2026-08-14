@@ -16,6 +16,7 @@ import {
   Badge,
   Box,
   Button,
+  CircularProgress,
   IconButton,
   ListItemButton,
   ListItemIcon,
@@ -34,17 +35,22 @@ import { t } from '../../../services/intl';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
+import { MapControlAppear } from '../MapControlAppear';
 import {
   applySunShadow,
   getSunTimes,
   removeSunShadow,
   SHADOW_MIN_ZOOM,
+  subscribeSunShadowLoading,
 } from './sunShadowLayer';
+
+const SUN_COLOR = '#f5a623';
 
 const MapControlButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $isOpened: boolean }>`
   pointer-events: all;
+  position: relative;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(15px);
 
@@ -59,52 +65,92 @@ const MapControlButton = styled(IconButton, {
 `;
 
 const Panel = styled.div<{ $inset?: boolean }>`
-  width: 240px;
-  padding: ${({ $inset }) => ($inset ? '0 16px 8px 52px' : '4px 8px 0')};
+  width: 248px;
+  padding: ${({ $inset }) => ($inset ? '0 16px 10px 52px' : '8px 12px 10px')};
 `;
 
 const DateInput = styled.input`
-  background: transparent;
+  background: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.08)'
+      : 'rgba(0, 0, 0, 0.05)'};
   color: inherit;
-  border: none;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
-  font-size: 0.8rem;
+  border: 1px solid
+    ${({ theme }) =>
+      theme.palette.mode === 'dark'
+        ? 'rgba(255, 255, 255, 0.2)'
+        : 'rgba(0, 0, 0, 0.18)'};
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
   width: 100%;
-  padding: 2px 0 5px;
+  padding: 8px 10px;
   cursor: pointer;
-  transition: border-color 0.15s ease;
-  // Make the browser render the native date popup (and its glyph) in the
-  // matching light/dark scheme.
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
   color-scheme: ${({ theme }) => theme.palette.mode};
+
+  &:hover {
+    border-color: ${({ theme }) =>
+      theme.palette.mode === 'dark'
+        ? 'rgba(255, 255, 255, 0.32)'
+        : 'rgba(0, 0, 0, 0.32)'};
+  }
 
   &:focus {
     outline: none;
-    border-bottom-color: #f5a623;
+    border-color: ${SUN_COLOR};
+    box-shadow: 0 0 0 3px ${convertHexToRgba(SUN_COLOR, 0.22)};
   }
 
   &::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    opacity: 0.7;
-  }
-  &:hover::-webkit-calendar-picker-indicator {
-    opacity: 1;
+    opacity: 0.85;
   }
 `;
 
 const QUICK_BTN_SX = {
   minWidth: 0,
-  px: 0.75,
-  py: 0.1,
-  fontSize: '0.7rem',
+  px: 1,
+  py: 0.25,
+  fontSize: '0.72rem',
   lineHeight: 1.4,
+  fontWeight: 700,
   textTransform: 'none',
+  borderRadius: '999px',
 } as const;
 
-const QuickButton: React.FC<{ onClick: () => void; label: string }> = ({
-  onClick,
-  label,
-}) => (
-  <Button size="small" sx={QUICK_BTN_SX} onClick={onClick}>
+const QuickButton: React.FC<{
+  onClick: () => void;
+  label: string;
+  emphasized?: boolean;
+}> = ({ onClick, label, emphasized }) => (
+  <Button
+    size="small"
+    variant={emphasized ? 'contained' : 'outlined'}
+    onClick={onClick}
+    sx={{
+      ...QUICK_BTN_SX,
+      ...(emphasized
+        ? {
+            backgroundColor: SUN_COLOR,
+            color: 'rgba(0, 0, 0, 0.82)',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: SUN_COLOR,
+              filter: 'brightness(0.95)',
+            },
+          }
+        : {
+            color: 'text.primary',
+            borderColor: (theme: Theme) =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(255, 255, 255, 0.28)'
+                : 'rgba(0, 0, 0, 0.28)',
+          }),
+    }}
+  >
     {label}
   </Button>
 );
@@ -143,9 +189,6 @@ const snapToTen = (value: number, min: number, max: number) => {
 };
 
 type SunMark = { value: number; label: React.ReactNode };
-
-// Warm "sun" amber used to tie the slider, marks and labels together.
-const SUN_COLOR = '#f5a623';
 
 const MARK_ICON_SX = {
   fontSize: 13,
@@ -194,7 +237,11 @@ const SUN_SLIDER_SX = {
     backgroundColor: SUN_COLOR,
     opacity: 1,
   },
-  '& .MuiSlider-markLabel': { fontSize: '0.65rem' },
+  '& .MuiSlider-markLabel': {
+    fontSize: '0.7rem',
+    color: 'text.primary',
+    filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.35))',
+  },
   '& .MuiSlider-valueLabel': {
     backgroundColor: SUN_COLOR,
     color: 'rgba(0, 0, 0, 0.82)',
@@ -264,7 +311,7 @@ const SunControls: React.FC<SunControlsProps> = ({
       <Box sx={WARNING_BOX_SX}>
         <WarningAmberIcon sx={{ fontSize: 17, flexShrink: 0 }} />
         <Typography variant="caption" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
-          Přibliž mapu, aby se stíny zobrazily.
+          {t('layerswitcher.shadows_zoom_in')}
         </Typography>
       </Box>
     )}
@@ -292,10 +339,20 @@ const SunControls: React.FC<SunControlsProps> = ({
       sx={{ mt: 0.5 }}
     >
       <Stack direction="row" gap={0.5}>
-        <QuickButton label="Dopoledne" onClick={onMorning} />
-        <QuickButton label="Odpoledne" onClick={onAfternoon} />
+        <QuickButton
+          label={t('layerswitcher.shadows_morning')}
+          onClick={onMorning}
+        />
+        <QuickButton
+          label={t('layerswitcher.shadows_afternoon')}
+          onClick={onAfternoon}
+        />
       </Stack>
-      <QuickButton label="Teď" onClick={setNow} />
+      <QuickButton
+        label={t('layerswitcher.shadows_now')}
+        onClick={setNow}
+        emphasized
+      />
     </Stack>
   </Panel>
 );
@@ -380,13 +437,16 @@ const useSunHillshadeEffect = (
       applySunShadow(map, buildDate(d, m), lat, lon);
     };
 
-    // setStyle() (e.g. switching base layer) wipes our custom layer,
-    // so re-add it whenever the style finishes (re)loading.
     map.on('styledata', reapply);
-    reapply();
+    if (map.isStyleLoaded()) {
+      reapply();
+    } else {
+      map.once('idle', reapply);
+    }
 
     return () => {
       map.off('styledata', reapply);
+      map.off('idle', reapply);
       removeSunShadow(map);
     };
   }, [enabled, latLonRef]);
@@ -419,6 +479,18 @@ const useLowZoom = (enabled: boolean) => {
   return lowZoom;
 };
 
+const useSunShadowLoading = (enabled: boolean) => {
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return undefined;
+    }
+    return subscribeSunShadowLoading(setLoading);
+  }, [enabled]);
+  return enabled && loading;
+};
+
 type SunShadowContextValue = {
   enabled: boolean;
   setEnabled: (v: boolean) => void;
@@ -433,9 +505,27 @@ type SunShadowContextValue = {
   min: number;
   max: number;
   lowZoom: boolean;
+  isLoading: boolean;
 };
 
 const SunShadowContext = createContext<SunShadowContextValue | null>(null);
+
+let enableSunShadow: (() => void) | null = null;
+let pendingOpenPopover = false;
+
+const SHADOW_PREVIEW_ZOOM = SHADOW_MIN_ZOOM + 1;
+
+/** Turn shadows on from outside the provider (e.g. About page CTA). */
+export const activateSunShadow = () => {
+  const apply = () => {
+    pendingOpenPopover = true;
+    enableSunShadow?.();
+    const map = getGlobalMap();
+    if (!map || map.getZoom() >= SHADOW_MIN_ZOOM) return;
+    map.easeTo({ zoom: SHADOW_PREVIEW_ZOOM, duration: 1200, essential: true });
+  };
+  window.setTimeout(apply, 0);
+};
 
 const useSunShadowContext = () => {
   const ctx = useContext(SunShadowContext);
@@ -460,11 +550,19 @@ export const SunShadowProvider = ({
   const [day, setDay] = useState(todayIso);
   const [minutes, setMinutes] = useState(nowMinutes);
 
+  useEffect(() => {
+    enableSunShadow = () => setEnabled(true);
+    return () => {
+      enableSunShadow = null;
+    };
+  }, []);
+
   const latLonRef = useRef({ lat, lon });
   latLonRef.current = { lat, lon };
 
   useSunHillshadeEffect(enabled, day, minutes, latLonRef);
   const lowZoom = useLowZoom(enabled);
+  const isLoading = useSunShadowLoading(enabled && !lowZoom);
 
   const { marks, range, onMorning, onAfternoon } = useSunQuickActions(
     day,
@@ -499,6 +597,7 @@ export const SunShadowProvider = ({
       min: range.min,
       max: range.max,
       lowZoom,
+      isLoading,
     }),
     [
       enabled,
@@ -511,6 +610,7 @@ export const SunShadowProvider = ({
       range.min,
       range.max,
       lowZoom,
+      isLoading,
     ],
   );
 
@@ -547,6 +647,7 @@ export const SunShadowMapButton = () => {
   const isMobileMode = useMobileMode();
   const { open, toggle, setOpen } = useExclusiveMapControl('shadow');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const {
     enabled,
     setEnabled,
@@ -561,7 +662,17 @@ export const SunShadowMapButton = () => {
     min,
     max,
     lowZoom,
+    isLoading,
   } = useSunShadowContext();
+
+  useEffect(() => {
+    if (!enabled || !pendingOpenPopover) return;
+    pendingOpenPopover = false;
+    const el = buttonRef.current;
+    if (!el) return;
+    setAnchorEl(el);
+    setOpen(true);
+  }, [enabled, setOpen]);
 
   if (!enabled) return null;
 
@@ -569,36 +680,42 @@ export const SunShadowMapButton = () => {
 
   return (
     <>
-      <Badge
-        color="success"
-        variant="dot"
-        overlap="circular"
-        invisible={hiddenByZoom}
-      >
-        <Tooltip
-          title={
-            hiddenByZoom
-              ? 'Přibliž mapu, aby se stíny zobrazily'
-              : t('layerswitcher.shadows')
-          }
-          arrow
+      <MapControlAppear>
+        <Badge
+          color={hiddenByZoom ? 'error' : 'success'}
+          variant="dot"
+          overlap="circular"
+          invisible={isLoading && !hiddenByZoom}
         >
-          <MapControlButton
-            $isOpened={open}
-            size={isMobileMode ? 'large' : 'medium'}
-            onClick={(e) => {
-              setAnchorEl(e.currentTarget);
-              toggle();
-            }}
+          <Tooltip
+            title={
+              hiddenByZoom
+                ? t('layerswitcher.shadows_zoom_in')
+                : t('layerswitcher.shadows')
+            }
+            arrow
           >
-            {hiddenByZoom ? (
-              <WarningAmberIcon fontSize="small" color="warning" />
-            ) : (
+            <MapControlButton
+              ref={buttonRef}
+              $isOpened={open}
+              size={isMobileMode ? 'large' : 'medium'}
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+                toggle();
+              }}
+            >
+              {isLoading && (
+                <CircularProgress
+                  size={isMobileMode ? 36 : 28}
+                  thickness={4}
+                  sx={{ position: 'absolute', inset: 0, margin: 'auto' }}
+                />
+              )}
               <WbSunnyIcon fontSize="small" color="primary" />
-            )}
-          </MapControlButton>
-        </Tooltip>
-      </Badge>
+            </MapControlButton>
+          </Tooltip>
+        </Badge>
+      </MapControlAppear>
       <PopperWithArrow
         title={t('layerswitcher.shadows')}
         isOpen={open}
@@ -606,6 +723,7 @@ export const SunShadowMapButton = () => {
         placement="top-end"
         offset={[0, 10]}
         paperSx={GLASS_PAPER_SX}
+        loading={isLoading}
         addition={
           <Switch
             size="small"

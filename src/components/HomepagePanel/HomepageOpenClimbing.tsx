@@ -26,16 +26,7 @@ import {
   PanelContent,
   PanelScrollbars,
 } from '../utils/PanelHelpers';
-import { DividerOpenClimbing } from './DividerOpenClimbing';
 import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
-import { LinkCard, LinkRow } from './LinkCard';
-import { SupportUs } from './SupportUs';
-
-const Divider = styled.div`
-  align-items: center;
-  display: flex;
-  margin: 40px -32px 24px -32px;
-`;
 
 const Content = styled.div`
   height: 100%;
@@ -110,20 +101,6 @@ const Description = () => (
     <Box component="strong" color="text.primary">
       {t('homepage.openclimbing_description_p2')}
     </Box>
-  </Typography>
-);
-
-const AboutOpenStreetMap = () => (
-  <Typography variant="body2">
-    {t('homepage.climbing.expanded_description_p1')}{' '}
-    <Link href="https://wikipedia.org/wiki/OpenStreetMap" target="_blank">
-      OpenStreetMap
-    </Link>{' '}
-    {t('homepage.climbing.expanded_description_p2')}{' '}
-    <Link href="https://wikipedia.org/wiki/Wikimedia_Commons" target="_blank">
-      Wikimedia Commons
-    </Link>
-    {t('homepage.climbing.expanded_description_p3')}
   </Typography>
 );
 
@@ -227,18 +204,41 @@ const Gallery = () => (
   </Box>
 );
 
-const ImportantLinks = () => (
-  <>
-    <LinkCard>
-      <LinkRow
-        icon={<img src="/logo-osm.svg" alt="OpenStreetMap logo" width={24} />}
-        title="OpenStreetMap"
-      >
-        <AboutOpenStreetMap />
-      </LinkRow>
-    </LinkCard>
-    <SupportUs />
-  </>
+const AboutTeaser = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  text-decoration: none !important;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    ${({ theme }) => theme.palette.primary.main} 0%,
+    ${({ theme }) => theme.palette.background.searchBox} 100%
+  );
+
+  &:hover,
+  &:focus {
+    text-decoration: none !important;
+    filter: brightness(1.06);
+  }
+`;
+
+const AboutLink = () => (
+  <AboutTeaser href="/about" locale={intl.lang}>
+    <Stack spacing={0.5} minWidth={0}>
+      <Typography variant="subtitle1" fontWeight={800} lineHeight={1.25}>
+        {t('topbar.about')}
+      </Typography>
+      <Typography variant="body2" sx={{ opacity: 0.9 }} lineHeight={1.45}>
+        {t('homepage.about_banner_desc')}
+      </Typography>
+    </Stack>
+    <ArrowForwardIcon sx={{ flexShrink: 0 }} />
+  </AboutTeaser>
 );
 
 const Footer = () => (
@@ -288,7 +288,7 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
           <Brand $peek={isPeek}>OpenClimbing</Brand>
         </BrandBar>
       </MobileOnly>
-      <ClosePanelButton right onClick={onClose} style={{ zIndex: 6 }} />
+      <ClosePanelButton right onClick={onClose} />
       <Content>
         <Stack height="100%">
           <Stack flex={1} justifyContent="center">
@@ -306,11 +306,7 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
             <Buttons onClose={onClose} />
           </Stack>
 
-          <Divider>
-            <DividerOpenClimbing width="100%" />
-          </Divider>
-
-          <ImportantLinks />
+          <AboutLink />
           <Footer />
         </Stack>
       </Content>

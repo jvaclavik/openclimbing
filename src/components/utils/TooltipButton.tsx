@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { IconButton, SxProps, Theme, Tooltip } from '@mui/material';
+import { Box, IconButton, SxProps, Theme, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { isMobileDevice, useBoolState } from '../helpers';
 
@@ -30,27 +30,45 @@ const useClickAwayListener = (
 type Props = {
   tooltip: React.ReactNode;
   sx?: SxProps<Theme>;
+  children?: React.ReactNode;
+  enterDelay?: number;
+  enterNextDelay?: number;
 };
 
 /**
- * Button with InfoIcon, which works on both desktop and mobile.
- * (Desktop onHover, Mobile onClick)
+ * Desktop: tooltip on hover. Mobile: tooltip on tap (MUI hover tooltips
+ * don't work on touch). Optional children replace the default info icon.
  */
-export const TooltipButton = ({ tooltip, sx }: Props) => {
+export const TooltipButton = ({
+  tooltip,
+  sx,
+  children,
+  enterDelay,
+  enterNextDelay,
+}: Props) => {
   const isMobile = isMobileDevice();
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [mobileTooltipShown, show, hide] = useBoolState(false);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isMobile) {
+      e.preventDefault();
       show();
     }
-    e.stopPropagation();
   };
 
   useClickAwayListener(tooltipRef, hide, isMobile);
 
-  const button = (
+  const trigger = children ? (
+    <Box
+      component="span"
+      onClick={handleClick}
+      sx={{ display: 'inline-flex', lineHeight: 0, cursor: 'help' }}
+    >
+      {children}
+    </Box>
+  ) : (
     <IconButton onClick={handleClick} sx={sx} aria-label="info button">
       <InfoOutlinedIcon fontSize="inherit" color="inherit" />
     </IconButton>
@@ -65,17 +83,18 @@ export const TooltipButton = ({ tooltip, sx }: Props) => {
       open={mobileTooltipShown}
       ref={tooltipRef}
     >
-      {button}
+      {trigger}
     </Tooltip>
   ) : (
     <Tooltip
       arrow
       title={tooltip}
       placement="top"
-      //open={isMobile ? mobileTooltipShown : undefined} -- broken, see above
+      enterDelay={enterDelay}
+      enterNextDelay={enterNextDelay}
       ref={tooltipRef}
     >
-      {button}
+      {trigger}
     </Tooltip>
   );
 };

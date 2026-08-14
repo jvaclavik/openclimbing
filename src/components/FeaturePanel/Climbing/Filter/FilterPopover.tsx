@@ -1,7 +1,7 @@
-import { Button, Stack, Box, Typography } from '@mui/material';
+import { Button, IconButton, Stack, Tooltip } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import React from 'react';
-import { t, Translation } from '../../../../services/intl';
+import { t } from '../../../../services/intl';
 import { MinimumRoutesFilter } from './MinimumRoutesFilter';
 import { GradeFilter } from './GradeFilter';
 import { ClimbingTypeFilter } from './ClimbingTypeFilter';
@@ -13,56 +13,7 @@ import {
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { Placement } from '@popperjs/core';
 import { Setter } from '../../../../types';
-import { useMapStateContext } from '../../../utils/MapStateContext';
-
-const ResetButton = (props: { onClick: () => void }) => (
-  <Button
-    onClick={props.onClick}
-    size="small"
-    color="secondary"
-    variant="outlined"
-    startIcon={<RestartAltIcon fontSize="small" />}
-  >
-    {t('crag_filter.reset')}
-  </Button>
-);
-
-const DoneButton = (props: { onClick: () => void }) => (
-  <Button
-    variant="contained"
-    size="small"
-    onClick={props.onClick}
-    sx={{ mr: 1 }}
-  >
-    {t('crag_filter.done')}
-  </Button>
-);
-
-const ZoomWarning = () => {
-  // First zoom level without omitted pois due to "optimization to grid"
-  // - see climbingTileSource#updateData() loads tile level 9 for mapzoom >= 10
-  // - see getClimbingTile() to which zoom levels "isOptimizedToGrid"
-  const ZOOM_LEVEL = 10;
-
-  const [zoom, lat, lon] = useMapStateContext().view;
-  if (parseFloat(zoom) >= ZOOM_LEVEL) {
-    return null;
-  }
-  return (
-    // TODO the FilterPopover should be probably fixed to maxWidth. But maybe there is a reason.
-    <Box mx={2} pb={1} sx={{ maxWidth: '300px' }}>
-      <Typography variant="body2">
-        <Translation
-          id="crag_filter.zoom_in"
-          values={{ zoom: `${ZOOM_LEVEL}+ (~3 km)` }}
-          tags={{
-            link: 'a href="https://community.openclimbing.org/d/12-map-filtering-is-in-beta" target="_blank"',
-          }}
-        />
-      </Typography>
-    </Box>
-  );
-};
+import { FilterBody } from './filterUi';
 
 type FilterPopoverProps = {
   anchorEl: null | HTMLElement;
@@ -82,7 +33,6 @@ export const FilterPopover = ({
   const { reset, isDefaultFilter, poiTypes } =
     useUserSettingsContext().climbingFilter;
 
-  // Show difficulty/route filters only for rock POIs (e.g. not for via ferratas)
   const showRockFilters = poiTypes.rock;
   const showFamilyFriendly = poiTypes.rock || poiTypes.ferrata;
   const showAdvancedFilters = showRockFilters || showFamilyFriendly;
@@ -99,13 +49,31 @@ export const FilterPopover = ({
       sx={{ minWidth: 320, maxWidth: 360 }}
       paperSx={GLASS_PAPER_SX}
       addition={
-        <Stack direction="row" gap={1} alignItems="center">
-          {!isDefaultFilter && <ResetButton onClick={reset} />}
-          <DoneButton onClick={handleClose} />
+        <Stack direction="row" gap={0.5} alignItems="center" mr={1}>
+          <Tooltip title={t('crag_filter.reset')}>
+            <span>
+              <IconButton
+                size="small"
+                onClick={reset}
+                disabled={isDefaultFilter}
+                aria-label={t('crag_filter.reset')}
+              >
+                <RestartAltIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleClose}
+            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 700 }}
+          >
+            {t('crag_filter.done')}
+          </Button>
         </Stack>
       }
     >
-      <Box>
+      <FilterBody>
         <ClimbingTypeFilter />
         {showRockFilters && (
           <>
@@ -123,8 +91,7 @@ export const FilterPopover = ({
             showLength={showRockFilters}
           />
         )}
-        <ZoomWarning />
-      </Box>
+      </FilterBody>
     </PopperWithArrow>
   );
 };

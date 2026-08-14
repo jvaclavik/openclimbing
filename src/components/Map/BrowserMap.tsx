@@ -11,7 +11,6 @@ import { useUpdateViewOnMove } from './behaviour/useUpdateViewOnMove';
 import { useUpdateStyle } from './behaviour/useUpdateStyle';
 import { useInitMap } from './behaviour/useInitMap';
 import { Translation } from '../../services/intl';
-import { useToggleTerrainControl } from './behaviour/useToggleTerrainControl';
 import { webglSupported } from './helpers';
 import { useOnMapLongPressed } from './behaviour/useOnMapLongPressed';
 import { useAddTopRightControls } from './useAddTopRightControls';
@@ -130,7 +129,6 @@ const BrowserMap = () => {
   const { viewForMap, setViewFromMap, setBbox, activeLayers } =
     useMapStateContext();
   useUpdateViewOnMove(map, setViewFromMap, setBbox);
-  useToggleTerrainControl(map);
   useUpdateMap(map, viewForMap);
   useUpdateStyle(
     map,

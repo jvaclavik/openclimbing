@@ -2,9 +2,10 @@ import { useState } from 'react';
 import {
   alpha,
   Box,
+  CircularProgress,
+  ClickAwayListener,
   Divider,
   Fade,
-  lighten,
   Paper,
   Popper,
   Stack,
@@ -15,6 +16,7 @@ import {
 import React from 'react';
 import styled from '@emotion/styled';
 import { Placement } from '@popperjs/core';
+import { t } from '../../services/intl';
 
 const styles = {
   arrow: {
@@ -33,18 +35,32 @@ const styles = {
   },
 };
 
-const ELEVATION = 1;
+const ELEVATION = 8;
 
-// Translucent, blurred "glass" background for popovers that should let the map
-// shine through (used by the map filter and the sun-shadow popover).
+// Frosted card over the map: opaque enough for text/chips/sliders to stay
+// readable, still slightly translucent so the map peeks through.
 export const GLASS_PAPER_SX: SxProps<Theme> = {
-  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.6),
-  backdropFilter: 'blur(15px)',
-  WebkitBackdropFilter: 'blur(15px)',
+  backgroundColor: (theme) =>
+    alpha(
+      theme.palette.background.paper,
+      theme.palette.mode === 'dark' ? 0.88 : 0.94,
+    ),
+  backdropFilter: 'blur(22px) saturate(1.35)',
+  WebkitBackdropFilter: 'blur(22px) saturate(1.35)',
+  border: (theme) =>
+    `1px solid ${alpha(
+      theme.palette.text.primary,
+      theme.palette.mode === 'dark' ? 0.16 : 0.1,
+    )}`,
+  boxShadow: (theme) =>
+    theme.palette.mode === 'dark'
+      ? '0 12px 40px rgba(0, 0, 0, 0.55)'
+      : '0 12px 36px rgba(0, 0, 0, 0.18)',
+  borderRadius: '12px',
 };
 
 const StyledPopper = styled(Popper)(({ theme }) => {
-  const bg = lighten(theme.palette.background.paper, ELEVATION * 0.05);
+  const bg = theme.palette.background.paper;
   return {
     '&[data-popper-placement*="bottom"] .arrow': {
       top: 0,
@@ -101,6 +117,8 @@ type PopperWithArrowProps = {
   offset?: number[];
   sx?: React.CSSProperties;
   paperSx?: SxProps<Theme>;
+  loading?: boolean;
+  onClickAway?: (event: MouseEvent | TouchEvent) => void;
 };
 
 export const PopperWithArrow = ({
@@ -113,6 +131,8 @@ export const PopperWithArrow = ({
   offset = [0, 0],
   sx,
   paperSx,
+  loading,
+  onClickAway,
 }: PopperWithArrowProps) => {
   const [arrowRef, setArrowRef] = useState<HTMLElement | null>(null);
 
@@ -160,49 +180,80 @@ export const PopperWithArrow = ({
       {({ TransitionProps }) => (
         <Fade {...TransitionProps} timeout={350}>
           <div>
-            <Box
-              component="span"
-              className="arrow"
-              ref={setArrowRef}
-              sx={styles.arrow}
-            />
-
-            <Paper
-              elevation={ELEVATION}
-              sx={{
-                // Never grow taller than the viewport; keep the header pinned
-                // and let the body scroll so tall content stays usable on mobile.
-                maxHeight: 'calc(100dvh - 16px)',
-                display: 'flex',
-                flexDirection: 'column',
-                ...paperSx,
-              }}
+            <ClickAwayListener
+              onClickAway={onClickAway ?? (() => {})}
+              mouseEvent={onClickAway ? 'onClick' : false}
+              touchEvent={onClickAway ? 'onTouchEnd' : false}
             >
-              {title && (
-                <>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    sx={{ flexShrink: 0 }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight={900}
-                      ml={2}
-                      mr={1}
-                      mt={1}
-                      mb={1}
-                    >
-                      {title}
-                    </Typography>
-                    {addition}
-                  </Stack>
-                  <Divider sx={{ flexShrink: 0 }} />
-                </>
-              )}
-              <Box sx={{ overflowY: 'auto', minHeight: 0 }}>{children}</Box>
-            </Paper>
+              <div>
+                <Box
+                  component="span"
+                  className="arrow"
+                  ref={setArrowRef}
+                  sx={styles.arrow}
+                />
+                <Paper
+                  elevation={ELEVATION}
+                  sx={{
+                    // Never grow taller than the viewport; keep the header pinned
+                    // and let the body scroll so tall content stays usable on mobile.
+                    maxHeight: 'calc(100dvh - 16px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    borderRadius: '12px',
+                    ...paperSx,
+                  }}
+                >
+                  {title && (
+                    <>
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{
+                          flexShrink: 0,
+                          bgcolor: (theme) =>
+                            alpha(theme.palette.text.primary, 0.04),
+                        }}
+                      >
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={1}
+                          sx={{ ml: 2, mr: 1, my: 1, minWidth: 0, flex: 1 }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={800}
+                            component="div"
+                            noWrap
+                          >
+                            {title}
+                          </Typography>
+                          {loading && (
+                            <CircularProgress
+                              size={16}
+                              thickness={5}
+                              aria-label={t('layerswitcher.loading')}
+                            />
+                          )}
+                        </Stack>
+                        {addition}
+                      </Stack>
+                      <Divider
+                        sx={{
+                          flexShrink: 0,
+                          borderColor: (theme) =>
+                            alpha(theme.palette.text.primary, 0.14),
+                        }}
+                      />
+                    </>
+                  )}
+                  <Box sx={{ overflowY: 'auto', minHeight: 0 }}>{children}</Box>
+                </Paper>
+              </div>
+            </ClickAwayListener>
           </div>
         </Fade>
       )}

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Tooltip } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { t } from '../../../services/intl';
+import { TooltipButton } from '../../utils/TooltipButton';
 
 const SIZE = 14;
 const STROKE = 2;
@@ -40,7 +40,7 @@ export const PhotoCoverageRing = ({ total, withPhoto }: Props) => {
   });
 
   return (
-    <Tooltip arrow enterDelay={700} enterNextDelay={700} title={label}>
+    <TooltipButton tooltip={label} enterDelay={700} enterNextDelay={700}>
       <svg
         width={SIZE}
         height={SIZE}
@@ -72,6 +72,6 @@ export const PhotoCoverageRing = ({ total, withPhoto }: Props) => {
           />
         )}
       </svg>
-    </Tooltip>
+    </TooltipButton>
   );
 };

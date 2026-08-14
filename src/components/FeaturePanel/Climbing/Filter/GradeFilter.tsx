@@ -7,6 +7,7 @@ import React from 'react';
 import { Interval } from '../../../utils/userSettings/getClimbingFilter';
 import styled from '@emotion/styled';
 import { useGetSliderColors } from '../../../../services/tagging/climbing/gradeData';
+import { FilterCard, FilterSectionLabel } from './filterUi';
 
 const convertToUnique = ([minIndex, maxIndex]: Interval, grades: string[]) => {
   const uniqueGrades = [...new Set(grades)];
@@ -32,13 +33,18 @@ const StyledSlider = styled(Slider, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $colors: string }>`
   .MuiSlider-rail {
-    background-image:${({ $colors }) => $colors});
+    background-image: ${({ $colors }) => $colors};
     opacity: 1;
     height: 6px;
+    border-radius: 3px;
   }
   .MuiSlider-track {
     background: none;
     border: 0;
+  }
+  .MuiSlider-thumb {
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -66,42 +72,37 @@ export const GradeFilter = () => {
   const { gradeInterval, grades } = climbingFilter;
 
   return (
-    <>
+    <FilterCard>
       <Stack
         direction="row"
         spacing={1}
         justifyContent="space-between"
         alignItems="center"
-        mr={2}
-        ml={2}
-        mt={1}
       >
-        {t('crag_filter.grade')}
-        <GradeSystemSelect showDefaultOnButton />
+        <FilterSectionLabel $flush>{t('crag_filter.grade')}</FilterSectionLabel>
+        <GradeSystemSelect showDefaultOnButton size="tiny" />
       </Stack>
-      <Stack gap={1} ml={2} mr={2} mb={2}>
-        <div>
-          {t('crag_filter.grade_from')}{' '}
-          <RouteDifficultyBadge
-            routeDifficulty={{
-              gradeSystem,
-              grade: grades[gradeInterval[0]],
-            }}
-          />{' '}
-          {grades[gradeInterval[1]] && (
-            <>
-              {t('crag_filter.grade_to')}{' '}
-              <RouteDifficultyBadge
-                routeDifficulty={{
-                  gradeSystem,
-                  grade: grades[gradeInterval[1]],
-                }}
-              />
-            </>
-          )}
-        </div>
-        <GradesFilterSlider />
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mt={0.5}
+        mb={0.25}
+      >
+        <RouteDifficultyBadge
+          routeDifficulty={{
+            gradeSystem,
+            grade: grades[gradeInterval[0]],
+          }}
+        />
+        <RouteDifficultyBadge
+          routeDifficulty={{
+            gradeSystem,
+            grade: grades[gradeInterval[1]],
+          }}
+        />
       </Stack>
-    </>
+      <GradesFilterSlider />
+    </FilterCard>
   );
 };

@@ -18,17 +18,6 @@ export const TintedCard = styled.div`
   background-color: ${({ theme }) => tint(theme, 0.04)};
 `;
 
-export const IconBubble = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background-color: ${({ theme }) => tint(theme, 0.06)};
-  color: ${({ theme }) => theme.palette.primary.main};
-`;
-
 export const GradientHeading = styled.h1`
   margin: 0;
   font-family: ${({ theme }) => theme.typography.h1.fontFamily};

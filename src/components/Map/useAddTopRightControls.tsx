@@ -17,7 +17,7 @@ const navigation = {
   }),
 };
 
-// TODO create custom NavigationControl and move it there (see OsmappTerrainControl)
+// TODO create custom NavigationControl and move it there
 export const COMPASS_TOOLTIP = t('map.compass_tooltip');
 const updateCompassFactory = (map: any, mobileMode: boolean) => () => {
   const bearing = map.getBearing();

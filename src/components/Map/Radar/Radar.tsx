@@ -16,6 +16,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import {
   Badge,
   Box,
+  CircularProgress,
   IconButton,
   ListItemButton,
   ListItemIcon,
@@ -34,6 +35,8 @@ import { t } from '../../../services/intl';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
 import { useMobileMode } from '../../helpers';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
+import { MapControlAppear } from '../MapControlAppear';
+import { useMapSourceLoading } from '../useMapSourceLoading';
 import {
   applyOverlay,
   isInRadarCoverage,
@@ -59,6 +62,7 @@ const MapControlButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $isOpened: boolean }>`
   pointer-events: all;
+  position: relative;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(15px);
 
@@ -155,7 +159,7 @@ const RadarControls = ({
     return (
       <Panel $inset={inset}>
         <Typography variant="caption" color="text.secondary">
-          Načítám radarová data…
+          {t('layerswitcher.radar_loading')}
         </Typography>
       </Panel>
     );
@@ -165,7 +169,7 @@ const RadarControls = ({
     return (
       <Panel $inset={inset}>
         <Typography variant="caption" color="text.secondary">
-          Radarová data se nepodařilo načíst.
+          {t('layerswitcher.radar_error')}
         </Typography>
       </Panel>
     );
@@ -177,7 +181,14 @@ const RadarControls = ({
   return (
     <Panel $inset={inset}>
       <Stack direction="row" alignItems="center" spacing={1}>
-        <Tooltip title={playing ? 'Zastavit' : 'Přehrát'} arrow>
+        <Tooltip
+          title={
+            playing
+              ? t('layerswitcher.radar_pause')
+              : t('layerswitcher.radar_play')
+          }
+          arrow
+        >
           <IconButton
             size="small"
             onClick={togglePlay}
@@ -215,8 +226,10 @@ const RadarControls = ({
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {isLatest
-            ? 'poslední snímek'
-            : `−${(frames.length - 1 - index) * 5} min`}
+            ? t('layerswitcher.radar_latest')
+            : t('layerswitcher.radar_ago', {
+                minutes: (frames.length - 1 - index) * 5,
+              })}
         </Typography>
       </Stack>
 
@@ -225,7 +238,7 @@ const RadarControls = ({
         color="text.secondary"
         sx={{ display: 'block', mt: 1 }}
       >
-        Průhlednost
+        {t('layerswitcher.opacity')}
       </Typography>
       <Slider
         size="small"
@@ -242,7 +255,7 @@ const RadarControls = ({
         color="text.secondary"
         sx={{ display: 'block', mt: 0.5 }}
       >
-        Data © ČHMÚ · pokrytí Česko a okolí
+        {t('layerswitcher.radar_credit')}
       </Typography>
     </Panel>
   );
@@ -260,6 +273,7 @@ type RadarContextValue = {
   togglePlay: () => void;
   opacity: number;
   setOpacity: (v: number) => void;
+  waitingForMap: boolean;
 };
 
 const RadarContext = createContext<RadarContextValue | null>(null);
@@ -295,6 +309,14 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
       staleTime: 60_000,
     },
   );
+
+  const hasFrame = !!frames?.length;
+  const sourceLoading = useMapSourceLoading(
+    RADAR_IDS.sourceId,
+    active && hasFrame,
+    { untilVisible: true },
+  );
+  const waitingForMap = active && (!hasFrame || sourceLoading);
 
   const framesRef = useRef<RadarFrame[] | undefined>(frames);
   framesRef.current = frames;
@@ -389,6 +411,7 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
       togglePlay,
       opacity,
       setOpacity,
+      waitingForMap,
     }),
     [
       inCoverage,
@@ -400,6 +423,7 @@ export const RadarProvider = ({ children }: { children: React.ReactNode }) => {
       playing,
       togglePlay,
       opacity,
+      waitingForMap,
     ],
   );
 
@@ -451,42 +475,48 @@ export const RadarMapButton = () => {
     togglePlay,
     opacity,
     setOpacity,
+    waitingForMap,
   } = useRadarContext();
 
   if (!enabled) return null;
 
   return (
     <>
-      <Badge
-        color="success"
-        variant="dot"
-        overlap="circular"
-        invisible={!inCoverage}
-      >
-        <Tooltip
-          title={
-            inCoverage
-              ? t('layerswitcher.radar')
-              : t('layerswitcher.radar_unavailable')
-          }
-          arrow
+      <MapControlAppear>
+        <Badge
+          color={inCoverage ? 'success' : 'error'}
+          variant="dot"
+          overlap="circular"
+          invisible={waitingForMap && inCoverage}
         >
-          <MapControlButton
-            $isOpened={open}
-            size={isMobileMode ? 'large' : 'medium'}
-            onClick={(e) => {
-              setAnchorEl(e.currentTarget);
-              toggle();
-            }}
+          <Tooltip
+            title={
+              inCoverage
+                ? t('layerswitcher.radar')
+                : t('layerswitcher.radar_unavailable')
+            }
+            arrow
           >
-            {inCoverage ? (
+            <MapControlButton
+              $isOpened={open}
+              size={isMobileMode ? 'large' : 'medium'}
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+                toggle();
+              }}
+            >
+              {waitingForMap && (
+                <CircularProgress
+                  size={isMobileMode ? 36 : 28}
+                  thickness={4}
+                  sx={{ position: 'absolute', inset: 0, margin: 'auto' }}
+                />
+              )}
               <RadarIcon fontSize="small" color="primary" />
-            ) : (
-              <WarningAmberIcon fontSize="small" color="warning" />
-            )}
-          </MapControlButton>
-        </Tooltip>
-      </Badge>
+            </MapControlButton>
+          </Tooltip>
+        </Badge>
+      </MapControlAppear>
       <PopperWithArrow
         title={t('layerswitcher.radar')}
         isOpen={open}
@@ -494,6 +524,7 @@ export const RadarMapButton = () => {
         placement="top-end"
         offset={[0, 10]}
         paperSx={GLASS_PAPER_SX}
+        loading={waitingForMap}
         addition={
           <Switch
             size="small"

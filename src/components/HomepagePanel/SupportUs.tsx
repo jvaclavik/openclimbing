@@ -1,24 +1,12 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import CloseIcon from '@mui/icons-material/Close';
-import {
-  AppBar,
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  IconButton,
-  Stack,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useUserThemeContext } from '../../helpers/theme';
 import { t, Translation } from '../../services/intl';
+import { BitcoinDialog } from './BitcoinDialog';
+import { DONATION_LINKS, GITHUB_REPO_URL } from './donationLinks';
 import { CardRow, CardTitle, LinkCard } from './LinkCard';
 
-// Dvojitý úder (“lub-dub”) + pauza, v 1s cyklu (což odpovídá cca 60 BPM).
 const heartbeat = keyframes`
   0% {
     transform: scale(1);
@@ -53,29 +41,8 @@ const HelpList = styled.ul`
   }
 `;
 
-const Qr = styled.img<{ $isDark: boolean }>`
-  ${({ $isDark }) => $isDark && `filter: invert(1);`}
-`;
-
-const DONATION_LINKS = [
-  { label: 'Github sponsor', href: 'https://github.com/sponsors/jvaclavik' },
-  {
-    label: 'Buy me a coffee',
-    href: 'https://buymeacoffee.com/openclimbing.org',
-  },
-  { label: 'Revolut', href: 'https://revolut.me/jvaclavik' },
-];
-
-// This function doesn't contain any logic - so no extraction needed.
-// eslint-disable-next-line max-lines-per-function
 export const SupportUs = () => {
   const [isBitcoinDialogOpen, setIsBitcoinDialogOpen] = useState(false);
-  const { currentTheme } = useUserThemeContext();
-  const isDark = currentTheme === 'dark';
-
-  const onClose = () => {
-    setIsBitcoinDialogOpen(false);
-  };
 
   return (
     <Box mt={2}>
@@ -117,7 +84,7 @@ export const SupportUs = () => {
                 <Translation
                   id="support_us.develop"
                   tags={{
-                    link: 'a href="https://github.com/jvaclavik/openclimbing" target="_blank"',
+                    link: `a href="${GITHUB_REPO_URL}" target="_blank"`,
                   }}
                 />
               </Typography>
@@ -156,26 +123,10 @@ export const SupportUs = () => {
         </CardRow>
       </LinkCard>
 
-      <Dialog open={isBitcoinDialogOpen} onClose={onClose}>
-        <AppBar position="static" color="transparent">
-          <Toolbar>
-            <Typography noWrap variant="h6" component="div">
-              {t('support_us.bitcoin_dialog_title')}
-            </Typography>
-
-            <Tooltip title="Close crag detail">
-              <IconButton color="primary" edge="end" onClick={onClose}>
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Toolbar>
-        </AppBar>
-
-        <DialogContent dividers>
-          <Qr src="/openclimbing/btcln.png" $isDark={isDark} />
-          <Typography variant="body1">openclimbing@lnbits.cz</Typography>
-        </DialogContent>
-      </Dialog>
+      <BitcoinDialog
+        open={isBitcoinDialogOpen}
+        onClose={() => setIsBitcoinDialogOpen(false)}
+      />
     </Box>
   );
 };

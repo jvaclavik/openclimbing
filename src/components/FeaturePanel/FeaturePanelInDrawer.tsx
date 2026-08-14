@@ -1,6 +1,5 @@
 import React, { Ref, useCallback } from 'react';
 import Router from 'next/router';
-import { useTheme } from '@mui/material';
 import { FeaturePanel } from './FeaturePanel';
 import { FeaturePanelErrorBoundary } from './FeaturePanelErrorBoundary';
 import { Drawer } from '../utils/Drawer';
@@ -18,7 +17,6 @@ type FeaturePanelInDrawerProps = {
 export const FeaturePanelInDrawer = ({
   scrollRef,
 }: FeaturePanelInDrawerProps) => {
-  const theme = useTheme();
   const { setFeature } = useFeatureContext();
 
   const onClose = useCallback(() => {
@@ -32,16 +30,7 @@ export const FeaturePanelInDrawer = ({
       topOffset={DRAWER_TOP_OFFSET}
       className={DRAWER_CLASSNAME}
       scrollRef={scrollRef}
-      overlay={
-        <ClosePanelButton
-          onClick={onClose}
-          style={{
-            backgroundColor: theme.palette.background.elevation,
-            color: theme.palette.text.secondary,
-            boxShadow: `0 0 0 1px ${theme.palette.divider}`,
-          }}
-        />
-      }
+      overlay={<ClosePanelButton onClick={onClose} />}
     >
       <FeaturePanelErrorBoundary>
         <FeaturePanel />

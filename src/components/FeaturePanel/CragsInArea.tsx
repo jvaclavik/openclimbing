@@ -227,15 +227,22 @@ const Gallery = ({ images, feature }) => {
   return (
     <Wrapper>
       <Slider>
-        {naturalSort(images, (item) => item.def.k).map((item, index) => (
-          <Image
-            key={item.image.imageUrl}
-            def={item.def}
-            image={item.image}
-            alt={`${alt} ${index + 1}`}
-            onClick={getClickHandler(feature, item.def)}
-          />
-        ))}
+        {naturalSort(images, (item) => item.def.k).map((item, index) => {
+          const owner = item.owner ?? feature;
+          const openTopo = getClickHandler(owner, item.def);
+          return (
+            <Image
+              key={item.image.imageUrl}
+              def={item.def}
+              image={item.image}
+              alt={`${alt} ${index + 1}`}
+              onClick={openTopo}
+              actionLabel={
+                openTopo ? t('featurepanel.photo_show_topo') : undefined
+              }
+            />
+          );
+        })}
       </Slider>
     </Wrapper>
   );
@@ -246,6 +253,7 @@ const getFeatureImages = (feature: Feature, limit = MAX_CRAG_CARD_IMAGES) =>
     feature?.imageDefs?.filter(isInstant)?.map((def) => ({
       def,
       image: getInstantImage(def),
+      owner: feature,
     })) ?? []
   ).slice(0, limit);
 

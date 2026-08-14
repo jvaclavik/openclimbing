@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  alpha,
-  Box,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from '@mui/material';
+import { alpha, Box } from '@mui/material';
 import styled from '@emotion/styled';
 import AreaGray from '../../../../../public/icons-climbing/icons/area-gray.svg';
 import ViaFerrataGray from '../../../../../public/icons-climbing/icons/via-ferrata-gray.svg';
@@ -14,6 +7,8 @@ import ClimbingGymGray from '../../../../../public/icons-climbing/icons/climbing
 import { t } from '../../../../services/intl';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { PoiTypes } from '../../../utils/userSettings/getClimbingFilter';
+import { FilterCard, FilterSectionLabel } from './filterUi';
+import { tint } from '../../../utils/panelUi';
 
 const Icon = styled.img`
   height: 22px;
@@ -22,78 +17,90 @@ const Icon = styled.img`
   filter: contrast(2);
 `;
 
-const TYPE_KEYS: (keyof PoiTypes)[] = ['rock', 'ferrata', 'gym'];
+const TypeGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+`;
 
-const selectedSx = (theme) => ({
-  '&.Mui-selected': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.18),
-    borderColor: theme.palette.primary.main,
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.28),
-    },
+const TypeTile = styled.button<{ $selected: boolean }>`
+  appearance: none;
+  font: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: inherit;
+  background: ${({ theme, $selected }) =>
+    $selected ? alpha(theme.palette.primary.main, 0.16) : tint(theme, 0.03)};
+  border: 1px solid
+    ${({ theme, $selected }) =>
+      $selected ? theme.palette.primary.main : tint(theme, 0.12)};
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: ${({ theme, $selected }) =>
+      $selected ? alpha(theme.palette.primary.main, 0.22) : tint(theme, 0.07)};
+  }
+`;
+
+const TypeCaption = styled.span`
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+`;
+
+const TYPES: {
+  key: keyof PoiTypes;
+  icon: string;
+  label:
+    | 'crag_filter.type_rock'
+    | 'crag_filter.type_ferrata'
+    | 'crag_filter.type_gym';
+}[] = [
+  { key: 'rock', icon: AreaGray.src, label: 'crag_filter.type_rock' },
+  {
+    key: 'ferrata',
+    icon: ViaFerrataGray.src,
+    label: 'crag_filter.type_ferrata',
   },
-});
+  { key: 'gym', icon: ClimbingGymGray.src, label: 'crag_filter.type_gym' },
+];
 
 export const ClimbingTypeFilter = () => {
   const { climbingFilter } = useUserSettingsContext();
   const { poiTypes, setPoiTypes } = climbingFilter;
 
-  const selectedTypes = TYPE_KEYS.filter((key) => poiTypes[key]);
-
-  const handleChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    next: (keyof PoiTypes)[],
-  ) => {
-    setPoiTypes({
-      rock: next.includes('rock'),
-      ferrata: next.includes('ferrata'),
-      gym: next.includes('gym'),
-    });
+  const toggle = (key: keyof PoiTypes) => {
+    setPoiTypes({ ...poiTypes, [key]: !poiTypes[key] });
   };
 
   return (
-    <Stack gap={1} ml={2} mr={2} mt={1} sx={{ paddingBottom: 2 }}>
-      <div>{t('crag_filter.type')}</div>
-      <ToggleButtonGroup
-        value={selectedTypes}
-        onChange={handleChange}
-        size="small"
-        aria-label={t('crag_filter.type')}
-      >
-        <ToggleButton
-          value="rock"
-          aria-label={t('crag_filter.type_rock')}
-          sx={selectedSx}
-        >
-          <Tooltip title={t('crag_filter.type_rock')}>
+    <FilterCard>
+      <FilterSectionLabel>{t('crag_filter.type')}</FilterSectionLabel>
+      <TypeGrid>
+        {TYPES.map(({ key, icon, label }) => (
+          <TypeTile
+            key={key}
+            type="button"
+            $selected={poiTypes[key]}
+            aria-pressed={poiTypes[key]}
+            aria-label={t(label)}
+            onClick={() => toggle(key)}
+          >
             <Box component="span" display="flex">
-              <Icon src={AreaGray.src} alt="" />
+              <Icon src={icon} alt="" />
             </Box>
-          </Tooltip>
-        </ToggleButton>
-        <ToggleButton
-          value="ferrata"
-          aria-label={t('crag_filter.type_ferrata')}
-          sx={selectedSx}
-        >
-          <Tooltip title={t('crag_filter.type_ferrata')}>
-            <Box component="span" display="flex">
-              <Icon src={ViaFerrataGray.src} alt="" />
-            </Box>
-          </Tooltip>
-        </ToggleButton>
-        <ToggleButton
-          value="gym"
-          aria-label={t('crag_filter.type_gym')}
-          sx={selectedSx}
-        >
-          <Tooltip title={t('crag_filter.type_gym')}>
-            <Box component="span" display="flex">
-              <Icon src={ClimbingGymGray.src} alt="" />
-            </Box>
-          </Tooltip>
-        </ToggleButton>
-      </ToggleButtonGroup>
-    </Stack>
+            <TypeCaption>{t(label)}</TypeCaption>
+          </TypeTile>
+        ))}
+      </TypeGrid>
+    </FilterCard>
   );
 };

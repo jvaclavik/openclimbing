@@ -28,6 +28,25 @@ const TILE_PADDING = 1;
 // Exported so the control panel can warn about it.
 export const SHADOW_MIN_ZOOM = 12;
 
+type LoadingListener = (loading: boolean) => void;
+const loadingListeners = new Set<LoadingListener>();
+let sunShadowLoading = false;
+
+const setSunShadowLoading = (next: boolean) => {
+  if (sunShadowLoading === next) return;
+  sunShadowLoading = next;
+  loadingListeners.forEach((fn) => fn(next));
+};
+
+/** True while DEM tiles are in flight and no shadow is on the map yet. */
+export const subscribeSunShadowLoading = (fn: LoadingListener) => {
+  loadingListeners.add(fn);
+  fn(sunShadowLoading);
+  return () => {
+    loadingListeners.delete(fn);
+  };
+};
+
 export type SunPosition = {
   /** Compass bearing of the sun in degrees, 0 = north, 90 = east. */
   azimuthDeg: number;
@@ -369,6 +388,8 @@ class SunShadowLayer implements CustomLayerInterface {
 
   private pendingTilesRemaining = 0;
 
+  private hasPainted = false;
+
   private sun: SunPosition = { azimuthDeg: 180, altitudeDeg: 0 };
 
   private uniforms: Record<string, WebGLUniformLocation | null> = {};
@@ -475,6 +496,8 @@ class SunShadowLayer implements CustomLayerInterface {
     this.buildingFbo = null;
     this.dem = null;
     this.pendingDem = null;
+    this.hasPainted = false;
+    setSunShadowLoading(false);
   }
 
   // Tessellate the DEM bounds into a triangle grid. The vertex shader lifts each
@@ -661,6 +684,12 @@ class SunShadowLayer implements CustomLayerInterface {
     return zoom;
   }
 
+  private syncLoading() {
+    setSunShadowLoading(
+      !this.hasPainted && this.map.getZoom() >= SHADOW_MIN_ZOOM,
+    );
+  }
+
   // Drop the current/pending DEM and stop drawing (used when zoomed too far out).
   private hideShadows() {
     const gl = this.gl;
@@ -671,7 +700,9 @@ class SunShadowLayer implements CustomLayerInterface {
     this.pendingDemTexture = null;
     this.pendingDem = null;
     this.dem = null;
+    this.hasPainted = false;
     this.map.triggerRepaint();
+    this.syncLoading();
   }
 
   private loadDemForView() {
@@ -727,6 +758,7 @@ class SunShadowLayer implements CustomLayerInterface {
       texelMerc: 1 / n / tileSizePx,
     };
     this.pendingTilesRemaining = cols * rows;
+    this.syncLoading();
     if (this.pendingTilesRemaining <= 0) {
       this.swapPendingDem();
       return;
@@ -785,6 +817,9 @@ class SunShadowLayer implements CustomLayerInterface {
     this.pendingDem = null;
 
     this.buildGrid(this.dem);
+
+    this.hasPainted = true;
+    this.syncLoading();
 
     // Building height map shares the DEM's size/bounds and uv mapping, so resize
     // it to the new view and re-rasterise the footprints.
@@ -925,6 +960,14 @@ const shadowBeforeId = (map: Map): string | undefined => {
 // wrapper, not our CustomLayerInterface object, so we can't reach setSun() there.
 let activeLayer: SunShadowLayer | null = null;
 
+const isMapStyleReady = (map: Map) => {
+  try {
+    return map.isStyleLoaded();
+  } catch {
+    return false;
+  }
+};
+
 export const applySunShadow = (
   map: Map,
   date: Date,
@@ -932,24 +975,32 @@ export const applySunShadow = (
   lon: number,
 ): SunPosition => {
   const sun = getSunPosition(date, lat, lon);
+  if (!isMapStyleReady(map)) return sun;
 
-  // setStyle() (base layer switch) wipes custom layers, so re-create if missing.
-  if (!map.getLayer(SUN_SHADOW_LAYER_ID)) {
-    activeLayer = new SunShadowLayer(map);
-    map.addLayer(
-      activeLayer as unknown as CustomLayerInterface,
-      shadowBeforeId(map),
-    );
+  try {
+    if (!map.getLayer(SUN_SHADOW_LAYER_ID)) {
+      setSunShadowLoading(map.getZoom() >= SHADOW_MIN_ZOOM);
+      activeLayer = new SunShadowLayer(map);
+      map.addLayer(
+        activeLayer as unknown as CustomLayerInterface,
+        shadowBeforeId(map),
+      );
+    }
+    activeLayer?.setSun(sun);
+  } catch {
+    // setStyle() in progress – styledata will re-apply once the style is ready
   }
-  // The basemap's own relief hillshade stays visible underneath: it gives the
-  // terrain its texture while our layer adds the real cast shadows on top.
-  activeLayer?.setSun(sun);
   return sun;
 };
 
 export const removeSunShadow = (map: Map) => {
-  if (map.getLayer(SUN_SHADOW_LAYER_ID)) {
-    map.removeLayer(SUN_SHADOW_LAYER_ID);
+  try {
+    if (isMapStyleReady(map) && map.getLayer(SUN_SHADOW_LAYER_ID)) {
+      map.removeLayer(SUN_SHADOW_LAYER_ID);
+    }
+  } catch {
+    // map/style already gone
   }
   activeLayer = null;
+  setSunShadowLoading(false);
 };
