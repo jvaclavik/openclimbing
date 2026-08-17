@@ -24,7 +24,11 @@ const getSource = (url) => {
   };
 };
 
-const rasterStyle = (id: string, url: string): StyleSpecification => {
+const rasterStyle = (
+  id: string,
+  url: string,
+  maxzoom?: number,
+): StyleSpecification => {
   const source = getSource(url);
   return {
     version: 8,
@@ -48,6 +52,7 @@ const rasterStyle = (id: string, url: string): StyleSpecification => {
       [id]: {
         type: 'raster' as const,
         tileSize: 256,
+        ...(maxzoom ? { maxzoom } : {}), // maplibre overzooms instead of requesting missing tiles
         ...source,
       },
     },
@@ -67,5 +72,5 @@ export const getRasterStyle = (
       : layer.url
     : key; // if `key` not found, it contains custom tiles URL
 
-  return rasterStyle(key, layerUrl);
+  return rasterStyle(key, layerUrl, layer?.maxzoom);
 };

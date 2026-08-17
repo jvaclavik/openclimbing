@@ -141,12 +141,18 @@ export const osmappLayers: Layers = {
           bboxes: [czBbox],
           isSatelite: false,
         },
+        // key kept as `cuzkGrayscale` so the layer stays selected for users
+        // who have it persisted in localStorage
         cuzkGrayscale: {
-          name: 'ČÚZK grayscale (CZ)',
+          name: 'ČÚZK elevation (CZ)',
+          secondLine: 'DMR 5G hires render by freemap.sk',
           type: 'basemap',
-          url: 'https://ags.cuzk.cz/arcgis2/services/dmr5g/ImageServer/WMSServer?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=dmr5g:GrayscaleHillshade&STYLES=&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}',
+          url: 'https://cz-hires-shading.tiles.freemap.sk/{z}/{x}/{y}.jpg',
           Icon: MapIcon,
-          attribution: ['&copy; <a href="https://geoportal.cuzk.cz">ČÚZK</a>'],
+          attribution: [
+            '&copy; <a href="https://geoportal.cuzk.cz">ČÚZK</a> DMR 5G, hires render by <a href="https://www.freemap.sk/">freemap.sk</a> (<a href="https://wiki.openstreetmap.org/wiki/Cs:%C4%8Cesko/freemap#%C4%8C%C3%9AZK">permission</a>)',
+          ],
+          maxzoom: 18,
           bboxes: [czBbox],
           isSatelite: false,
         },
