@@ -4,6 +4,10 @@ import { overpassLayers } from './layers/overpassLayers';
 import { osmappLayers } from '../../LayerSwitcher/osmappLayers';
 import { Theme } from '../../../helpers/theme';
 
+// `{z}/{x}/{y}` must stay literal so that maplibre can fill them in
+const toCorsProxyUrl = (url: string) =>
+  `/api/cors-proxy?url=${encodeURIComponent(url).replace(/%7B/g, '{').replace(/%7D/g, '}')}`;
+
 const getSource = (url) => {
   if (url.match('{bingSubdomains}')) {
     return {
@@ -72,5 +76,9 @@ export const getRasterStyle = (
       : layer.url
     : key; // if `key` not found, it contains custom tiles URL
 
-  return rasterStyle(key, layerUrl, layer?.maxzoom);
+  return rasterStyle(
+    key,
+    layer?.corsProxy ? toCorsProxyUrl(layerUrl) : layerUrl,
+    layer?.maxzoom,
+  );
 };

@@ -29,6 +29,7 @@ export type Layer = {
   secondLine?: string;
   url?: string;
   darkUrl?: string; // optional url for dark mode
+  corsProxy?: boolean; // upstream sends no CORS headers → route tiles through /api/cors-proxy
   key?: string;
   Icon?: LayerIcon;
   isSatelite?: boolean;
