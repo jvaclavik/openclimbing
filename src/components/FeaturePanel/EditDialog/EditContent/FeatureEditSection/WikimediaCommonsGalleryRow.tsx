@@ -15,6 +15,7 @@ import { t } from '../../../../../services/intl';
 import { TextFieldWithCharacterCount } from './helpers';
 import { WikimediaCommonsThumb } from './WikimediaCommonsThumb';
 import { useOptionalEditDialogUploadContext } from '../../EditDialogUploadContext';
+import { PathWithTags } from '../../../FeatureImages/PathsSvg';
 
 const isWikimediaCommonsFileNameInvalid = (value: string) => {
   const regex = /^File:.+\.[a-zA-Z0-9_]+$/;
@@ -37,6 +38,8 @@ type Props = {
   dragHandle?: React.ReactNode;
   highlighted?: boolean;
   rowRef?: React.Ref<HTMLDivElement>;
+  /** Route lines drawn on this photo, from this item and its loaded members. */
+  paths?: PathWithTags[];
 };
 
 type EmptyRowCtaProps = {
@@ -92,6 +95,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   dragHandle,
   highlighted,
   rowRef,
+  paths,
 }) => {
   const uploadCtx = useOptionalEditDialogUploadContext();
   const canUpload = Boolean(uploadCtx);
@@ -127,6 +131,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
           {dragHandle != null && <Box>{dragHandle}</Box>}
           <WikimediaCommonsThumb
             value={value}
+            paths={paths}
             onPlaceholderClick={
               canUpload && isEmpty ? handleUploadClick : undefined
             }

@@ -31,7 +31,7 @@ const getSuffix = (y: string) => {
   return matches ? matches[1] : '';
 };
 
-const parsePathTag = (pathString?: string): PathType | undefined => {
+export const parsePathTag = (pathString?: string): PathType | undefined => {
   const points = pathString
     ?.split('|')
     .map((coords) => coords.split(',', 2))

@@ -13,6 +13,7 @@ import {
   slotsFromFileKeysOrder,
 } from './wikimediaCommonsGalleryModel';
 import { WikimediaCommonsGalleryRow } from './WikimediaCommonsGalleryRow';
+import { useWikimediaCommonsPhotoPaths } from './useWikimediaCommonsPhotoPaths';
 
 const normalizeWikimediaCommonsInput = (raw: string) =>
   decodeURI(
@@ -34,6 +35,7 @@ export const WikimediaCommonsGallery: React.FC<Props> = ({
   const { tags, setTag, setTagsEntries } = useCurrentItem();
   const { highlightedPhoto } = usePhotoHighlightContext();
   const highlightedKey = highlightedPhoto && photoNameKey(highlightedPhoto);
+  const pathsByFileKey = useWikimediaCommonsPhotoPaths(fileKeys);
 
   const applySlotsAndSyncKeys = (
     slotList: ReturnType<typeof slotsFromFileKeysOrder>,
@@ -93,6 +95,7 @@ export const WikimediaCommonsGallery: React.FC<Props> = ({
                 index={index}
                 value={value}
                 focusTag={focusTag}
+                paths={pathsByFileKey[fileKey]}
                 highlighted={highlighted}
                 onValueChange={onValueChange}
                 onRemove={() => removeRow(index)}

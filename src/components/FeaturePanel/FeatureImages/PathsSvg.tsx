@@ -4,6 +4,7 @@ import { useTheme } from '@emotion/react';
 
 import {
   Feature,
+  FeatureTags,
   ImageDef,
   ImageDefFromTag,
   isTag,
@@ -54,20 +55,20 @@ const PathLine = styled.path<{ $color: string }>`
 
 type PathProps = {
   path: PathType;
-  feature: Feature;
+  tags: FeatureTags;
   size: Size;
   isHighlighted?: boolean;
 };
 const Path = ({
   path,
-  feature,
+  tags,
   size: { height, width },
   isHighlighted = false,
 }: PathProps) => {
   const theme = useTheme();
   const color = isHighlighted
     ? theme.palette.climbing.selected
-    : getDifficultyColor(getDifficulty(feature.tags), theme.palette.mode);
+    : getDifficultyColor(getDifficulty(tags), theme.palette.mode);
   const contrastColor = theme.palette.getContrastText(color);
   const d = path
     .map(({ x, y }, idx) => `${!idx ? 'M' : 'L'}${x * width} ${y * height}`)
@@ -91,12 +92,12 @@ export const Paths = ({ def, feature, size }: PathsProps) => {
   return (
     isTag(def) && (
       <>
-        {def.path && <Path path={def.path} feature={feature} size={size} />}
+        {def.path && <Path path={def.path} tags={feature.tags} size={size} />}
         {def.memberPaths?.map(({ path, member }) => (
           <Path
             key={getReactKey(member)}
             path={path}
-            feature={member}
+            tags={member.tags}
             size={size}
             isHighlighted={preview === member}
           />
@@ -118,3 +119,31 @@ export const PathsSvg = ({ def, size }: PathsSvgProps) => {
     </Svg>
   );
 };
+
+// A path drawn on a photo, decoupled from Feature/ImageDef – so the same
+// rendering can be used where only tags are available (eg. the edit dialog,
+// which draws from the live EditContext items instead of loaded features).
+export type PathWithTags = {
+  key: string;
+  path: PathType;
+  tags: FeatureTags;
+  isHighlighted?: boolean;
+};
+
+type PathsOverlaySvgProps = {
+  paths: PathWithTags[];
+  size: Size;
+};
+export const PathsOverlaySvg = ({ paths, size }: PathsOverlaySvgProps) => (
+  <Svg size={size}>
+    {paths.map(({ key, path, tags, isHighlighted }) => (
+      <Path
+        key={key}
+        path={path}
+        tags={tags}
+        size={size}
+        isHighlighted={isHighlighted}
+      />
+    ))}
+  </Svg>
+);
