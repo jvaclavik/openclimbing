@@ -705,6 +705,7 @@ export default {
   'crag_sort.option_photos': 'Liczba zdjęć',
   'crag_sort.option_routes': 'Liczba dróg',
   'crag_sort.option_alphabetical': 'Alfabetycznie',
+  'crag_sort.option_added': 'Data dodania',
   'crag_filter.title': 'Filtr',
   'crag_filter.grade': 'Z trudnością',
   'crag_filter.grade_from': 'od',

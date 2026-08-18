@@ -26,6 +26,7 @@ import {
 } from './DrawRoutesCoachmark';
 import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
 import { RoutesEditor } from './Editor/RoutesEditor';
+import { LoginToSaveBanner } from '../helpers/LoginToSaveBanner';
 import { splitPaneResizerStyles } from './splitPaneResizerStyles';
 import { TransformWrapper } from './TransformWrapper';
 import {
@@ -48,6 +49,22 @@ const BottomContainer = styled.div`
   // Establish a container so descendants can adapt to the right panel's width
   // via @container queries (header, edit button, grade alignment, ...).
   container-type: inline-size;
+`;
+const LoginBannerOverlay = styled.div`
+  position: absolute;
+  z-index: 20;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+
+  & > * {
+    pointer-events: all;
+    width: 100%;
+    max-width: 440px;
+  }
 `;
 const FabContainer = styled.div`
   position: absolute;
@@ -204,6 +221,16 @@ const getWindowDimensions = () => {
     width,
     height,
   };
+};
+
+const ClimbingLoginBanner = () => {
+  const { isEditMode } = useClimbingContext();
+  if (!isEditMode) return null;
+  return (
+    <LoginBannerOverlay>
+      <LoginToSaveBanner overlay />
+    </LoginBannerOverlay>
+  );
 };
 
 export const ClimbingView = () => {
@@ -529,6 +556,7 @@ export const ClimbingView = () => {
                 </FullLoadingContainer>
               )}
               <BlurContainer>
+                <ClimbingLoginBanner />
                 <RouteFloatingMenu />
                 <TransformWrapper>
                   <TransformComponent

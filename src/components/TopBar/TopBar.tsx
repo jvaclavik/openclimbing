@@ -145,9 +145,9 @@ const MapControlIconButton = styled(IconButton)`
   height: 44px;
   padding: 0;
   background: ${({ theme }) =>
-    convertHexToRgba(theme.palette.background.paper, 0.7)};
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    convertHexToRgba(theme.palette.background.paper, 0.8)};
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 
   &:hover {

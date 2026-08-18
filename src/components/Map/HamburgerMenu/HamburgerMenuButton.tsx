@@ -13,9 +13,9 @@ const mapControlButtonCss = ({ theme }) => `
   width: 44px;
   height: 44px;
   padding: 0;
-  background: ${convertHexToRgba(theme.palette.background.paper, 0.7)};
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: ${convertHexToRgba(theme.palette.background.paper, 0.8)};
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 
   &:hover {

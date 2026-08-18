@@ -713,6 +713,7 @@ export default {
   'crag_sort.option_photos': 'Nombre de photos',
   'crag_sort.option_routes': 'Nombre de voies',
   'crag_sort.option_alphabetical': 'Alphabétique',
+  'crag_sort.option_added': 'Date d’ajout',
   'crag_filter.title': 'Filtre',
   'crag_filter.grade': 'Avec cotation',
   'crag_filter.grade_from': 'de',

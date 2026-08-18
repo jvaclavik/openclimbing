@@ -438,6 +438,7 @@ export default {
   'crag_sort.option_photos': '照片数量',
   'crag_sort.option_routes': '路线数量',
   'crag_sort.option_alphabetical': '按字母顺序',
+  'crag_sort.option_added': '加入日期',
 
   'crag_filter.title': '筛选',
   'crag_filter.grade': '按难度',

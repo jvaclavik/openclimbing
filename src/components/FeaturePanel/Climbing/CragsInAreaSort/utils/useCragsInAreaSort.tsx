@@ -23,6 +23,9 @@ export const useCragsInAreaSort = () => {
           const name2 = item2.tags.name || '';
           return name1.localeCompare(name2);
         };
+      case 'added':
+        return (item1, item2) =>
+          (item2.osmMeta?.id ?? 0) - (item1.osmMeta?.id ?? 0);
       default:
         return () => 0;
     }

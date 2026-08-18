@@ -285,7 +285,7 @@ export default {
   'homepage.gallery.routes_count': `__count__ routes`,
   'homepage.gallery.drawn_on_photo': `__count__ drawn on this photo`,
   'homepage.gallery.nothing_in_viewport': `No drawn areas in the current map view – showing the most drawn ones.`,
-  'homepage.gallery.show_area': `Show`,
+  'homepage.gallery.show_area': `Show topo`,
   'homepage.about_banner_desc': `No ads. No paywall. A climbing guide that belongs to everyone.`,
   'homepage.about_banner_cta': `Learn more`,
 
@@ -359,10 +359,10 @@ export default {
   'about.open_heading': 'Where the data lives',
   'about.open_lead': 'Routes in OpenStreetMap. Photos on Wikimedia Commons. Edit them here – or in any other app, forever.',
   'about.open_osm_desc': 'The Wikipedia of maps. Every crag you draw is public – not locked inside OpenClimbing.',
-  'about.open_osm_cta': 'Explore OpenStreetMap',
+  'about.open_osm_cta': 'What is OpenStreetMap',
   'about.open_osm_spec': 'How we draw topos',
   'about.open_commons_desc': 'Climbing photos stay in a public archive that belongs to everyone.',
-  'about.open_commons_cta': 'Explore Commons',
+  'about.open_commons_cta': 'What is Wikimedia Commons',
   'about.open_github_desc': 'The app is open source. Anyone can read it, fork it or send a pull request.',
   'about.open_github_cta': 'View on GitHub',
 
@@ -566,6 +566,9 @@ export default {
   'editdialog.logout': 'logout',
   'editdialog.login_required_message': 'You need to log in to OpenStreetMap before saving. Sign in once and your edits go straight to the map.',
   'editdialog.login_required': 'Login is required to save changes.',
+  'editdialog.login_banner_title': "You're not signed in",
+  'editdialog.login_banner_body': 'You can edit now and sign in before saving. An OpenStreetMap account is free and takes about a minute.',
+  'editdialog.login_banner_dismiss': 'Dismiss',
   'editdialog.add_major_tag': 'Add',
   'editdialog.upload_photo': 'Upload photo',
   'editdialog.upload_photo_tooltip':
@@ -883,6 +886,7 @@ export default {
   'climbingareas.sort_routes': 'Number of routes',
   'climbingareas.sort_sectors': 'Number of sectors',
   'climbingareas.sort_alphabetical': 'Alphabetically',
+  'climbingareas.sort_added': 'Date added',
   'climbingareas.col_name': 'Name',
   'climbingareas.col_routes': 'Routes',
   'climbingareas.col_sectors': 'Sectors',
@@ -908,6 +912,7 @@ export default {
   'crag_sort.option_photos': 'Number of photos',
   'crag_sort.option_routes': 'Number of routes',
   'crag_sort.option_alphabetical': 'Alphabetical',
+  'crag_sort.option_added': 'Date added',
 
   'crag_filter.title': 'Filter',
   'crag_filter.grade': 'With grade',

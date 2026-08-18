@@ -14,7 +14,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import SplitPane from 'react-split-pane';
 import { EditDialogActions } from './EditDialogActions';
 import { OsmUserLogged } from './OsmUserLogged';
-import { OsmUserLoggedOut } from './OsmUserLoggedOut';
+import { LoginToSaveBanner } from '../../helpers/LoginToSaveBanner';
 import { TestApiWarning } from '../../helpers/TestApiWarning';
 import { ItemsTabs } from './ItemsTabs';
 import { ItemEditSection } from './ItemEditSection';
@@ -126,7 +126,7 @@ const FormPane: React.FC = () => {
           onSubmit={(e) => e.preventDefault()}
           style={{ height: '100%' }}
         >
-          <OsmUserLoggedOut />
+          <LoginToSaveBanner />
 
           <Stack height="100%">
             <Stack flex={1}>

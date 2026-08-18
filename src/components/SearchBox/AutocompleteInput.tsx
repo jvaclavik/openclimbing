@@ -56,7 +56,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 
   return (
     <AutocompleteConfigured
-      open={isOpen}
+      open={isOpen && inputValue !== ''}
       onClose={(_event, reason) => {
         setIsOpen(false);
         // On 'selectOption' the user picked a result and onSelected() is

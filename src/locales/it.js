@@ -708,6 +708,7 @@ export default {
   'crag_sort.option_photos': 'Numero di foto',
   'crag_sort.option_routes': 'Numero di vie',
   'crag_sort.option_alphabetical': 'Alfabetico',
+  'crag_sort.option_added': 'Data di aggiunta',
   'crag_filter.title': 'Filtro',
   'crag_filter.grade': 'Con grado',
   'crag_filter.grade_from': 'da',

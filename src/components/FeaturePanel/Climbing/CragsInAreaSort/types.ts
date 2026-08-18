@@ -1,1 +1,1 @@
-export type SortBy = 'default' | 'routes' | 'photos' | 'alphabetical';
+export type SortBy = 'default' | 'routes' | 'photos' | 'alphabetical' | 'added';

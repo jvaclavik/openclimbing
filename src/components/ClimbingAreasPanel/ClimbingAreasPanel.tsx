@@ -51,18 +51,20 @@ type ClimbingAreasPanelProps = {
   areas?: ClimbingArea[] | null;
 };
 
-type SortBy = 'photos' | 'routes' | 'sectors' | 'alphabetical';
+type SortBy = 'photos' | 'routes' | 'sectors' | 'alphabetical' | 'added';
 
 const SORT_OPTIONS: { value: SortBy; labelId: TranslationId }[] = [
   { value: 'photos', labelId: 'climbingareas.sort_photos' },
   { value: 'routes', labelId: 'climbingareas.sort_routes' },
   { value: 'sectors', labelId: 'climbingareas.sort_sectors' },
   { value: 'alphabetical', labelId: 'climbingareas.sort_alphabetical' },
+  { value: 'added', labelId: 'climbingareas.sort_added' },
 ];
 
 type CountryGroup = {
   countryCode: string | null;
   name: string;
+  osmId: number;
   areas: ClimbingArea[];
   cragCount: number;
   routeCount: number;
@@ -71,18 +73,23 @@ type CountryGroup = {
 
 type SortableItem = {
   name: string | null;
+  osmId: number;
   cragCount: number;
   routeCount: number;
   routesWithPhoto: number;
 };
 
 // Compares two items by the chosen key. `photos` (default): drawn routes desc;
-// `routes`: total routes desc; `sectors`: sectors desc; each falls back to the
-// remaining counts and finally the name; `alphabetical`: name only.
+// `routes`: total routes desc; `sectors`: sectors desc; `added`: OSM id desc
+// (newer objects first); each falls back to the remaining counts and finally
+// the name; `alphabetical`: name only.
 const compareBy = (sortBy: SortBy) => (a: SortableItem, b: SortableItem) => {
   const byName = (a.name ?? '').localeCompare(b.name ?? '');
   if (sortBy === 'alphabetical') {
     return byName;
+  }
+  if (sortBy === 'added') {
+    return b.osmId - a.osmId || byName;
   }
   if (sortBy === 'routes') {
     return b.routeCount - a.routeCount || b.cragCount - a.cragCount || byName;
@@ -131,6 +138,7 @@ const groupByCountry = (
       getCountryName(key || null, intl.lang) ||
       t('climbingareas.unknown_country'),
     areas: [...list].sort(comparator),
+    osmId: list.reduce((max, area) => Math.max(max, area.osmId), 0),
     cragCount: list.reduce((sum, area) => sum + area.cragCount, 0),
     routeCount: list.reduce((sum, area) => sum + area.routeCount, 0),
     routesWithPhoto: list.reduce((sum, area) => sum + area.routesWithPhoto, 0),

@@ -22,6 +22,7 @@ const OPTIONS: { value: SortBy; label: TranslationId }[] = [
   { value: 'routes', label: 'crag_sort.option_routes' },
   { value: 'photos', label: 'crag_sort.option_photos' },
   { value: 'alphabetical', label: 'crag_sort.option_alphabetical' },
+  { value: 'added', label: 'crag_sort.option_added' },
 ];
 
 export const CragsInAreaSort = ({

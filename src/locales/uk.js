@@ -707,6 +707,7 @@ export default {
   'crag_sort.option_photos': 'Кількість фото',
   'crag_sort.option_routes': 'Кількість маршрутів',
   'crag_sort.option_alphabetical': 'За абеткою',
+  'crag_sort.option_added': 'За датою додавання',
   'crag_filter.title': 'Фільтр',
   'crag_filter.grade': 'З категорією',
   'crag_filter.grade_from': 'від',

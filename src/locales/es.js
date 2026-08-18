@@ -710,6 +710,7 @@ export default {
   'crag_sort.option_photos': 'Número de fotos',
   'crag_sort.option_routes': 'Número de vías',
   'crag_sort.option_alphabetical': 'Alfabético',
+  'crag_sort.option_added': 'Fecha de alta',
   'crag_filter.title': 'Filtro',
   'crag_filter.grade': 'Con grado',
   'crag_filter.grade_from': 'desde',
