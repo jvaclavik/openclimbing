@@ -1,17 +1,15 @@
 import styled from '@emotion/styled';
-import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckIcon from '@mui/icons-material/Check';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import { Box, Button, Link as MuiLink, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import React from 'react';
-import { t } from '../../services/intl';
+import { intl, t } from '../../services/intl';
 import { TranslationId } from '../../services/types';
 import { useMobileMode } from '../helpers';
-import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
-import { GradientHeading, tint, TintedCard } from '../utils/panelUi';
+import { GradientHeading, TintedCard } from '../utils/panelUi';
 import {
   PanelContent,
   PanelScrollbars,
@@ -21,9 +19,38 @@ import { AboutFeatures } from './AboutFeatures';
 import { AboutOpenData } from './AboutOpenData';
 import { AboutSupport } from './AboutSupport';
 
-const COMMUNITY_URL = 'https://community.openclimbing.org';
-const FEEDBACK_EMAIL = 'jvaclavik@gmail.com';
 const US_POINTS = ['1', '2', '3'] as const;
+
+const storyUrl = (lang: string) =>
+  lang === 'cs'
+    ? 'https://medium.com/@jvaclavik/p%C5%99%C3%ADb%C4%9Bh-za-openclimbing-org-e1e2b3de2024'
+    : 'https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac';
+
+const StoryLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  color: ${({ theme }) => theme.palette.primary.main};
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  text-decoration: none !important;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1.5px;
+  transition:
+    background-size 0.22s ease,
+    gap 0.22s ease;
+
+  &:hover,
+  &:focus {
+    text-decoration: none !important;
+    background-size: 100% 1.5px;
+    gap: 8px;
+  }
+`;
 
 const Hero = () => (
   <Box mt={4}>
@@ -36,6 +63,14 @@ const Hero = () => (
     >
       {t('about.hero_sub')}
     </Typography>
+    <StoryLink
+      href={storyUrl(intl.lang)}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {t('homepage.our_story')}
+      <ArrowForwardIcon sx={{ fontSize: 16 }} />
+    </StoryLink>
   </Box>
 );
 
@@ -105,87 +140,6 @@ const Different = () => (
   </Section>
 );
 
-const CtaCard = styled.div`
-  margin-top: 40px;
-  padding: 22px 20px;
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    ${({ theme }) => tint(theme, 0.07)},
-    ${({ theme }) => tint(theme, 0.02)}
-  );
-`;
-
-const Cta = () => {
-  const { start } = useAddNewCragContext();
-
-  const addNewCrag = () => {
-    Router.push('/').then(() => start({ ignorePanel: true }));
-  };
-
-  return (
-    <CtaCard>
-      <Typography
-        variant="h5"
-        component="h2"
-        fontWeight={800}
-        letterSpacing={-0.4}
-      >
-        {t('about.cta_heading')}
-      </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        lineHeight={1.65}
-        mt={1}
-        mb={2}
-      >
-        {t('about.cta_p')}
-      </Typography>
-      <Stack spacing={1}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddLocationAltIcon />}
-          onClick={addNewCrag}
-        >
-          {t('add_new_crag.menu_link')}
-        </Button>
-        <Button
-          variant="text"
-          color="secondary"
-          startIcon={<QuestionAnswerIcon />}
-          href={COMMUNITY_URL}
-          target="_blank"
-        >
-          {t('climbing.forum')}
-        </Button>
-      </Stack>
-    </CtaCard>
-  );
-};
-
-const Feedback = () => (
-  <Typography
-    variant="body2"
-    color="text.secondary"
-    textAlign="center"
-    mt={5}
-    mb={3}
-  >
-    {t('support_us.feedback')}
-    {': '}
-    <MuiLink
-      href={`mailto:${FEEDBACK_EMAIL}`}
-      color="inherit"
-      underline="hover"
-    >
-      {FEEDBACK_EMAIL}
-    </MuiLink>
-  </Typography>
-);
-
 export const AboutPanel = () => {
   const isMobileMode = useMobileMode();
   const handleClose = () => {
@@ -196,19 +150,17 @@ export const AboutPanel = () => {
     <PanelSidePadding>
       <ClosePanelButton right onClick={handleClose} />
       <Hero />
-      <Section title={t('about.open_heading')} lead={t('about.open_lead')}>
-        <AboutOpenData />
-      </Section>
       <Section
         title={t('about.features_heading')}
         lead={t('about.features_lead')}
       >
         <AboutFeatures />
       </Section>
+      <Section title={t('about.open_heading')} lead={t('about.open_lead')}>
+        <AboutOpenData />
+      </Section>
       <Different />
-      <Cta />
       <AboutSupport />
-      <Feedback />
     </PanelSidePadding>
   );
 

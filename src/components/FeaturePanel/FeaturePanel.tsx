@@ -10,7 +10,6 @@ import { BackChip } from './BackChip';
 import { PanelClimbingBadges } from './Climbing/ClimbingBadges';
 import { ClimbingRestriction } from './Climbing/ClimbingRestriction';
 import { ClimbingStructuredData } from './Climbing/ClimbingStructuredData';
-import { FeaturePanelClimbingGuideInfo } from './Climbing/FeaturePanelClimbingGuideInfo';
 import { RouteDistributionInFeaturePanel } from './Climbing/RouteDistribution';
 import { ClimbingRouteGrade } from './ClimbingRouteGrade';
 import { CragsInArea } from './CragsInArea';
@@ -36,6 +35,11 @@ import { useRouter } from 'next/router';
 const Flex = styled.div`
   flex: 1;
   margin-bottom: 40px;
+`;
+
+const HeadingStack = styled.div`
+  display: flex;
+  flex-direction: column-reverse;
 `;
 
 type FeaturePanelProps = {
@@ -84,14 +88,16 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
         )}
 
         <PanelSidePadding>
-          {!isMobileMode && (
-            <>
-              <BackChip />
-              <ParentLink />
-            </>
-          )}
+          {!isMobileMode && <BackChip />}
 
-          <FeatureHeading headingRef={headingRef} />
+          {isMobileMode ? (
+            <FeatureHeading headingRef={headingRef} />
+          ) : (
+            <HeadingStack>
+              <FeatureHeading headingRef={headingRef} />
+              <ParentLink />
+            </HeadingStack>
+          )}
 
           <ClimbingRestriction />
 
@@ -150,7 +156,6 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
           showTagsTable={showTagsTable}
           toggleShowTags={toggleShowTags}
         />
-        <FeaturePanelClimbingGuideInfo />
       </PanelContent>
       <ClimbingStructuredData />
     </>

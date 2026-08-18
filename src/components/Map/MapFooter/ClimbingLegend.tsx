@@ -15,6 +15,7 @@ const HideableContainer = styled.div<{ $isVisible: boolean }>`
 `;
 
 const Icon = styled.img`
+  width: 16px;
   height: 16px;
   font-size: 14px;
 `;
@@ -91,8 +92,18 @@ export const ClimbingLegend = ({ isVisible, setLegendShown }) => {
           </HeadingRow>
           <Item>
             <span>
-              <Icon src={AreaBlue.src} alt="Climbing area with photos icon" />
-              <Icon src={CragRed.src} alt="Climbing crag with photos icon" />
+              <Icon
+                src={AreaBlue.src}
+                alt="Climbing area with photos icon"
+                width={16}
+                height={16}
+              />
+              <Icon
+                src={CragRed.src}
+                alt="Climbing crag with photos icon"
+                width={16}
+                height={16}
+              />
             </span>
             {t('climbing_legend.topos')}
           </Item>
@@ -101,10 +112,14 @@ export const ClimbingLegend = ({ isVisible, setLegendShown }) => {
               <Icon
                 src={AreaGray.src}
                 alt="Climbing area without photos icon"
+                width={16}
+                height={16}
               />
               <Icon
                 src={CragGray.src}
                 alt="Climbing crag without photos icon"
+                width={16}
+                height={16}
               />
             </span>
             {t('climbing_legend.only_position')}

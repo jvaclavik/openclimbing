@@ -31,6 +31,7 @@ const SupportCard = styled.div`
   isolation: isolate;
   overflow: hidden;
   margin-top: 40px;
+  margin-bottom: 24px;
   padding: 22px 18px 18px;
   border-radius: 18px;
   color: #fff;

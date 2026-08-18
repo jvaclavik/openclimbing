@@ -118,60 +118,94 @@ const globalStyle = (theme: Theme) => css`
     }
   }
 
-  /* Zoom / compass / geolocate: same circular glass as MapControlButton */
-  .maplibregl-ctrl-group:has(> .maplibregl-ctrl-zoom-in),
-  .maplibregl-ctrl-group:has(> .maplibregl-ctrl-compass),
-  .maplibregl-ctrl-group:has(> .maplibregl-ctrl-geolocate) {
+  /* Navigation (+ / − / compass): one glass button group */
+  .maplibregl-ctrl-group:has(> .maplibregl-ctrl-zoom-in) {
+    overflow: hidden;
+    border-radius: 16px !important;
+    display: flex;
+    flex-direction: column;
+
+    button {
+      width: 40px !important;
+      height: 40px !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+
+      &:focus:first-child,
+      &:focus:last-child,
+      &:focus:only-child {
+        border-radius: 0 !important;
+      }
+
+      &:focus:not(:focus-visible) {
+        box-shadow: none;
+      }
+
+      &:focus:focus-visible {
+        box-shadow: inset 0 0 0 2px ${theme.palette.primary.main};
+      }
+    }
+  }
+
+  /* Geolocate + compass-only: circular glass like MapControlButton */
+  .maplibregl-ctrl-group:has(> .maplibregl-ctrl-geolocate),
+  .maplibregl-ctrl-group:has(> .maplibregl-ctrl-compass):not(
+      :has(> .maplibregl-ctrl-zoom-in)
+    ) {
     background: transparent !important;
     box-shadow: none !important;
     overflow: visible;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
 
     button + button {
       border-top: 0 !important;
     }
-  }
 
-  .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-in,
-  .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-out,
-  .maplibregl-ctrl-group button.maplibregl-ctrl-compass,
-  .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    background-color: ${convertHexToRgba(
-      theme.palette.background.paper,
-      0.8,
-    )} !important;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-
-    &:focus:first-child,
-    &:focus:last-child,
-    &:focus:only-child {
+    button {
+      width: 40px !important;
+      height: 40px !important;
       border-radius: 50% !important;
-    }
-
-    &:focus:not(:focus-visible) {
+      background-color: ${convertHexToRgba(
+        theme.palette.background.paper,
+        0.8,
+      )} !important;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-    }
 
-    &:focus:focus-visible {
-      box-shadow:
-        0 0 0 2px rgba(0, 0, 0, 0.1),
-        0 0 0 4px ${theme.palette.primary.main};
+      &:focus:first-child,
+      &:focus:last-child,
+      &:focus:only-child {
+        border-radius: 50% !important;
+      }
+
+      &:focus:not(:focus-visible) {
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+      }
+
+      &:focus:focus-visible {
+        box-shadow:
+          0 0 0 2px rgba(0, 0, 0, 0.1),
+          0 0 0 4px ${theme.palette.primary.main};
+      }
     }
   }
 
   @media (hover: hover) {
-    .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-in:not(:disabled):hover,
-    .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-out:not(:disabled):hover,
-    .maplibregl-ctrl-group button.maplibregl-ctrl-compass:not(:disabled):hover,
-    .maplibregl-ctrl-group
-      button.maplibregl-ctrl-geolocate:not(:disabled):hover {
+    .maplibregl-ctrl-group:has(> .maplibregl-ctrl-zoom-in)
+      button:not(:disabled):hover {
+      background-color: ${convertHexToRgba(
+        theme.palette.background.paper,
+        1,
+      )} !important;
+    }
+
+    .maplibregl-ctrl-group:has(> .maplibregl-ctrl-geolocate)
+      button:not(:disabled):hover,
+    .maplibregl-ctrl-group:has(> .maplibregl-ctrl-compass):not(
+        :has(> .maplibregl-ctrl-zoom-in)
+      )
+      button:not(:disabled):hover {
       background-color: ${theme.palette.background.paper} !important;
     }
   }
@@ -191,10 +225,12 @@ const globalStyle = (theme: Theme) => css`
     .maplibregl-ctrl-top-right {
       top: 58px !important;
     }
-    .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-in,
-    .maplibregl-ctrl-group button.maplibregl-ctrl-zoom-out,
-    .maplibregl-ctrl-group button.maplibregl-ctrl-compass,
-    .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate {
+    .maplibregl-ctrl-group:has(> .maplibregl-ctrl-zoom-in) button,
+    .maplibregl-ctrl-group:has(> .maplibregl-ctrl-geolocate) button,
+    .maplibregl-ctrl-group:has(> .maplibregl-ctrl-compass):not(
+        :has(> .maplibregl-ctrl-zoom-in)
+      )
+      button {
       width: 44px !important;
       height: 44px !important;
     }

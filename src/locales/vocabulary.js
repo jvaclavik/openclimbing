@@ -233,7 +233,7 @@ export default {
     'openclimbing.org is an open platform for climbing guides and maps. Topos and photos are stored in OpenStreetMap and Wikipedia projects, so they can be edited by anyone.',
   'climbing.guideinfo.button': 'More info',
 
-  'project.openclimbing.description': 'Free wiki climbing map',
+  'project.openclimbing.description': 'Open climbing guidebook',
   'project.openclimbing.serpDescription': 'A wiki based open-source climbing map with topos. Built on OpenStreetMap and Wikipedia projects.',
   'project.openclimbing.climbing_guide': 'Climbing guide & topos',
 
@@ -285,7 +285,7 @@ export default {
   'homepage.gallery.routes_count': `__count__ routes`,
   'homepage.gallery.drawn_on_photo': `__count__ drawn on this photo`,
   'homepage.gallery.nothing_in_viewport': `No drawn areas in the current map view – showing the most drawn ones.`,
-  'homepage.gallery.show_area': `Show topo`,
+  'homepage.gallery.show_area': `Show area`,
   'homepage.about_banner_desc': `No ads. No paywall. A climbing guide that belongs to everyone.`,
   'homepage.about_banner_cta': `Learn more`,
 
@@ -497,6 +497,8 @@ export default {
   'featurepanel.gallery_scroll_right': 'Scroll right',
   'featurepanel.photo_show_topo': 'Show topo',
   'featurepanel.photo_enlarge': 'Enlarge',
+  'featurepanel.photo_alt': 'Photo of __type__ __name__',
+  'featurepanel.photo_alt_named': 'Photo of __type__ __name__ (__photo__)',
   'featurepanel.grade_range': 'Difficulty',
   'climbing_orientation.label': 'Faces',
   'climbing_orientation.n': 'north',

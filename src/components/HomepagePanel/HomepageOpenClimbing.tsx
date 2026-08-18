@@ -1,17 +1,12 @@
 import styled from '@emotion/styled';
-import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import GithubIcon from '../../assets/GithubIcon';
 import { LogoMaptiler } from '../../assets/LogoMaptiler';
 import { intl, t } from '../../services/intl';
 import { isMobileMode, useMobileMode } from '../helpers';
-import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { DRAWER_MOTION } from '../utils/drawerSnap';
 import { useMapChrome } from '../utils/mapChromeRegistry';
@@ -56,7 +51,8 @@ const Brand = styled(GradientHeading, {
   transition:
     font-size ${DRAWER_MOTION},
     transform ${DRAWER_MOTION};
-  transform: translateY(${({ $peek }) => ($peek ? '0' : '10px')});
+  transform: ${({ $peek }) =>
+    $peek === undefined ? 'none' : `translateY(${$peek ? '0' : '10px'})`};
 `;
 
 /** Peek: compact + centered in the strip. Expanded: larger, slightly lower. */
@@ -78,7 +74,7 @@ const Subtitle = () => (
     component="p"
     variant="subtitle2"
     color="secondary"
-    textTransform="lowercase"
+    sx={{ px: 1, textAlign: 'center' }}
   >
     {t('project.openclimbing.description')}
   </Typography>
@@ -104,85 +100,25 @@ const Description = () => (
   </Typography>
 );
 
-const STORY_URL = (lang) =>
-  lang === 'cs'
-    ? 'https://medium.com/@jvaclavik/p%C5%99%C3%ADb%C4%9Bh-za-openclimbing-org-e1e2b3de2024'
-    : 'https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac';
-
-const Buttons = ({ onClose }) => {
-  const { start } = useAddNewCragContext();
-
-  const addNewCrag = () => {
-    onClose();
-    start({ ignorePanel: true });
-  };
-
-  return (
-    <Stack spacing={1} mt={4}>
-      <MobileOnly>
-        <Button
-          variant="contained"
-          color="primary"
-          endIcon={<ChevronRightIcon />}
-          onClick={onClose}
-          fullWidth
-          size="large"
-        >
-          {t('homepage.go_to_map_button')}
-        </Button>
-      </MobileOnly>
-      <Button
-        variant="outlined"
-        color="primary"
-        size="large"
-        fullWidth
-        startIcon={<AddLocationAltIcon />}
-        onClick={addNewCrag}
-      >
-        {t('add_new_crag.menu_link')}
-      </Button>
-      <Stack direction="row" spacing={1}>
-        <Button
-          variant="text"
-          color="secondary"
-          fullWidth
-          startIcon={<MenuBookIcon />}
-          href={STORY_URL(intl.lang)}
-          target="_blank"
-        >
-          {t('homepage.our_story')}
-        </Button>
-        <Button
-          variant="text"
-          color="secondary"
-          fullWidth
-          startIcon={<QuestionAnswerIcon />}
-          href="https://community.openclimbing.org"
-          target="_blank"
-        >
-          {t('climbing.forum')}
-        </Button>
-      </Stack>
-    </Stack>
-  );
-};
-
-const StyledGithubIcon = styled(GithubIcon)`
-  display: block;
-  filter: ${({ theme }) => theme.palette.invertFilter};
-`;
+const Buttons = ({ onClose }) => (
+  <MobileOnly>
+    <Button
+      variant="contained"
+      color="primary"
+      endIcon={<ChevronRightIcon />}
+      onClick={onClose}
+      fullWidth
+      size="large"
+      sx={{ mt: 4 }}
+    >
+      {t('homepage.go_to_map_button')}
+    </Button>
+  </MobileOnly>
+);
 
 const FooterLink = styled.a`
   display: flex;
   align-items: center;
-`;
-
-const GithubLink = styled(FooterLink)`
-  opacity: 0.65;
-
-  &:hover {
-    opacity: 1;
-  }
 `;
 
 const Gallery = () => (
@@ -250,24 +186,14 @@ const Footer = () => (
     mt={5}
     pb={2}
   >
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <FooterLink
-        href="https://www.maptiler.com"
-        target="_blank"
-        aria-label="MapTiler"
-        title="MapTiler"
-      >
-        <LogoMaptiler width={120} />
-      </FooterLink>
-      <GithubLink
-        href="https://github.com/jvaclavik/openclimbing"
-        target="_blank"
-        aria-label={t('map.github_title')}
-        title={t('map.github_title')}
-      >
-        <StyledGithubIcon width="22" />
-      </GithubLink>
-    </Stack>
+    <FooterLink
+      href="https://www.maptiler.com"
+      target="_blank"
+      aria-label="MapTiler"
+      title="MapTiler"
+    >
+      <LogoMaptiler width={120} />
+    </FooterLink>
     <Typography variant="caption" color="secondary" letterSpacing={1}>
       Made in Prague with ♥
     </Typography>

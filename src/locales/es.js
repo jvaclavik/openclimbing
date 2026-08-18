@@ -227,7 +227,7 @@ export default {
   'climbing.guideinfo.description':
     'openclimbing.org es una plataforma abierta de guías y mapas de escalada. Los croquis y las fotos se almacenan en los proyectos OpenStreetMap y Wikipedia, por lo que cualquiera puede editarlos.',
   'climbing.guideinfo.button': 'Más información',
-  'project.openclimbing.description': 'Mapa de escalada wiki gratuito',
+  'project.openclimbing.description': 'Guía abierta de escalada',
   'project.openclimbing.serpDescription':
     'Un mapa de escalada de código abierto basado en wiki con croquis. Construido sobre los proyectos OpenStreetMap y Wikipedia.',
   'project.openclimbing.climbing_guide': 'Guía de escalada y croquis',

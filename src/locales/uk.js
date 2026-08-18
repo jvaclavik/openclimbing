@@ -226,7 +226,7 @@ export default {
   'climbing.guideinfo.description':
     'openclimbing.org — це відкрита платформа для скелелазних путівників і карт. Топо та фото зберігаються в проєктах OpenStreetMap і Wikipedia, тож їх може редагувати будь-хто.',
   'climbing.guideinfo.button': 'Детальніше',
-  'project.openclimbing.description': 'Безкоштовна вікі-карта скелелазіння',
+  'project.openclimbing.description': 'Відкритий скелелазний путівник',
   'project.openclimbing.serpDescription':
     'Скелелазна карта з відкритим кодом на основі вікі з топо. Побудована на проєктах OpenStreetMap і Wikipedia.',
   'project.openclimbing.climbing_guide': 'Скелелазний путівник і топо',

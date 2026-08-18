@@ -58,6 +58,9 @@ type Props = {
   blur?: number;
   className?: string;
   loading?: 'lazy' | 'eager';
+  fetchPriority?: 'high' | 'low' | 'auto';
+  width?: number;
+  height?: number;
   title?: string;
   objectFit?: ObjectFit;
   /** natural width / height, reported as soon as either of the two images loads */
@@ -72,6 +75,9 @@ export const ProgressiveImage = ({
   blur = 12,
   className,
   loading = 'lazy',
+  fetchPriority,
+  width,
+  height,
   title,
   objectFit = 'cover',
   onRatio,
@@ -110,7 +116,10 @@ export const ProgressiveImage = ({
           src={placeholderSrc}
           alt=""
           aria-hidden
+          width={width}
+          height={height}
           loading={loading}
+          fetchPriority={fetchPriority}
           decoding="async"
           $blur={blur}
           $loaded={loaded}
@@ -122,7 +131,10 @@ export const ProgressiveImage = ({
         ref={imageRef}
         src={src}
         alt={alt}
+        width={width}
+        height={height}
         loading={loading}
+        fetchPriority={fetchPriority}
         decoding="async"
         $loaded={loaded}
         $objectFit={objectFit}

@@ -4,7 +4,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import React, { useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
-import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
+import { getLabel } from '../../helpers/featureLabel';
 import { getOsmappLink, getShortId, getUrlOsmId } from '../../services/helpers';
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 import { Feature, isInstant } from '../../services/types';
@@ -31,6 +31,7 @@ import { hasPathOnPhoto } from './Climbing/utils/photo';
 import { Slider, Wrapper } from './FeatureImages/FeatureImages';
 import { getClickHandler } from './FeatureImages/Image/helpers';
 import { Image } from './FeatureImages/Image/Image';
+import { getClimbingPhotoAlt } from './FeatureImages/getClimbingPhotoAlt';
 import { MemberItem } from './MemberFeatures/MemberItem';
 
 const MAX_CRAG_CARD_IMAGES = 3;
@@ -220,33 +221,41 @@ const AreaInfo = ({
   );
 };
 
-const Gallery = ({ images, feature }) => {
-  const poiType = getHumanPoiType(feature);
-  const alt = `${poiType} ${getLabel(feature)}`;
-
-  return (
-    <Wrapper>
-      <Slider>
-        {naturalSort(images, (item) => item.def.k).map((item, index) => {
-          const owner = item.owner ?? feature;
-          const openTopo = getClickHandler(owner, item.def);
-          return (
-            <Image
-              key={item.image.imageUrl}
-              def={item.def}
-              image={item.image}
-              alt={`${alt} ${index + 1}`}
-              onClick={openTopo}
-              actionLabel={
-                openTopo ? t('featurepanel.photo_show_topo') : undefined
-              }
-            />
-          );
-        })}
-      </Slider>
-    </Wrapper>
-  );
-};
+const Gallery = ({
+  images,
+  feature,
+  priority,
+}: {
+  images: {
+    def: Feature['imageDefs'][number];
+    image: ReturnType<typeof getInstantImage>;
+    owner?: Feature;
+  }[];
+  feature: Feature;
+  priority?: boolean;
+}) => (
+  <Wrapper>
+    <Slider>
+      {naturalSort(images, (item) => item.def.k).map((item, index) => {
+        const owner = item.owner ?? feature;
+        const openTopo = getClickHandler(owner, item.def);
+        return (
+          <Image
+            key={item.image.imageUrl}
+            def={item.def}
+            image={item.image}
+            alt={getClimbingPhotoAlt(owner, item.def)}
+            onClick={openTopo}
+            actionLabel={
+              openTopo ? t('featurepanel.photo_show_topo') : undefined
+            }
+            priority={priority && index === 0}
+          />
+        );
+      })}
+    </Slider>
+  </Wrapper>
+);
 
 const getFeatureImages = (feature: Feature, limit = MAX_CRAG_CARD_IMAGES) =>
   (
@@ -293,9 +302,11 @@ const collectAreaImages = (feature: Feature, limit = 20) => {
 const CragItem = ({
   feature,
   showTypeLabel,
+  priority,
 }: {
   feature: Feature;
   showTypeLabel?: boolean;
+  priority?: boolean;
 }) => {
   const mobileMode = useMobileMode();
   const { setPreview } = useFeatureContext();
@@ -341,7 +352,9 @@ const CragItem = ({
             }
             typeLabel={showTypeLabel ? t('featurepanel.type_crag') : undefined}
           />
-          {images.length ? <Gallery feature={feature} images={images} /> : null}
+          {images.length ? (
+            <Gallery feature={feature} images={images} priority={priority} />
+          ) : null}
         </InnerContainer>
       </StyledLink>
       {feature.memberFeatures.length > 0 && (
@@ -354,7 +367,13 @@ const CragItem = ({
   );
 };
 
-const AreaItem = ({ feature }: { feature: Feature }) => {
+const AreaItem = ({
+  feature,
+  priority,
+}: {
+  feature: Feature;
+  priority?: boolean;
+}) => {
   const mobileMode = useMobileMode();
   const { setPreview } = useFeatureContext();
   const handleHover = () => feature.center && setPreview(feature);
@@ -411,7 +430,9 @@ const AreaItem = ({ feature }: { feature: Feature }) => {
             typeLabel={t('featurepanel.type_area')}
             withArrow
           />
-          {images.length ? <Gallery feature={feature} images={images} /> : null}
+          {images.length ? (
+            <Gallery feature={feature} images={images} priority={priority} />
+          ) : null}
         </InnerContainer>
       </StyledLink>
     </Container>
@@ -459,9 +480,15 @@ const CragList = ({
             }
             itemContent={(_index, item) => (
               <ListRow>
-                {item.kind === 'area' && <AreaItem feature={item.feature} />}
+                {item.kind === 'area' && (
+                  <AreaItem feature={item.feature} priority={_index === 0} />
+                )}
                 {item.kind === 'crag' && (
-                  <CragItem feature={item.feature} showTypeLabel={hasMixed} />
+                  <CragItem
+                    feature={item.feature}
+                    showTypeLabel={hasMixed}
+                    priority={_index === 0}
+                  />
                 )}
                 {item.kind === 'other' && <MemberItem feature={item.feature} />}
               </ListRow>

@@ -226,8 +226,7 @@ export default {
   'climbing.guideinfo.description':
     'openclimbing.org è una piattaforma aperta per guide e mappe di arrampicata. I topo e le foto sono salvati nei progetti OpenStreetMap e Wikipedia, quindi possono essere modificati da chiunque.',
   'climbing.guideinfo.button': 'Maggiori informazioni',
-  'project.openclimbing.description':
-    'Una mappa di arrampicata open-source basata su wiki con topografia. Basata sui progetti OpenStreetMap e Wikipedia.',
+  'project.openclimbing.description': 'Guida aperta di arrampicata',
   'project.openclimbing.serpDescription':
     "Una mappa open-source sull'arrampicata basata su wiki con topografia. Basata sui progetti di OpenStreetMap e Wikipedia.",
   'project.openclimbing.climbing_guide': 'Guida di arrampicata e topo',

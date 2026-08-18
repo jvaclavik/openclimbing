@@ -3,6 +3,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { Image } from './Image/Image';
+import { getClimbingPhotoAlt } from './getClimbingPhotoAlt';
 import { useLoadImages } from './useLoadImages';
 import { NoImage } from './NoImage';
 import { HEIGHT, ImageSkeleton, useSliderScroll } from './helpers';
@@ -10,7 +11,6 @@ import { getClickHandler } from './Image/helpers';
 import { PhotoLightbox } from './PhotoLightbox';
 import { PROJECT_ID } from '../../../services/project';
 import { useFeatureContext } from '../../utils/FeatureContext';
-import { getHumanPoiType, getLabel } from '../../../helpers/featureLabel';
 import { t } from '../../../services/intl';
 import { isTag } from '../../../services/types';
 import { photoNameKey } from '../Climbing/utils/photo';
@@ -140,8 +140,6 @@ export const FeatureImages = () => {
   const { highlightedPhoto, highlightToken } = usePhotoHighlightContext();
   const itemRefs = useRef<Record<string, HTMLDivElement>>({});
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const poiType = getHumanPoiType(feature);
-  const alt = `${poiType} ${getLabel(feature)}`;
 
   // Scroll the requested photo into view whenever a crag photo marker on the
   // map is clicked (highlightToken changes even when re-clicking the same one).
@@ -198,8 +196,9 @@ export const FeatureImages = () => {
                     ? t('featurepanel.photo_show_topo')
                     : t('featurepanel.photo_enlarge')
                 }
-                alt={`${alt} ${index + 1}`}
+                alt={getClimbingPhotoAlt(feature, item.def)}
                 highlighted={!!key && key === highlightedKey}
+                priority={index === 0}
                 wrapperRef={(el) => {
                   if (key) {
                     if (el) itemRefs.current[key] = el;

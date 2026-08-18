@@ -229,7 +229,7 @@ export default {
   'climbing.guideinfo.description':
     "openclimbing.org est une plateforme ouverte de topos et de cartes d'escalade. Les topos et les photos sont stockés dans les projets OpenStreetMap et Wikipédia, ils peuvent donc être édités par tous.",
   'climbing.guideinfo.button': "Plus d'infos",
-  'project.openclimbing.description': "Carte d'escalade wiki gratuite",
+  'project.openclimbing.description': "Topo d'escalade ouvert",
   'project.openclimbing.serpDescription':
     "Une carte d'escalade open-source basée sur un wiki avec des topos. Construite sur les projets OpenStreetMap et Wikipédia.",
   'project.openclimbing.climbing_guide': "Topo d'escalade et schémas",

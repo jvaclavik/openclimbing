@@ -81,7 +81,7 @@ export default {
     'openclimbing.org 係一個開放嘅攀石指南同地圖平台。岩壁圖同相片儲存喺 OpenStreetMap 同維基百科項目，所以任何人都可以編輯。',
   'climbing.guideinfo.button': '更多資訊',
 
-  'project.openclimbing.description': '免費嘅維基攀石地圖',
+  'project.openclimbing.description': '開放攀石指南',
   'project.openclimbing.serpDescription': '一個有岩壁圖、基於維基嘅開源攀石地圖。建基於 OpenStreetMap 同維基百科項目。',
   'project.openclimbing.climbing_guide': '攀石指南及岩壁圖',
 

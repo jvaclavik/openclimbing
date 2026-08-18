@@ -275,7 +275,7 @@ export default {
   'homepage.gallery.routes_count': `__count__ cest`,
   'homepage.gallery.drawn_on_photo': `__count__ zakresleno na této fotce`,
   'homepage.gallery.nothing_in_viewport': `V aktuálním výřezu mapy nejsou zakreslené oblasti – zobrazujeme nejzakreslenější.`,
-  'homepage.gallery.show_area': `Zobrazit topo`,
+  'homepage.gallery.show_area': `Zobrazit oblast`,
 
   'homepage.about_banner_desc': `Žádné reklamy. Žádný paywall. Lezecký průvodce, který patří všem.`,
   'homepage.about_banner_cta': `Zjistit víc`,
@@ -452,6 +452,8 @@ export default {
   'featurepanel.gallery_scroll_right': 'Posunout doprava',
   'featurepanel.photo_show_topo': 'Zobrazit topo',
   'featurepanel.photo_enlarge': 'Zvětšit',
+  'featurepanel.photo_alt': 'Fotka __type__ __name__',
+  'featurepanel.photo_alt_named': 'Fotka __type__ __name__ (__photo__)',
   'featurepanel.grade_range': 'Obtížnost',
   'climbing_orientation.label': 'Orientace',
   'climbing_orientation.n': 'sever',

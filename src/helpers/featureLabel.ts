@@ -33,6 +33,20 @@ export const hasName = (feature: Feature) =>
 export const getHumanPoiType = (feature: Feature) =>
   hasName(feature) ? getTypeLabel(feature) : t('featurepanel.no_name');
 
+export const getSeoPoiType = (feature: Feature) => {
+  switch (feature.tags?.climbing) {
+    case 'area':
+      return t('seo.type.area');
+    case 'crag':
+      return t('seo.type.crag');
+    case 'route':
+    case 'route_bottom':
+      return t('seo.type.route');
+    default:
+      return getHumanPoiType(feature);
+  }
+};
+
 const getLabelWithoutFallback = (feature: Feature) => {
   const { point, roundedCenter } = feature;
   if (point) {

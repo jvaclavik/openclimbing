@@ -1,6 +1,6 @@
 import { Feature, TranslationId } from '../services/types';
 import { t } from '../services/intl';
-import { getHumanPoiType, getLabel, getParentLabel } from './featureLabel';
+import { getLabel, getParentLabel, getSeoPoiType } from './featureLabel';
 import {
   getClimbingAttributes,
   mergeClimbingAttributes,
@@ -23,20 +23,6 @@ const translateRock = (rock: string) => {
 const isClimbingRouteTags = (feature: Feature) =>
   feature.tags?.climbing === 'route' ||
   feature.tags?.climbing === 'route_bottom';
-
-const getClimbingPoiType = (feature: Feature): string => {
-  switch (feature.tags?.climbing) {
-    case 'area':
-      return t('seo.type.area');
-    case 'crag':
-      return t('seo.type.crag');
-    case 'route':
-    case 'route_bottom':
-      return t('seo.type.route');
-    default:
-      return getHumanPoiType(feature);
-  }
-};
 
 const collectRoutes = (feature: Feature): Feature[] => {
   const routes: Feature[] = [];
@@ -149,7 +135,7 @@ export const generateFeatureDescription = (feature: Feature): string | null => {
   }
 
   const name = getLabel(feature);
-  const poiType = getClimbingPoiType(feature);
+  const poiType = getSeoPoiType(feature);
   const parentLabel = getParentLabel(feature);
   const prefix = parentLabel
     ? `${name} – ${poiType}, ${parentLabel}`

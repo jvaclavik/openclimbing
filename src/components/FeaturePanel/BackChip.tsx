@@ -34,7 +34,7 @@ export const BackChip = () => {
 
   return (
     <BackItem>
-      <Typography component="h2" variant="subtitle2" color="primary">
+      <Typography component="div" variant="subtitle2" color="primary">
         <Chip
           size="small"
           label={label}

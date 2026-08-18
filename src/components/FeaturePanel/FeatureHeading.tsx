@@ -44,19 +44,34 @@ const TitleRow = () => {
   return (
     <Typography
       variant="h1"
+      component="h1"
       sx={{
+        display: 'flex',
+        flexDirection: isMobileMode ? 'row' : 'column-reverse',
+        alignItems: 'flex-start',
         minWidth: 0,
         textDecoration: feature?.deleted ? 'line-through' : 'none',
         ...(isMobileMode && {
           fontSize: 32,
           lineHeight: 1.15,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
         }),
       }}
     >
-      {label}
+      <span
+        style={
+          isMobileMode
+            ? {
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }
+            : undefined
+        }
+      >
+        {label}
+      </span>
+      <PoiDescription srOnly={isMobileMode} />
     </Typography>
   );
 };
@@ -129,7 +144,6 @@ export const FeatureHeading = ({ headingRef }: FeatureHeadingProps) => {
         </>
       ) : (
         <Stack direction="column" marginTop={4}>
-          <PoiDescription />
           <Headings />
         </Stack>
       )}

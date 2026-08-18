@@ -522,22 +522,39 @@ export const Terrain3dProvider = ({
     if (!wasEnabled.current) return undefined;
     wasEnabled.current = false;
     flatteningRef.current = true;
+
     const finishFlatten = () => {
+      if (cancelled || map.getPitch() > 1) return;
       flatteningRef.current = false;
+      map.off('pitch', finishFlatten);
+      map.off('pitchend', finishFlatten);
+      try {
+        turnOffTerrain(map);
+      } catch {
+        // style still swapping
+      }
     };
+
     try {
-      if (map.getPitch() > 0) {
+      map.setTerrain(null);
+      if (map.getPitch() > 1) {
         map.easeTo({ pitch: 0, duration: 500, essential: true });
-        map.once('pitchend', finishFlatten);
+        map.on('pitch', finishFlatten);
+        map.on('pitchend', finishFlatten);
       } else {
         finishFlatten();
       }
-      turnOffTerrain(map);
     } catch {
-      finishFlatten();
+      flatteningRef.current = false;
+      try {
+        turnOffTerrain(map);
+      } catch {
+        // style still swapping
+      }
     }
     return () => {
       cancelled = true;
+      map.off('pitch', finishFlatten);
       map.off('pitchend', finishFlatten);
     };
   }, [enabled, mapLoaded]);
@@ -549,14 +566,14 @@ export const Terrain3dProvider = ({
 
     const maybeEnable = () => {
       if (flatteningRef.current) return;
-      if (map.getPitch() > 5) setEnabled(true);
+      if (map.getPitch() > 5) setEnabledSafe(true);
     };
 
     map.on('pitch', maybeEnable);
     return () => {
       map.off('pitch', maybeEnable);
     };
-  }, [mapLoaded]);
+  }, [mapLoaded, setEnabledSafe]);
 
   const value = useMemo(
     () => ({ enabled, setEnabled: setEnabledSafe }),

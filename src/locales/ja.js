@@ -58,7 +58,7 @@ export default {
   'climbing.guideinfo.description':
     'OpenClimbing.org は、クライミングガイドと地図のためのオープン プラットフォームです。地形図と写真は OpenStreetMap および Wikipedia プロジェクトに保存されるため、誰でも編集できます。',
 
-  'project.openclimbing.description': '無料のWikiクライミング地図',
+  'project.openclimbing.description': 'オープンクライミングガイド',
   'project.openclimbing.serpDescription':
     '地形図を備えた Wiki ベースのオープンソース登山地図。OpenStreetMap および Wikipedia プロジェクトに基づいて構築されています。',
 

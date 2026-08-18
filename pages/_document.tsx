@@ -56,20 +56,11 @@ export default class MyDocument extends Document<Props> {
             crossOrigin="anonymous"
           />
           <link
-            href="https://fonts.googleapis.com/css2?family=Piazzolla:opsz,wght@8..30,100..900&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Piazzolla:opsz,wght@8..30,100..900&family=Source+Sans+3:wght@200..900&display=swap"
             rel="stylesheet"
-          ></link>
-          <link
-            href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@200..900&display=swap"
-            rel="stylesheet"
-          ></link>
-
+          />
           <link rel="preconnect" href="https://api.maptiler.com" />
-          <link rel="preconnect" href="https://a.mapillary.com" />
-          <link rel="preconnect" href="https://images.mapillary.com" />
-          <link rel="preconnect" href="https://commons.wikimedia.org" />
-          <link rel="preconnect" href="https://www.wikidata.org" />
-          <link rel="preconnect" href="https://en.wikipedia.org" />
+          <link rel="preconnect" href="https://upload.wikimedia.org" />
           <LangLinks urlForLangLinks={urlForLangLinks} />
 
           {isOpenClimbing ? <FaviconsOpenClimbing /> : <FaviconsOsmapp />}

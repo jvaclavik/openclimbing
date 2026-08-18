@@ -94,6 +94,8 @@ type Props = {
   wrapperRef?: React.Ref<HTMLDivElement>;
   /** shown on hover, tells what clicking the photo does */
   actionLabel?: string;
+  /** first visible photo: skip lazy-load so Lighthouse can discover LCP */
+  priority?: boolean;
 };
 
 export const Image = ({
@@ -104,6 +106,7 @@ export const Image = ({
   highlighted,
   wrapperRef,
   actionLabel,
+  priority,
 }: Props) => {
   const { error, onError } = useImgError();
   const [ratio, setRatio] = useState<number | null>(image.ratio ?? null);
@@ -138,6 +141,10 @@ export const Image = ({
           src={image.imageUrl}
           placeholderSrc={getImagePlaceholderUrl(image)}
           alt={alt || getImageDefId(def)}
+          width={size.width}
+          height={size.height}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
           onRatio={setRatio}
           onError={onError}
         />

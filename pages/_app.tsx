@@ -126,7 +126,7 @@ const MyApp = (props: Props) => {
                                 <Head>
                                   <meta
                                     name="viewport"
-                                    content="width=device-width, user-scalable=no, initial-scale=1, interactive-widget=resizes-visual"
+                                    content="width=device-width, initial-scale=1, interactive-widget=resizes-visual"
                                   />
                                 </Head>
                                 <DebugModeManager />
