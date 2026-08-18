@@ -1,15 +1,6 @@
-import { useToggleState } from '../helpers';
-import { useFeatureContext } from '../utils/FeatureContext';
-import { PanelFooterWrapper, PanelSidePadding } from '../utils/PanelHelpers';
-import {
-  FeatureDescription,
-  FromOsm,
-  OpenInProduction,
-} from './FeatureDescription';
-import Coordinates from './Coordinates';
-import { t } from '../../services/intl';
-import { ObjectsAround } from './ObjectsAround';
-import React from 'react';
+import styled from '@emotion/styled';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Accordion,
   AccordionDetails,
@@ -19,9 +10,51 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import React from 'react';
+import { t } from '../../services/intl';
 import { Setter } from '../../types';
+import { useToggleState } from '../helpers';
+import { PanelFooterWrapper, PanelSidePadding } from '../utils/PanelHelpers';
+import { useFeatureContext } from '../utils/FeatureContext';
+import Coordinates from './Coordinates';
+import {
+  FeatureDescription,
+  FromOsm,
+  OpenInProduction,
+} from './FeatureDescription';
+import { ObjectsAround } from './ObjectsAround';
+
+const OsmAccordion = styled(Accordion)`
+  background: transparent;
+  box-shadow: none;
+
+  &:before {
+    display: none;
+  }
+`;
+
+const OsmSummary = styled(AccordionSummary)`
+  min-height: 56px;
+  padding: 0 16px;
+  border-top: 1px solid ${({ theme }) => theme.palette.divider};
+
+  &.Mui-expanded {
+    min-height: 56px;
+  }
+
+  .MuiAccordionSummary-content {
+    margin: 10px 0;
+    min-width: 0;
+
+    &.Mui-expanded {
+      margin: 10px 0;
+    }
+  }
+
+  .MuiAccordionSummary-expandIconWrapper {
+    color: ${({ theme }) => theme.palette.text.secondary};
+  }
+`;
 
 type Props = {
   advanced: boolean;
@@ -29,6 +62,7 @@ type Props = {
   toggleShowTags: () => void;
   showTagsTable: boolean;
 };
+
 export const FeaturePanelFooter = ({
   advanced,
   setAdvanced,
@@ -47,13 +81,11 @@ export const FeaturePanelFooter = ({
   };
 
   return (
-    <Accordion disableGutters elevation={0} square onClick={onClick}>
-      <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
-        <Typography variant="caption">
-          <FeatureDescription />
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
+    <OsmAccordion disableGutters elevation={0} square onClick={onClick}>
+      <OsmSummary expandIcon={<ExpandMoreIcon />}>
+        <FeatureDescription />
+      </OsmSummary>
+      <AccordionDetails sx={{ px: 0, pt: 0, pb: 1 }}>
         <PanelFooterWrapper>
           <PanelSidePadding>
             {feature.point ? null : <FromOsm />}
@@ -107,6 +139,6 @@ export const FeaturePanelFooter = ({
           </PanelSidePadding>
         </PanelFooterWrapper>
       </AccordionDetails>
-    </Accordion>
+    </OsmAccordion>
   );
 };
