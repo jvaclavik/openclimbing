@@ -141,14 +141,12 @@ export const osmappLayers: Layers = {
           bboxes: [czBbox],
           isSatelite: false,
         },
-        // key kept as `cuzkGrayscale` so the layer stays selected for users
-        // who have it persisted in localStorage
         cuzkGrayscale: {
           name: 'ČÚZK elevation (CZ)',
           secondLine: 'DMR 5G hires render by freemap.sk',
           type: 'basemap',
           url: 'https://cz-hires-shading.tiles.freemap.sk/{z}/{x}/{y}.jpg',
-          corsProxy: true, // freemap.sk sends no CORS headers
+          corsProxy: true,
           Icon: MapIcon,
           attribution: [
             '&copy; <a href="https://geoportal.cuzk.cz">ČÚZK</a> DMR 5G, hires render by <a href="https://www.freemap.sk/">freemap.sk</a> (<a href="https://wiki.openstreetmap.org/wiki/Cs:%C4%8Cesko/freemap#%C4%8C%C3%9AZK">permission</a>)',

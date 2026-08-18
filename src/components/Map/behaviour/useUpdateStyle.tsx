@@ -175,9 +175,6 @@ export const useUpdateStyle = createMapEffectHook(
     const [basemap, ...overlays] = activeLayers;
     const key = basemap ?? DEFAULT_MAP;
 
-    // osmapp raster layers pass their `maxzoom` to the source itself (see
-    // rasterStyle), so maplibre overzooms the last available tiles instead of
-    // stopping the map – eg. bing at 19 or ČÚZK elevation at 18.
     const userLayerMaxZoom = userLayers.find(({ url }) => url === key)?.maxzoom;
     map.setMaxZoom(userLayerMaxZoom ?? 24);
 

@@ -1,22 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PROJECT_URL } from '../../src/services/project';
 
-// Same-origin proxy for third party raster tiles which are served without CORS
-// headers – the browser refuses to load them into a WebGL texture. Usage:
-// `/api/cors-proxy?url=https%3A%2F%2Fexample.com%2F1%2F2%2F3.jpg`
-//
-// Not an open proxy: only hosts listed below can be requested, otherwise this
-// endpoint would happily fetch anything reachable from our servers (SSRF).
-const ALLOWED_HOSTS = [
-  'cz-hires-shading.tiles.freemap.sk', // ČÚZK DMR 5G hires render (see osmappLayers)
-];
+const ALLOWED_HOSTS = ['cz-hires-shading.tiles.freemap.sk'];
 
 const TIMEOUT_MS = 20_000;
 
-// Upstream headers worth passing through to the browser. `content-length` is
-// deliberately not among them – fetch() transparently decompresses the body, so
-// the upstream value may not match what we send.
 const FORWARDED_HEADERS = ['content-type', 'etag'];
+
+const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable';
 
 const single = (v: string | string[] | undefined) =>
   Array.isArray(v) ? v[0] : v;
@@ -68,12 +59,14 @@ export default async function handler(
         res.setHeader(header, value);
       }
     });
+
+    const isImage = !!upstream.headers
+      .get('content-type')
+      ?.startsWith('image/');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader(
       'Cache-Control',
-      upstream.ok
-        ? 'public, max-age=604800, stale-while-revalidate=86400'
-        : 'no-store',
+      upstream.ok && isImage ? IMMUTABLE_CACHE : 'no-store',
     );
 
     if (req.method === 'HEAD') {

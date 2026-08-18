@@ -4,7 +4,6 @@ import { overpassLayers } from './layers/overpassLayers';
 import { osmappLayers } from '../../LayerSwitcher/osmappLayers';
 import { Theme } from '../../../helpers/theme';
 
-// `{z}/{x}/{y}` must stay literal so that maplibre can fill them in
 const toCorsProxyUrl = (url: string) =>
   `/api/cors-proxy?url=${encodeURIComponent(url).replace(/%7B/g, '{').replace(/%7D/g, '}')}`;
 
@@ -56,7 +55,7 @@ const rasterStyle = (
       [id]: {
         type: 'raster' as const,
         tileSize: 256,
-        ...(maxzoom ? { maxzoom } : {}), // maplibre overzooms instead of requesting missing tiles
+        ...(maxzoom ? { maxzoom } : {}),
         ...source,
       },
     },
