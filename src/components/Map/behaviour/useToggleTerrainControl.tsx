@@ -18,11 +18,14 @@ export const setTerrain3dWanted = (value: boolean) => {
 export const turnOnTerrain = (map: Map) => {
   map.setTerrain(TERRAIN_3D);
   map.setMaxPitch(85);
+  // Recalculating center/zoom on dragend snaps the camera over terrain.
+  map.setCenterClampedToGround(false);
 };
 
 export const turnOffTerrain = (map: Map) => {
   map.setTerrain(null);
   map.setMaxPitch(60);
+  map.setCenterClampedToGround(true);
 };
 
 /** Enter 3D terrain mode: DEM mesh + higher max pitch. */

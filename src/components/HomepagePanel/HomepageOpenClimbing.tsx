@@ -201,7 +201,7 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
       <ClosePanelButton right onClick={onClose} />
       <Content>
         <Stack height="100%">
-          <Stack flex={1} justifyContent="center">
+          <Stack flex={1}>
             <Stack component="section" alignItems="center" mt={2} mb={2}>
               <DesktopOnly>
                 <Brand>OpenClimbing</Brand>

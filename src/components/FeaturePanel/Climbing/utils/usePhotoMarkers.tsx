@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import maplibregl, { LngLatLike } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { LngLatLike } from 'maplibre-gl';
 import ReactDOMServer from 'react-dom/server';
 import { CameraMarker } from '../CameraMarker';
 import { getPhotoGps, PhotoExifs } from './usePhotoExifGps';

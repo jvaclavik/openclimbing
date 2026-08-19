@@ -1,6 +1,6 @@
 import { getDistance } from '../../SearchBox/utils';
 import { getGlobalMap, mapIdlePromise } from '../../../services/mapStorage';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { LonLat } from '../../../services/types';
 import { Profile, RoutingResult } from './types';
 import { getGraphhopperResults } from './getGraphhopperResults';

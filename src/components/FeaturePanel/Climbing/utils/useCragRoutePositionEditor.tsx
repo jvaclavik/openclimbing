@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { lineString, nearestPointOnLine } from '@turf/turf';
 import { useTheme } from '@emotion/react';
 import React, {

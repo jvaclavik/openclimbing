@@ -1,7 +1,10 @@
 import { OsmId } from '../../services/types';
 import { isBrowser } from '../helpers';
 import { getGlobalMap } from '../../services/mapStorage';
-import { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
+import {
+  LayerSpecification,
+  StyleSpecification,
+} from '@maplibre/maplibre-gl-style-spec';
 
 type OsmappMetadata = { clickableWithOsmId?: boolean };
 
@@ -23,7 +26,7 @@ const isOsmLayer = ({ id, metadata }: LayerSpecification) => {
   return prefixes.some((prefix) => id.startsWith(prefix));
 };
 
-export const layersWithOsmId = (style: maplibregl.StyleSpecification) =>
+export const layersWithOsmId = (style: StyleSpecification) =>
   style.layers // TODO make it custom for basic/outdoor + revert place_
     .filter((layer) => isOsmLayer(layer))
     .map((x) => x.id);
@@ -90,7 +93,7 @@ const isWebglSupported = () => {
       // to canvas.getContext(), causing the check to fail if hardware rendering is not available. See
       // https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
       // for more details.
-      const context = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      const context = canvas.getContext('webgl2');
       if (context && typeof context.getParameter === 'function') {
         return true;
       }

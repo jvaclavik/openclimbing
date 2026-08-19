@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { emptyStyle } from '../styles/emptyStyle';
 import { setGlobalMap } from '../../../services/mapStorage';
 import { COMPASS_TOOLTIP } from '../useAddTopRightControls';
 import { installMapFeatureStateGuard } from './safeMapFeatureState';
+import '../maplibreSetup';
 
 // There are plenty of errors like this:
 //   Image "office_11" could not be loaded. Please make sure you have added the image with map.addImage() or a "sprite" property in your style. You can provide missing images by listening for the "styleimagemissing" map event.

@@ -18,8 +18,10 @@ import {
   Radio,
   Tooltip,
 } from '@mui/material';
-import maplibregl, { StyleSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { StyleSpecification } from 'maplibre-gl';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import '../../Map/maplibreSetup';
 import { t } from '../../../services/intl';
 import { getApiId, getShortId } from '../../../services/helpers';
 import { Feature, LonLat, TranslationId } from '../../../services/types';

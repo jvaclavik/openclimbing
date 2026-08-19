@@ -1,4 +1,5 @@
-import maplibregl, { Map, Point } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { Map, Point } from 'maplibre-gl';
 import styled from '@emotion/styled';
 import { isMobileModeVanilla } from '../../helpers';
 import { FEATURE_PANEL_WIDTH } from '../../utils/PanelHelpers';

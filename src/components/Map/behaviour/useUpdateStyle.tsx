@@ -207,6 +207,7 @@ export const useUpdateStyle = createMapEffectHook(
 
     if (keepTerrain) {
       map.setMaxPitch(85);
+      map.setCenterClampedToGround(false);
     }
 
     // OpenMapTilesLanguage mutates layer fields; only attach once.

@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import '../../Map/maplibreSetup';
 import React, { useEffect, useRef, useState } from 'react';
 import { Feature } from '../../../services/types';
 import { touristStyle } from '../../Map/styles/touristStyle';

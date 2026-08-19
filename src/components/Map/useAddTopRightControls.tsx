@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { getGlobalMap } from '../../services/mapStorage';
 import { t } from '../../services/intl';
 import { isMobileDevice } from '../helpers';

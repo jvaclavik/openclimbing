@@ -1,5 +1,5 @@
 import React from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import styled from '@emotion/styled';
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import TimelineIcon from '@mui/icons-material/Timeline';
