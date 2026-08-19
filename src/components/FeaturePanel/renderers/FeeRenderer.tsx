@@ -10,7 +10,6 @@ const Container = styled.div`
 `;
 
 export const FeeRenderer = ({ k, v }) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { feature } = useFeatureContext();
   const charge = feature?.tags?.charge;
 

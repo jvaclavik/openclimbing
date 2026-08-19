@@ -1,7 +1,7 @@
 /**
  * Via ferrata grading conversion.
  *
- * OSM uses the Schall scale (numeric 1–6) in the `via_ferrata_scale` tag.
+ * OSM uses the Schall scale (numeric 0–5) in the `via_ferrata_scale` tag.
  * This module converts it to the French and German/Hüsler scales.
  *
  * @see https://wiki.openstreetmap.org/wiki/Key:via_ferrata_scale

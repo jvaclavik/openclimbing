@@ -16,11 +16,6 @@ const Badge = styled.span`
   border-radius: 12px;
 `;
 
-const FeeContainer = styled.div`
-  font-size: 13px;
-  margin-bottom: 8px;
-`;
-
 /**
  * Displays via ferrata equipment features (bridges, ladders, zip lines, nets)
  * and entrance fee information when available in OSM tags.
@@ -47,31 +42,19 @@ export const ViaFerrataFeatures = () => {
   if (zipLineCount > 0)
     features.push({ icon: '🪂', label: 'zip lines', count: zipLineCount });
   if (netCount > 0)
-    features.push({ icon: '𓈈', label: 'nets', count: netCount });
+    features.push({ icon: '🕸️', label: 'nets', count: netCount });
 
-  const hasFee = tags.fee === 'yes';
-  const charge = tags.charge;
-
-  if (features.length === 0 && !hasFee) {
+  if (features.length === 0) {
     return null;
   }
 
   return (
-    <>
-      {features.length > 0 && (
-        <Container>
-          {features.map(({ icon, label, count }) => (
-            <Badge key={label}>
-              {icon} {count} {label}
-            </Badge>
-          ))}
-        </Container>
-      )}
-      {hasFee && (
-        <FeeContainer>
-          💶 {charge ? `${charge} fee` : 'Entrance fee required'}
-        </FeeContainer>
-      )}
-    </>
+    <Container>
+      {features.map(({ icon, label, count }) => (
+        <Badge key={label}>
+          {icon} {count} {label}
+        </Badge>
+      ))}
+    </Container>
   );
 };
