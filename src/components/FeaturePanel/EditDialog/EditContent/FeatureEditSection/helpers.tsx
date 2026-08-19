@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CharacterCount, getInputTypeForKey } from '../helpers';
-import { Button, Stack, TextField } from '@mui/material';
+import { Button, InputAdornment, Stack, TextField } from '@mui/material';
 import styled from '@emotion/styled';
 import { useLoadingState } from '../../../../utils/useLoadingState';
 import { t } from '../../../../../services/intl';
@@ -24,6 +24,7 @@ type TextFieldProps = {
   margin?: 'none' | 'dense' | 'normal';
   multiline?: boolean;
   size?: 'small' | 'medium';
+  endAdornment?: React.ReactNode;
 };
 
 export const TextFieldWithCharacterCount = ({
@@ -39,6 +40,7 @@ export const TextFieldWithCharacterCount = ({
   margin = 'normal',
   multiline: multilineProp,
   size = 'medium',
+  endAdornment,
 }: TextFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isValidationReadyToCheck, setIsValidationReadyToCheck] =
@@ -69,7 +71,24 @@ export const TextFieldWithCharacterCount = ({
           setIsValidationReadyToCheck(true);
           setIsFocused(false);
         }}
-        slotProps={{ formHelperText: { component: 'div' } }}
+        slotProps={{
+          formHelperText: { component: 'div' },
+          input: {
+            endAdornment: endAdornment ? (
+              <InputAdornment
+                position="end"
+                sx={{
+                  maxHeight: 'none',
+                  height: 'auto',
+                  alignSelf: multiline ? 'flex-start' : 'center',
+                  mt: multiline ? 0.5 : 0,
+                }}
+              >
+                {endAdornment}
+              </InputAdornment>
+            ) : undefined,
+          },
+        }}
         helperText={
           <Stack direction="row" spacing={1}>
             {errorText

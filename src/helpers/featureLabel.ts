@@ -71,6 +71,28 @@ export const getSecondaryLabel = (feature: Feature) => {
   return name === getLabel(feature) ? undefined : name;
 };
 
+export const getAltName = (feature: Feature) => {
+  const { point, tags } = feature;
+  if (point) {
+    return undefined;
+  }
+
+  const raw = tags[`alt_name:${intl.lang}`] || tags.alt_name;
+  if (!raw) {
+    return undefined;
+  }
+
+  const skip = new Set(
+    [getLabel(feature), getSecondaryLabel(feature)].filter(Boolean),
+  );
+  const parts = raw
+    .split(';')
+    .map((part) => part.trim())
+    .filter((part) => part && !skip.has(part));
+
+  return parts.length ? parts.join(' · ') : undefined;
+};
+
 export const getParentLabel = (feature: Feature) => {
   const parentWithName = feature.parentFeatures?.find(
     (parent) => getName(parent) && parent.tags.climbing,

@@ -4,7 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getReactKey, getOsmappLink, getShortId } from '../../services/helpers';
 import { getHumanPoiType, getLabel } from '../../helpers/featureLabel';
 import { useFeatureContext } from '../utils/FeatureContext';
-import { Chip, Stack, Typography } from '@mui/material';
+import { Chip, Skeleton, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 
@@ -100,6 +100,21 @@ export const ParentLinkContent = () => {
 export const ParentLink = () => {
   const { feature } = useFeatureContext();
   const hasParentLink = feature.parentFeatures?.length;
+  const awaitingParent =
+    feature.skeleton && feature.properties?.parentId != null && !hasParentLink;
+
+  if (awaitingParent) {
+    return (
+      <ParentItem>
+        <Skeleton
+          variant="rounded"
+          width={128}
+          height={24}
+          sx={{ borderRadius: '16px' }}
+        />
+      </ParentItem>
+    );
+  }
 
   if (!hasParentLink) return null;
 

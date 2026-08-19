@@ -17,6 +17,9 @@ const filterConsoleLog = () => {
       typeof message === 'string' &&
       !message.includes(
         'Please make sure you have added the image with map.addImage',
+      ) &&
+      !message.includes(
+        'READ-usage buffer was written, then fenced, but written again',
       )
     ) {
       original.apply(console, [message, ...optionalParams]);

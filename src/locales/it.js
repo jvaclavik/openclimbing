@@ -617,7 +617,7 @@ export default {
   'climbingpanel.update_route_2': 'è già disegnata, ma puoi aggiornarla. Trascina i punti o aggiungine uno nuovo.',
   'climbingview.description': 'Descrizione',
   'climbingview.links': 'Link',
-  'climbing.distribute_along_line': 'Distribuisci lungo una linea',
+  'climbing.distribute_along_line': 'Distribuisci',
   'climbing.done_drawing_line': 'Fatto',
   'climbing.route_positions_help':
     'Clicca sulla mappa per aggiungere punti guida — le vie si distribuiscono uniformemente lungo la linea tra di essi. Trascina un punto guida per ridistribuire, o trascina una via per regolarne la posizione. Clic destro su una via per riportarla sulla linea, o clic destro su un punto guida per rimuoverlo.',

@@ -2,7 +2,11 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Stack, Typography, useMediaQuery } from '@mui/material';
 import React from 'react';
-import { getLabel, getSecondaryLabel } from '../../helpers/featureLabel';
+import {
+  getAltName,
+  getLabel,
+  getSecondaryLabel,
+} from '../../helpers/featureLabel';
 import { PROJECT_ID } from '../../services/project';
 import { useMobileMode } from '../helpers';
 import { PANEL_GAP } from '../utils/PanelHelpers';
@@ -90,6 +94,7 @@ const Headings = () => {
   const isMobileMode = useMobileMode();
   const { feature } = useFeatureContext();
   const secondaryLabel = getSecondaryLabel(feature);
+  const altName = getAltName(feature);
 
   return (
     <HeadingsWrapper>
@@ -102,6 +107,7 @@ const Headings = () => {
           {secondaryLabel}
         </SecondaryHeading>
       )}
+      {altName && <AltName $deleted={feature?.deleted}>{altName}</AltName>}
     </HeadingsWrapper>
   );
 };
@@ -119,6 +125,15 @@ const SecondaryHeading = styled.h2<{
       font-weight: 900;
     `}
   margin: 0;
+  ${({ $deleted }) => $deleted && 'text-decoration: line-through;'}
+`;
+
+const AltName = styled.div<{ $deleted: boolean }>`
+  margin: 4px 0 0;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
   ${({ $deleted }) => $deleted && 'text-decoration: line-through;'}
 `;
 

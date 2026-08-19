@@ -94,6 +94,7 @@ type Props = {
   wrapperRef?: React.Ref<HTMLDivElement>;
   /** shown on hover, tells what clicking the photo does */
   actionLabel?: string;
+  actionAccent?: boolean;
   /** first visible photo: skip lazy-load so Lighthouse can discover LCP */
   priority?: boolean;
 };
@@ -106,6 +107,7 @@ export const Image = ({
   highlighted,
   wrapperRef,
   actionLabel,
+  actionAccent,
   priority,
 }: Props) => {
   const { error, onError } = useImgError();
@@ -155,7 +157,7 @@ export const Image = ({
       {hasPaths && ratio !== null && <PathsSvg def={def} size={size} />}
       <DrawnRoutesBadge count={getDrawnRoutesCount(def)} />
       {onClick && actionLabel && !isPanorama && (
-        <HoverAction>{actionLabel}</HoverAction>
+        <HoverAction $accent={actionAccent}>{actionLabel}</HoverAction>
       )}
       {(isPanorama || ratio !== null) && <InfoButton image={image} />}
       {image.uncertainImage && !isPanorama && <UncertainCover />}

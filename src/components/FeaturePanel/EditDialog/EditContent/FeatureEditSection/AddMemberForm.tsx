@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { getApiId } from '../../../../../services/helpers';
 import { useCurrentItem, useEditContext } from '../../context/EditContext';
-import { Button, IconButton, TextareaAutosize, TextField } from '@mui/material';
+import {
+  Button,
+  IconButton,
+  ListItemIcon,
+  MenuItem,
+  TextareaAutosize,
+  TextField,
+  Tooltip,
+} from '@mui/material';
 import { FeatureTags } from '../../../../../services/types';
 import { t } from '../../../../../services/intl';
 import AddIcon from '@mui/icons-material/Add';
 import { getPresetTranslation } from '../../../../../services/tagging/translations';
 import { fetchFreshItem, getNewNodeItem } from '../../context/itemsHelpers';
 import { DataItem, Members } from '../../context/types';
-import { getPresetKey } from '../../context/utils';
+import { findInItems, getPresetKey } from '../../context/utils';
 import { Setter } from '../../../../../types';
 import styled from '@emotion/styled';
 import { GradeSystemSelect } from '../../../Climbing/GradeSystemSelect';
@@ -17,8 +25,14 @@ import { GRADE_TABLE } from '../../../../../services/tagging/climbing/gradeData'
 import { getOsmTagFromGradeSystem } from '../../../../../services/tagging/climbing/routeGrade';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import CloseIcon from '@mui/icons-material/Close';
+import LinkIcon from '@mui/icons-material/Link';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useMoreMenu } from '../../../Climbing/useMoreMenu';
+import { useSnackbar } from '../../../../utils/SnackbarContext';
+import { parseOsmShortId } from './parseOsmShortId';
+import { useLinkEditItem } from './useLinkEditItem';
 
-export type Scene = null | 'single' | 'batch';
+export type Scene = null | 'single' | 'batch' | 'url';
 
 const ROUTE_BOTTOM_TAGS = {
   climbing: 'route_bottom',
@@ -66,9 +80,9 @@ const convertLine = async (
   gradeSystem: string | undefined,
 ) => {
   let newItem: DataItem;
-  if (line.match(/^[nwr]\d+$/)) {
-    const apiId = getApiId(line);
-    newItem = await fetchFreshItem(apiId);
+  const shortId = parseOsmShortId(line);
+  if (shortId) {
+    newItem = await fetchFreshItem(getApiId(shortId));
   } else {
     const { gradeTags, name } = parseGradeFromLine(line, gradeSystem);
     newItem = getNewNodeItem(undefined, {
@@ -83,7 +97,12 @@ const convertLine = async (
   const presetLabel = getPresetTranslation(presetKey);
   const tags = Object.fromEntries(newItem.tagsEntries);
   const newLabel = tags.name ?? presetLabel;
-  const newMember = { shortId: newItem.shortId, role: '', label: newLabel };
+  const newMember = {
+    shortId: newItem.shortId,
+    role: '',
+    originalLabel: newLabel,
+    originalTags: tags,
+  };
 
   return { newItem, newMember };
 };
@@ -103,7 +122,7 @@ const useHandleAddMember = (
   label: string,
   setLabel: Setter<string>,
 ) => {
-  const { addItem, setCurrent } = useEditContext();
+  const { addItem, items, setCurrent } = useEditContext();
   const relation = useCurrentItem();
   const gradeSystem = useGetGradeSystemOrUndefined(scene);
 
@@ -114,7 +133,14 @@ const useHandleAddMember = (
     for (const line of lines) {
       const { tags } = relation;
       const { newItem, newMember } = await convertLine(line, tags, gradeSystem);
-      addItem(newItem);
+      if (
+        relation.members?.some((member) => member.shortId === newMember.shortId)
+      ) {
+        continue;
+      }
+      if (!findInItems(items, newMember.shortId)) {
+        addItem(newItem);
+      }
       newMembers.push(newMember);
     }
 
@@ -133,9 +159,11 @@ const StyledFormatListBulletedIcon = styled(FormatListBulletedIcon)`
 `;
 export const BatchButton = ({ onClick }: { onClick: () => void }) => (
   <div>
-    <IconButton onClick={onClick}>
-      <StyledFormatListBulletedIcon />
-    </IconButton>
+    <Tooltip title={t('editdialog.members.add_multiple')}>
+      <IconButton onClick={onClick}>
+        <StyledFormatListBulletedIcon />
+      </IconButton>
+    </Tooltip>
   </div>
 );
 
@@ -170,6 +198,45 @@ const ShowFormButton = (props: { onClick: () => void }) => {
   );
 };
 
+const AddMemberMoreMenu = ({ onAddFromUrl }: { onAddFromUrl: () => void }) => {
+  const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
+
+  return (
+    <>
+      <IconButton size="small" color="secondary" onClick={handleClickMore}>
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+      <MoreMenu>
+        <MenuItem
+          onClick={(e) => {
+            handleCloseMore(e);
+            onAddFromUrl();
+          }}
+        >
+          <ListItemIcon>
+            <LinkIcon fontSize="small" />
+          </ListItemIcon>
+          {t('editdialog.members.add_from_url')}
+        </MenuItem>
+      </MoreMenu>
+    </>
+  );
+};
+
+const UrlInput = (props: { label: string; setLabel: Setter<string> }) => (
+  <TextField
+    value={props.label}
+    size="small"
+    label={t('editdialog.members.add_from_url')}
+    placeholder={t('editdialog.members.url_placeholder')}
+    onChange={(e) => {
+      props.setLabel(e.target.value);
+    }}
+    autoFocus
+    sx={{ minWidth: 220, flex: 1 }}
+  />
+);
+
 const ConfirmButton = (props: { onClick: (e) => Promise<void> }) => (
   <Button onClick={props.onClick} variant="text">
     {t('editdialog.members.confirm')}
@@ -198,7 +265,7 @@ const useKeyboardShortcuts = (
 ) => {
   useEffect(() => {
     const downHandler = (e) => {
-      if (scene !== 'single') {
+      if (scene !== 'single' && scene !== 'url') {
         return;
       }
 
@@ -248,7 +315,30 @@ export const AddMemberForm = () => {
   const [scene, setScene] = useState<Scene>();
   const [label, setLabel] = useState('');
   const handleAddMember = useHandleAddMember(scene, setScene, label, setLabel);
-  useKeyboardShortcuts(handleAddMember, scene, setScene);
+  const { addAsMember } = useLinkEditItem();
+  const { showToast } = useSnackbar();
+
+  const handleAddFromUrl = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const shortId = parseOsmShortId(label);
+    if (!shortId) {
+      showToast(t('editdialog.members.url_invalid'), 'warning');
+      return;
+    }
+    try {
+      await addAsMember(shortId);
+      setScene(null);
+      setLabel('');
+    } catch {
+      showToast(t('editdialog.members.url_invalid'), 'warning');
+    }
+  };
+
+  useKeyboardShortcuts(
+    scene === 'url' ? handleAddFromUrl : handleAddMember,
+    scene,
+    setScene,
+  );
 
   return (
     <>
@@ -257,11 +347,18 @@ export const AddMemberForm = () => {
           <MemberNameInput label={label} setLabel={setLabel} />
           <ConfirmButton onClick={handleAddMember} />
           <BatchButton onClick={() => setScene('batch')} />
+          <AddMemberMoreMenu onAddFromUrl={() => setScene('url')} />
         </>
       ) : scene === 'batch' ? (
         <>
           <BatchTextarea label={label} setLabel={setLabel} />
           <ConfirmButton onClick={handleAddMember} />
+          <CancelButton setLabel={setLabel} setScene={setScene} />
+        </>
+      ) : scene === 'url' ? (
+        <>
+          <UrlInput label={label} setLabel={setLabel} />
+          <ConfirmButton onClick={handleAddFromUrl} />
           <CancelButton setLabel={setLabel} setScene={setScene} />
         </>
       ) : (

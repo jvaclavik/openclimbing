@@ -616,7 +616,7 @@ export default {
   'climbingpanel.update_route_2': 'jest już narysowana, ale możesz ją zaktualizować. Po prostu przeciągnij punkty lub dodaj nowy.',
   'climbingview.description': 'Opis',
   'climbingview.links': 'Linki',
-  'climbing.distribute_along_line': 'Rozmieść wzdłuż linii',
+  'climbing.distribute_along_line': 'Rozmieść',
   'climbing.done_drawing_line': 'Gotowe',
   'climbing.route_positions_help':
     'Kliknij na mapie, aby dodać punkty pomocnicze — drogi rozkładają się równomiernie wzdłuż linii między nimi. Przeciągnij punkt pomocniczy, aby rozłożyć ponownie, lub przeciągnij drogę, aby dopasować jej pozycję. Kliknij prawym przyciskiem drogę, aby przyciągnąć ją z powrotem do linii, lub punkt pomocniczy, aby go usunąć.',

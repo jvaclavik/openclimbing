@@ -16,7 +16,7 @@ import { getShortId } from '../../../../services/helpers';
 import { findPreset } from '../../../../services/tagging/presets';
 import { getNewId } from '../../../../services/getCoordsFeature';
 import { getLastBeforeDeleted } from '../../../../services/osm/osmApi';
-import { DataItem, DataItemRaw, Members } from './types';
+import { DataItem, DataItemRaw, Members, Section } from './types';
 
 export const addEmptyOriginalState = (dataItem: DataItemRaw): DataItem => ({
   ...dataItem,
@@ -29,18 +29,53 @@ export const addEmptyOriginalState = (dataItem: DataItemRaw): DataItem => ({
   },
 });
 
+const isClimbingRoute = (tags: FeatureTags) =>
+  tags.climbing === 'route' || tags.climbing === 'route_bottom';
+
+const getInitialSections = (
+  tags: FeatureTags,
+  shortId: string,
+  options: { members?: Members; nodeLonLat?: LonLat } = {},
+): Section[] => {
+  const sections: Section[] = [];
+  if (isClimbingRoute(tags)) sections.push('climbing');
+  // Crag member lists (climbing routes) stay collapsed — they are long.
+  if (options.members && tags.climbing !== 'crag') sections.push('members');
+  if (shortId.startsWith('n') && options.nodeLonLat === undefined) {
+    sections.push('location');
+  }
+  return sections;
+};
+
 export const getNewNodeItem = (
   nodeLonLat: LonLat | undefined,
   tags: FeatureTags = {},
-): DataItem =>
-  addEmptyOriginalState({
-    shortId: `n${getNewId()}`,
+): DataItem => {
+  const shortId = `n${getNewId()}`;
+  return addEmptyOriginalState({
+    shortId,
     version: undefined,
     tagsEntries: Object.entries(tags),
     toBeDeleted: false,
     nodeLonLat,
-    sections: tags.climbing ? ['climbing'] : [],
+    sections: getInitialSections(tags, shortId, { nodeLonLat }),
   });
+};
+
+export const getNewRelationItem = (
+  tags: FeatureTags = {},
+  members: Members = [],
+): DataItem => {
+  const shortId = `r${getNewId()}`;
+  return addEmptyOriginalState({
+    shortId,
+    version: undefined,
+    tagsEntries: Object.entries(tags),
+    toBeDeleted: false,
+    members,
+    sections: getInitialSections(tags, shortId, { members }),
+  });
+};
 
 const getLabel = (itemsMap: ItemsMap, member: RelationMember) => {
   const element = itemsMap[member.type][member.ref];
@@ -70,11 +105,15 @@ const getFullOrDeleted = async (apiId: OsmId): Promise<OsmResponse> => {
 };
 
 const getMembers = (el: OsmElement, itemsMap: ItemsMap): Members =>
-  el.members?.map((member) => ({
-    shortId: getShortId({ type: member.type, id: member.ref }),
-    role: member.role,
-    originalLabel: getLabel(itemsMap, member),
-  })) ?? [];
+  el.members?.map((member) => {
+    const element = itemsMap[member.type][member.ref];
+    return {
+      shortId: getShortId({ type: member.type, id: member.ref }),
+      role: member.role,
+      originalLabel: getLabel(itemsMap, member),
+      originalTags: element?.tags,
+    };
+  }) ?? [];
 
 // For FeaturePanel use getFullFeatureWithMemberFeatures() which returns `Feature` type
 export const fetchFreshItem = async (apiId: OsmId): Promise<DataItem> => {
@@ -103,6 +142,9 @@ export const fetchFreshItem = async (apiId: OsmId): Promise<DataItem> => {
       nodes,
       members,
     },
-    sections: tags.climbing ? ['climbing'] : [],
+    sections: getInitialSections(tags, getShortId(el), {
+      members,
+      nodeLonLat,
+    }),
   };
 };

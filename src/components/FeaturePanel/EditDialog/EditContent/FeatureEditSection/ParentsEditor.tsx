@@ -1,20 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Chip,
-  Divider,
   List,
   Stack,
   Typography,
   useTheme,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { getShortId } from '../../../../../services/helpers';
+import { getApiId, getShortId } from '../../../../../services/helpers';
 import { FeatureRow } from '../FeatureRow';
 import { t } from '../../../../../services/intl';
-import { useCurrentItem, useExpandedSections } from '../../context/EditContext';
+import {
+  useCurrentItem,
+  useEditContext,
+  useExpandedSections,
+} from '../../context/EditContext';
 import { isClimbingRoute as getIsClimbingRoute } from '../../../../../utils';
 import { AreaIcon } from '../../../Climbing/AreaIcon';
 import { CragIcon } from '../../../Climbing/CragIcon';
@@ -25,6 +29,11 @@ import {
 import { Feature } from '../../../../../services/types';
 import { OpenAllButton } from './helpers';
 import { useGetParents } from './useGetParents';
+import { fetchFreshItem } from '../../context/itemsHelpers';
+import { findInItems } from '../../context/utils';
+import { EditTabDropZone } from './EditTabDropZone';
+import { useLinkEditItem } from './useLinkEditItem';
+import { AddParentForm } from './AddParentForm';
 
 const SectionName = () => {
   const theme = useTheme();
@@ -43,10 +52,7 @@ const SectionName = () => {
           width={24}
         />
         <Typography variant="button">
-          {t('editdialog.climbing_areas')}{' '}
-          <Typography variant="caption" color="secondary">
-            ({t('editdialog.parents')})
-          </Typography>
+          {t('editdialog.climbing_areas')}
         </Typography>
       </Stack>
     );
@@ -61,10 +67,7 @@ const SectionName = () => {
           width={24}
         />
         <Typography variant="button">
-          {t('editdialog.climbing_crags')}{' '}
-          <Typography variant="caption" color="secondary">
-            ({t('editdialog.parents')})
-          </Typography>
+          {t('editdialog.climbing_crags')}
         </Typography>
       </Stack>
     );
@@ -82,73 +85,147 @@ const CustomAccordion = ({
   parentsLength,
 }: {
   children: React.ReactNode;
-  parentsLength: number | undefined;
+  parentsLength: number;
 }) => {
-  const { expanded, toggleExpanded } = useExpandedSections('parents');
+  const { tags } = useCurrentItem();
+  const { current } = useEditContext();
+  const { expanded, toggleExpanded, expand } = useExpandedSections('parents');
+
+  useEffect(() => {
+    if (tags.climbing === 'crag') return;
+    expand();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
+
   return (
-    <>
-      <Divider />
-      <Accordion // TODO replace Accordion with custom collapse component, it is not accordion anymore :)
-        disableGutters
-        elevation={0}
-        square
-        expanded={expanded}
-        slotProps={{ transition: { timeout: 0 } }}
-        sx={{
-          '&.MuiAccordion-root:before': {
-            opacity: 0,
-          },
-        }}
+    <Accordion // TODO replace Accordion with custom collapse component, it is not accordion anymore :)
+      disableGutters
+      elevation={0}
+      square
+      expanded={expanded}
+      slotProps={{ transition: { timeout: 0 } }}
+      sx={{
+        bgcolor: 'transparent',
+        '&.MuiAccordion-root:before': {
+          opacity: 0,
+        },
+      }}
+    >
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel1-content"
+        id="panel1-parents-header"
+        onClick={toggleExpanded}
       >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1-content"
-          id="panel1-parents-header"
-          onClick={toggleExpanded}
-        >
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Typography variant="button">
-              <SectionName />
-            </Typography>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <SectionName />
+          {parentsLength ? (
             <Chip size="small" label={parentsLength} variant="outlined" />
-          </Stack>
-        </AccordionSummary>
-        <AccordionDetails sx={{ pt: 0 }}>
-          <List disablePadding>{children}</List>
-        </AccordionDetails>
-      </Accordion>
-    </>
+          ) : null}
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails sx={{ pt: 0 }}>{children}</AccordionDetails>
+    </Accordion>
   );
+};
+
+const useVisibleParents = () => {
+  const parents = useGetParents();
+  const { items, current } = useEditContext();
+
+  const visibleOsmParents = parents.filter((parent) => {
+    const parentItem = findInItems(items, getShortId(parent.osmMeta));
+    if (!parentItem?.members) return true;
+    return parentItem.members.some((member) => member.shortId === current);
+  });
+
+  const osmParentIds = new Set(
+    visibleOsmParents.map((parent) => getShortId(parent.osmMeta)),
+  );
+
+  const sessionParents = items.filter(
+    (item) =>
+      item.shortId !== current &&
+      item.shortId.startsWith('r') &&
+      !osmParentIds.has(item.shortId) &&
+      item.members?.some((member) => member.shortId === current),
+  );
+
+  return { visibleOsmParents, sessionParents };
 };
 
 export const ParentsEditor = () => {
   const handleClick = useHandleItemClick();
-  const parents = useGetParents();
-  const handleOpenAll = useHandleOpenAllParents(parents);
+  const { visibleOsmParents, sessionParents } = useVisibleParents();
+  const handleOpenAll = useHandleOpenAllParents(visibleOsmParents);
+  const { items, addItem, current } = useEditContext();
+  const { addAsParent } = useLinkEditItem();
+  const { expand } = useExpandedSections('parents');
 
-  if (!parents || parents.length === 0) {
-    return null;
-  }
+  const unlinkFromParent = async (parentShortId: string) => {
+    const existing = findInItems(items, parentShortId);
+    if (existing) {
+      existing.setMembers((prev) =>
+        (prev ?? []).filter((member) => member.shortId !== current),
+      );
+      return;
+    }
+    const fresh = await fetchFreshItem(getApiId(parentShortId));
+    addItem({
+      ...fresh,
+      members: (fresh.members ?? []).filter(
+        (member) => member.shortId !== current,
+      ),
+    });
+  };
+
+  const parentsCount = visibleOsmParents.length + sessionParents.length;
 
   return (
-    <CustomAccordion parentsLength={parents?.length}>
-      {parents.map((parent) => {
-        const shortId = getShortId(parent.osmMeta);
-        return (
-          <FeatureRow
-            key={shortId}
-            shortId={shortId}
-            originalLabel={getLabel(parent)}
-            onClick={(e) => handleClick(e, shortId)}
-          />
-        );
-      })}
+    <EditTabDropZone
+      onDropShortId={async (droppedShortId) => {
+        const added = await addAsParent(droppedShortId);
+        if (added) expand();
+      }}
+    >
+      <CustomAccordion parentsLength={parentsCount}>
+        <List disablePadding>
+          {visibleOsmParents.map((parent) => {
+            const shortId = getShortId(parent.osmMeta);
+            const canRemove = parent.osmMeta.type === 'relation';
+            return (
+              <FeatureRow
+                key={shortId}
+                shortId={shortId}
+                originalLabel={getLabel(parent)}
+                previewTags={parent.tags}
+                onClick={(e) => handleClick(e, shortId)}
+                onRemove={
+                  canRemove ? () => unlinkFromParent(shortId) : undefined
+                }
+              />
+            );
+          })}
+          {sessionParents.map((parent) => (
+            <FeatureRow
+              key={parent.shortId}
+              shortId={parent.shortId}
+              originalLabel={parent.tags.name || parent.presetLabel}
+              previewTags={parent.tags}
+              onClick={(e) => handleClick(e, parent.shortId)}
+              onRemove={() => unlinkFromParent(parent.shortId)}
+            />
+          ))}
+        </List>
 
-      {parents.length > 1 && (
-        <Stack alignItems="end">
-          <OpenAllButton onClick={handleOpenAll} />
+        <Stack direction="row" alignItems="center" spacing={2} mt={1} ml={1}>
+          <AddParentForm />
+          <Box sx={{ flex: 1 }} />
+          {visibleOsmParents.length > 1 && (
+            <OpenAllButton onClick={handleOpenAll} />
+          )}
         </Stack>
-      )}
-    </CustomAccordion>
+      </CustomAccordion>
+    </EditTabDropZone>
   );
 };

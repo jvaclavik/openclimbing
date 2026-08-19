@@ -9,15 +9,23 @@ import { useFeatureContext } from '../../utils/FeatureContext';
 import { QuickActionButton } from './QuickActionButton';
 import { SaveButton } from './SaveButton';
 import { ShareButton } from './ShareDialog/ShareButton';
+import { EditQuickAction } from '../EditButton';
+import { CONTENT_GAP } from '../../utils/PanelHelpers';
 
 const Wrapper = styled.div`
-  max-width: 100%;
-  width: fit-content;
   margin-top: 12px;
+  margin-left: calc(-1 * ${CONTENT_GAP});
+  margin-right: calc(-1 * ${CONTENT_GAP});
+  width: calc(100% + 2 * ${CONTENT_GAP});
+  padding: 4px 0;
 
   overflow-x: auto;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   /* Used to overwrite pointer-events: none from the collapsed featurepanel drawer */
   pointer-events: all;
@@ -27,6 +35,7 @@ const Container = styled.div`
   width: max-content;
   display: flex;
   gap: 8px;
+  padding: 0 ${CONTENT_GAP};
 `;
 
 export const QuickActions = () => {
@@ -54,13 +63,7 @@ export const QuickActions = () => {
   return (
     <Wrapper>
       <Container>
-        <QuickActionButton
-          icon={DirectionsIcon}
-          label={t('featurepanel.directions_button')}
-          onClick={() => {
-            Router.push('/directions');
-          }}
-        />
+        <EditQuickAction />
         <SaveButton />
         <ShareButton />
         {showPdfButton && (
@@ -79,6 +82,13 @@ export const QuickActions = () => {
             }}
           />
         )}
+        <QuickActionButton
+          icon={DirectionsIcon}
+          label={t('featurepanel.directions_button')}
+          onClick={() => {
+            Router.push('/directions');
+          }}
+        />
       </Container>
     </Wrapper>
   );

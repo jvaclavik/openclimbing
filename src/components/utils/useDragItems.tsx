@@ -1,51 +1,53 @@
 import styled from '@emotion/styled';
 import React, { useEffect, useState } from 'react';
-import { alpha } from '@mui/material/styles';
 import { toInsertIndexAfterRemove } from '../FeaturePanel/Climbing/utils/array';
 
-export const HighlightedDropzoneVertical = styled.div<{
-  $isActive: boolean;
-  $isDragging?: boolean;
-}>`
+export const HighlightedDropzoneVertical = styled.div`
   position: absolute;
-  height: 100%;
-  margin-left: -2px;
-  width: 4px;
-  top: 0;
-  background: ${({ $isActive, $isDragging, theme }) => {
-    if (!$isDragging) {
-      return 'transparent';
-    }
-    const c = theme.palette.climbing.active;
-    if ($isActive) {
-      return c;
-    }
-    return alpha(c, 0.28);
-  }};
-  z-index: 1000000;
-  transition: background-color 0.12s ease-out;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 3px;
+  background: ${({ theme }) => theme.palette.primary.main};
+  pointer-events: none;
+  z-index: 2;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.palette.primary.main};
+    transform: translateX(-50%);
+  }
 `;
 
-export const HighlightedDropzoneHorizontal = styled.div<{
-  $isActive: boolean;
-  $isDragging?: boolean;
-}>`
+export const HighlightedDropzoneHorizontal = styled.div`
   position: absolute;
-  width: 100%;
-  margin-top: -2px;
-  height: 4px;
-  background: ${({ $isActive, $isDragging, theme }) => {
-    if (!$isDragging) {
-      return 'transparent';
-    }
-    const c = theme.palette.climbing.active;
-    if ($isActive) {
-      return c;
-    }
-    return alpha(c, 0.28);
-  }};
-  z-index: 1000000;
-  transition: background-color 0.12s ease-out;
+  left: 8px;
+  right: 8px;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 3px;
+  background: ${({ theme }) => theme.palette.primary.main};
+  pointer-events: none;
+  z-index: 2;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.palette.primary.main};
+    transform: translateY(-50%);
+  }
 `;
 
 const ItemContainer = styled.div`
@@ -96,20 +98,9 @@ const DragDropIndicator = ({
   isDragging: boolean;
   isDropAllowed: boolean;
 }) => {
-  const shouldShow = isDragging && isDropAllowed;
-  if (direction === 'horizontal')
-    return (
-      <HighlightedDropzoneHorizontal
-        $isActive={isActive}
-        $isDragging={shouldShow}
-      />
-    );
-  return (
-    <HighlightedDropzoneVertical
-      $isActive={isActive}
-      $isDragging={shouldShow}
-    />
-  );
+  if (!isDragging || !isDropAllowed || !isActive) return null;
+  if (direction === 'horizontal') return <HighlightedDropzoneHorizontal />;
+  return <HighlightedDropzoneVertical />;
 };
 
 const reorderItemsAfterDrop = <T,>(
@@ -138,11 +129,16 @@ export const useDragItems = <T,>({
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const content = (initialItems ?? []).map((item, index) => ({
+    const next = (initialItems ?? []).map((item, index) => ({
       id: index,
       content: item,
     }));
-    setItems(content);
+    setItems((prev) =>
+      prev.length === next.length &&
+      prev.every((item, index) => item.content === next[index].content)
+        ? prev
+        : next,
+    );
   }, [initialItems]);
 
   const handleDragStart = (

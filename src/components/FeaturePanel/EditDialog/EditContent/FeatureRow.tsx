@@ -1,44 +1,53 @@
 import {
   CircularProgress,
-  Divider,
+  IconButton,
   ListItem,
+  ListItemIcon,
   ListItemText,
+  MenuItem,
   Stack,
   Typography,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DownloadIcon from '@mui/icons-material/Download';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import styled from '@emotion/styled';
 import React from 'react';
-import { NwrIcon } from '../../NwrIcon';
 import { useEditContext } from '../context/EditContext';
 import { useLoadingState } from '../../../utils/useLoadingState';
 import { PoiIcon } from '../../../utils/icons/PoiIcon';
-import { allPresets } from '../../../../services/tagging/data';
-import { EditDataItem } from '../context/types';
 import { isDesktop } from '../../../helpers';
 import { findInItems } from '../context/utils';
 import { getDifficulties } from '../../../../services/tagging/climbing/routeGrade';
 import { ConvertedRouteDifficultyBadge } from '../../Climbing/ConvertedRouteDifficultyBadge';
 import { usePhotoHighlightContext } from '../../Climbing/contexts/PhotoHighlightContext';
-import { formatRouteLengthAndAuthor } from '../../Climbing/utils/formatClimbingLength';
 import { isRouteDrawnOnPhoto } from '../../Climbing/utils/photo';
+import { t } from '../../../../services/intl';
+import { useMoreMenu } from '../../Climbing/useMoreMenu';
+import { FeatureTags } from '../../../../services/types';
+import { getApiId } from '../../../../services/helpers';
+import { findPreset } from '../../../../services/tagging/presets';
+import { getPresetTranslation } from '../../../../services/tagging/translations';
+import { isClimbingRoute } from '../../../../utils';
 
 const StyledListItem = styled(ListItem)`
-  &:hover {
-    background-color: ${({ theme }) => theme.palette.background.hover};
-    cursor: pointer;
-  }
-`;
+  margin: 2px 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 
-const StyledDivider = styled(Divider)`
-  &:last-of-type {
-    border: none;
+  @media (hover: hover) {
+    &:hover {
+      background-color: ${({ theme }) =>
+        alpha(theme.palette.primary.main, 0.08)};
+    }
   }
-`;
 
-const StyledDownloadIcon = styled(DownloadIcon)`
-  font-size: 18px;
+  &:active {
+    background-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.12)};
+  }
 `;
 
 const StyledPresetLabel = styled(Typography)`
@@ -48,82 +57,128 @@ const StyledPresetLabel = styled(Typography)`
   }
 `;
 
-const getLabel = (dataItem: EditDataItem, highlighted?: boolean) => {
-  if (dataItem) {
-    const hasGrade = dataItem.tagsEntries.find(([k]) =>
-      k.startsWith('climbing:grade:'),
-    );
-    const routeDifficulties = getDifficulties(dataItem.tags);
-    const meta = formatRouteLengthAndAuthor(dataItem.tags);
-    return (
-      <Stack
-        direction="row"
-        gap={1}
-        alignItems="center"
-        justifyContent="space-between"
-        width="100%"
-        mr={1}
-      >
-        <Stack direction="column">
-          <Typography fontWeight={highlighted ? 700 : undefined}>
-            {dataItem.tags.name}{' '}
-          </Typography>
-          {meta ? (
-            <Typography color="secondary" variant="caption">
-              {meta}
-            </Typography>
-          ) : null}
-          <StyledPresetLabel color="secondary" variant="caption">
-            {dataItem.presetLabel}
-          </StyledPresetLabel>
-        </Stack>
-        {hasGrade && (
-          <ConvertedRouteDifficultyBadge
-            routeDifficulties={routeDifficulties}
-          />
-        )}
-      </Stack>
-    );
-  }
-  return undefined;
+const getPresetLabelFromTags = (shortId: string, tags: FeatureTags) => {
+  const preset = findPreset(getApiId(shortId).type, tags);
+  return getPresetTranslation(preset.presetKey);
 };
 
-const PoiIconForItem = ({
-  dataItem,
+const RowLabel = ({
+  name,
+  presetLabel,
+  fallback,
+  tags,
   highlighted,
+  loaded,
 }: {
-  dataItem: EditDataItem;
+  name?: string;
+  presetLabel?: string;
+  fallback: string;
+  tags?: FeatureTags;
   highlighted?: boolean;
-}) =>
-  dataItem ? (
-    <PoiIcon
-      tags={allPresets[dataItem.presetKey]?.tags}
-      size={16}
-      middle
-      themed
-      highlighted={highlighted}
-    />
-  ) : (
-    <StyledDownloadIcon color="secondary" />
+  loaded: boolean;
+}) => {
+  const hasGrade =
+    !!tags && Object.keys(tags).some((k) => k.startsWith('climbing:grade:'));
+  const routeDifficulties = tags ? getDifficulties(tags) : undefined;
+  const meta =
+    tags && isClimbingRoute(tags)
+      ? tags.author?.trim() || undefined
+      : undefined;
+  const title = name || presetLabel || fallback;
+
+  return (
+    <Stack
+      direction="row"
+      gap={1}
+      alignItems="center"
+      justifyContent="space-between"
+      width="100%"
+      mr={1}
+    >
+      <Stack direction="column">
+        <Typography fontWeight={highlighted ? 700 : loaded ? 500 : undefined}>
+          {title}
+        </Typography>
+        {meta ? (
+          <Typography color="secondary" variant="caption">
+            {meta}
+          </Typography>
+        ) : null}
+        {name && presetLabel ? (
+          <StyledPresetLabel color="secondary" variant="caption">
+            {presetLabel}
+          </StyledPresetLabel>
+        ) : null}
+      </Stack>
+      {hasGrade && (
+        <ConvertedRouteDifficultyBadge routeDifficulties={routeDifficulties} />
+      )}
+    </Stack>
   );
+};
+
+type FeatureRowMoreMenuProps = {
+  onRemove: () => void | Promise<void>;
+};
+
+const FeatureRowMoreMenu = ({ onRemove }: FeatureRowMoreMenuProps) => {
+  const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
+
+  return (
+    <>
+      <IconButton
+        size="small"
+        color="secondary"
+        aria-label={t('editdialog.remove')}
+        onClick={handleClickMore}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+      <MoreMenu>
+        <MenuItem
+          onClick={(e) => {
+            handleCloseMore(e);
+            onRemove();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteOutlineIcon fontSize="small" />
+          </ListItemIcon>
+          {t('editdialog.remove')}
+        </MenuItem>
+      </MoreMenu>
+    </>
+  );
+};
 
 type Props = {
   shortId: string;
   onClick: (e: React.MouseEvent) => Promise<void>;
   originalLabel?: string;
+  previewTags?: FeatureTags;
   role?: string;
+  onRemove?: () => void | Promise<void>;
 };
 
 export const FeatureRow = ({
   shortId,
   onClick,
   originalLabel,
+  previewTags,
   role,
+  onRemove,
 }: Props) => {
   const { isLoading, startLoading, stopLoading } = useLoadingState();
   const { items } = useEditContext();
   const { highlightedPhoto } = usePhotoHighlightContext();
   const dataItem = findInItems(items, shortId);
+  const loaded = !!dataItem;
+  const tags = dataItem?.tags ?? previewTags;
+  const name = dataItem?.tags.name ?? previewTags?.name;
+  const presetLabel =
+    dataItem?.presetLabel ??
+    (tags ? getPresetLabelFromTags(shortId, tags) : undefined);
   const highlighted =
     !!dataItem && isRouteDrawnOnPhoto(dataItem.tags, highlightedPhoto);
   const handleClick = (e: React.MouseEvent) => {
@@ -134,35 +189,60 @@ export const FeatureRow = ({
   };
 
   return (
-    <>
-      <StyledListItem onClick={handleClick}>
-        <Stack
-          alignItems="center"
-          justifyContent="space-between"
-          direction="row"
-          width="100%"
-        >
-          <ListItemText>
-            <Stack direction="row" gap={2} alignItems="center">
-              <PoiIconForItem dataItem={dataItem} highlighted={highlighted} />
-              {getLabel(dataItem, highlighted) || originalLabel || shortId}
-              <NwrIcon shortId={shortId} hideNode />
-              {role && (
-                <>
-                  <div style={{ flex: '1' }} />
-                  <Typography variant="caption">{role}</Typography>
-                </>
-              )}
-            </Stack>
-          </ListItemText>
-          {isLoading ? (
-            <CircularProgress size={14} />
-          ) : (
-            <ChevronRightIcon color="primary" />
-          )}
-        </Stack>
-      </StyledListItem>
-      <StyledDivider />
-    </>
+    <StyledListItem onClick={handleClick}>
+      <Stack
+        alignItems="center"
+        justifyContent="space-between"
+        direction="row"
+        width="100%"
+      >
+        <ListItemText>
+          <Stack
+            direction="row"
+            gap={2}
+            alignItems="center"
+            sx={{ opacity: loaded ? 1 : 0.55 }}
+          >
+            {tags ? (
+              <PoiIcon
+                tags={tags}
+                size={16}
+                middle
+                themed
+                highlighted={highlighted}
+              />
+            ) : null}
+            <RowLabel
+              name={name}
+              presetLabel={presetLabel}
+              fallback={originalLabel || shortId}
+              tags={tags}
+              highlighted={highlighted}
+              loaded={loaded}
+            />
+            {role && (
+              <>
+                <div style={{ flex: '1' }} />
+                <Typography variant="caption">{role}</Typography>
+              </>
+            )}
+          </Stack>
+        </ListItemText>
+        {isLoading ? (
+          <CircularProgress size={14} />
+        ) : (
+          <Stack
+            direction="row"
+            alignItems="center"
+            flexShrink={0}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            {onRemove && <FeatureRowMoreMenu onRemove={onRemove} />}
+            <ChevronRightIcon color={loaded ? 'primary' : 'disabled'} />
+          </Stack>
+        )}
+      </Stack>
+    </StyledListItem>
   );
 };

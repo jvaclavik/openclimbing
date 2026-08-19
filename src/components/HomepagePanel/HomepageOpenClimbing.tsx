@@ -4,7 +4,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
-import { LogoMaptiler } from '../../assets/LogoMaptiler';
 import { intl, t } from '../../services/intl';
 import { isMobileMode, useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
@@ -116,11 +115,6 @@ const Buttons = ({ onClose }) => (
   </MobileOnly>
 );
 
-const FooterLink = styled.a`
-  display: flex;
-  align-items: center;
-`;
-
 const Gallery = () => (
   <Box mt={4}>
     <SectionHeading centered>{t('homepage.gallery.title')}</SectionHeading>
@@ -178,26 +172,16 @@ const AboutLink = () => (
 );
 
 const Footer = () => (
-  <Stack
-    direction="row"
-    alignItems="center"
-    justifyContent="space-between"
-    spacing={2}
+  <Typography
+    variant="caption"
+    color="secondary"
+    letterSpacing={1}
+    textAlign="center"
     mt={5}
     pb={2}
   >
-    <FooterLink
-      href="https://www.maptiler.com"
-      target="_blank"
-      aria-label="MapTiler"
-      title="MapTiler"
-    >
-      <LogoMaptiler width={120} />
-    </FooterLink>
-    <Typography variant="caption" color="secondary" letterSpacing={1}>
-      Made in Prague with ♥
-    </Typography>
-  </Stack>
+    Made in Prague with ♥
+  </Typography>
 );
 
 export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {

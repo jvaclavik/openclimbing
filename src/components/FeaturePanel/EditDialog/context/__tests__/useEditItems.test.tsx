@@ -79,4 +79,36 @@ describe('useEditItems', () => {
 
     expect(result.current.items[0].toBeDeleted).toBe(false);
   });
+
+  it('should revert tags and location to originalState', () => {
+    const { result } = renderHook(() => useEditItems());
+
+    act(() => {
+      result.current.addItem({
+        ...initialItem,
+        originalState: {
+          tags: { amenity: 'cafe' },
+          isDeleted: false,
+          nodeLonLat: [14, 50],
+          nodes: undefined,
+          members: undefined,
+        },
+      });
+    });
+
+    act(() => {
+      result.current.items[0].setTag('name', 'Test Cafe');
+      result.current.items[0].setNodeLonLat([15, 51]);
+    });
+
+    expect(result.current.items[0].modified).toBe(true);
+
+    act(() => {
+      result.current.items[0].revertChanges();
+    });
+
+    expect(result.current.items[0].tags).toEqual({ amenity: 'cafe' });
+    expect(result.current.items[0].nodeLonLat).toEqual([14, 50]);
+    expect(result.current.items[0].modified).toBe(false);
+  });
 });

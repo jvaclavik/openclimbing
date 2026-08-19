@@ -621,7 +621,7 @@ export default {
     'ist bereits eingezeichnet, du kannst sie aber aktualisieren. Ziehe einfach die Punkte oder füge einen neuen hinzu.',
   'climbingview.description': 'Beschreibung',
   'climbingview.links': 'Links',
-  'climbing.distribute_along_line': 'Entlang einer Linie verteilen',
+  'climbing.distribute_along_line': 'Verteilen',
   'climbing.done_drawing_line': 'Fertig',
   'climbing.route_positions_help':
     'Klicke auf die Karte, um Hilfspunkte hinzuzufügen — die Routen verteilen sich gleichmäßig entlang der Linie zwischen ihnen. Ziehe einen Hilfspunkt, um neu zu verteilen, oder ziehe eine Route, um ihre Position fein abzustimmen. Rechtsklick auf eine Route, um sie wieder auf die Linie zu setzen, oder Rechtsklick auf einen Hilfspunkt, um ihn zu entfernen.',

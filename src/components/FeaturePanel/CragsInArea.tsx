@@ -249,6 +249,7 @@ const Gallery = ({
             actionLabel={
               openTopo ? t('featurepanel.photo_show_topo') : undefined
             }
+            actionAccent={!!openTopo}
             priority={priority && index === 0}
           />
         );

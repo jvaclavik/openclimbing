@@ -196,6 +196,7 @@ export const FeatureImages = () => {
                     ? t('featurepanel.photo_show_topo')
                     : t('featurepanel.photo_enlarge')
                 }
+                actionAccent={!!openTopo}
                 alt={getClimbingPhotoAlt(feature, item.def)}
                 highlighted={!!key && key === highlightedKey}
                 priority={index === 0}

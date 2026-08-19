@@ -53,7 +53,7 @@ export const DrawClimbingRoutesBanner = () => {
   return tags.climbing === 'crag' || tags.climbing === 'route_bottom' ? (
     <Alert
       severity="info"
-      sx={{ mb: 2 }}
+      sx={{ m: 2 }}
       icon={<DrawIcon fontSize="inherit" />}
       action={
         <Button color="inherit" size="small" onClick={onDraw}>

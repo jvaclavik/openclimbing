@@ -623,7 +623,7 @@ export default {
   'climbingpanel.update_route_2': 'est déjà dessinée, mais vous pouvez la mettre à jour. Déplacez simplement les points ou ajoutez-en un nouveau.',
   'climbingview.description': 'Description',
   'climbingview.links': 'Liens',
-  'climbing.distribute_along_line': "Répartir le long d'une ligne",
+  'climbing.distribute_along_line': 'Répartir',
   'climbing.done_drawing_line': 'Terminé',
   'climbing.route_positions_help':
     'Cliquez sur la carte pour ajouter des points guides — les voies se répartissent uniformément le long de la ligne entre eux. Déplacez un point guide pour redistribuer, ou déplacez une voie pour ajuster sa position. Clic droit sur une voie pour la replacer sur la ligne, ou clic droit sur un point guide pour le supprimer.',

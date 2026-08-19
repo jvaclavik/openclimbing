@@ -1,8 +1,8 @@
 import { Stack, Typography } from '@mui/material';
-import { NwrIcon } from '../../../NwrIcon';
 import React from 'react';
 import styled from '@emotion/styled';
 import { useCurrentItem } from '../../context/EditContext';
+import { OsmTypeLabel } from '../../../OsmTypeLabel';
 
 const StyledTypography = styled(Typography, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -16,20 +16,15 @@ export const ItemHeading = () => {
   return (
     <Stack
       direction="row"
-      spacing={2}
       justifyContent="space-between"
       alignItems="center"
+      gap={2}
       mb={2}
     >
       <StyledTypography variant="h6" $deleted={toBeDeleted}>
         {tags.name || presetLabel || ' '}
       </StyledTypography>
-      <Stack direction="row" alignItems="center" gap={0.5}>
-        <Typography variant="caption" color="secondary">
-          {shortId}
-        </Typography>
-        <NwrIcon shortId={shortId} />
-      </Stack>
+      <OsmTypeLabel shortId={shortId} />
     </Stack>
   );
 };

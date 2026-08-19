@@ -3,7 +3,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Divider,
   Stack,
   Typography,
 } from '@mui/material';
@@ -21,6 +20,7 @@ import { ClimbingGradesEditor } from './ClimbingGradesEditor';
 import { DrawClimbingRoutesBanner } from './DrawClimbingRoutesBanner';
 import { ClimbingRockSelect } from '../ClimbingRockSelect';
 import { ClimbingStartSelect } from '../ClimbingStartSelect';
+import { EditSectionCard } from '../../EditSectionCard';
 
 const IconContainer = styled.div`
   display: flex;
@@ -96,8 +96,7 @@ export const ClimbingEditor = () => {
   }
 
   return (
-    <>
-      <Divider />
+    <EditSectionCard>
       <Accordion // TODO replace Accordion with custom collapse component, it is not accordion anymore :)
         disableGutters
         elevation={0}
@@ -106,6 +105,7 @@ export const ClimbingEditor = () => {
         onChange={toggleExpanded}
         slotProps={{ transition: { timeout: 0 } }}
         sx={{
+          bgcolor: 'transparent',
           '&.MuiAccordion-root:before': {
             opacity: 0,
           },
@@ -135,6 +135,6 @@ export const ClimbingEditor = () => {
         </AccordionDetails>
         <DrawClimbingRoutesBanner />
       </Accordion>
-    </>
+    </EditSectionCard>
   );
 };

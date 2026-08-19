@@ -1,4 +1,5 @@
 import {
+  Button,
   DialogContent,
   IconButton,
   Stack,
@@ -23,6 +24,8 @@ import { useUserSettingsContext } from '../../../utils/userSettings/UserSettings
 import { getSplitPaneDefaultSize } from '../../Climbing/config';
 import { splitPaneResizerStyles } from '../../Climbing/splitPaneResizerStyles';
 import { useEditDialogSplitLayout } from '../useEditDialogSplitLayout';
+import { useEditContext } from '../context/EditContext';
+import { useNeedsNodeLocation } from './FeatureEditSection/LocationEditor/LocationEditor';
 
 const EditDialogMapDynamic = dynamic(() => import('../EditDialogMap'), {
   ssr: false,
@@ -150,11 +153,22 @@ const FormPane: React.FC = () => {
 
 export const EditContent = () => {
   const layout = useEditDialogSplitLayout();
+  const { current } = useEditContext();
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const splitPaneSize = userSettings['editdialog.splitPaneSize'];
+  const needsLocation = useNeedsNodeLocation();
 
   const { mapPaneRef, isMapCollapsed, setIsDragging } =
     useMapPaneCollapse(layout);
+
+  useEffect(() => {
+    if (!needsLocation) return;
+    if (isMapCollapsed || splitPaneSize === COLLAPSED_PANE_SIZE_PX) {
+      setUserSetting('editdialog.splitPaneSize', null);
+    }
+    // Open the map when switching to an item that still needs a location.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, needsLocation]);
 
   return (
     <>
@@ -182,22 +196,34 @@ export const EditContent = () => {
         </SplitPane>
         {isMapCollapsed && (
           <RestoreCollapsedMapButton>
-            <Tooltip title={t('editdialog.show_map')} arrow>
-              <IconButton
-                size="small"
-                color="primary"
-                aria-label={t('editdialog.show_map')}
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
-                  boxShadow: 2,
-                  '&:hover': { bgcolor: 'primary.dark' },
-                }}
+            {needsLocation ? (
+              <Button
+                variant="contained"
+                startIcon={<MapIcon />}
                 onClick={() => setUserSetting('editdialog.splitPaneSize', null)}
               >
-                <MapIcon />
-              </IconButton>
-            </Tooltip>
+                {t('editdialog.set_location_on_map')}
+              </Button>
+            ) : (
+              <Tooltip title={t('editdialog.show_map')} arrow>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  aria-label={t('editdialog.show_map')}
+                  sx={{
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    boxShadow: 2,
+                    '&:hover': { bgcolor: 'primary.dark' },
+                  }}
+                  onClick={() =>
+                    setUserSetting('editdialog.splitPaneSize', null)
+                  }
+                >
+                  <MapIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </RestoreCollapsedMapButton>
         )}
       </SplitContainer>

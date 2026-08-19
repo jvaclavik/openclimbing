@@ -1,11 +1,12 @@
 import styled from '@emotion/styled';
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import LayersIcon from '@mui/icons-material/Layers';
+import MapIcon from '@mui/icons-material/Map';
+import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {
+  Alert,
   Checkbox,
-  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -24,9 +25,9 @@ import { getApiId, getShortId } from '../../../services/helpers';
 import { Feature, LonLat, TranslationId } from '../../../services/types';
 import { fetchWays } from '../../../services/osm/fetchWays';
 import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
-import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { touristStyle } from '../../Map/styles/touristStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
+import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import {
   EditMapPosition,
@@ -49,6 +50,7 @@ import {
 import { useHasCragRoutesMap } from './EditContent/FeatureEditSection/CragRoutesLocationEditor';
 import { useCurrentItem, useEditContext } from './context/EditContext';
 import { useDraggableFeatureMarker } from './EditContent/FeatureEditSection/LocationEditor/useDraggableMarker';
+import { useNeedsNodeLocation } from './EditContent/FeatureEditSection/LocationEditor/LocationEditor';
 
 // BFS the (recursively loaded) member tree for the feature with this shortId and
 // return its map position — used to centre the map on the active route even when
@@ -114,6 +116,7 @@ const Container = styled.div<{ $fullscreen: boolean }>`
   overflow: hidden;
   height: 100%;
   width: 100%;
+  container-type: inline-size;
   background: ${({ theme }) => theme.palette.background.default};
   ${({ $fullscreen }) =>
     $fullscreen
@@ -142,47 +145,47 @@ const MapEl = styled.div<{ $isVisible: boolean }>`
   width: 100%;
 `;
 
-const MapStyleChip = styled.div`
+const ControlsRow = styled.div`
   position: absolute;
-  top: 12px;
-  right: 96px;
+  top: 8px;
+  right: 8px;
   z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
-const FullscreenButton = styled.div`
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 1001;
+const GlassIconButton = styled(IconButton)`
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: ${({ theme }) =>
+    convertHexToRgba(theme.palette.background.paper, 0.8)};
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: ${({ theme }) => theme.palette.background.paper};
+  }
 `;
 
-const SettingsButton = styled.div`
-  position: absolute;
-  top: 12px;
-  right: 52px;
-  z-index: 1001;
-`;
+type MapStyleName = 'tourist' | 'satellite';
 
-type MapStyleName = 'tourist' | 'outdoor' | 'satellite';
-
-const STYLE_ORDER: MapStyleName[] = ['tourist', 'outdoor', 'satellite'];
+const STYLE_ORDER: MapStyleName[] = ['tourist', 'satellite'];
 
 const getStyle = (name: MapStyleName): StyleSpecification | string => {
   if (name === 'satellite') {
     const apiKey = process.env.NEXT_PUBLIC_API_KEY_MAPTILER;
     return `https://api.maptiler.com/maps/hybrid/style.json?key=${apiKey}`;
   }
-  if (name === 'outdoor') {
-    return outdoorStyle;
-  }
   return touristStyle;
 };
 
-const getStyleLabel = (name: MapStyleName) => {
-  if (name === 'satellite') return t('climbing.map_style_satellite');
-  if (name === 'outdoor') return t('climbing.map_style_outdoor');
-  return t('climbing.map_style_tourist');
-};
+const getStyleLabel = (name: MapStyleName) =>
+  name === 'satellite'
+    ? t('climbing.map_style_satellite')
+    : t('climbing.map_style_tourist');
 
 // Centres the (already created) map on the active element: once when the first
 // valid centre becomes known after load (jumpTo, no animation), then a flyTo
@@ -262,6 +265,13 @@ const useEditDialogMapInstance = () => {
       locale: { 'NavigationControl.ResetBearing': COMPASS_TOOLTIP },
     });
     createdMap.scrollZoom.setWheelZoomRate(1 / 200);
+    createdMap.addControl(
+      new maplibregl.NavigationControl({
+        showZoom: true,
+        showCompass: true,
+        visualizePitch: true,
+      }),
+    );
     createdMap.addControl(
       new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
@@ -369,25 +379,26 @@ const MapControls: React.FC<ControlsProps> = ({
   const mapPosition = userSettings['editdialog.mapPosition'] ?? 'auto';
   return (
     <>
-      <MapStyleChip>
-        <Chip
-          component="button"
-          label={getStyleLabel(mapStyle)}
-          icon={<LayersIcon />}
-          onClick={onSwitchStyle}
-          color="secondary"
-        />
-      </MapStyleChip>
-      <SettingsButton>
-        <Tooltip title={t('climbing.display_settings')} arrow>
-          <IconButton
-            size="small"
-            color="secondary"
-            sx={{ bgcolor: 'background.paper', boxShadow: 1 }}
-            onClick={(e) => setSettingsAnchor(e.currentTarget)}
+      <ControlsRow>
+        <Tooltip title={getStyleLabel(mapStyle)} arrow>
+          <GlassIconButton
+            onClick={onSwitchStyle}
+            aria-label={getStyleLabel(mapStyle)}
           >
-            <SettingsIcon />
-          </IconButton>
+            {mapStyle === 'satellite' ? (
+              <SatelliteAltIcon fontSize="small" />
+            ) : (
+              <MapIcon fontSize="small" />
+            )}
+          </GlassIconButton>
+        </Tooltip>
+        <Tooltip title={t('climbing.display_settings')} arrow>
+          <GlassIconButton
+            onClick={(e) => setSettingsAnchor(e.currentTarget)}
+            aria-label={t('climbing.display_settings')}
+          >
+            <SettingsIcon fontSize="small" />
+          </GlassIconButton>
         </Tooltip>
         <Menu
           anchorEl={settingsAnchor}
@@ -427,8 +438,6 @@ const MapControls: React.FC<ControlsProps> = ({
             </MenuItem>
           ))}
         </Menu>
-      </SettingsButton>
-      <FullscreenButton>
         <Tooltip
           title={
             isFullscreen
@@ -437,10 +446,7 @@ const MapControls: React.FC<ControlsProps> = ({
           }
           arrow
         >
-          <IconButton
-            size="small"
-            color="secondary"
-            sx={{ bgcolor: 'background.paper', boxShadow: 1 }}
+          <GlassIconButton
             onClick={onToggleFullscreen}
             aria-label={
               isFullscreen
@@ -448,13 +454,26 @@ const MapControls: React.FC<ControlsProps> = ({
                 : t('editdialog.fullscreen_map')
             }
           >
-            {isFullscreen ? <CloseFullscreenIcon /> : <OpenInFullIcon />}
-          </IconButton>
+            {isFullscreen ? (
+              <CloseFullscreenIcon fontSize="small" />
+            ) : (
+              <OpenInFullIcon fontSize="small" />
+            )}
+          </GlassIconButton>
         </Tooltip>
-      </FullscreenButton>
+      </ControlsRow>
     </>
   );
 };
+
+const NoLocationAlert = styled(Alert)`
+  position: absolute;
+  z-index: 1001;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+`;
 
 const EditDialogMap = () => {
   const {
@@ -468,6 +487,7 @@ const EditDialogMap = () => {
   } = useEditDialogMapInstance();
   const hasCragRoutesMap = useHasCragRoutesMap();
   const isNodeLocationEditable = useIsNodeLocationEditable();
+  const needsLocation = useNeedsNodeLocation();
   const currentItem = useCurrentItem();
   const currentIsRoute = isRouteTags(currentItem?.tags);
   const { userSettings, setUserSetting } = useUserSettingsContext();
@@ -524,6 +544,11 @@ const EditDialogMap = () => {
         ref={containerRef}
         className="edit-feature-map"
       />
+      {needsLocation && (
+        <NoLocationAlert severity="info">
+          {t('editdialog.no_location_alert')}
+        </NoLocationAlert>
+      )}
     </Container>
   );
 };

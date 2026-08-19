@@ -121,23 +121,60 @@ const buildCragMoveHandleElement = () => {
   return el;
 };
 
-const buildControlPointElement = (label: string) => {
-  const el = document.createElement('div');
-  el.style.cssText = `
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 3px solid #4150a0;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
-    cursor: grab;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #4150a0;
-    font: 700 9px/1 sans-serif;
+const CONTROL_POINT_STYLE_ID = 'route-guide-point-style';
+
+const ensureControlPointStyles = () => {
+  if (document.getElementById(CONTROL_POINT_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = CONTROL_POINT_STYLE_ID;
+  style.textContent = `
+    .route-guide-point {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+    }
+    .route-guide-point-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid #4150a0;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4150a0;
+      font: 700 9px/1 sans-serif;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .route-guide-point:hover .route-guide-point-dot,
+    .route-guide-point:focus-visible .route-guide-point-dot {
+      transform: scale(1.35);
+      box-shadow:
+        0 0 0 4px rgba(65, 80, 160, 0.35),
+        0 0 0 1px rgba(0, 0, 0, 0.3);
+    }
+    .route-guide-point:active {
+      cursor: grabbing;
+    }
+    .route-guide-point:active .route-guide-point-dot {
+      transform: scale(1.2);
+    }
   `;
-  el.textContent = label;
+  document.head.appendChild(style);
+};
+
+const buildControlPointElement = (label: string) => {
+  ensureControlPointStyles();
+  const el = document.createElement('div');
+  el.className = 'route-guide-point';
+  const dot = document.createElement('div');
+  dot.className = 'route-guide-point-dot';
+  dot.textContent = label;
+  el.appendChild(dot);
   return el;
 };
 
@@ -645,6 +682,7 @@ export const useCragRoutePositionEditor = (
       const marker = new maplibregl.Marker({ element, draggable: true })
         .setLngLat(point)
         .addTo(map);
+      marker.getElement().style.zIndex = '2';
 
       const deletePoint = () => {
         const next = controlPointsRef.current.filter((_, i) => i !== index);

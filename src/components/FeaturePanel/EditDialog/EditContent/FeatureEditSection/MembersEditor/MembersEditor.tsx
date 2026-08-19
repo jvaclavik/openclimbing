@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import {
   Accordion,
@@ -9,12 +9,14 @@ import {
   Divider,
   List,
   Stack,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { FeatureRow } from '../../FeatureRow';
-import { t, Translation } from '../../../../../../services/intl';
+import { t } from '../../../../../../services/intl';
 import { AddMemberForm } from '../AddMemberForm';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { CragIcon } from '../../../../Climbing/CragIcon';
@@ -25,6 +27,7 @@ import {
 import { ConvertNodeToRelation, isConvertible } from '../ConvertNodeToRelation';
 import {
   useCurrentItem,
+  useEditContext,
   useExpandedSections,
 } from '../../../context/EditContext';
 import { OpenAllButton } from '../helpers';
@@ -32,6 +35,9 @@ import { Member } from '../../../context/types';
 import { useDragItems } from '../../../../../utils/useDragItems';
 import { DragHandler } from '../../../../../utils/DragHandler';
 import { moveElementToIndex } from '../../../../Climbing/utils/array';
+import { useMobileMode } from '../../../../../helpers';
+import { EditTabDropZone } from '../EditTabDropZone';
+import { useLinkEditItem } from '../useLinkEditItem';
 
 const MemberRow = styled.div`
   display: flex;
@@ -43,6 +49,8 @@ const MemberRowMain = styled.div`
   flex: 1;
   min-width: 0;
 `;
+
+const NO_MEMBERS: Member[] = [];
 
 const SectionName = () => {
   const theme = useTheme();
@@ -58,10 +66,7 @@ const SectionName = () => {
           width={24}
         />
         <Typography variant="button">
-          {t('editdialog.climbing_crags')}{' '}
-          <Typography variant="caption" color="secondary">
-            ({t('editdialog.members')})
-          </Typography>
+          {t('editdialog.climbing_crags')}
         </Typography>
       </Stack>
     );
@@ -72,15 +77,30 @@ const SectionName = () => {
       <Stack direction="row" gap={1}>
         <ShowChartIcon />
         <Typography variant="button">
-          {t('editdialog.climbing_routes')}{' '}
-          <Typography variant="caption" color="secondary">
-            ({t('editdialog.members')})
-          </Typography>
+          {t('editdialog.climbing_routes')}
         </Typography>
       </Stack>
     );
   }
   return <Typography variant="button">{t('editdialog.members')}</Typography>;
+};
+
+const MembersInfoTooltip = () => {
+  const isMobile = useMobileMode();
+  const { tags } = useCurrentItem();
+  if (isMobile || !tags.climbing) return null;
+
+  return (
+    <Tooltip title={t('editdialog.members_climbing_info')} arrow>
+      <Box
+        component="span"
+        onClick={(e) => e.stopPropagation()}
+        sx={{ display: 'inline-flex', cursor: 'help', color: 'text.secondary' }}
+      >
+        <InfoOutlinedIcon fontSize="small" />
+      </Box>
+    </Tooltip>
+  );
 };
 
 const CustomAccordion = ({
@@ -90,7 +110,16 @@ const CustomAccordion = ({
   children: React.ReactNode;
   membersLength: number | undefined;
 }) => {
-  const { expanded, toggleExpanded } = useExpandedSections('members');
+  const { tags } = useCurrentItem();
+  const { current } = useEditContext();
+  const { expanded, toggleExpanded, expand } = useExpandedSections('members');
+
+  useEffect(() => {
+    if (tags.climbing === 'crag') return;
+    expand();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
+
   return (
     <>
       <Divider />
@@ -101,20 +130,26 @@ const CustomAccordion = ({
         expanded={expanded}
         slotProps={{ transition: { timeout: 0 } }}
         sx={{
+          bgcolor: 'transparent',
           '&.MuiAccordion-root:before': {
-            opacity: 1,
+            opacity: 0,
           },
         }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           onClick={toggleExpanded}
+          sx={{
+            '& .MuiAccordionSummary-expandIconWrapper': { ml: 1 },
+          }}
         >
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center" width="100%">
             <SectionName />
             {membersLength ? (
               <Chip size="small" label={membersLength} variant="outlined" />
             ) : null}
+            <Box sx={{ flex: 1 }} />
+            <MembersInfoTooltip />
           </Stack>
         </AccordionSummary>
         <AccordionDetails sx={{ pt: 0 }}>{children}</AccordionDetails>
@@ -127,6 +162,7 @@ type DraggableMemberItemProps = {
   member: Member;
   index: number;
   canReorder: boolean;
+  onRemove: () => void;
   dragHandlers: {
     handleDragStart: (
       e: React.DragEvent<HTMLDivElement>,
@@ -141,6 +177,7 @@ const DraggableMemberItem = ({
   member,
   index,
   canReorder,
+  onRemove,
   dragHandlers,
 }: DraggableMemberItemProps) => {
   const handleClick = useHandleItemClick();
@@ -148,8 +185,10 @@ const DraggableMemberItem = ({
     <FeatureRow
       shortId={member.shortId}
       originalLabel={member.originalLabel}
+      previewTags={member.originalTags}
       role={member.role}
       onClick={(e: React.MouseEvent) => handleClick(e, member.shortId)}
+      onRemove={onRemove}
     />
   );
 
@@ -175,6 +214,8 @@ export const MembersEditor = () => {
   const { shortId, members, tags, setMembers } = useCurrentItem();
   const convertible = isConvertible(shortId, tags);
   const handleOpenAll = useHandleOpenAllMembers();
+  const { addAsMember } = useLinkEditItem();
+  const { expand } = useExpandedSections('members');
 
   const {
     handleDragStart,
@@ -184,7 +225,7 @@ export const MembersEditor = () => {
     ItemContainer,
     draggedItem,
   } = useDragItems<Member>({
-    initialItems: members ?? [],
+    initialItems: members ?? NO_MEMBERS,
     moveItems: (oldIndex, newIndex) => {
       setMembers((prev) => moveElementToIndex(prev ?? [], oldIndex, newIndex));
     },
@@ -198,45 +239,55 @@ export const MembersEditor = () => {
   const canReorder = (members?.length ?? 0) > 1;
 
   return (
-    <CustomAccordion membersLength={members?.length}>
-      {!!members && (
-        <List disablePadding>
-          {members.map((member, index) => (
-            <ItemContainer key={member.shortId}>
-              {canReorder && draggedItem != null && draggedItem.id > index && (
-                <HighlightedDropzone index={index} />
-              )}
-              <DraggableMemberItem
-                member={member}
-                index={index}
-                canReorder={canReorder}
-                dragHandlers={{
-                  handleDragStart,
-                  handleDragOver,
-                  handleDragEnd,
-                }}
-              />
-              {canReorder && draggedItem != null && draggedItem.id <= index && (
-                <HighlightedDropzone index={index} activeAt={index + 1} />
-              )}
-            </ItemContainer>
-          ))}
-        </List>
-      )}
+    <EditTabDropZone
+      onDropShortId={async (droppedShortId) => {
+        const added = await addAsMember(droppedShortId);
+        if (added) expand();
+      }}
+    >
+      <CustomAccordion membersLength={members?.length}>
+        {!!members && (
+          <List disablePadding>
+            {members.map((member, index) => (
+              <ItemContainer key={member.shortId}>
+                {canReorder &&
+                  draggedItem != null &&
+                  draggedItem.id > index && (
+                    <HighlightedDropzone index={index} />
+                  )}
+                <DraggableMemberItem
+                  member={member}
+                  index={index}
+                  canReorder={canReorder}
+                  onRemove={() =>
+                    setMembers((prev) =>
+                      (prev ?? []).filter((m) => m.shortId !== member.shortId),
+                    )
+                  }
+                  dragHandlers={{
+                    handleDragStart,
+                    handleDragOver,
+                    handleDragEnd,
+                  }}
+                />
+                {canReorder &&
+                  draggedItem != null &&
+                  draggedItem.id <= index && (
+                    <HighlightedDropzone index={index} activeAt={index + 1} />
+                  )}
+              </ItemContainer>
+            ))}
+          </List>
+        )}
 
-      <Stack direction="row" alignItems="center" spacing={2} mt={1} ml={1}>
-        {convertible ? <ConvertNodeToRelation /> : <AddMemberForm />}
+        <Stack direction="row" alignItems="center" spacing={2} mt={1} ml={1}>
+          {convertible ? <ConvertNodeToRelation /> : <AddMemberForm />}
 
-        <Box sx={{ flex: '1' }} />
+          <Box sx={{ flex: '1' }} />
 
-        {handleOpenAll && <OpenAllButton onClick={handleOpenAll} />}
-      </Stack>
-      {!!members?.length && tags.climbing && (
-        <Typography variant="body2" color="textSecondary" ml={1}>
-          <Translation id="editdialog.members_climbing_info" />
-          {/* If we convert a natural=peak to crag relation, the peak stays as a member - this notice must be visible especially for this scenario. */}
-        </Typography>
-      )}
-    </CustomAccordion>
+          {handleOpenAll && <OpenAllButton onClick={handleOpenAll} />}
+        </Stack>
+      </CustomAccordion>
+    </EditTabDropZone>
   );
 };

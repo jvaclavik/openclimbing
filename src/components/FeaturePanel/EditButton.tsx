@@ -6,9 +6,8 @@ import React from 'react';
 import { t } from '../../services/intl';
 import { useEditDialogContext } from './helpers/EditDialogContext';
 import { useEditDialogFeature } from './EditDialog/utils';
+import { QuickActionButton } from './QuickActions/QuickActionButton';
 
-// When this button lives inside a narrow @container (e.g. shrunk climbing
-// side panel), collapse it to an icon-only button.
 const ResponsiveButton = styled(Button)`
   @container (max-width: 220px) {
     min-width: 0;
@@ -29,6 +28,21 @@ const getLabel = (isAddPlace: boolean, isUndelete: boolean) => {
   if (isAddPlace) return t('featurepanel.add_place_button');
   if (isUndelete) return t('featurepanel.undelete_button');
   return t('featurepanel.edit_button');
+};
+
+export const EditQuickAction = () => {
+  const { feature, isAddPlace, isUndelete } = useEditDialogFeature();
+  const { open } = useEditDialogContext();
+
+  if (feature.skeleton) return null;
+
+  return (
+    <QuickActionButton
+      icon={isAddPlace || isUndelete ? AddLocationIcon : EditIcon}
+      label={getLabel(isAddPlace, isUndelete)}
+      onClick={open}
+    />
+  );
 };
 
 export const EditButton = () => {

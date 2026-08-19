@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, Skeleton, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import React, { useState } from 'react';
 import { getReactKey } from '../../services/helpers';
 import { isPublictransportRoute } from '../../utils';
@@ -13,13 +13,13 @@ import { ClimbingStructuredData } from './Climbing/ClimbingStructuredData';
 import { RouteDistributionInFeaturePanel } from './Climbing/RouteDistribution';
 import { ClimbingRouteGrade } from './ClimbingRouteGrade';
 import { CragsInArea } from './CragsInArea';
-import { EditButton } from './EditButton';
 import { EditDialog } from './EditDialog/EditDialog';
 import { FeaturedTag } from './FeaturedTag';
 import { FeatureHeading, FeatureStickyTitle } from './FeatureHeading';
 import { FeatureImages } from './FeatureImages/FeatureImages';
 import { FeatureOpenPlaceGuideLink } from './FeatureOpenPlaceGuideLink';
 import { FeaturePanelFooter } from './FeaturePanelFooter';
+import { FeaturePanelSkeleton } from './FeaturePanelSkeleton';
 import { TestApiWarning } from './helpers/TestApiWarning';
 import { MemberFeatures } from './MemberFeatures/MemberFeatures';
 import { Members } from './Members';
@@ -113,13 +113,7 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
 
         <Flex>
           {skeleton ? (
-            <PanelSidePadding>
-              <Stack direction="column" spacing={1} alignItems="flex-start">
-                <Skeleton variant="rounded" width="100%" height={14} />
-                <Skeleton variant="rounded" width="100%" height={14} />
-                <Skeleton variant="rounded" width={50} height={14} />
-              </Stack>
-            </PanelSidePadding>
+            <FeaturePanelSkeleton feature={feature} />
           ) : (
             <>
               <CragsInArea />
@@ -140,7 +134,6 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
                 <Runways />
                 <Sockets />
                 <FeatureOpenPlaceGuideLink />
-                <EditButton />
                 {/* Climbing dialog already mounts EditDialog. A second instance
                     stacks two fullscreen modals and the top one stops receiving
                     clicks (Cancel, add photo, …). */}

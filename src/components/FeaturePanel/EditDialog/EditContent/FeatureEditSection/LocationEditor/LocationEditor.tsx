@@ -3,6 +3,8 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
+  Button,
   Divider,
   Stack,
   Typography,
@@ -20,6 +22,38 @@ import {
 import { OSM_WEBSITE } from '../../../../../../services/osm/consts';
 import { useHasCragRoutesMap } from '../CragRoutesLocationEditor';
 import { LocationInputs } from './LocationInputs';
+import { useUserSettingsContext } from '../../../../../utils/userSettings/UserSettingsContext';
+
+export const useNeedsNodeLocation = () => {
+  const item = useCurrentItem();
+  if (!item) return false;
+  return item.shortId[0] === 'n' && item.nodeLonLat === undefined;
+};
+
+export const MissingLocationBanner = () => {
+  const needsLocation = useNeedsNodeLocation();
+  const { setUserSetting } = useUserSettingsContext();
+
+  if (!needsLocation) return null;
+
+  return (
+    <Alert
+      severity="warning"
+      sx={{ mb: 2 }}
+      action={
+        <Button
+          color="inherit"
+          size="small"
+          onClick={() => setUserSetting('editdialog.splitPaneSize', null)}
+        >
+          {t('editdialog.set_location_on_map')}
+        </Button>
+      }
+    >
+      {t('editdialog.no_location_alert')}
+    </Alert>
+  );
+};
 
 const NotYetEditableWarning = () => {
   const { shortId } = useCurrentItem();
@@ -70,11 +104,17 @@ const Content = () => {
 };
 
 export const LocationEditor = () => {
-  const { expanded, toggleExpanded } = useExpandedSections('location');
+  const { expanded, toggleExpanded, expand } = useExpandedSections('location');
   const { shortId, tags } = useCurrentItem();
   const osmId = getApiId(shortId);
   const hasCragRoutesMap = useHasCragRoutesMap();
   const isRoute = tags.climbing === 'route' || tags.climbing === 'route_bottom';
+  const needsLocation = useNeedsNodeLocation();
+
+  useEffect(() => {
+    if (needsLocation) expand();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shortId, needsLocation]);
 
   if (osmId.type === 'relation') {
     return null;
@@ -104,7 +144,7 @@ export const LocationEditor = () => {
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Stack direction="row" gap={1} alignItems="center">
-            <PlaceIcon />
+            <PlaceIcon color={needsLocation ? 'warning' : 'inherit'} />
             <Typography variant="button">{t('editdialog.location')}</Typography>
           </Stack>
         </AccordionSummary>

@@ -237,7 +237,8 @@ const globalStyle = (theme: Theme) => css`
   }
 
   .edit-feature-map .maplibregl-ctrl-top-right {
-    top: 35px !important;
+    top: 56px !important;
+    right: 6px !important;
   }
 
   .maplibregl-canvas:not(:focus) {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   IconButton,
+  ListItemIcon,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -11,12 +11,14 @@ import {
   Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import TranslateIcon from '@mui/icons-material/Translate';
 import { t } from '../../../../../services/intl';
 import { useCurrentItem } from '../../context/EditContext';
 import { TextFieldWithCharacterCount } from './helpers';
 import { FeatureTags } from '../../../../../services/types';
 import { TAG_LANGUAGE_FLAGS, TAG_LANGUAGES } from './tagLanguages';
-import { useMobileMode } from '../../../../helpers';
+import { useMoreMenu } from '../../../Climbing/useMoreMenu';
 
 const CUSTOM_LANG = '__custom__';
 
@@ -59,7 +61,37 @@ const nextCustomPlaceholder = (baseKey: string, slots: string[]) => {
   return buildLocalizedTagKey(baseKey, `lang${n}`);
 };
 
-type LangControlsProps = {
+const AddTranslationMenu = ({ onAdd }: { onAdd: () => void }) => {
+  const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
+
+  return (
+    <>
+      <IconButton
+        size="small"
+        onClick={handleClickMore}
+        aria-label={t('editdialog.add_description_translation')}
+        sx={{ flexShrink: 0, color: 'text.secondary' }}
+      >
+        <MoreVertIcon fontSize="small" />
+      </IconButton>
+      <MoreMenu>
+        <MenuItem
+          onClick={(e) => {
+            handleCloseMore(e);
+            onAdd();
+          }}
+        >
+          <ListItemIcon>
+            <TranslateIcon fontSize="small" />
+          </ListItemIcon>
+          {t('editdialog.add_description_translation')}
+        </MenuItem>
+      </MoreMenu>
+    </>
+  );
+};
+
+type LangSelectProps = {
   lang: string;
   usedLangs: Set<string>;
   customDraft: string;
@@ -67,10 +99,9 @@ type LangControlsProps = {
   onDraftChange: (value: string) => void;
   onApplyCustom: (raw: string) => void;
   onLangChange: (value: string) => void;
-  onRemove: () => void;
 };
 
-const LocalizedTagLangControls = ({
+const LocalizedTagLangSelect = ({
   lang,
   usedLangs,
   customDraft,
@@ -78,16 +109,20 @@ const LocalizedTagLangControls = ({
   onDraftChange,
   onApplyCustom,
   onLangChange,
-  onRemove,
-}: LangControlsProps) => {
-  const isMobileMode = useMobileMode();
+}: LangSelectProps) => {
   const isCustom = !isKnownLang(lang);
   const showCustomInput = isEditingCustom || isCustom;
   const selectValue = showCustomInput ? CUSTOM_LANG : lang;
 
   return (
-    <>
-      {!isMobileMode && showCustomInput ? (
+    <Stack
+      direction="row"
+      spacing={0.5}
+      alignItems="center"
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {showCustomInput ? (
         <TextField
           size="small"
           variant="standard"
@@ -108,8 +143,7 @@ const LocalizedTagLangControls = ({
             'aria-label': t('editdialog.description_lang_custom'),
           }}
           sx={{
-            flexShrink: 0,
-            width: 56,
+            width: 48,
             '& .MuiInput-input': {
               fontSize: '0.75rem',
               py: 0.5,
@@ -118,104 +152,114 @@ const LocalizedTagLangControls = ({
           }}
         />
       ) : null}
-      {!isMobileMode ? (
-        <Select
-          size="small"
-          value={selectValue}
-          onChange={(e: SelectChangeEvent) => onLangChange(e.target.value)}
-          displayEmpty
-          variant="standard"
-          disableUnderline
-          title={t('editdialog.description_lang')}
-          renderValue={(value) => {
-            if (!value) {
-              return (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  component="span"
-                  sx={{ whiteSpace: 'nowrap' }}
-                >
-                  —
-                </Typography>
-              );
-            }
-            if (value === CUSTOM_LANG) {
-              return (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  component="span"
-                  sx={{ whiteSpace: 'nowrap' }}
-                >
-                  …
-                </Typography>
-              );
-            }
+      <Select
+        size="small"
+        value={selectValue}
+        onChange={(e: SelectChangeEvent) => onLangChange(e.target.value)}
+        displayEmpty
+        variant="standard"
+        disableUnderline
+        title={t('editdialog.description_lang')}
+        renderValue={(value) => {
+          if (!value) {
             return (
-              <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
-                {TAG_LANGUAGE_FLAGS[value] ?? value}
-              </Box>
-            );
-          }}
-          sx={{
-            flexShrink: 0,
-            alignSelf: 'center',
-            minWidth: 36,
-            color: 'text.secondary',
-            '& .MuiSelect-select': {
-              py: 0.5,
-              pr: '18px !important',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-            },
-          }}
-          MenuProps={{ PaperProps: { sx: { maxHeight: 320 } } }}
-        >
-          <MenuItem value="">
-            <Typography variant="caption" color="text.secondary">
-              {t('editdialog.description_lang_default')}
-            </Typography>
-          </MenuItem>
-          {Object.entries(TAG_LANGUAGES).map(([code, name]) => (
-            <MenuItem
-              key={code}
-              value={code}
-              disabled={usedLangs.has(code) && code !== lang}
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              <Typography variant="caption" component="span">
-                {langLabel(code)}
-              </Typography>
               <Typography
                 variant="caption"
                 color="text.secondary"
                 component="span"
-                sx={{ ml: 1 }}
+                sx={{ whiteSpace: 'nowrap' }}
               >
-                {name}
+                —
               </Typography>
-            </MenuItem>
-          ))}
-          <MenuItem value={CUSTOM_LANG} sx={{ whiteSpace: 'nowrap' }}>
+            );
+          }
+          if (value === CUSTOM_LANG) {
+            return (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                component="span"
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                …
+              </Typography>
+            );
+          }
+          return (
+            <Box component="span" sx={{ whiteSpace: 'nowrap', fontSize: 16 }}>
+              {TAG_LANGUAGE_FLAGS[value] ?? value}
+            </Box>
+          );
+        }}
+        sx={{
+          minWidth: 36,
+          color: 'text.secondary',
+          '& .MuiSelect-select': {
+            py: 0.25,
+            pr: '20px !important',
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+          },
+        }}
+        MenuProps={{ PaperProps: { sx: { maxHeight: 320 } } }}
+      >
+        <MenuItem value="">
+          <Typography variant="caption" color="text.secondary">
+            {t('editdialog.description_lang_default')}
+          </Typography>
+        </MenuItem>
+        {Object.entries(TAG_LANGUAGES).map(([code, name]) => (
+          <MenuItem
+            key={code}
+            value={code}
+            disabled={usedLangs.has(code) && code !== lang}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
             <Typography variant="caption" component="span">
-              {t('editdialog.description_lang_custom')}
+              {langLabel(code)}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              component="span"
+              sx={{ ml: 1 }}
+            >
+              {name}
             </Typography>
           </MenuItem>
-        </Select>
-      ) : null}
-      <IconButton
-        size="small"
-        onClick={onRemove}
-        aria-label="remove"
-        sx={{ flexShrink: 0, color: 'text.secondary' }}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </>
+        ))}
+        <MenuItem value={CUSTOM_LANG} sx={{ whiteSpace: 'nowrap' }}>
+          <Typography variant="caption" component="span">
+            {t('editdialog.description_lang_custom')}
+          </Typography>
+        </MenuItem>
+      </Select>
+    </Stack>
   );
 };
+
+type RowActionsProps = {
+  onAddTranslation?: () => void;
+  onRemove: () => void;
+};
+
+const LocalizedTagRowActions = ({
+  onAddTranslation,
+  onRemove,
+}: RowActionsProps) => (
+  <>
+    {onAddTranslation ? <AddTranslationMenu onAdd={onAddTranslation} /> : null}
+    <IconButton
+      size="small"
+      onClick={onRemove}
+      aria-label="remove"
+      sx={{ flexShrink: 0, color: 'text.secondary' }}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </>
+);
 
 type Props = {
   baseKey: string;
@@ -344,30 +388,28 @@ export const LocalizedTagEditor: React.FC<Props> = ({
                 value={tags[key] ?? ''}
                 helperText={index === 0 ? helperText : undefined}
                 multiline={multiline}
+                endAdornment={
+                  <LocalizedTagLangSelect
+                    lang={lang}
+                    usedLangs={usedLangs}
+                    customDraft={customDrafts[key] ?? lang}
+                    isEditingCustom={editingCustomFor === key}
+                    onDraftChange={(value) =>
+                      setCustomDrafts((prev) => ({ ...prev, [key]: value }))
+                    }
+                    onApplyCustom={(raw) => applyCustomLang(key, raw)}
+                    onLangChange={(value) => onLangChange(key, value)}
+                  />
+                }
               />
             </Box>
-            <LocalizedTagLangControls
-              lang={lang}
-              usedLangs={usedLangs}
-              customDraft={customDrafts[key] ?? lang}
-              isEditingCustom={editingCustomFor === key}
-              onDraftChange={(value) =>
-                setCustomDrafts((prev) => ({ ...prev, [key]: value }))
-              }
-              onApplyCustom={(raw) => applyCustomLang(key, raw)}
-              onLangChange={(value) => onLangChange(key, value)}
+            <LocalizedTagRowActions
+              onAddTranslation={index === 0 ? addSlot : undefined}
               onRemove={() => removeSlot(key)}
             />
           </Stack>
         );
       })}
-      <Button
-        size="small"
-        onClick={addSlot}
-        sx={{ mt: 0.5, color: 'text.secondary' }}
-      >
-        {t('editdialog.add_description_translation')}
-      </Button>
     </Box>
   );
 };

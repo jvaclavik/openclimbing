@@ -1,6 +1,5 @@
 import { useCurrentItem, useEditContext } from '../../context/EditContext';
 import { Alert, Button } from '@mui/material';
-import { NwrIcon } from '../../../NwrIcon';
 import { t } from '../../../../../services/intl';
 import React from 'react';
 import { FeatureTags } from '../../../../../services/types';
@@ -32,7 +31,6 @@ export const ConvertNodeToRelation = () => {
           color="inherit"
           variant="text"
           size="small"
-          startIcon={<NwrIcon osmType="relation" color="inherit" />}
         >
           {t('editdialog.members.convert_button')}
         </Button>

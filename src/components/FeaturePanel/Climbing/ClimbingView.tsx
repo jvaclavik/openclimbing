@@ -314,7 +314,11 @@ export const ClimbingView = () => {
   const cragPhotos = getWikimediaCommonsPhotoValues(feature.tags).map(
     removeFilePrefix,
   );
-  preparePhotos(cragPhotos);
+
+  useEffect(() => {
+    preparePhotos(cragPhotos);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {

@@ -90,6 +90,19 @@ const setSectionsFactory =
       sections: updateFn(prev.sections),
     }));
 
+const revertChangesFactory = (setDataItem: SetDataItem) => () =>
+  setDataItem((prev) => {
+    const orig = prev.originalState;
+    return {
+      ...prev,
+      tagsEntries: Object.entries(orig.tags),
+      toBeDeleted: orig.isDeleted,
+      nodeLonLat: orig.nodeLonLat,
+      nodes: orig.nodes,
+      members: orig.members,
+    };
+  });
+
 const getModifiedFlag = (dataItem: DataItem): boolean => {
   if (dataItem.shortId.includes('-')) {
     return true;
@@ -132,6 +145,7 @@ export const useEditItems = () => {
           presetLabel: getPresetTranslation(presetKey),
           convertToRelation: convertToRelationFactory(setData, shortId),
           modified: getModifiedFlag(dataItem),
+          revertChanges: revertChangesFactory(setDataItem),
           setSections: setSectionsFactory(setDataItem),
         };
         // TODO maybe keep reference to original EditDataItem if DataItem didnt change? #performance

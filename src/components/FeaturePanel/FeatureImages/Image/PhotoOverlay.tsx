@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { darken } from '@mui/material';
 import PolylineIcon from '@mui/icons-material/Polyline';
 import React from 'react';
 import { t } from '../../../../services/intl';
@@ -34,16 +35,23 @@ const Badge = styled.div`
 `;
 
 // same reveal-on-hover pattern as the homepage gallery tiles
-export const HoverAction = styled.span`
+export const HoverAction = styled.span<{ $accent?: boolean }>`
   position: absolute;
   top: 6px;
   right: 6px;
   z-index: 1;
   padding: 4px 10px;
   border-radius: 20px;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background-color: ${({ theme, $accent }) =>
+    $accent
+      ? darken(theme.palette.background.searchBox, 0.15)
+      : 'rgba(0, 0, 0, 0.6)'};
+  ${({ $accent }) =>
+    !$accent &&
+    `
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    `}
   color: #fff;
   font-size: 11px;
   font-weight: 700;

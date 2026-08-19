@@ -5,7 +5,8 @@ export type TagsEntries = [string, string][];
 export type Member = {
   shortId: string;
   role: string;
-  originalLabel?: string; // only shown when member is not among editItems
+  originalLabel?: string;
+  originalTags?: FeatureTags;
 };
 export type Members = Member[];
 
@@ -45,6 +46,7 @@ export type EditDataItem = DataItem & {
   toggleToBeDeleted: () => void;
   convertToRelation: ConvertToRelation;
   modified: boolean;
+  revertChanges: () => void;
   setSections: SetSections;
 };
 
