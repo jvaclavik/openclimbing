@@ -71,7 +71,14 @@ export const CategoryHeading = ({
 
   return (
     <>
-      <Stack direction="row" spacing={2} alignItems="center" mb={1}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+          mb: 1,
+        }}
+      >
         <h4>{fmtCategory(category)}</h4>
         <IconButton
           onClick={({ currentTarget }) => {
@@ -87,7 +94,9 @@ export const CategoryHeading = ({
         onClose={() => {
           setAnchorEl(null);
         }}
-        MenuListProps={{ 'aria-labelledby': 'basic-button' }}
+        slotProps={{
+          list: { 'aria-labelledby': 'basic-button' },
+        }}
       >
         <ToggleCategory
           shown={isShownOnMap}

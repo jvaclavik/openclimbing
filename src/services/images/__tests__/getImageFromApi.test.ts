@@ -20,7 +20,7 @@ jest.mock('../makeCategoryImage', () => ({
 jest.mock('../../fetch', () => ({
   fetchJson: jest.fn(),
 }));
-jest.mock('maplibre-gl', () => ({}));
+jest.mock('maplibre-gl', () => ({}), { virtual: true });
 
 const mockApi = (mock: ApiMock) => {
   jest.spyOn(fetchModule, 'fetchJson').mockImplementation((url) => {

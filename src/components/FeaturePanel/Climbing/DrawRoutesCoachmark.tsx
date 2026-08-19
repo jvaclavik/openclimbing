@@ -89,8 +89,20 @@ export const DrawRoutesCoachmark = ({
         </IconButton>
       }
     >
-      <Box paddingX={2} paddingY={1} maxWidth={300}>
-        <Typography variant="body2" color="text.secondary" mb={2}>
+      <Box
+        sx={{
+          paddingX: 2,
+          paddingY: 1,
+          maxWidth: 300,
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            mb: 2,
+          }}
+        >
           {t('climbingpanel.coachmark_draw_routes_body')}
         </Typography>
       </Box>

@@ -15,8 +15,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import LoadingButton from '@mui/lab/LoadingButton';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { t } from '../../services/intl';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import {
@@ -70,13 +69,31 @@ type HeaderProps = {
 };
 
 const ListHeader = ({ list, onRename, onDelete, deleting }: HeaderProps) => (
-  <Stack direction="row" alignItems="center" gap={1.5} mt={4} mb={2}>
+  <Stack
+    direction="row"
+    sx={{
+      alignItems: 'center',
+      gap: 1.5,
+      mt: 4,
+      mb: 2,
+    }}
+  >
     <ListAvatar emoji={list.emoji} color={list.color} size="lg" />
-    <Box flex={1} minWidth={0}>
+    <Box
+      sx={{
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
       <Typography variant="h5" noWrap>
         {list.name}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('mylists.item_count', { count: String(list.items.length) })}
       </Typography>
     </Box>
@@ -88,7 +105,7 @@ const ListHeader = ({ list, onRename, onDelete, deleting }: HeaderProps) => (
     >
       {t('mylists.edit')}
     </Button>
-    <LoadingButton
+    <Button
       size="small"
       color="error"
       startIcon={<DeleteIcon fontSize="small" />}
@@ -96,7 +113,7 @@ const ListHeader = ({ list, onRename, onDelete, deleting }: HeaderProps) => (
       loading={deleting}
     >
       {t('mylists.delete')}
-    </LoadingButton>
+    </Button>
   </Stack>
 );
 
@@ -123,7 +140,7 @@ const ItemRow = ({ item, onRemove }: ItemRowProps) => (
             onRemove();
           }}
         >
-          <DeleteOutlineIcon fontSize="small" />
+          <DeleteOutlinedIcon fontSize="small" />
         </IconButton>
       </ListItemSecondaryAction>
     </ListItemButton>
@@ -138,7 +155,12 @@ type ListBodyProps = {
 const ListBody = ({ list, onRemoveItem }: ListBodyProps) => {
   if (list.items.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('mylists.empty')}
       </Typography>
     );
@@ -203,11 +225,21 @@ export const MyListDetailPanel = () => {
             <ClosePanelButton right onClick={handleClose} />
             <PanelSidePadding>
               {!loggedIn ? (
-                <Typography variant="body1" mt={4}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    mt: 4,
+                  }}
+                >
                   {t('mylists.login_required')}
                 </Typography>
               ) : lists === null ? null : !list ? (
-                <Typography variant="body1" mt={4}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    mt: 4,
+                  }}
+                >
                   {t('mylists.not_found')}
                 </Typography>
               ) : (

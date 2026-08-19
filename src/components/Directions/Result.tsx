@@ -85,7 +85,12 @@ const MobileResult = ({
           sx={{ color: 'secondary', fontSize: '16px' }}
         />
       </div>
-      <Stack direction="row" justifyContent="space-between">
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: 'space-between',
+        }}
+      >
         {result.instructions && (
           <Button
             size="small"
@@ -137,14 +142,21 @@ export const Result = ({ revealForm }: Props) => {
       <Stack
         direction="row"
         spacing={2}
-        width="100%"
-        justifyContent="space-between"
+        sx={{
+          width: '100%',
+          justifyContent: 'space-between',
+        }}
       >
         <div>
           <Typography variant="caption">
             {t('directions.result.time')}
           </Typography>
-          <Typography fontWeight={900} variant="h6">
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 900,
+            }}
+          >
             {time}
           </Typography>
         </div>
@@ -152,7 +164,12 @@ export const Result = ({ revealForm }: Props) => {
           <Typography variant="caption">
             {t('directions.result.distance')}
           </Typography>
-          <Typography fontWeight={900} variant="h6">
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 900,
+            }}
+          >
             {distance}
           </Typography>
         </div>
@@ -160,7 +177,12 @@ export const Result = ({ revealForm }: Props) => {
           <Typography variant="caption">
             {t('directions.result.ascent')}
           </Typography>
-          <Typography fontWeight={900} variant="h6">
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 900,
+            }}
+          >
             {ascent}
           </Typography>
         </div>

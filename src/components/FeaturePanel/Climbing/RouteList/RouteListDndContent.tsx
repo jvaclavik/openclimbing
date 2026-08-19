@@ -114,7 +114,11 @@ export const RouteListDndContent = () => {
         <TableHeader>
           <MaxWidthContainer>
             <NameHeader>{t('member_features.climbing')}</NameHeader>
-            <Box mr={1}>
+            <Box
+              sx={{
+                mr: 1,
+              }}
+            >
               <GradeSystemSelect />
             </Box>
           </MaxWidthContainer>

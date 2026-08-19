@@ -164,7 +164,12 @@ export const EditTickModal = () => {
             allTicks={ticks ?? []}
           />
         ) : (
-          <Stack alignItems="center" py={4}>
+          <Stack
+            sx={{
+              alignItems: 'center',
+              py: 4,
+            }}
+          >
             <CircularProgress />
           </Stack>
         )}

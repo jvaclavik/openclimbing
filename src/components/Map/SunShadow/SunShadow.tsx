@@ -334,11 +334,18 @@ const SunControls: React.FC<SunControlsProps> = ({
     />
     <Stack
       direction="row"
-      justifyContent="space-between"
-      alignItems="center"
-      sx={{ mt: 0.5 }}
+      sx={{
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mt: 0.5,
+      }}
     >
-      <Stack direction="row" gap={0.5}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 0.5,
+        }}
+      >
         <QuickButton
           label={t('layerswitcher.shadows_morning')}
           onClick={onMorning}

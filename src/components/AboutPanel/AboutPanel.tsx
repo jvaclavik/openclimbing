@@ -53,13 +53,19 @@ const StoryLink = styled.a`
 `;
 
 const Hero = () => (
-  <Box mt={4}>
+  <Box
+    sx={{
+      mt: 4,
+    }}
+  >
     <GradientHeading>{t('about.hero_claim')}</GradientHeading>
     <Typography
       variant="body1"
-      color="text.secondary"
-      mt={1.5}
-      lineHeight={1.7}
+      sx={{
+        color: 'text.secondary',
+        mt: 1.5,
+        lineHeight: 1.7,
+      }}
     >
       {t('about.hero_sub')}
     </Typography>
@@ -83,23 +89,31 @@ const Section = ({
   lead?: string;
   children: React.ReactNode;
 }) => (
-  <Box mt={5}>
+  <Box
+    sx={{
+      mt: 5,
+    }}
+  >
     <Typography
       variant="h5"
       component="h2"
-      fontWeight={800}
-      letterSpacing={-0.4}
-      lineHeight={1.25}
+      sx={{
+        fontWeight: 800,
+        letterSpacing: -0.4,
+        lineHeight: 1.25,
+      }}
     >
       {title}
     </Typography>
     {lead && (
       <Typography
         variant="body1"
-        color="text.secondary"
-        mt={1.25}
-        mb={2}
-        lineHeight={1.7}
+        sx={{
+          color: 'text.secondary',
+          mt: 1.25,
+          mb: 2,
+          lineHeight: 1.7,
+        }}
       >
         {lead}
       </Typography>
@@ -114,9 +128,22 @@ const UsCard = styled(TintedCard)`
 `;
 
 const Point = ({ children }: { children: React.ReactNode }) => (
-  <Stack direction="row" spacing={1.25} alignItems="flex-start" mt={1}>
+  <Stack
+    direction="row"
+    spacing={1.25}
+    sx={{
+      alignItems: 'flex-start',
+      mt: 1,
+    }}
+  >
     <CheckIcon color="primary" sx={{ fontSize: 20, mt: '1px' }} />
-    <Typography variant="body2" fontWeight={600} lineHeight={1.5}>
+    <Typography
+      variant="body2"
+      sx={{
+        fontWeight: 600,
+        lineHeight: 1.5,
+      }}
+    >
       {children}
     </Typography>
   </Stack>
@@ -128,7 +155,13 @@ const Different = () => (
     lead={t('about.different_lead')}
   >
     <UsCard>
-      <Typography variant="caption" color="primary" fontWeight={700}>
+      <Typography
+        variant="caption"
+        color="primary"
+        sx={{
+          fontWeight: 700,
+        }}
+      >
         {t('about.different_us')}
       </Typography>
       {US_POINTS.map((index) => (

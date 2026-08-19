@@ -163,18 +163,22 @@ export const LoginToSaveBanner = ({ overlay }: LoginToSaveBannerProps) => {
         <Body>
           <Typography
             variant="subtitle1"
-            fontWeight={800}
-            lineHeight={1.2}
-            sx={{ letterSpacing: -0.3 }}
+            sx={{
+              fontWeight: 800,
+              lineHeight: 1.2,
+              letterSpacing: -0.3,
+            }}
           >
             {t('editdialog.login_banner_title')}
           </Typography>
           <Typography
             variant="body2"
-            color="text.secondary"
-            display="block"
-            mt={0.4}
-            lineHeight={1.45}
+            sx={{
+              color: 'text.secondary',
+              display: 'block',
+              mt: 0.4,
+              lineHeight: 1.45,
+            }}
           >
             {t('editdialog.login_banner_body')}
           </Typography>

@@ -89,7 +89,12 @@ export const MajorKeysFieldList: React.FC<Props> = ({
           if (!wikimediaGalleryInserted && wikimediaFileKeys.length) {
             wikimediaGalleryInserted = true;
             return [
-              <Box key="__wikimedia_commons_gallery__" mb={2}>
+              <Box
+                key="__wikimedia_commons_gallery__"
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <WikimediaCommonsGallery
                   fileKeys={wikimediaFileKeys}
                   onFileKeysChange={(next) =>
@@ -104,7 +109,12 @@ export const MajorKeysFieldList: React.FC<Props> = ({
           return [];
         }
         return [
-          <Box key={k} mb={2}>
+          <Box
+            key={k}
+            sx={{
+              mb: 2,
+            }}
+          >
             {getInputElement(k)}
           </Box>,
         ];

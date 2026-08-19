@@ -49,8 +49,10 @@ export const PoiDescription = ({ srOnly }: PoiDescriptionProps) => {
       <Typography
         variant="caption"
         color="secondary"
-        textTransform="lowercase"
         component="span"
+        sx={{
+          textTransform: 'lowercase',
+        }}
       >
         {poiType}
       </Typography>

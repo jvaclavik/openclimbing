@@ -32,9 +32,11 @@ export const ImageAttribution = () => {
     <Wrapper $currentTheme={currentTheme}>
       <Stack
         direction="row"
-        alignItems="center"
-        justifyContent="flex-end"
         spacing={1}
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+        }}
       >
         <Heading>{t('sharedialog.image_attribution')}</Heading>
         <IconButton onClick={() => setExpanded((x) => !x)} size="small">

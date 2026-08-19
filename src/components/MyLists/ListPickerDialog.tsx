@@ -16,7 +16,6 @@ import {
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { t } from '../../services/intl';
 import { useMyListsContext } from '../utils/MyListsContext';
 import { UserList, UserListItem } from '../../services/my-lists/myListsTypes';
@@ -72,7 +71,13 @@ const PickerBody = ({
 }: BodyProps) => (
   <DialogContent dividers>
     {(lists?.length ?? 0) === 0 && (
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+          mb: 1,
+        }}
+      >
         {t('mylists.no_lists')}
       </Typography>
     )}
@@ -198,13 +203,9 @@ export const ListPickerDialog = ({ open, onClose, item }: Props) => {
           <Button onClick={onClose} disabled={saving}>
             {t('mylists.cancel')}
           </Button>
-          <LoadingButton
-            onClick={handleDone}
-            variant="contained"
-            loading={saving}
-          >
+          <Button onClick={handleDone} variant="contained" loading={saving}>
             {t('mylists.done')}
-          </LoadingButton>
+          </Button>
         </DialogActions>
       </Dialog>
 

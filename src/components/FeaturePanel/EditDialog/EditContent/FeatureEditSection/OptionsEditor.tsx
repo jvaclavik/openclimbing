@@ -44,13 +44,15 @@ export const ChangeLocationEditor = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder={t('editdialog.location_placeholder')}
-            InputLabelProps={{
-              shrink: true,
-            }}
             multiline
             fullWidth
             rows={2}
             variant="outlined"
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
           />
         </div>
       )}

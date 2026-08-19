@@ -52,13 +52,15 @@ export const MyTicksDayHeader = ({
         <TableCell colSpan={colSpan} sx={{ p: 0 }}>
           <Stack
             direction="row"
-            alignItems="center"
             spacing={1}
             sx={{
+              alignItems: 'center',
+
               // Stick the title + share button to the left edge of the
               // horizontally scrollable TableContainer so the action stays
               // reachable even on overflowing tables.
               position: 'sticky',
+
               left: 0,
               width: 'fit-content',
               py: 0.5,
@@ -68,7 +70,12 @@ export const MyTicksDayHeader = ({
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {formatDayLabel(sessionDate)}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {t('my_ticks.day_header.tick_count', {
                 count: String(tickCount),
               })}

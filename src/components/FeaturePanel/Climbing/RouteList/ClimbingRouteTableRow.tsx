@@ -321,8 +321,10 @@ const RouteName = (props: {
       <Typography
         variant="inherit"
         component="h3"
-        fontWeight={props.highlighted ? 700 : undefined}
-        lineHeight={1.3}
+        sx={{
+          fontWeight: props.highlighted ? 700 : undefined,
+          lineHeight: 1.3,
+        }}
       >
         {props.feature.tags?.name}
       </Typography>
@@ -430,8 +432,13 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
                 {index + 1}
               </RouteNumber>
             </RouteNumberContainer>
-            <NameColumn justifyContent="stretch" flex={1}>
-              <Stack direction="row" gap={1}>
+            <NameColumn sx={{ justifyContent: 'stretch', flex: 1 }}>
+              <Stack
+                direction="row"
+                sx={{
+                  gap: 1,
+                }}
+              >
                 <RouteName
                   feature={feature}
                   selected={isSelected}

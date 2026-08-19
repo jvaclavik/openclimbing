@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
+import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import { t } from '../../../../services/intl';
 import { useAddNewCragContext } from './AddNewCragContext';
@@ -17,11 +17,11 @@ export const AddNewCragMenuItem = ({ closeMenu }: Props) => {
   };
 
   return (
-    <MenuItem onClick={handleClick}>
+    <ListItemButton onClick={handleClick}>
       <ListItemIcon>
         <AddLocationAltIcon />
       </ListItemIcon>
       <ListItemText>{t('add_new_crag.menu_link')}</ListItemText>
-    </MenuItem>
+    </ListItemButton>
   );
 };

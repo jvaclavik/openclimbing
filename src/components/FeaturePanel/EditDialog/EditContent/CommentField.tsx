@@ -28,15 +28,17 @@ export const CommentField = () => {
           sx={{ mt: 1, mb: 1 }}
           label={t('editdialog.comment')}
           placeholder={t('editdialog.comment_placeholder')}
-          InputLabelProps={{
-            shrink: true,
-          }}
           multiline
           fullWidth
           rows={2}
           variant="outlined"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
+          slotProps={{
+            inputLabel: {
+              shrink: true,
+            },
+          }}
         />
       )}
     </>

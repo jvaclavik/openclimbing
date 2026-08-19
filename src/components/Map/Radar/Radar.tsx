@@ -158,7 +158,12 @@ const RadarControls = ({
   if (isLoading || !frames) {
     return (
       <Panel $inset={inset}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t('layerswitcher.radar_loading')}
         </Typography>
       </Panel>
@@ -168,7 +173,12 @@ const RadarControls = ({
   if (!frames.length) {
     return (
       <Panel $inset={inset}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t('layerswitcher.radar_error')}
         </Typography>
       </Panel>
@@ -180,7 +190,13 @@ const RadarControls = ({
 
   return (
     <Panel $inset={inset}>
-      <Stack direction="row" alignItems="center" spacing={1}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Tooltip
           title={
             playing
@@ -214,17 +230,26 @@ const RadarControls = ({
 
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="baseline"
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+        }}
       >
         <Typography
           variant="body2"
-          fontWeight={700}
-          sx={{ color: RADAR_COLOR }}
+          sx={{
+            fontWeight: 700,
+            color: RADAR_COLOR,
+          }}
         >
           {formatTime(current.time)}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {isLatest
             ? t('layerswitcher.radar_latest')
             : t('layerswitcher.radar_ago', {
@@ -235,8 +260,11 @@ const RadarControls = ({
 
       <Typography
         variant="caption"
-        color="text.secondary"
-        sx={{ display: 'block', mt: 1 }}
+        sx={{
+          color: 'text.secondary',
+          display: 'block',
+          mt: 1,
+        }}
       >
         {t('layerswitcher.opacity')}
       </Typography>
@@ -252,8 +280,11 @@ const RadarControls = ({
 
       <Typography
         variant="caption"
-        color="text.secondary"
-        sx={{ display: 'block', mt: 0.5 }}
+        sx={{
+          color: 'text.secondary',
+          display: 'block',
+          mt: 0.5,
+        }}
       >
         {t('layerswitcher.radar_credit')}
       </Typography>

@@ -2,7 +2,7 @@ import { mergeResultFn } from '../useLoadImages';
 import { ImageDef } from '../../../../services/types';
 import { ImageType } from '../../../../services/images/getImageDefs';
 
-jest.mock('maplibre-gl', () => ({}));
+jest.mock('maplibre-gl', () => ({}), { virtual: true });
 
 const def1: ImageDef = { type: 'tag', k: 'key', v: '1', instant: false };
 const def2: ImageDef = { type: 'tag', k: 'key2', v: '2', instant: false };

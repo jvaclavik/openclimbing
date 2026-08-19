@@ -1,6 +1,12 @@
 import { useRef } from 'react';
 import React from 'react';
-import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
+import {
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+} from '@mui/material';
 import { useRouter } from 'next/router';
 import { useBoolState } from '../../helpers';
 import { changeLang, intl, t } from '../../../services/intl';
@@ -40,7 +46,7 @@ export const LangSwitcher = () => {
           </MenuItem>
         ))}
       </Menu>
-      <MenuItem
+      <ListItemButton
         aria-controls="language-switcher"
         aria-haspopup="true"
         onClick={open}
@@ -51,7 +57,7 @@ export const LangSwitcher = () => {
           {LANGUAGE_FLAGS[intl.lang]}
         </ListItemIcon>
         <ListItemText>{LANGUAGES[intl.lang]}</ListItemText>
-      </MenuItem>
+      </ListItemButton>
     </>
   );
 };

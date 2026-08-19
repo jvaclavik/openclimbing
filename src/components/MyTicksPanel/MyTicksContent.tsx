@@ -30,9 +30,11 @@ export function MyTicksEmptyHint() {
 
       <Typography
         variant="caption"
-        display="block"
         gutterBottom
         color="secondary"
+        sx={{
+          display: 'block',
+        }}
       >
         {t('my_ticks.no_ticks_paragraph2')}
       </Typography>
@@ -69,9 +71,10 @@ export const MyTicksContent = ({
         ? groupTicksByDay(visibleRows)
         : visibleRows.map(
             (row) =>
-              ({ type: 'row', row }) as ReturnType<
-                typeof groupTicksByDay
-              >[number],
+              ({
+                type: 'row',
+                row,
+              }) as ReturnType<typeof groupTicksByDay>[number],
           ),
     [groupByDay, visibleRows],
   );

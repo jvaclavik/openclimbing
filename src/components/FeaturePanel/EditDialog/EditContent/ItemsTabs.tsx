@@ -132,7 +132,12 @@ const ModifiedBadge = ({ item }: { item: EditDataItem }) => {
       enterDelay={200}
       placement={isSmallScreen ? 'bottom' : 'right'}
       title={
-        <Stack alignItems="flex-start" gap={0.25}>
+        <Stack
+          sx={{
+            alignItems: 'flex-start',
+            gap: 0.25,
+          }}
+        >
           <span>
             {isNew ? t('editdialog.new_item') : t('editdialog.modified')}
           </span>
@@ -180,13 +185,26 @@ const TabLabel = ({ item }: TabLabelProps) => {
   return (
     <>
       {modified && <ModifiedBadge item={item} />}
-      <Stack direction="column" alignItems="flex-start" width="100%">
-        <Stack direction="row" gap={1} alignItems="center" width="100%">
+      <Stack
+        direction="column"
+        sx={{
+          alignItems: 'flex-start',
+          width: '100%',
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{
+            gap: 1,
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
           <WarningBadge item={item} />
           <StyledTypography
             variant="button"
-            whiteSpace="nowrap"
             $deleted={toBeDeleted}
+            sx={{ whiteSpace: 'nowrap' }}
           >
             {title}
           </StyledTypography>
@@ -194,8 +212,10 @@ const TabLabel = ({ item }: TabLabelProps) => {
         {tags.name && presetLabel ? (
           <Typography
             variant="caption"
-            textTransform="lowercase"
-            whiteSpace="nowrap"
+            sx={{
+              textTransform: 'lowercase',
+              whiteSpace: 'nowrap',
+            }}
           >
             {presetLabel}
           </Typography>

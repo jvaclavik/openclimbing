@@ -60,7 +60,13 @@ export const EmojiTextField = ({ value, onChange }: Props) => (
 );
 
 export const EmojiPresets = ({ value, onChange }: Props) => (
-  <Box display="flex" flexWrap="wrap" gap={0.5}>
+  <Box
+    sx={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: 0.5,
+    }}
+  >
     {EMOJI_PRESETS.map((emoji) => (
       <IconButton
         key={emoji}
@@ -81,7 +87,12 @@ export const EmojiPresets = ({ value, onChange }: Props) => (
 );
 
 export const EmojiInput = ({ value, onChange }: Props) => (
-  <Stack direction="column" gap={1}>
+  <Stack
+    direction="column"
+    sx={{
+      gap: 1,
+    }}
+  >
     <EmojiTextField value={value} onChange={onChange} />
     <EmojiPresets value={value} onChange={onChange} />
   </Stack>

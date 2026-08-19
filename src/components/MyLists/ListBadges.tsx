@@ -11,7 +11,13 @@ type Props = {
 export const ListBadges = ({ lists, size = 'xs' }: Props) => {
   if (lists.length === 0) return null;
   return (
-    <Stack direction="row" gap={0.5} sx={{ flexShrink: 0 }}>
+    <Stack
+      direction="row"
+      sx={{
+        gap: 0.5,
+        flexShrink: 0,
+      }}
+    >
       {lists.map((list) => (
         <Tooltip key={list.id} title={list.name} arrow>
           <span>

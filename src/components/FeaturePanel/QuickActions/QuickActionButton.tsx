@@ -16,7 +16,13 @@ export const QuickActionButton = forwardRef<HTMLButtonElement, Props>(
       component="button"
       label={
         suffix ? (
-          <Stack direction="row" alignItems="center" gap={0.5}>
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: 'center',
+              gap: 0.5,
+            }}
+          >
             <span>{label}</span>
             {suffix}
           </Stack>

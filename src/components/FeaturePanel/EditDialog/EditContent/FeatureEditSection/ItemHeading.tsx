@@ -16,10 +16,12 @@ export const ItemHeading = () => {
   return (
     <Stack
       direction="row"
-      justifyContent="space-between"
-      alignItems="center"
-      gap={2}
-      mb={2}
+      sx={{
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 2,
+        mb: 2,
+      }}
     >
       <StyledTypography variant="h6" $deleted={toBeDeleted}>
         {tags.name || presetLabel || ' '}

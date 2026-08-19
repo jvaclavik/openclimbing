@@ -33,11 +33,19 @@ export const EditDialogTitle = () => {
     >
       <Stack
         direction="row"
-        gap={1}
-        alignItems="center"
-        justifyContent="space-between"
+        sx={{
+          gap: 1,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
       >
-        <Stack direction="row" gap={2} alignItems="center">
+        <Stack
+          direction="row"
+          sx={{
+            gap: 2,
+            alignItems: 'center',
+          }}
+        >
           <EditIcon />
           {dialogTitle}
           {debugMode && (
@@ -51,7 +59,13 @@ export const EditDialogTitle = () => {
           )}
         </Stack>
 
-        <Stack direction="row" gap={0.5} alignItems="center">
+        <Stack
+          direction="row"
+          sx={{
+            gap: 0.5,
+            alignItems: 'center',
+          }}
+        >
           <IconButton
             color="secondary"
             edge="end"

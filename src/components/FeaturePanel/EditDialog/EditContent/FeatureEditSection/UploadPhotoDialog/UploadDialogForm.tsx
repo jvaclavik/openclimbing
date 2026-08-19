@@ -141,7 +141,12 @@ export const UploadDialogForm: React.FC<Props> = ({
       </Alert>
 
       {prepared?.exifLocation && (
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t('uploaddialog.exif_location', {
             lat: prepared.exifLocation[1].toFixed(5),
             lon: prepared.exifLocation[0].toFixed(5),
@@ -149,7 +154,12 @@ export const UploadDialogForm: React.FC<Props> = ({
         </Typography>
       )}
       {prepared?.exifDate && (
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t('uploaddialog.exif_date', {
             date: prepared.exifDate.toLocaleString(),
           })}

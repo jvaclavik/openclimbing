@@ -93,7 +93,13 @@ export const CragRoutesLocationEditor = () => {
         }}
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Stack direction="row" gap={1} alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
             <PlaceIcon />
             <Typography variant="button">{t('editdialog.location')}</Typography>
           </Stack>

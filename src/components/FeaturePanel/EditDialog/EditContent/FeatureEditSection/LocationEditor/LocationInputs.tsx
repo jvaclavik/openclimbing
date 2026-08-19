@@ -84,7 +84,13 @@ export const LocationInputs = () => {
   };
 
   return (
-    <Stack direction="row" mt={2} gap={1}>
+    <Stack
+      direction="row"
+      sx={{
+        mt: 2,
+        gap: 1,
+      }}
+    >
       <LatInput value={lat} onChange={changeLat} latError={latError} />
       <LonInput value={lon} onChange={changeLon} lonError={lonError} />
     </Stack>

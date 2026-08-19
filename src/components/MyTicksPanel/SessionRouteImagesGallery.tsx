@@ -356,9 +356,12 @@ const ImageTile = ({ tile, refreshNonce }: TileProps) => {
       </Box>
       <Stack
         direction="row"
-        alignItems="center"
         spacing={0.5}
-        sx={{ pt: 0.5, width: '100%' }}
+        sx={{
+          alignItems: 'center',
+          pt: 0.5,
+          width: '100%',
+        }}
       >
         <Typography
           variant="caption"
@@ -433,8 +436,18 @@ export const SessionRouteImagesGallery = ({ ticks }: Props) => {
   if (!loading && tiles.length === 0) return null;
 
   return (
-    <Box mb={2}>
-      <Stack direction="row" alignItems="center" spacing={0.5}>
+    <Box
+      sx={{
+        mb: 2,
+      }}
+    >
+      <Stack
+        direction="row"
+        spacing={0.5}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Typography variant="overline" sx={{ flex: 1 }}>
           {t('my_ticks.share.images_label')}
         </Typography>
@@ -476,7 +489,12 @@ export const SessionRouteImagesGallery = ({ ticks }: Props) => {
           ))
         )}
       </Stack>
-      <Typography variant="caption" color="text.secondary">
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('my_ticks.share.images_hint')}
       </Typography>
     </Box>

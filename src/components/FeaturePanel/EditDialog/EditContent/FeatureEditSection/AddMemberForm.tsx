@@ -214,7 +214,11 @@ const AddMemberMoreMenu = ({ onAddFromUrl }: { onAddFromUrl: () => void }) => {
           }}
         >
           <ListItemIcon>
-            <LinkIcon fontSize="small" />
+            <LinkIcon
+              sx={{
+                fontSize: 'small',
+              }}
+            />
           </ListItemIcon>
           {t('editdialog.members.add_from_url')}
         </MenuItem>

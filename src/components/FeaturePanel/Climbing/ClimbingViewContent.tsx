@@ -145,7 +145,12 @@ export const ClimbingViewContent = ({ isMapVisible, setIsMapVisible }) => {
             <HideOnNarrowPanel>
               <PanelLabel>{t('climbingview.description')}</PanelLabel>
 
-              <Typography ml={2} mr={2}>
+              <Typography
+                sx={{
+                  ml: 2,
+                  mr: 2,
+                }}
+              >
                 {getDescription(feature)}
               </Typography>
             </HideOnNarrowPanel>
@@ -155,7 +160,12 @@ export const ClimbingViewContent = ({ isMapVisible, setIsMapVisible }) => {
             <HideOnNarrowPanel>
               <PanelLabel>{t('climbingview.links')}</PanelLabel>
 
-              <Box ml={2} mr={2}>
+              <Box
+                sx={{
+                  ml: 2,
+                  mr: 2,
+                }}
+              >
                 <FeaturedTags />
               </Box>
             </HideOnNarrowPanel>

@@ -143,7 +143,9 @@ export const PartnersTextField = ({
           onSelect={(e) => syncCursor(e.target as HTMLTextAreaElement)}
           onClick={(e) => syncCursor(e.target as HTMLTextAreaElement)}
           onKeyUp={(e) => syncCursor(e.target as HTMLTextAreaElement)}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{
+            inputLabel: { shrink: true },
+          }}
         />
       </Box>
 

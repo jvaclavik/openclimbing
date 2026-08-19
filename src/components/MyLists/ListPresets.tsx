@@ -35,11 +35,28 @@ export const ListPresets = ({ existingNames, onSelect, disabled }: Props) => {
   }
 
   return (
-    <Stack direction="column" gap={0.5} mb={1.5}>
-      <Typography variant="caption" color="text.secondary">
+    <Stack
+      direction="column"
+      sx={{
+        gap: 0.5,
+        mb: 1.5,
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('mylists.quick_presets')}
       </Typography>
-      <Stack direction="row" gap={1} flexWrap="wrap">
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+          flexWrap: 'wrap',
+        }}
+      >
         {available.map((p) => (
           <Chip
             key={p.nameKey}

@@ -24,8 +24,10 @@ export const AddNewCragBanner = () => {
         <Stack
           direction="row"
           spacing={2}
-          alignItems="center"
-          justifyContent="space-between"
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
         >
           <Typography variant="body2">
             {zoomedEnough

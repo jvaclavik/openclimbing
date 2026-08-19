@@ -23,17 +23,19 @@ const SearchBoxInput = ({
   useFocusOnSlash(inputRef);
   useFocusOnCmdK(inputRef);
 
-  const { InputLabelProps, InputProps, ...restParams } = params;
+  const { slotProps, ...restParams } = params;
 
   useEffect(() => {
-    // @ts-ignore
-    params.InputProps.ref(autocompleteRef.current);
+    const ref = slotProps.input.ref;
+    if (typeof ref === 'function') {
+      ref(autocompleteRef.current);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <InputBase
       {...restParams} // eslint-disable-line react/jsx-props-no-spreading
-      sx={{ height: '47px' }}
+      sx={{ height: '100%', fontSize: 14 }}
       inputRef={inputRef}
       autoFocus={autoFocus}
       placeholder={t('searchbox.placeholder')}

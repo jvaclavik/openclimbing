@@ -25,7 +25,12 @@ export const RouteTickRow = ({ tick }: TickRowProps) => {
         <TickStyleBadge style={tick.style as TickStyle} />
       </TableCell>
       <TableCell>
-        <Stack spacing={0.25} alignItems="flex-start">
+        <Stack
+          spacing={0.25}
+          sx={{
+            alignItems: 'flex-start',
+          }}
+        >
           <span>{formattedDate}</span>
           {partners.trim() ? (
             <PartnersMentionsText text={partners} variant="caption" />

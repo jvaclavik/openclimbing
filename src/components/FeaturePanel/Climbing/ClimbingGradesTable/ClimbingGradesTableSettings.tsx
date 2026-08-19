@@ -12,7 +12,11 @@ export const ClimbingGradesTableSettings = ({ isSettingVisible }) => {
 
   return (
     isSettingVisible && (
-      <Box m={1}>
+      <Box
+        sx={{
+          m: 1,
+        }}
+      >
         <Alert severity="warning">
           {t('climbing_grade_table.warning')}{' '}
           <a
@@ -24,10 +28,23 @@ export const ClimbingGradesTableSettings = ({ isSettingVisible }) => {
           .
         </Alert>
 
-        <Typography variant="body2" mt={3} ml={1}>
+        <Typography
+          variant="body2"
+          sx={{
+            mt: 3,
+            ml: 1,
+          }}
+        >
           {t('climbing_grade_table.show')}
         </Typography>
-        <Stack direction="row" flexWrap="wrap" gap={0.6} mt={1}>
+        <Stack
+          direction="row"
+          sx={{
+            flexWrap: 'wrap',
+            gap: 0.6,
+            mt: 1,
+          }}
+        >
           {GRADE_SYSTEMS.map((gs) => {
             const isVisible = isGradeSystemVisible(gs.key);
             return (

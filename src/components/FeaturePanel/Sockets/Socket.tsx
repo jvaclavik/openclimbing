@@ -60,7 +60,12 @@ export const Socket = ({ type, details }: Props) => {
 
   return (
     <Container>
-      <Stack alignItems="center" spacing={1}>
+      <Stack
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <img
           src={getImageSrc(type)}
           style={{

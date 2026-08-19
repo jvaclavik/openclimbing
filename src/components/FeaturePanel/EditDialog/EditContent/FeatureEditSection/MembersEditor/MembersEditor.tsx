@@ -58,7 +58,12 @@ const SectionName = () => {
 
   if (tags.climbing === 'area') {
     return (
-      <Stack direction="row" gap={1}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+        }}
+      >
         <CragIcon
           fill={theme.palette.text.primary}
           stroke={theme.palette.text.primary}
@@ -74,7 +79,12 @@ const SectionName = () => {
 
   if (tags.climbing === 'crag') {
     return (
-      <Stack direction="row" gap={1}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+        }}
+      >
         <ShowChartIcon />
         <Typography variant="button">
           {t('editdialog.climbing_routes')}
@@ -143,7 +153,14 @@ const CustomAccordion = ({
             '& .MuiAccordionSummary-expandIconWrapper': { ml: 1 },
           }}
         >
-          <Stack direction="row" spacing={2} alignItems="center" width="100%">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
             <SectionName />
             {membersLength ? (
               <Chip size="small" label={membersLength} variant="outlined" />
@@ -280,7 +297,15 @@ export const MembersEditor = () => {
           </List>
         )}
 
-        <Stack direction="row" alignItems="center" spacing={2} mt={1} ml={1}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            mt: 1,
+            ml: 1,
+          }}
+        >
           {convertible ? <ConvertNodeToRelation /> : <AddMemberForm />}
 
           <Box sx={{ flex: '1' }} />

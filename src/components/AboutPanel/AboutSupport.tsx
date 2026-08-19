@@ -4,7 +4,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import IosShareIcon from '@mui/icons-material/IosShare';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import { Button, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import type { SvgIconComponent } from '@mui/icons-material';
@@ -201,7 +201,7 @@ export const AboutSupport = () => {
     },
     {
       key: 'feedback',
-      icon: MailOutlineIcon,
+      icon: MailOutlinedIcon,
       label: 'about.support_feedback',
       href: `mailto:${FEEDBACK_EMAIL}`,
     },
@@ -221,18 +221,22 @@ export const AboutSupport = () => {
           <Typography
             variant="h5"
             component="h2"
-            fontWeight={800}
-            letterSpacing={-0.4}
-            lineHeight={1.2}
-            mt={1.5}
+            sx={{
+              fontWeight: 800,
+              letterSpacing: -0.4,
+              lineHeight: 1.2,
+              mt: 1.5,
+            }}
           >
             {t('about.support_heading')}
           </Typography>
           <Typography
             variant="body2"
-            mt={1}
-            lineHeight={1.65}
-            sx={{ opacity: 0.92 }}
+            sx={{
+              mt: 1,
+              lineHeight: 1.65,
+              opacity: 0.92,
+            }}
           >
             {t('about.support_lead')}
           </Typography>
@@ -243,10 +247,10 @@ export const AboutSupport = () => {
           </WayGrid>
           <Typography
             variant="caption"
-            fontWeight={800}
-            mt={2.5}
-            mb={1}
             sx={{
+              fontWeight: 800,
+              mt: 2.5,
+              mb: 1,
               opacity: 0.8,
               letterSpacing: 0.08,
               textTransform: 'uppercase',
@@ -254,7 +258,13 @@ export const AboutSupport = () => {
           >
             {t('about.support_donate')}
           </Typography>
-          <Stack direction="row" flexWrap="wrap" gap={1}>
+          <Stack
+            direction="row"
+            sx={{
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
             {DONATION_LINKS.map(({ label, href }) => (
               <Button
                 key={label}
@@ -278,7 +288,13 @@ export const AboutSupport = () => {
               Bitcoin
             </Button>
           </Stack>
-          <Typography variant="body2" mt={2} sx={{ opacity: 0.8 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              mt: 2,
+              opacity: 0.8,
+            }}
+          >
             {t('support_us.thanks')}
           </Typography>
         </Stack>

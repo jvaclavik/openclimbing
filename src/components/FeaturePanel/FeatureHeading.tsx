@@ -158,7 +158,12 @@ export const FeatureHeading = ({ headingRef }: FeatureHeadingProps) => {
           <PoiDescription />
         </>
       ) : (
-        <Stack direction="column" marginTop={4}>
+        <Stack
+          direction="column"
+          sx={{
+            marginTop: 4,
+          }}
+        >
           <Headings />
         </Stack>
       )}

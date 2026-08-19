@@ -44,7 +44,12 @@ const SectionName = () => {
 
   if (isClimbingCrag) {
     return (
-      <Stack direction="row" gap={1}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+        }}
+      >
         <AreaIcon
           fill={theme.palette.text.primary}
           stroke={theme.palette.text.primary}
@@ -59,7 +64,12 @@ const SectionName = () => {
   }
   if (isClimbingRoute) {
     return (
-      <Stack direction="row" gap={1}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+        }}
+      >
         <CragIcon
           fill={theme.palette.text.primary}
           stroke={theme.palette.text.primary}
@@ -117,7 +127,13 @@ const CustomAccordion = ({
         id="panel1-parents-header"
         onClick={toggleExpanded}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <SectionName />
           {parentsLength ? (
             <Chip size="small" label={parentsLength} variant="outlined" />
@@ -218,7 +234,15 @@ export const ParentsEditor = () => {
           ))}
         </List>
 
-        <Stack direction="row" alignItems="center" spacing={2} mt={1} ml={1}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            mt: 1,
+            ml: 1,
+          }}
+        >
           <AddParentForm />
           <Box sx={{ flex: 1 }} />
           {visibleOsmParents.length > 1 && (

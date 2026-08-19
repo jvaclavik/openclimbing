@@ -65,7 +65,12 @@ export const MyTicksRow = ({
       }
     >
       <TableCell>
-        <Stack spacing={0.25} alignItems="flex-start">
+        <Stack
+          spacing={0.25}
+          sx={{
+            alignItems: 'flex-start',
+          }}
+        >
           <Link
             href={`/${getUrlOsmId(apiId)}?back=${encodeURIComponent(
               router.asPath,

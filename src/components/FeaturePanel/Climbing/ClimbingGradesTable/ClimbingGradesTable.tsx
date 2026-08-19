@@ -50,8 +50,10 @@ export const ClimbingGradesTable = ({ onClose }: ClimbingGradesTableProps) => {
           <Stack
             direction="row"
             spacing={1}
-            justifyContent="space-between"
-            width="100%"
+            sx={{
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
           >
             <Typography noWrap variant="h6" component="div">
               {t('climbing_grade_table.title')}

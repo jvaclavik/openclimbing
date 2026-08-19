@@ -143,7 +143,13 @@ export const LocationEditor = () => {
         }}
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Stack direction="row" gap={1} alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
             <PlaceIcon color={needsLocation ? 'warning' : 'inherit'} />
             <Typography variant="button">{t('editdialog.location')}</Typography>
           </Stack>

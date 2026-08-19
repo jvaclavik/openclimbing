@@ -29,7 +29,6 @@ const nextConfig = {
     // direct submodule imports so only used components are bundled.
     optimizePackageImports: [
       '@mui/material',
-      '@mui/lab',
       '@mui/icons-material',
       '@mui/system',
     ],

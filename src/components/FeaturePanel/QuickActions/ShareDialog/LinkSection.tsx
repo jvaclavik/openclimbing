@@ -66,7 +66,11 @@ export const LinkSection = () => {
 
   return (
     <>
-      <Box mb={2}>
+      <Box
+        sx={{
+          mb: 2,
+        }}
+      >
         <Typography variant="overline">{t('sharedialog.link')}</Typography>
         <Stack spacing={0}>
           <StyledTextField
@@ -75,7 +79,12 @@ export const LinkSection = () => {
             variant="outlined"
             size={useMobileMode() ? 'small' : 'medium'}
           />
-          <Stack direction="row" alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             {supportsShortUrl && (
               <ShortenCheckbox short={short} setShort={setShort} />
             )}

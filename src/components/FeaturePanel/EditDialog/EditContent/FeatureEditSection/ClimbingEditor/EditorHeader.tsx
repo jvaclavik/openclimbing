@@ -25,7 +25,13 @@ export const EditorHeader: React.FC<{
 
   return (
     <>
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+        }}
+      >
         <Typography variant="body1">{label}</Typography>
         <Button variant="text" size="small" onClick={onClick}>
           {t('editdialog.add_value')}

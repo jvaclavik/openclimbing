@@ -151,7 +151,13 @@ const renderTitle = (
   Icon?: React.ElementType,
 ) => {
   return (
-    <Stack direction="row" gap={0.4} alignItems="center">
+    <Stack
+      direction="row"
+      sx={{
+        gap: 0.4,
+        alignItems: 'center',
+      }}
+    >
       {Icon && <Icon fontSize="inherit" />}
       <span>
         {t(label)}
@@ -195,7 +201,13 @@ const MaterialBadges = ({ feature }: { feature: Feature }) => {
           <StyledChip
             key={material}
             label={
-              <Stack direction="row" gap={0.4} alignItems="center">
+              <Stack
+                direction="row"
+                sx={{
+                  gap: 0.4,
+                  alignItems: 'center',
+                }}
+              >
                 <TerrainIcon fontSize="inherit" />
                 <span>
                   {translationKey
@@ -266,10 +278,14 @@ export const ClimbingBadges = ({
     <Stack
       direction="row"
       useFlexGap
-      gap={0.5}
-      flexWrap="wrap"
-      paddingBottom={dense ? 0 : 2}
-      sx={subtle ? { opacity: 0.6 } : undefined}
+      sx={[
+        {
+          gap: 0.5,
+          flexWrap: 'wrap',
+          paddingBottom: dense ? 0 : 2,
+        },
+        subtle ? { opacity: 0.6 } : undefined,
+      ]}
     >
       {Object.entries(climbingTypes).map(
         ([_key, { value, label, description }]) =>

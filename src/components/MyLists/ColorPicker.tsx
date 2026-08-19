@@ -9,11 +9,27 @@ type Props = {
 };
 
 export const ColorPicker = ({ value, onChange }: Props) => (
-  <Stack direction="column" gap={0.75}>
-    <Typography variant="caption" color="text.secondary">
+  <Stack
+    direction="column"
+    sx={{
+      gap: 0.75,
+    }}
+  >
+    <Typography
+      variant="caption"
+      sx={{
+        color: 'text.secondary',
+      }}
+    >
       {t('mylists.color_placeholder')}
     </Typography>
-    <Box display="flex" flexWrap="wrap" gap={0.75}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 0.75,
+      }}
+    >
       {LIST_COLOR_PALETTE.map((color) => {
         const selected = value === color;
         return (

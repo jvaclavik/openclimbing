@@ -29,9 +29,11 @@ const TopPanel = styled.div`
 const StyledPaper = styled(Paper, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $withShadow: boolean }>`
-  padding: 2px 4px;
+  padding: 0 4px 0 0;
   display: flex;
   align-items: center;
+  height: 36.5px;
+  box-sizing: border-box;
   background-color: ${({ $withShadow, theme }) =>
     $withShadow
       ? theme.palette.background.searchInput
@@ -44,19 +46,19 @@ const StyledPaper = styled(Paper, {
 
   .MuiAutocomplete-root {
     flex: 1;
+    min-width: 0;
+    height: 100%;
   }
 `;
 
 const SearchIconButton = styled(IconButton)`
+  padding: 6px;
   svg {
+    font-size: 20px;
     transform: scaleX(-1);
     filter: FlipH;
     -ms-filter: 'FlipH';
   }
-`;
-
-const LoadingSpinner = styled(CircularProgress)`
-  padding: 10px;
 `;
 
 // https://docs.mapbox.com/help/troubleshooting/working-with-large-geojson-data/
@@ -92,7 +94,7 @@ export const SearchField = ({
         autoFocus={autoFocus}
       />
 
-      {isLoading && <LoadingSpinner />}
+      {isLoading && <CircularProgress size={16} sx={{ mx: 1 }} />}
       {showHamburger && isMobileMode && <HamburgerMenu />}
     </StyledPaper>
   );

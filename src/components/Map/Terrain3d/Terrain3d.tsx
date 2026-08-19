@@ -303,21 +303,38 @@ const TerrainControls = ({
       />
       <Typography
         variant="caption"
-        color="text.secondary"
-        sx={{ display: 'block', textAlign: 'center', mb: 1, mt: -0.5 }}
+        sx={{
+          color: 'text.secondary',
+          display: 'block',
+          textAlign: 'center',
+          mb: 1,
+          mt: -0.5,
+        }}
       >
         {t('layerswitcher.3d_hint')}
       </Typography>
       <Stack spacing={0.25}>
         <Stack
           direction="row"
-          justifyContent="space-between"
-          alignItems="baseline"
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+          }}
         >
-          <Typography variant="caption" fontWeight={700}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             {t('layerswitcher.3d_tilt')}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {Math.round(pitch)}°
           </Typography>
         </Stack>
@@ -331,14 +348,26 @@ const TerrainControls = ({
         />
         <Stack
           direction="row"
-          justifyContent="space-between"
-          alignItems="baseline"
-          sx={{ mt: 0.5 }}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            mt: 0.5,
+          }}
         >
-          <Typography variant="caption" fontWeight={700}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             {t('layerswitcher.3d_rotate')}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {Math.round(bearing)}°
           </Typography>
         </Stack>
@@ -351,7 +380,13 @@ const TerrainControls = ({
           sx={SLIDER_SX}
         />
       </Stack>
-      <Stack direction="row" justifyContent="flex-end" sx={{ mt: 0.75 }}>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: 'flex-end',
+          mt: 0.75,
+        }}
+      >
         <Button
           size="small"
           variant="outlined"

@@ -1,5 +1,5 @@
 import Router from 'next/router';
-import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
+import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { t } from '../../../services/intl';
 import React from 'react';
 import PersonIcon from '@mui/icons-material/Person';
@@ -25,11 +25,11 @@ export const MyClimbingProfileMenuItem = ({
   };
 
   return (
-    <MenuItem onClick={openProfile}>
+    <ListItemButton onClick={openProfile}>
       <ListItemIcon>
         <PersonIcon />
       </ListItemIcon>
       <ListItemText>{t('user.my_climbing_profile')}</ListItemText>
-    </MenuItem>
+    </ListItemButton>
   );
 };

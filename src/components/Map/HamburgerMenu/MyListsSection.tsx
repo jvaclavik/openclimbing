@@ -56,9 +56,9 @@ const ListRow = ({
   return (
     <Stack
       direction="row"
-      alignItems="center"
-      gap={0.5}
       sx={{
+        alignItems: 'center',
+        gap: 0.5,
         px: 1,
         py: 0.25,
         '&:hover': { backgroundColor: 'action.hover' },
@@ -69,22 +69,37 @@ const ListRow = ({
         checked={visible}
         onChange={onToggleVisible}
         onClick={(e) => e.stopPropagation()}
-        inputProps={{ 'aria-label': t('mylists.show_on_map') }}
+        slotProps={{
+          input: { 'aria-label': t('mylists.show_on_map') },
+        }}
       />
       <Box
-        flex={1}
-        display="flex"
-        alignItems="center"
-        gap={1}
-        sx={{ cursor: 'pointer', py: 0.5 }}
         onClick={onOpen}
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          cursor: 'pointer',
+          py: 0.5,
+        }}
       >
         <ListAvatar emoji={list.emoji} color={list.color} size="sm" />
-        <Box flex={1} minWidth={0}>
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
             {list.name}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('mylists.item_count', { count: String(list.items.length) })}
           </Typography>
         </Box>
@@ -140,7 +155,12 @@ export const MyListsSection = ({ closeMenu }: Props) => {
   const count = lists?.length ?? 0;
 
   return (
-    <Box mt={1} mb={1}>
+    <Box
+      sx={{
+        mt: 1,
+        mb: 1,
+      }}
+    >
       <ButtonBase
         onClick={() => setExpanded(!expanded)}
         sx={{
@@ -160,8 +180,10 @@ export const MyListsSection = ({ closeMenu }: Props) => {
         )}
         <Typography
           variant="overline"
-          color="text.secondary"
-          sx={{ letterSpacing: 0.5 }}
+          sx={{
+            color: 'text.secondary',
+            letterSpacing: 0.5,
+          }}
         >
           {t('mylists.title')}
           {count > 0 ? ` (${count})` : ''}
@@ -172,8 +194,11 @@ export const MyListsSection = ({ closeMenu }: Props) => {
         {count === 0 ? (
           <Typography
             variant="caption"
-            color="text.secondary"
-            sx={{ px: 2, display: 'block' }}
+            sx={{
+              color: 'text.secondary',
+              px: 2,
+              display: 'block',
+            }}
           >
             {t('mylists.no_lists')}
           </Typography>

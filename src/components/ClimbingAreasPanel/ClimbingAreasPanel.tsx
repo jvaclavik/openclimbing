@@ -209,25 +209,54 @@ const CountryAccordion = ({
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          width="100%"
-          gap={1}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            gap: 1,
+          }}
         >
-          <Box display="flex" alignItems="center" gap={1} minWidth={0}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              minWidth: 0,
+            }}
+          >
             <span style={{ fontSize: '1.3em' }}>
               {getCountryFlag(countryCode) || '🏳️'}
             </span>
-            <Typography noWrap fontWeight={600}>
+            <Typography
+              noWrap
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               {countryName}
             </Typography>
           </Box>
-          <Box textAlign="right" flexShrink={0}>
-            <Typography variant="body2" fontWeight={600}>
+          <Box
+            sx={{
+              textAlign: 'right',
+              flexShrink: 0,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               {t('climbingareas.areas_count', { count: areas.length })}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {t('climbingareas.crags_count', { count: cragCount })}
             </Typography>
           </Box>
@@ -273,10 +302,12 @@ const CountryAccordion = ({
                 </TableCell>
                 <TableCell align="right">
                   <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                    gap={0.75}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: 0.75,
+                    }}
                   >
                     {area.routeCount > 0 && (
                       <PhotoCoverageRing
@@ -369,7 +400,12 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
               sx={{ mb: 1, display: 'block' }}
             />
             {groups.length === 0 && (
-              <Typography color="text.secondary" sx={{ mb: 2 }}>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                  mb: 2,
+                }}
+              >
                 {t('climbingareas.no_areas_in_viewport')}
               </Typography>
             )}
@@ -394,10 +430,26 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
         </PanelSidePadding>
       ) : (
         isLoading && (
-          <Box display="flex" justifyContent="center" p={4}>
-            <Stack alignItems="center" spacing={2}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              p: 4,
+            }}
+          >
+            <Stack
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <CircularProgress color="secondary" />
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {t('loading')}
               </Typography>
             </Stack>

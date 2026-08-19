@@ -52,7 +52,13 @@ export const MemberItem = ({ feature }: Props) => {
       </a>
 
       {feature.members ? (
-        <Typography color="secondary" component="span" fontSize="12px">
+        <Typography
+          color="secondary"
+          component="span"
+          sx={{
+            fontSize: '12px',
+          }}
+        >
           {' '}
           ({feature.members.length})
         </Typography>

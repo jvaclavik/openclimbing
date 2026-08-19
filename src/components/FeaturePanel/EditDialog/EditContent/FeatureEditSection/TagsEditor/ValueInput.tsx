@@ -68,7 +68,13 @@ export const ValueInput = ({ index }: Props) => {
   };
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <FastInput
         type={getInputTypeForKey(currentKey)}
         value={currentValue}

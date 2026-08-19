@@ -94,7 +94,12 @@ export const ClimbingTypeFilter = () => {
             aria-label={t(label)}
             onClick={() => toggle(key)}
           >
-            <Box component="span" display="flex">
+            <Box
+              component="span"
+              sx={{
+                display: 'flex',
+              }}
+            >
               <Icon src={icon} alt="" />
             </Box>
             <TypeCaption>{t(label)}</TypeCaption>

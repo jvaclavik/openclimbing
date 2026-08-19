@@ -39,7 +39,11 @@ export const ItemEditSection = () => {
       </EditSectionCard>
       <LocationEditor />
       <TagsEditor />
-      <Box mt={4} />
+      <Box
+        sx={{
+          mt: 4,
+        }}
+      />
     </>
   );
 };

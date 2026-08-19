@@ -48,8 +48,10 @@ function UserProfilePerformanceTopBar({
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
       spacing={1}
-      alignItems={{ xs: 'stretch', sm: 'center' }}
-      sx={{ pt: 0.5 }}
+      sx={{
+        alignItems: { xs: 'stretch', sm: 'center' },
+        pt: 0.5,
+      }}
     >
       <ClimbingStatsDateRangeSelect
         labelId="user-profile-period-label"

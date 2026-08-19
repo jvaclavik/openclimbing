@@ -7,9 +7,9 @@ import {
   Divider,
   Drawer,
   IconButton,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  MenuItem,
   Stack,
   Tooltip,
 } from '@mui/material';
@@ -62,12 +62,12 @@ const EditLink = () => {
   const { feature } = useFeatureContext();
   const href = getIdEditorLink(feature, browser ? view : undefined);
   return (
-    <MenuItem component="a" href={href} target="_blank">
+    <ListItemButton component="a" href={href} target="_blank">
       <ListItemIcon>
         <CreateIcon />
       </ListItemIcon>
       <ListItemText>{t('map.edit_link')}</ListItemText>
-    </MenuItem>
+    </ListItemButton>
   );
 };
 
@@ -83,34 +83,38 @@ const GithubLink = () => (
   </Tooltip>
 );
 const ClimbingGradesTableLink = ({ closeMenu }) => (
-  <MenuItem href="/climbing-grades" component={Link} onClick={closeMenu}>
+  <ListItemButton href="/climbing-grades" component={Link} onClick={closeMenu}>
     <ListItemIcon>
       <ViewListIcon />
     </ListItemIcon>
     <ListItemText>{t('climbing_grade_table.title')}</ListItemText>
-  </MenuItem>
+  </ListItemButton>
 );
 const TickScoringLink = ({ closeMenu }) => (
-  <MenuItem href="/tick-scoring" component={Link} onClick={closeMenu}>
+  <ListItemButton href="/tick-scoring" component={Link} onClick={closeMenu}>
     <ListItemIcon>
       <EmojiEventsIcon />
     </ListItemIcon>
     <ListItemText>{t('tick_scoring.menu_link')}</ListItemText>
-  </MenuItem>
+  </ListItemButton>
 );
 const ClimbingLeaderboardLink = ({ closeMenu }) => (
-  <MenuItem href="/climbing-leaderboard" component={Link} onClick={closeMenu}>
+  <ListItemButton
+    href="/climbing-leaderboard"
+    component={Link}
+    onClick={closeMenu}
+  >
     <ListItemIcon>
       <LeaderboardIcon />
     </ListItemIcon>
     <ListItemText>{t('leaderboard.menu_link')}</ListItemText>
-  </MenuItem>
+  </ListItemButton>
 );
 const ClimbingAreasLink = ({ closeMenu }) => {
   const { persistShowHomepage } = useFeatureContext();
 
   return (
-    <MenuItem
+    <ListItemButton
       href="/"
       component={Link}
       onClick={(e) => {
@@ -123,17 +127,17 @@ const ClimbingAreasLink = ({ closeMenu }) => {
         <MapOutlinedIcon />
       </ListItemIcon>
       <ListItemText>{t('topbar.climbing_areas')}</ListItemText>
-    </MenuItem>
+    </ListItemButton>
   );
 };
 
 const AboutLink = ({ closeMenu }) => (
-  <MenuItem href="/about" component={Link} onClick={closeMenu}>
+  <ListItemButton href="/about" component={Link} onClick={closeMenu}>
     <ListItemIcon>
       <InfoOutlinedIcon />
     </ListItemIcon>
     <ListItemText>{t('topbar.about')}</ListItemText>
-  </MenuItem>
+  </ListItemButton>
 );
 
 const themeOptions = {
@@ -219,8 +223,10 @@ export const HamburgerMenu = () => {
         <ThemeProvider theme={overlayTheme}>
           <Stack
             direction="column"
-            justifyContent="space-between"
-            height="100%"
+            sx={{
+              justifyContent: 'space-between',
+              height: '100%',
+            }}
           >
             <div>
               <UserHeader
@@ -256,15 +262,21 @@ export const HamburgerMenu = () => {
             </div>
             <div>
               <Divider />
-              <Box mb={2}>
+              <Box
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <EditLink />
               </Box>
               <Divider />
               <Stack
                 direction="row"
-                justifyContent="space-between"
-                mb={1}
-                mt={1}
+                sx={{
+                  justifyContent: 'space-between',
+                  mb: 1,
+                  mt: 1,
+                }}
               >
                 <LangSwitcher />
                 <div>

@@ -46,8 +46,8 @@ export const SectionHeading = ({ children, centered }: SectionHeadingProps) => (
   <Typography
     variant="overline"
     component="h2"
-    color="text.secondary"
     sx={{
+      color: 'text.secondary',
       display: 'block',
       mb: 1.5,
       fontWeight: 700,
@@ -96,7 +96,13 @@ const Stat = ({ value, label }: { value?: number; label: string }) => (
     <StatValue>
       {value === undefined ? <Skeleton width="70%" /> : formatCount(value)}
     </StatValue>
-    <Typography variant="caption" color="text.secondary" lineHeight={1.3}>
+    <Typography
+      variant="caption"
+      sx={{
+        color: 'text.secondary',
+        lineHeight: 1.3,
+      }}
+    >
       {label}
     </Typography>
   </TintedCard>

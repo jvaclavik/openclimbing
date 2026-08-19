@@ -76,18 +76,22 @@ export const GradeFilter = () => {
       <Stack
         direction="row"
         spacing={1}
-        justifyContent="space-between"
-        alignItems="center"
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
       >
         <FilterSectionLabel $flush>{t('crag_filter.grade')}</FilterSectionLabel>
         <GradeSystemSelect showDefaultOnButton size="tiny" />
       </Stack>
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mt={0.5}
-        mb={0.25}
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mt: 0.5,
+          mb: 0.25,
+        }}
       >
         <RouteDifficultyBadge
           routeDifficulty={{

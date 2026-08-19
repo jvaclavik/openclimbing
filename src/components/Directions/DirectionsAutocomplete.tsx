@@ -60,14 +60,16 @@ const DirectionsInput = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const { InputLabelProps, InputProps, ...restParams } = params;
+  const { slotProps, ...restParams } = params;
   const isClient = useIsClient();
   const { showToast } = useSnackbar();
   const theme = useTheme();
 
   useEffect(() => {
-    // @ts-ignore
-    params.InputProps.ref(autocompleteRef.current);
+    const ref = slotProps.input.ref;
+    if (typeof ref === 'function') {
+      ref(autocompleteRef.current);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,32 +116,40 @@ const DirectionsInput = ({
       variant="outlined"
       size="small"
       fullWidth
-      InputProps={{
-        startAdornment: (
-          <InputAdornment
-            position="start"
-            sx={{ position: 'relative', top: 5, left: 5 }}
-          >
-            <AlphabeticalMarker hasPin={false} index={pointIndex} height={32} />
-          </InputAdornment>
-        ),
-        endAdornment:
-          isClient && isFocused && navigator?.geolocation ? (
-            isLoading ? (
-              <DotLoaderContainer>
-                <DotLoader />
-              </DotLoaderContainer>
-            ) : (
-              <Tooltip title={t('directions.get_my_location')}>
-                <MyLocationIcon
-                  color="secondary"
-                  sx={{ cursor: 'pointer' }}
-                  onClick={handleGetMyPosition}
-                />
-              </Tooltip>
-            )
-          ) : undefined,
-        style: { paddingRight: 12 },
+      slotProps={{
+        ...slotProps,
+        input: {
+          ...slotProps.input,
+          startAdornment: (
+            <InputAdornment
+              position="start"
+              sx={{ position: 'relative', top: 5, left: 5 }}
+            >
+              <AlphabeticalMarker
+                hasPin={false}
+                index={pointIndex}
+                height={32}
+              />
+            </InputAdornment>
+          ),
+          endAdornment:
+            isClient && isFocused && navigator?.geolocation ? (
+              isLoading ? (
+                <DotLoaderContainer>
+                  <DotLoader />
+                </DotLoaderContainer>
+              ) : (
+                <Tooltip title={t('directions.get_my_location')}>
+                  <MyLocationIcon
+                    color="secondary"
+                    sx={{ cursor: 'pointer' }}
+                    onClick={handleGetMyPosition}
+                  />
+                </Tooltip>
+              )
+            ) : undefined,
+          sx: { pr: 1.5 },
+        },
       }}
       placeholder={label}
       onChange={onChange}

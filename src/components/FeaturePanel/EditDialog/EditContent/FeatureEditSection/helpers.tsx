@@ -56,7 +56,6 @@ export const TextFieldWithCharacterCount = ({
         type={inputType}
         multiline={multiline}
         value={value}
-        InputLabelProps={{ shrink: true }}
         variant="outlined"
         margin={margin}
         size={size}
@@ -65,7 +64,6 @@ export const TextFieldWithCharacterCount = ({
         fullWidth
         autoFocus={autoFocus}
         placeholder={placeholder}
-        inputProps={{ maxLength: MAX_INPUT_LENGTH }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => {
           setIsValidationReadyToCheck(true);
@@ -88,6 +86,9 @@ export const TextFieldWithCharacterCount = ({
               </InputAdornment>
             ) : undefined,
           },
+
+          htmlInput: { maxLength: MAX_INPUT_LENGTH },
+          inputLabel: { shrink: true },
         }}
         helperText={
           <Stack direction="row" spacing={1}>

@@ -167,7 +167,7 @@ const SearchSlot = styled.div`
   min-width: 0;
 
   @media ${isDesktop} {
-    flex: 0 1 360px;
+    flex: 0 1 220px;
     margin-left: auto;
   }
 
@@ -211,10 +211,12 @@ const NavLinks = () => {
   return (
     <Stack
       direction="row"
-      alignItems="center"
-      alignSelf="stretch"
       spacing={0.5}
-      minWidth={0}
+      sx={{
+        alignItems: 'center',
+        alignSelf: 'stretch',
+        minWidth: 0,
+      }}
     >
       <NavButton
         label={t('topbar.climbing_areas')}

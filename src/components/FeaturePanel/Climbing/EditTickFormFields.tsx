@@ -80,9 +80,12 @@ export const EditTickFormFields = ({
             applyDateInputToTickTimestamp(tempTick.timestamp, clamped),
           );
         }}
-        InputLabelProps={{ shrink: true }}
-        inputProps={{
-          max: maxDay,
+        slotProps={{
+          htmlInput: {
+            max: maxDay,
+          },
+
+          inputLabel: { shrink: true },
         }}
       />
 
@@ -125,7 +128,13 @@ export const EditTickFormFields = ({
           }
           label={t('tick.remember_defaults_label')}
         />
-        <Typography variant="caption" color="text.secondary" sx={{ pl: 4.5 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+            pl: 4.5,
+          }}
+        >
           {t('tick.remember_defaults_helper')}
         </Typography>
       </Stack>
@@ -160,7 +169,9 @@ export const EditTickFormFields = ({
             }}
             fullWidth
             size="small"
-            InputLabelProps={{ shrink: true }}
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
           />
 
           <TextField
@@ -173,7 +184,9 @@ export const EditTickFormFields = ({
             multiline
             minRows={2}
             size="small"
-            InputLabelProps={{ shrink: true }}
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
           />
         </Stack>
       </Collapse>

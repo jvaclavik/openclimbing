@@ -81,3 +81,10 @@ export const chipOutline = (theme: Theme) => ({
   bgcolor: tint(theme, 0.03),
   fontWeight: 600,
 });
+
+export const filterChipSx = (theme: Theme, outlined: boolean) => ({
+  fontWeight: 600,
+  borderRadius: '8px',
+  '& .MuiTouchRipple-root': { display: 'none' },
+  ...(outlined ? chipOutline(theme) : undefined),
+});

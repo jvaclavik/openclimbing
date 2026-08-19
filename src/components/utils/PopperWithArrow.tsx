@@ -209,25 +209,34 @@ export const PopperWithArrow = ({
                     <>
                       <Stack
                         direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
                         sx={{
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
                           flexShrink: 0,
+
                           bgcolor: (theme) =>
                             alpha(theme.palette.text.primary, 0.04),
                         }}
                       >
                         <Stack
                           direction="row"
-                          alignItems="center"
                           spacing={1}
-                          sx={{ ml: 2, mr: 1, my: 1, minWidth: 0, flex: 1 }}
+                          sx={{
+                            alignItems: 'center',
+                            ml: 2,
+                            mr: 1,
+                            my: 1,
+                            minWidth: 0,
+                            flex: 1,
+                          }}
                         >
                           <Typography
                             variant="subtitle1"
-                            fontWeight={800}
                             component="div"
                             noWrap
+                            sx={{
+                              fontWeight: 800,
+                            }}
                           >
                             {title}
                           </Typography>

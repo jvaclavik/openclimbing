@@ -45,7 +45,12 @@ const useUpdateFeatureMarkers = createMapEffectHook<
 
     const MyPopupContent = () => {
       return (
-        <Stack direction="column" gap={2}>
+        <Stack
+          direction="column"
+          sx={{
+            gap: 2,
+          }}
+        >
           <Typography variant="subtitle2" color="primary">
             {item.tags?.name || item.shortId}
           </Typography>

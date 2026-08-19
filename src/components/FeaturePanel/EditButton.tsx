@@ -50,7 +50,14 @@ export const EditButton = () => {
   const { open } = useEditDialogContext();
 
   return (
-    <Box mt={3} mb={3} mx="auto" sx={{ textAlign: 'center' }}>
+    <Box
+      sx={{
+        mt: 3,
+        mb: 3,
+        mx: 'auto',
+        textAlign: 'center',
+      }}
+    >
       <ResponsiveButton
         size="large"
         startIcon={

@@ -21,10 +21,30 @@ export const ClimbingGradesEditor = () => {
   }
 
   return (
-    <Box mb={2}>
-      <Typography mb={1}>{t('tags.climbing_grade')}</Typography>
-      <Stack gap={1} alignItems="center" direction="row">
-        <Box flex="1">
+    <Box
+      sx={{
+        mb: 2,
+      }}
+    >
+      <Typography
+        sx={{
+          mb: 1,
+        }}
+      >
+        {t('tags.climbing_grade')}
+      </Typography>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            flex: '1',
+          }}
+        >
           <GradeSelect
             k={key}
             climbingGradeSystem={climbingGradeSystem}

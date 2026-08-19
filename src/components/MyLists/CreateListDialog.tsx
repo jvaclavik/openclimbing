@@ -9,7 +9,6 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { t } from '../../services/intl';
 import { useMyListsContext } from '../utils/MyListsContext';
 import { pickNextListColor } from '../../services/my-lists/listColors';
@@ -63,9 +62,24 @@ export const CreateListDialog = ({ open, onClose, onCreated }: Props) => {
           onSelect={createAndClose}
           disabled={saving}
         />
-        <Box mt={3}>
-          <Stack direction="column" gap={2}>
-            <Stack direction="row" gap={1} alignItems="flex-start">
+        <Box
+          sx={{
+            mt: 3,
+          }}
+        >
+          <Stack
+            direction="column"
+            sx={{
+              gap: 2,
+            }}
+          >
+            <Stack
+              direction="row"
+              sx={{
+                gap: 1,
+                alignItems: 'flex-start',
+              }}
+            >
               <EmojiTextField value={emoji} onChange={setEmoji} />
               <TextField
                 size="small"
@@ -89,14 +103,14 @@ export const CreateListDialog = ({ open, onClose, onCreated }: Props) => {
         <Button onClick={onClose} disabled={saving}>
           {t('mylists.cancel')}
         </Button>
-        <LoadingButton
+        <Button
           onClick={handleCreate}
           variant="contained"
           loading={saving}
           disabled={!name.trim()}
         >
           {t('mylists.create')}
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );

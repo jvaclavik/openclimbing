@@ -57,7 +57,13 @@ export const UserProfileHero = ({ titleName }: { titleName: string }) => {
 
   return (
     <Box sx={{ px: PANEL_GAP, pb: 0, mt: 2, mb: 1.5 }}>
-      <Stack direction="row" spacing={2} alignItems="center">
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         {imageUrl ? (
           <Box sx={{ flexShrink: 0, lineHeight: 0 }}>
             <OsmUserAvatarImg src={imageUrl} alt={titleName} $size={56} />
@@ -75,7 +81,13 @@ export const UserProfileHero = ({ titleName }: { titleName: string }) => {
             {initial}
           </Avatar>
         )}
-        <Stack spacing={0.5} flex={1} minWidth={0}>
+        <Stack
+          spacing={0.5}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <UserProfileHeroTitle titleName={titleName} />
         </Stack>
       </Stack>

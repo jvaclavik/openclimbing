@@ -157,14 +157,23 @@ const Header = ({
 }) => (
   <PanelSidePadding>
     <CragName>
-      <Box display="flex" alignItems="baseline" gap={1} overflow="hidden">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 1,
+          overflow: 'hidden',
+        }}
+      >
         <Typography
           variant="h4"
           component="h3"
-          overflow="hidden"
-          textOverflow="ellipsis"
           color="primary"
-          lineHeight={1.2}
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            lineHeight: 1.2,
+          }}
         >
           {label}
         </Typography>
@@ -468,7 +477,12 @@ const CragList = ({
   }, [crags, feature.memberFeatures, subAreas]);
 
   return (
-    <Box mt={2} mb={4}>
+    <Box
+      sx={{
+        mt: 2,
+        mb: 4,
+      }}
+    >
       <CragListContainer ref={setListEl}>
         {scrollParent && items.length > 0 ? (
           <Virtuoso
@@ -607,9 +621,11 @@ const FilterRow: React.FC = ({ children }) => (
   <Stack
     direction="row"
     spacing={0.5}
-    justifyContent="flex-end"
-    m={1}
-    alignItems="center"
+    sx={{
+      justifyContent: 'flex-end',
+      m: 1,
+      alignItems: 'center',
+    }}
   >
     {children}
   </Stack>

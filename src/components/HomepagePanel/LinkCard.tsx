@@ -36,9 +36,22 @@ type CardTitleProps = {
 };
 
 export const CardTitle = ({ icon, children }: CardTitleProps) => (
-  <Stack direction="row" spacing={1.5} alignItems="center" mb={1}>
+  <Stack
+    direction="row"
+    spacing={1.5}
+    sx={{
+      alignItems: 'center',
+      mb: 1,
+    }}
+  >
     <IconSlot>{icon}</IconSlot>
-    <Typography variant="subtitle2" component="h3" fontWeight={700}>
+    <Typography
+      variant="subtitle2"
+      component="h3"
+      sx={{
+        fontWeight: 700,
+      }}
+    >
       {children}
     </Typography>
   </Stack>
@@ -51,7 +64,13 @@ type LinkRowProps = CardTitleProps & {
 export const LinkRow = ({ icon, title, children }: LinkRowProps) => (
   <CardRow>
     <CardTitle icon={icon}>{title}</CardTitle>
-    <Typography variant="body2" color="text.secondary" component="div">
+    <Typography
+      variant="body2"
+      component="div"
+      sx={{
+        color: 'text.secondary',
+      }}
+    >
       {children}
     </Typography>
   </CardRow>

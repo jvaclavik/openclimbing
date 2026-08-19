@@ -8,7 +8,6 @@ import {
   Stack,
   TextField,
 } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { t } from '../../services/intl';
 import { UserList } from '../../services/my-lists/myListsTypes';
 import { DEFAULT_LIST_COLOR } from '../../services/my-lists/listColors';
@@ -59,8 +58,20 @@ export const EditListDialog = ({ open, list, onClose }: Props) => {
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{t('mylists.edit')}</DialogTitle>
       <DialogContent dividers>
-        <Stack direction="column" gap={2} mt={1}>
-          <Stack direction="row" gap={1} alignItems="flex-start">
+        <Stack
+          direction="column"
+          sx={{
+            gap: 2,
+            mt: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+              alignItems: 'flex-start',
+            }}
+          >
             <EmojiTextField value={emoji} onChange={setEmoji} />
             <TextField
               size="small"
@@ -83,14 +94,14 @@ export const EditListDialog = ({ open, list, onClose }: Props) => {
         <Button onClick={onClose} disabled={saving}>
           {t('mylists.cancel')}
         </Button>
-        <LoadingButton
+        <Button
           onClick={handleSave}
           variant="contained"
           loading={saving}
           disabled={!name.trim()}
         >
           {t('mylists.done')}
-        </LoadingButton>
+        </Button>
       </DialogActions>
     </Dialog>
   );

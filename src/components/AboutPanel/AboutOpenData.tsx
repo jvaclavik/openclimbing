@@ -171,20 +171,27 @@ const PartnerCard = ({
     <Badge $accent={accent}>{badge}</Badge>
     <Typography
       variant="h6"
-      fontWeight={800}
-      lineHeight={1.2}
-      mt={1.5}
-      sx={{ position: 'relative', zIndex: 1, letterSpacing: -0.3 }}
+      sx={{
+        fontWeight: 800,
+        lineHeight: 1.2,
+        mt: 1.5,
+        position: 'relative',
+        zIndex: 1,
+        letterSpacing: -0.3,
+      }}
     >
       {title}
     </Typography>
     <Typography
       variant="body2"
-      color="text.secondary"
-      lineHeight={1.5}
-      mt={0.6}
-      mb={1.5}
-      sx={{ position: 'relative', zIndex: 1 }}
+      sx={{
+        color: 'text.secondary',
+        lineHeight: 1.5,
+        mt: 0.6,
+        mb: 1.5,
+        position: 'relative',
+        zIndex: 1,
+      }}
     >
       {description}
     </Typography>
