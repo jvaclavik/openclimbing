@@ -1,4 +1,4 @@
-import { Presets } from './types/Presets';
+import { Presets, RawPresets } from './types/Presets';
 import type { RawFields } from './types/Fields';
 
 export const ourFields: RawFields = {
@@ -52,17 +52,36 @@ const routeFields = [
   'climbing/summit_log',
 ];
 
+const ourPresets: RawPresets = {
+  // A node-specific "Climbing Area" preset.
+  // The relation variant (type/site/climbing/area) carries relation-only tags
+  // (type=site, site=climbing) that must not be applied to nodes.
+  // This preset matches nodes tagged with climbing=area and only adds the tags
+  // that are valid for nodes.
+  'climbing/area': {
+    icon: 'temaki-climbing',
+    fields: ['name'],
+    moreFields: ['website'],
+    geometry: ['point'],
+    tags: { climbing: 'area' },
+    addTags: { climbing: 'area', sport: 'climbing' },
+  },
+};
+
 export const modifyPresets = (presets: Presets) => {
   presets['climbing/route'].moreFields.push(...routeFields);
   presets['climbing/route_bottom'].moreFields.push(...routeFields);
   presets['climbing/crag'].geometry.push('line'); // line is not intended use, but we need to match way+climbing=crag
-  presets['type/site/climbing/area'].geometry.push('point'); // to be able to create it from node
 
   presets['climbing/route_top'] = JSON.parse(
     JSON.stringify(presets['climbing/route_bottom']),
   );
   presets['climbing/route_top'].tags.climbing = 'route_top';
   presets['climbing/route_top'].addTags.climbing = 'route_top';
+
+  Object.entries(ourPresets).forEach(([key, preset]) => {
+    presets[key] = { ...preset, presetKey: key };
+  });
 
   return presets;
 };
@@ -72,6 +91,9 @@ export const getOurTranslations = (lang: string) => ({
   [lang]: {
     presets: {
       presets: {
+        'climbing/area': {
+          name: 'Climbing Area',
+        },
         'climbing/route_top': {
           name: 'Climbing route (top)',
         },
