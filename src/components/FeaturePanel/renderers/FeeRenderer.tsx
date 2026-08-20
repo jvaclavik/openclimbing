@@ -18,6 +18,8 @@ export const FeeRenderer = ({ k, v }) => {
   }
 
   return (
-    <Container>💶 {charge ? `${charge} fee` : 'Entrance fee required'}</Container>
+    <Container>
+      💶 {charge ? `${charge} fee` : 'Entrance fee required'}
+    </Container>
   );
 };
