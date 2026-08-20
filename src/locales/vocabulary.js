@@ -379,6 +379,10 @@ export default {
   'searchbox.overpass_custom_query': 'custom query',
   'searchbox.coordinate_subtitle': 'Latitude, Longitude',
   'searchbox.tile_boundaries': 'z/x/y tile boundaries',
+  'searchbox.section.climbing': 'Climbing',
+  'searchbox.section.routes': 'Routes',
+  'searchbox.section.places': 'Places',
+  'searchbox.section.categories': 'Categories',
 
   'directions.get_directions': 'Get Directions',
   'layerswitcher.fetching_index': 'Fetching the layer index...',

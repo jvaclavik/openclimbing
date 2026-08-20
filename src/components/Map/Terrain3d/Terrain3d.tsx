@@ -667,7 +667,7 @@ export const Terrain3dMapButton = () => {
 
   return (
     <>
-      <MapControlAppear>
+      <MapControlAppear id="terrain3d">
         <Badge
           color="success"
           variant="dot"

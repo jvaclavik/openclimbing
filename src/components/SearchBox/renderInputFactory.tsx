@@ -1,5 +1,4 @@
-import { useRef } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AutocompleteRenderInputParams } from '@mui/material/Autocomplete/Autocomplete';
 import { useFocusOnCmdK, useFocusOnSlash } from '../../helpers/hooks';
 import { InputBase } from '@mui/material';
@@ -24,6 +23,7 @@ const SearchBoxInput = ({
   useFocusOnCmdK(inputRef);
 
   const { slotProps, ...restParams } = params;
+  const htmlInput = slotProps.htmlInput;
 
   useEffect(() => {
     const ref = slotProps.input.ref;
@@ -39,6 +39,7 @@ const SearchBoxInput = ({
       inputRef={inputRef}
       autoFocus={autoFocus}
       placeholder={t('searchbox.placeholder')}
+      inputProps={htmlInput}
       onChange={({ target }) => setInputValue(target.value)}
       onFocus={({ target }) => target.select()}
     />

@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { Grid, Typography } from '@mui/material';
 import orderBy from 'lodash/orderBy';
 import React from 'react';
 import type { LngLatLike } from 'maplibre-gl';
@@ -16,12 +15,64 @@ import { SEARCH_THRESHOLD } from './consts';
 import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
 
 export const IconPart = styled.div`
-  width: 50px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
-  text-align: center;
-  padding-right: 10px;
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.08)'
+      : 'rgba(0, 0, 0, 0.05)'};
   color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 10px;
+
+  & > * {
+    margin: 0 !important;
+  }
+
+  svg {
+    display: block;
+  }
+`;
+
+export const OptionBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+`;
+
+export const OptionTitle = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const OptionSubtitle = styled.div`
+  font-size: 12px;
+  line-height: 1.35;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const OptionMeta = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  margin-left: 8px;
 `;
 
 const EARTH_RADIUS = 6372795;
@@ -69,12 +120,12 @@ export const useMapCenter = (): LonLat => {
 export const LoaderRow = () => (
   <>
     <IconPart />
-    <Grid size={{ xs: 12 }}>
-      <Typography>
+    <OptionBody>
+      <OptionTitle>
         {t('loading')}
         <DotLoader />
-      </Typography>
-    </Grid>
+      </OptionTitle>
+    </OptionBody>
   </>
 );
 

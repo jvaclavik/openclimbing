@@ -1,11 +1,14 @@
-import { Grid, Typography } from '@mui/material';
-import React, { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { join } from '../../../utils';
 import {
   fitBounds,
   getHumanDistance,
   highlightText,
   IconPart,
+  OptionBody,
+  OptionMeta,
+  OptionSubtitle,
+  OptionTitle,
   useMapCenter,
 } from '../utils';
 import { getPoiClass } from '../../../services/getPoiClass';
@@ -147,16 +150,16 @@ export const GeocoderRow = ({ option: { geocoder }, inputValue }: Props) => {
         <PoiIcon
           ico={poiClass.class}
           title={`${tagKey}=${tagValue}`}
-          size={20}
+          size={18}
         />
-        <div>{distance}</div>
       </IconPart>
-      <Grid size={{ xs: 12 }}>
-        {highlightText(text, inputValue)}
-        <Typography variant="body2" color="textSecondary">
-          {additionalText}
-        </Typography>
-      </Grid>
+      <OptionBody>
+        <OptionTitle>{highlightText(text, inputValue)}</OptionTitle>
+        {additionalText && <OptionSubtitle>{additionalText}</OptionSubtitle>}
+      </OptionBody>
+      <OptionMeta>
+        <span style={{ fontSize: 11, opacity: 0.7 }}>{distance}</span>
+      </OptionMeta>
     </>
   );
 };

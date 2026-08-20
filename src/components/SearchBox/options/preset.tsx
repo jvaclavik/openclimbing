@@ -1,7 +1,6 @@
 import orderBy from 'lodash/orderBy';
 import { diceCoefficient } from 'dice-coefficient';
 import FolderIcon from '@mui/icons-material/Folder';
-import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import {
   fetchSchemaTranslations,
@@ -11,7 +10,13 @@ import {
 import { allPresets } from '../../../services/tagging/data';
 import { PresetOption } from '../types';
 import { t } from '../../../services/intl';
-import { highlightText, IconPart } from '../utils';
+import {
+  highlightText,
+  IconPart,
+  OptionBody,
+  OptionSubtitle,
+  OptionTitle,
+} from '../utils';
 import { SEARCH_THRESHOLD } from '../consts';
 
 let presetsForSearch: {
@@ -129,12 +134,12 @@ export const PresetRow = ({ option: { preset }, inputValue }: Props) => {
       <IconPart>
         <FolderIcon />
       </IconPart>
-      <Grid size={{ xs: 12 }}>
-        {highlightText(`${name}${additionalText}`, inputValue)}
-        <Typography variant="body2" color="textSecondary">
-          {t('searchbox.category')}
-        </Typography>
-      </Grid>
+      <OptionBody>
+        <OptionTitle>
+          {highlightText(`${name}${additionalText}`, inputValue)}
+        </OptionTitle>
+        <OptionSubtitle>{t('searchbox.category')}</OptionSubtitle>
+      </OptionBody>
     </>
   );
 };

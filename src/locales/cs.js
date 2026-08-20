@@ -369,6 +369,10 @@ export default {
   'searchbox.overpass_error': 'Chyba při načítání výsledků. __message__',
   'searchbox.overpass_custom_query': 'vlastní dotaz',
   'searchbox.tile_boundaries': 'hranice dlaždice z/x/y',
+  'searchbox.section.climbing': 'Lezení',
+  'searchbox.section.routes': 'Cesty',
+  'searchbox.section.places': 'Místa',
+  'searchbox.section.categories': 'Kategorie',
 
   'directions.get_directions': 'Vyhledat trasu',
   'directions.form.start_or_click': 'Zvolte začátek nebo klikněte do mapy',

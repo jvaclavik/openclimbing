@@ -1,8 +1,7 @@
 import React from 'react';
 import { TilesOption } from '../types';
 import GridViewIcon from '@mui/icons-material/GridView';
-import { Grid, Typography } from '@mui/material';
-import { IconPart } from '../utils';
+import { IconPart, OptionBody, OptionSubtitle, OptionTitle } from '../utils';
 import { t } from '../../../services/intl';
 import { getGlobalMap } from '../../../services/mapStorage';
 import { tileToBBOX } from '../../../server/climbing-tiles/tileToBBOX';
@@ -122,11 +121,9 @@ export const TilesRow = ({ option: { tiles } }: Props) => (
     <IconPart>
       <GridViewIcon />
     </IconPart>
-    <Grid size={12}>
-      <span style={{ fontWeight: 700 }}>{tiles.label}</span>
-      <Typography variant="body2" color="textSecondary">
-        {t('searchbox.tile_boundaries')}
-      </Typography>
-    </Grid>
+    <OptionBody>
+      <OptionTitle>{tiles.label}</OptionTitle>
+      <OptionSubtitle>{t('searchbox.tile_boundaries')}</OptionSubtitle>
+    </OptionBody>
   </>
 );

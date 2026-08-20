@@ -57,7 +57,7 @@ const MobileBar = styled(Bar)`
   display: none;
   @media ${isMobileMode} {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     padding: 6px;
     height: auto;
     min-height: 0;
@@ -167,7 +167,7 @@ const SearchSlot = styled.div`
   min-width: 0;
 
   @media ${isDesktop} {
-    flex: 0 1 220px;
+    flex: 0 1 280px;
     margin-left: auto;
   }
 

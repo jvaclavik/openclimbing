@@ -687,7 +687,7 @@ export const SunShadowMapButton = () => {
 
   return (
     <>
-      <MapControlAppear>
+      <MapControlAppear id="shadow">
         <Badge
           color={hiddenByZoom ? 'error' : 'success'}
           variant="dot"

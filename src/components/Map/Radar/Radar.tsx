@@ -513,7 +513,7 @@ export const RadarMapButton = () => {
 
   return (
     <>
-      <MapControlAppear>
+      <MapControlAppear id="radar">
         <Badge
           color={inCoverage ? 'success' : 'error'}
           variant="dot"

@@ -481,7 +481,7 @@ export const PrecipAccumMapButton = () => {
 
   return (
     <>
-      <MapControlAppear>
+      <MapControlAppear id="precip">
         <Badge
           color={inCoverage ? 'success' : 'error'}
           variant="dot"

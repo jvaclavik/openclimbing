@@ -1,8 +1,7 @@
 import React from 'react';
 import { OsmOption } from '../types';
 import MapIcon from '@mui/icons-material/Map';
-import { Grid, Typography } from '@mui/material';
-import { IconPart } from '../utils';
+import { IconPart, OptionBody, OptionSubtitle, OptionTitle } from '../utils';
 import Router from 'next/router';
 import { isUrl } from '../../../helpers/utils';
 
@@ -83,14 +82,12 @@ export const OsmRow = ({ option: { osm } }: Props) => (
     <IconPart>
       <MapIcon />
     </IconPart>
-    <Grid size={{ xs: 12 }}>
-      <span style={{ fontWeight: 700 }}>
+    <OptionBody>
+      <OptionTitle>
         {osm.type}/{osm.id}
-      </span>
-      <Typography variant="body2" color="textSecondary">
-        OpenStreetMap Object
-      </Typography>
-    </Grid>
+      </OptionTitle>
+      <OptionSubtitle>OpenStreetMap Object</OptionSubtitle>
+    </OptionBody>
   </>
 );
 
