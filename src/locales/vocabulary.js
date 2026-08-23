@@ -235,7 +235,7 @@ export default {
 
   'project.openclimbing.description': 'Open climbing guidebook',
   'project.openclimbing.serpDescription': 'A wiki based open-source climbing map with topos. Built on OpenStreetMap and Wikipedia projects.',
-  'project.openclimbing.climbing_guide': 'Climbing guide & topos',
+  'project.openclimbing.climbing_guide': 'Free climbing guide & topos',
 
   'seo.routes': '__count__ climbing routes',
   'seo.grades': 'grades __range__',

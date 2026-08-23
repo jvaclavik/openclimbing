@@ -232,7 +232,7 @@ export default {
   'project.openclimbing.description': "Topo d'escalade ouvert",
   'project.openclimbing.serpDescription':
     "Une carte d'escalade open-source basée sur un wiki avec des topos. Construite sur les projets OpenStreetMap et Wikipédia.",
-  'project.openclimbing.climbing_guide': "Topo d'escalade et schémas",
+  'project.openclimbing.climbing_guide': "Topo d'escalade gratuit et schémas",
   'homepage.how_to_start': 'Commencez en tapant votre requête dans la barre de recherche.\nOu cliquez sur un élément de la carte.',
   'homepage.go_to_map_button': 'Aller à la carte',
   'homepage.examples.eg': 'ex : ',

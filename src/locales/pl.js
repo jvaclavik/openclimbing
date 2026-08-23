@@ -228,7 +228,7 @@ export default {
   'project.openclimbing.description': 'Otwarty przewodnik wspinaczkowy',
   'project.openclimbing.serpDescription':
     'Oparta na wiki mapa wspinaczkowa o otwartym kodzie z topo. Zbudowana na projektach OpenStreetMap i Wikipedia.',
-  'project.openclimbing.climbing_guide': 'Przewodnik wspinaczkowy i topo',
+  'project.openclimbing.climbing_guide': 'Darmowy przewodnik wspinaczkowy i topo',
   'homepage.how_to_start': 'Zacznij od wpisania zapytania w polu wyszukiwania.\nAlbo też kliknij dowolny obiekt na mapie.',
   'homepage.go_to_map_button': 'Przejdź do mapy',
   'homepage.examples.eg': 'np.',

@@ -229,7 +229,7 @@ export default {
   'project.openclimbing.description': 'Guida aperta di arrampicata',
   'project.openclimbing.serpDescription':
     "Una mappa open-source sull'arrampicata basata su wiki con topografia. Basata sui progetti di OpenStreetMap e Wikipedia.",
-  'project.openclimbing.climbing_guide': 'Guida di arrampicata e topo',
+  'project.openclimbing.climbing_guide': 'Guida di arrampicata gratuita e topo',
   'homepage.how_to_start': 'Inizia scrivendo la tua richiesta nella casella di ricerca.\nOppure clicca un qualsiasi elemento sulla mappa.',
   'homepage.go_to_map_button': 'Vai alla mappa',
   'homepage.examples.eg': 'ad es.',

@@ -230,7 +230,7 @@ export default {
   'project.openclimbing.description': 'Guía abierta de escalada',
   'project.openclimbing.serpDescription':
     'Un mapa de escalada de código abierto basado en wiki con croquis. Construido sobre los proyectos OpenStreetMap y Wikipedia.',
-  'project.openclimbing.climbing_guide': 'Guía de escalada y croquis',
+  'project.openclimbing.climbing_guide': 'Guía de escalada gratuita y croquis',
   'homepage.how_to_start': 'Comienza escribiendo tu búsqueda en la caja de búsqueda. \nO haz click en cualquier elemento en el mapa.',
   'homepage.go_to_map_button': 'Ir al mapa',
   'homepage.examples.eg': 'ej.',

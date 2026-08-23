@@ -229,7 +229,7 @@ export default {
   'project.openclimbing.description': 'Offener Kletterführer',
   'project.openclimbing.serpDescription':
     'Eine wiki-basierte Open-Source-Kletterkarte mit Topos. Basierend auf den OpenStreetMap- und Wikipedia-Projekten.',
-  'project.openclimbing.climbing_guide': 'Kletterführer & Topos',
+  'project.openclimbing.climbing_guide': 'Kostenloser Kletterführer & Topos',
   'homepage.how_to_start': 'Tippe einen Begriff in das Suchfeld ein.\nOder klicke auf einen Ort auf der Karte.',
   'homepage.go_to_map_button': 'Gehe zur Karte',
   'homepage.examples.eg': 'z.B.',

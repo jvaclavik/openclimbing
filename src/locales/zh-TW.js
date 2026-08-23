@@ -83,7 +83,7 @@ export default {
 
   'project.openclimbing.description': '開放攀岩指南',
   'project.openclimbing.serpDescription': '一個附有岩壁圖、以維基為基礎的開源攀岩地圖。建立於 OpenStreetMap 和維基百科專案之上。',
-  'project.openclimbing.climbing_guide': '攀岩指南與岩壁圖',
+  'project.openclimbing.climbing_guide': '免費攀岩指南與岩壁圖',
 
   'homepage.how_to_start': '在搜尋框輸入查詢內容，\n或點擊地圖上任何項目即可開始。',
   'homepage.go_to_map_button': '前往地圖',

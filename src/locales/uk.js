@@ -229,7 +229,7 @@ export default {
   'project.openclimbing.description': 'Відкритий скелелазний путівник',
   'project.openclimbing.serpDescription':
     'Скелелазна карта з відкритим кодом на основі вікі з топо. Побудована на проєктах OpenStreetMap і Wikipedia.',
-  'project.openclimbing.climbing_guide': 'Скелелазний путівник і топо',
+  'project.openclimbing.climbing_guide': 'Безкоштовний скелелазний путівник і топо',
   'homepage.how_to_start': 'Почніть із введення запиту в полі пошуку.\nАбо клікніть будь-який об’єкт на карті.',
   'homepage.go_to_map_button': 'Перейти до карти',
   'homepage.examples.eg': 'напр.',
