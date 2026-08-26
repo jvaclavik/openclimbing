@@ -1088,6 +1088,13 @@ export default {
   'editdialog.draw_climbing_routes_button': 'Draw routes',
   'editdialog.draw_climbing_routes_save_confirm': 'Do you want to save current changes?',
 
+  'editdialog.openclimbing_link_info':
+    'This place has routes drawn on photos, so the app adds a link to OpenClimbing.org into the website tag, to let people find them in OpenStreetMap.',
+  'editdialog.openclimbing_link_optout_info':
+    'The link to OpenClimbing.org will not be added – people in OpenStreetMap will not find the routes drawn on photos.',
+  'editdialog.openclimbing_link_optout_button': "Don't add",
+  'editdialog.openclimbing_link_optin_button': 'Add the link',
+
   yes: 'Yes',
   no: 'No',
 };

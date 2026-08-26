@@ -14,6 +14,7 @@ import React from 'react';
 import { ClimbingEditor } from './FeatureEditSection/ClimbingEditor/ClimbingEditor';
 import { Box } from '@mui/material';
 import { EditSectionCard } from './EditSectionCard';
+import { OpenClimbingWebsiteBanner } from './OpenClimbingWebsiteBanner';
 
 export const ItemEditSection = () => {
   const { toBeDeleted } = useCurrentItem();
@@ -30,6 +31,7 @@ export const ItemEditSection = () => {
     <>
       <ItemHeading />
       <MissingLocationBanner />
+      <OpenClimbingWebsiteBanner />
       <PresetSelect />
       <MajorKeysEditor />
       <ClimbingEditor />

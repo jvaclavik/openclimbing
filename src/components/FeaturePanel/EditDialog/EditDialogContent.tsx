@@ -5,6 +5,7 @@ import { EditContent } from './EditContent/EditContent';
 import React, { useEffect } from 'react';
 import { CircularProgress } from '@mui/material';
 import { useBoolState } from '../../helpers';
+import { useApplyOpenClimbingWebsite } from './useOpenClimbingWebsite';
 
 const useDelayedSpinner = () => {
   const [showSpinner, start] = useBoolState(false);
@@ -30,6 +31,7 @@ export const EditDialogLoadingSkeleton = () => {
 
 export const EditDialogContent = () => {
   const { successInfo } = useEditContext();
+  useApplyOpenClimbingWebsite();
 
   return (
     <>

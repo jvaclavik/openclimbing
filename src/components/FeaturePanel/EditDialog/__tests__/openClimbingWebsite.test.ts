@@ -105,46 +105,47 @@ describe('removeOpenClimbingWebsite', () => {
 });
 
 describe('featureHasDrawnRoutes', () => {
-  const route = (tags: Record<string, string>) => ({ tags }) as Feature;
+  const asFeature = (partial: Partial<Feature>) => partial as Feature;
+  const route = (tags: Record<string, string>) => asFeature({ tags });
 
   it('finds a drawn route among crag members', () => {
-    const crag = {
+    const crag = asFeature({
       tags: { climbing: 'crag' },
       memberFeatures: [
         route({ climbing: 'route_bottom' }),
         route({ 'wikimedia_commons:2:path': '0.1,0.2|0.3,0.4' }),
       ],
-    } as Feature;
+    });
     expect(featureHasDrawnRoutes(crag)).toBe(true);
   });
 
   it('walks the whole area tree', () => {
-    const area = {
+    const area = asFeature({
       tags: { climbing: 'area' },
       memberFeatures: [
-        {
+        asFeature({
           tags: { climbing: 'crag' },
           memberFeatures: [route({ 'wikimedia_commons:path': '0.1,0.2' })],
-        },
+        }),
       ],
-    } as Feature;
+    });
     expect(featureHasDrawnRoutes(area)).toBe(true);
   });
 
   it('is false without any path tag', () => {
-    const crag = {
+    const crag = asFeature({
       tags: { climbing: 'crag' },
       memberFeatures: [route({ wikimedia_commons: 'File:A.jpg' })],
-    } as Feature;
+    });
     expect(featureHasDrawnRoutes(crag)).toBe(false);
-    expect(featureHasDrawnRoutes({ tags: {} } as Feature)).toBe(false);
+    expect(featureHasDrawnRoutes(asFeature({ tags: {} }))).toBe(false);
   });
 
   it('ignores an empty path tag', () => {
-    const crag = {
+    const crag = asFeature({
       tags: { climbing: 'crag' },
       memberFeatures: [route({ 'wikimedia_commons:path': '  ' })],
-    } as Feature;
+    });
     expect(featureHasDrawnRoutes(crag)).toBe(false);
   });
 });

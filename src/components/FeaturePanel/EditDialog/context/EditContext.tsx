@@ -31,6 +31,9 @@ type EditContextType = {
   // item (a peak, cliff, …) within the same dialog session.
   activeCragId: string;
   setActiveCragId: Setter<string>;
+  // user's decision not to let us add the openclimbing.org link into `website`
+  openClimbingLinkOptOut: boolean;
+  setOpenClimbingLinkOptOut: Setter<boolean>;
 };
 
 const EditContext = createContext<EditContextType>(undefined);
@@ -45,6 +48,7 @@ export const EditContextProvider: React.FC = ({ children }) => {
   const [current, setCurrent] = useState<ShortId>(''); // to get currentItem - use `useCurrentItem()`
   const [selectedIds, setSelectedIds] = useState<ShortId[]>([]);
   const [activeCragId, setActiveCragId] = useState<ShortId>('');
+  const [openClimbingLinkOptOut, setOpenClimbingLinkOptOut] = useState(false);
 
   // Keep the multi-selection in sync with `current`. Multi-select actions set
   // `current` to a member of the selection, so this only fires when `current`
@@ -75,6 +79,8 @@ export const EditContextProvider: React.FC = ({ children }) => {
     setValidate,
     activeCragId,
     setActiveCragId,
+    openClimbingLinkOptOut,
+    setOpenClimbingLinkOptOut,
   };
 
   return <EditContext.Provider value={value}>{children}</EditContext.Provider>;

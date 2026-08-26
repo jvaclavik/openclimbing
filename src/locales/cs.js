@@ -1021,6 +1021,12 @@ export default {
   'editdialog.draw_climbing_routes_button': 'Chci zakreslovat cesty',
   'editdialog.draw_climbing_routes_save_confirm': 'Chcete uložit vaše aktuální úpravy?',
 
+  'editdialog.openclimbing_link_info':
+    'Na tomto místě jsou zakreslené cesty, proto aplikace přidává do tagu website odkaz na OpenClimbing.org, aby si je lidé z OpenStreetMap mohli zobrazit.',
+  'editdialog.openclimbing_link_optout_info': 'Odkaz na OpenClimbing.org se nepřidá – lidé v OpenStreetMap se k zakresleným cestám nedostanou.',
+  'editdialog.openclimbing_link_optout_button': 'Nepřidávat',
+  'editdialog.openclimbing_link_optin_button': 'Přidat odkaz',
+
   'climbing_renderer.sac_scale': 'SAC stupnice',
   'climbing_renderer.via_ferrata_scale': 'stupnice ferrat',
   'climbingpanel.show_routes_layer': 'Zobrazit vrstvu cest',
