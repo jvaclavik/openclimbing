@@ -1,7 +1,8 @@
 import Language from '@mui/icons-material/Language';
 import LocalPhone from '@mui/icons-material/LocalPhone';
-import { Chip } from '@mui/material';
+import { Chip, SvgIcon } from '@mui/material';
 import styled from '@emotion/styled';
+import { WikipediaIcon } from '../../assets/WikipediaIcon';
 import { PROJECT_ID } from '../../services/project';
 import { FeaturedKeyRenderer } from '../../services/tagging/featuredKeys';
 import { displayForm, protocol } from './renderers/helpers';
@@ -41,7 +42,9 @@ const iconForRenderer = (renderer: FeaturedKeyRenderer) => {
   if (renderer === 'WebsiteRenderer') return <Language fontSize="small" />;
   if (renderer === 'PhoneRenderer') return <LocalPhone fontSize="small" />;
   if (renderer === 'WikipediaRenderer' || renderer === 'WikidataRenderer') {
-    return <Language fontSize="small" />;
+    return (
+      <SvgIcon component={WikipediaIcon} inheritViewBox fontSize="small" />
+    );
   }
   return undefined;
 };
