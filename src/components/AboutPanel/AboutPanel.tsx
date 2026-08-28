@@ -1,12 +1,14 @@
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckIcon from '@mui/icons-material/Check';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { Box, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import React from 'react';
 import { intl, t } from '../../services/intl';
 import { TranslationId } from '../../services/types';
-import { useMobileMode } from '../helpers';
+import { COMMUNITY_URL } from '../consts';
+import { isMobileMode, useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import { GradientHeading, TintedCard } from '../utils/panelUi';
@@ -52,6 +54,15 @@ const StoryLink = styled.a`
   }
 `;
 
+const ForumLink = styled(StoryLink)`
+  display: none;
+  margin-top: 8px;
+
+  @media ${isMobileMode} {
+    display: inline-flex;
+  }
+`;
+
 const Hero = () => (
   <Box
     sx={{
@@ -69,14 +80,24 @@ const Hero = () => (
     >
       {t('about.hero_sub')}
     </Typography>
-    <StoryLink
-      href={storyUrl(intl.lang)}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Stack
+      sx={{
+        alignItems: 'flex-start',
+      }}
     >
-      {t('homepage.our_story')}
-      <ArrowForwardIcon sx={{ fontSize: 16 }} />
-    </StoryLink>
+      <StoryLink
+        href={storyUrl(intl.lang)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t('homepage.our_story')}
+        <ArrowForwardIcon sx={{ fontSize: 16 }} />
+      </StoryLink>
+      <ForumLink href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">
+        <QuestionAnswerIcon sx={{ fontSize: 16 }} />
+        {t('climbing.forum')}
+      </ForumLink>
+    </Stack>
   </Box>
 );
 
