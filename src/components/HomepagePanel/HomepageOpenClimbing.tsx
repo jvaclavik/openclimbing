@@ -1,10 +1,12 @@
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
 import { intl, t } from '../../services/intl';
+import { COMMUNITY_URL } from '../consts';
 import { isMobileMode, useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { DRAWER_MOTION } from '../utils/drawerSnap';
@@ -116,6 +118,17 @@ const Buttons = ({ onClose }) => (
       sx={{ mt: 4 }}
     >
       {t('homepage.go_to_map_button')}
+    </Button>
+    <Button
+      variant="text"
+      color="secondary"
+      startIcon={<QuestionAnswerIcon />}
+      href={COMMUNITY_URL}
+      target="_blank"
+      fullWidth
+      sx={{ mt: 1 }}
+    >
+      {t('climbing.forum')}
     </Button>
   </MobileOnly>
 );
