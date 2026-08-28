@@ -15,8 +15,7 @@ import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 import { SearchField } from '../SearchBox/SearchBox';
 import { convertHexToRgba } from '../utils/colorUtils';
 import { useFeatureContext } from '../utils/FeatureContext';
-
-const COMMUNITY_URL = 'https://community.openclimbing.org';
+import { COMMUNITY_URL } from '../consts';
 
 const Bar = styled.div<{ $transparent?: boolean }>`
   position: absolute;

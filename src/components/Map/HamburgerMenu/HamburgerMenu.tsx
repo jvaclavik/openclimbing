@@ -28,6 +28,7 @@ import { PROJECT_ID } from '../../../services/project';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Link from 'next/link';
 import { UserHeader } from './UserHeader';
@@ -41,6 +42,7 @@ import {
   HAMBURGER_DRAWER_Z,
   HAMBURGER_OVERLAY_Z,
 } from '../../utils/mapChromeRegistry';
+import { COMMUNITY_URL } from '../../consts';
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
@@ -110,6 +112,15 @@ const ClimbingLeaderboardLink = ({ closeMenu }) => (
     <ListItemText>{t('leaderboard.menu_link')}</ListItemText>
   </ListItemButton>
 );
+const CommunityForumLink = ({ closeMenu }) => (
+  <ListItemButton href={COMMUNITY_URL} component="a" onClick={closeMenu}>
+    <ListItemIcon>
+      <QuestionAnswerIcon />
+    </ListItemIcon>
+    <ListItemText>{t('climbing.forum')}</ListItemText>
+  </ListItemButton>
+);
+
 const ClimbingAreasLink = ({ closeMenu }) => {
   const { persistShowHomepage } = useFeatureContext();
 
@@ -259,6 +270,7 @@ export const HamburgerMenu = () => {
                   )}
                 </>
               )}
+              {isMobileMode && <CommunityForumLink closeMenu={close} />}
             </div>
             <div>
               <Divider />
