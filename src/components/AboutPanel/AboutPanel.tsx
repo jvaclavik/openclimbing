@@ -1,15 +1,17 @@
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CheckIcon from '@mui/icons-material/Check';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Router from 'next/router';
 import React from 'react';
 import { intl, t } from '../../services/intl';
-import { TranslationId } from '../../services/types';
 import { useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
-import { GradientHeading, TintedCard } from '../utils/panelUi';
+import {
+  ArrowLink,
+  ArrowLinkInternal,
+  GradientHeading,
+} from '../utils/panelUi';
 import {
   PanelContent,
   PanelScrollbars,
@@ -18,38 +20,19 @@ import {
 import { AboutFeatures } from './AboutFeatures';
 import { AboutOpenData } from './AboutOpenData';
 import { AboutSupport } from './AboutSupport';
-
-const US_POINTS = ['1', '2', '3'] as const;
+import { OpenPointsCard } from './OpenPointsCard';
 
 const storyUrl = (lang: string) =>
   lang === 'cs'
     ? 'https://medium.com/@jvaclavik/p%C5%99%C3%ADb%C4%9Bh-za-openclimbing-org-e1e2b3de2024'
     : 'https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac';
 
-const StoryLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+const StoryLink = styled(ArrowLink)`
   margin-top: 14px;
-  color: ${({ theme }) => theme.palette.primary.main};
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: -0.2px;
-  text-decoration: none !important;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0 1.5px;
-  transition:
-    background-size 0.22s ease,
-    gap 0.22s ease;
+`;
 
-  &:hover,
-  &:focus {
-    text-decoration: none !important;
-    background-size: 100% 1.5px;
-    gap: 8px;
-  }
+const ExportLink = styled(ArrowLinkInternal)`
+  margin-top: 14px;
 `;
 
 const Hero = () => (
@@ -122,54 +105,17 @@ const Section = ({
   </Box>
 );
 
-const UsCard = styled(TintedCard)`
-  background-color: transparent;
-  border: 1px solid ${({ theme }) => theme.palette.primary.main};
-`;
-
-const Point = ({ children }: { children: React.ReactNode }) => (
-  <Stack
-    direction="row"
-    spacing={1.25}
-    sx={{
-      alignItems: 'flex-start',
-      mt: 1,
-    }}
-  >
-    <CheckIcon color="primary" sx={{ fontSize: 20, mt: '1px' }} />
-    <Typography
-      variant="body2"
-      sx={{
-        fontWeight: 600,
-        lineHeight: 1.5,
-      }}
-    >
-      {children}
-    </Typography>
-  </Stack>
-);
-
 const Different = () => (
   <Section
     title={t('about.different_heading')}
     lead={t('about.different_lead')}
   >
-    <UsCard>
-      <Typography
-        variant="caption"
-        color="primary"
-        sx={{
-          fontWeight: 700,
-        }}
-      >
-        {t('about.different_us')}
-      </Typography>
-      {US_POINTS.map((index) => (
-        <Point key={index}>
-          {t(`about.compare_us_${index}` as TranslationId)}
-        </Point>
-      ))}
-    </UsCard>
+    <OpenPointsCard>
+      <ExportLink href="/export">
+        {t('about.export_cta')}
+        <ArrowForwardIcon sx={{ fontSize: 16 }} />
+      </ExportLink>
+    </OpenPointsCard>
   </Section>
 );
 

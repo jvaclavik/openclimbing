@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Skeleton, Theme, Typography } from '@mui/material';
+import Link from 'next/link';
 import React from 'react';
 import { useQuery } from 'react-query';
 import { getClimbingStats } from '../../services/climbing-areas/getClimbingStats';
@@ -17,6 +18,33 @@ export const TintedCard = styled.div`
   border-radius: 12px;
   background-color: ${({ theme }) => tint(theme, 0.04)};
 `;
+
+export const ArrowLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: ${({ theme }) => theme.palette.primary.main};
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  text-decoration: none !important;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1.5px;
+  transition:
+    background-size 0.22s ease,
+    gap 0.22s ease;
+
+  &:hover,
+  &:focus {
+    text-decoration: none !important;
+    background-size: 100% 1.5px;
+    gap: 8px;
+  }
+`;
+
+export const ArrowLinkInternal = ArrowLink.withComponent(Link);
 
 export const GradientHeading = styled.h1`
   margin: 0;
