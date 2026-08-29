@@ -24,9 +24,8 @@ export const ArrowLink = styled.a`
   align-items: center;
   gap: 4px;
   color: ${({ theme }) => theme.palette.primary.main};
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 800;
-  letter-spacing: -0.2px;
   text-decoration: none !important;
   background-image: linear-gradient(currentColor, currentColor);
   background-position: 0 100%;

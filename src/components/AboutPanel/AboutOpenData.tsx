@@ -7,7 +7,7 @@ import { alpha } from '@mui/material/styles';
 import React from 'react';
 import { t } from '../../services/intl';
 import { GITHUB_REPO_URL } from '../HomepagePanel/donationLinks';
-import { tint } from '../utils/panelUi';
+import { ArrowLink, tint } from '../utils/panelUi';
 
 const OSM_ACCENT = '#7ebc6f';
 const COMMONS_ACCENT = '#3366cc';
@@ -104,30 +104,10 @@ const Links = styled.div`
   margin-top: auto;
 `;
 
-const AccentLink = styled('a', {
+const AccentLink = styled(ArrowLink, {
   shouldForwardProp: (prop) => prop !== '$accent',
 })<{ $accent: string }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   color: ${({ $accent }) => $accent};
-  font-size: 0.92rem;
-  font-weight: 800;
-  text-decoration: none !important;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0 1.5px;
-  transition:
-    background-size 0.22s ease,
-    gap 0.22s ease;
-
-  &:hover,
-  &:focus {
-    text-decoration: none !important;
-    background-size: 100% 1.5px;
-    gap: 8px;
-  }
 `;
 
 type TextLinkProps = {
