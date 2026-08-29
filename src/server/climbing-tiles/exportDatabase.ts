@@ -60,6 +60,21 @@ export const getOrCreateExport = async (): Promise<string> => {
   return createExport();
 };
 
+export type ExportInfo = { fileName: string; size: number; date: string };
+
+/**
+ * Metadata of the newest export on disk (or null when none was created yet).
+ * Used by the /export page to show the approximate download size.
+ */
+export const getLatestExportInfo = (): ExportInfo | null => {
+  const [newest] = listExportFiles();
+  if (!newest) {
+    return null;
+  }
+  const { size, mtime } = statSync(newest.path);
+  return { fileName: newest.name, size, date: mtime.toISOString() };
+};
+
 /**
  * Resolves a requested filename to an existing export path, or null if the name is
  * invalid (path traversal, unknown pattern) or the file doesn't exist.
