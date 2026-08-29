@@ -323,6 +323,7 @@ export default {
   'about.compare_us_1': 'Novou cestu zakreslí kdokoli',
   'about.compare_us_2': 'Data zdarma a pro všechny',
   'about.compare_us_3': 'Offline PDF průvodce ke stažení',
+  'about.export_cta': 'Stáhnout databázi',
 
   'about.features_heading': 'Funkce',
   'about.features_lead': 'Víc než mapa. Nástroje, které použiješ v den, kdy opravdu vyrazíš lézt.',
@@ -363,6 +364,7 @@ export default {
   'about.support_code': 'Pošlete PR',
   'about.support_feedback': 'Napište nám',
   'about.support_donate': 'Přispějte finančně',
+
   'searchbox.placeholder': 'Hledat',
   'searchbox.category': 'kategorie',
   'searchbox.overpass_success': 'Nalezeno výsledků: __count__',

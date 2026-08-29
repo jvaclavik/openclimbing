@@ -332,6 +332,7 @@ export default {
   'about.compare_us_1': 'Anyone can draw a new route',
   'about.compare_us_2': 'Data free for everyone, forever',
   'about.compare_us_3': 'Offline PDF guidebook to download',
+  'about.export_cta': 'Download the database',
 
   'about.features_heading': 'Features',
   'about.features_lead': "More than a map. Tools you'll actually use on the day you go climbing.",
@@ -372,6 +373,7 @@ export default {
   'about.support_code': 'Send a PR',
   'about.support_feedback': 'Write to us',
   'about.support_donate': 'Contribute financially',
+
   'searchbox.placeholder': 'Search',
   'searchbox.category': 'category',
   'searchbox.overpass_success': 'Results found: __count__',
