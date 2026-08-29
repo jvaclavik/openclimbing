@@ -42,14 +42,11 @@ export const OpenPointsCard = ({
 }) => (
   <Card>
     <Typography
-      variant="h6"
+      variant="caption"
       component="h3"
-      color="primary"
       sx={{
-        fontWeight: 800,
-        lineHeight: 1.2,
-        letterSpacing: -0.3,
-        mb: 1,
+        color: 'text.primary',
+        fontWeight: 700,
       }}
     >
       {t('about.different_us')}
