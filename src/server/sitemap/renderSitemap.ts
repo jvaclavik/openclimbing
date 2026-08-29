@@ -12,6 +12,7 @@ const STATIC_PATHS = [
   '/climbing-areas',
   '/climbing-grades',
   '/climbing-leaderboard',
+  '/export',
   '/tick-scoring',
 ];
 
