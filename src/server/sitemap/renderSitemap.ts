@@ -14,6 +14,7 @@ const STATIC_PATHS = [
   ...Object.values(CLIMBING_LIST_PATHS),
   '/climbing-grades',
   '/climbing-leaderboard',
+  '/export',
   '/tick-scoring',
 ];
 
