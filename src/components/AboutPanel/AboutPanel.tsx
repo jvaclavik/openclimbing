@@ -59,6 +59,7 @@ const MobileOnly = styled.div`
 
   @media ${isMobileMode} {
     display: block;
+    text-align: center;
   }
 `;
 
@@ -90,7 +91,7 @@ const Hero = () => (
     <MobileOnly>
       <Button
         variant="outlined"
-        color="primary"
+        color="secondary"
         size="small"
         startIcon={<QuestionAnswerIcon />}
         href={COMMUNITY_URL}
