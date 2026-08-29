@@ -44,8 +44,8 @@ export const OpenPointsCard = ({
     <Typography
       variant="caption"
       component="h3"
+      color="primary"
       sx={{
-        color: 'text.primary',
         fontWeight: 700,
       }}
     >
