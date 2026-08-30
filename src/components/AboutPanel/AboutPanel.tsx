@@ -33,6 +33,7 @@ const StoryLink = styled(ArrowLink)`
 
 const ExportLink = styled(ArrowLinkInternal)`
   margin-top: 14px;
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const Hero = () => (
