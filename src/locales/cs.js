@@ -366,7 +366,8 @@ export default {
   'about.support_donate': 'Přispějte finančně',
 
   'export.heading': 'Stáhni si celou databázi',
-  'export.lead': 'Všechno, co vidíš na mapě, jsou otevřená data. Vezmi si celou databázi a postav si na ní, co potřebuješ.',
+  'export.lead':
+    'Všechno, co vidíš na mapě, jsou otevřená data. Můžeš si je vyexportovat přímo z OpenStreetMap a Wikipedie, nebo použít náš extrakt.',
   'export.download_heading': 'Export databáze',
   'export.download_format': 'Jeden soubor SQLite – otevřeš ho v jakémkoli SQL klientovi.',
   'export.download_size': 'Přibližná velikost __size__.',
