@@ -118,7 +118,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
 
     // omit playground=climbingwall with sport=climbing
     else if (way.tags.playground) {
-      return;
+      continue;
     }
 
     //
