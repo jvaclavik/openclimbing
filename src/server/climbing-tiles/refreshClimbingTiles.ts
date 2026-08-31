@@ -139,6 +139,11 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
       addRecord('area', centerGeometry(relation));
     }
 
+    // usually a type=multipolygon relation
+    else if (relation.tags.leisure || relation.tags.building) {
+      addRecord('gym', centerGeometry(relation));
+    }
+
     //
     else if (
       relation.tags.climbing ||
