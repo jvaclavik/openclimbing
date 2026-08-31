@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
 import styled from '@emotion/styled';
-import { useBoolState, useMobileMode } from '../../helpers';
+import { isModifiedClick, useBoolState, useMobileMode } from '../../helpers';
 import { t } from '../../../services/intl';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useMapStateContext } from '../../utils/MapStateContext';
@@ -129,6 +129,7 @@ const ClimbingAreasLink = ({ closeMenu }) => {
       href="/"
       component={Link}
       onClick={(e) => {
+        if (isModifiedClick(e)) return;
         e.preventDefault();
         persistShowHomepage();
         closeMenu();

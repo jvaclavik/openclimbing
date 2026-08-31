@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
 import { t } from '../../services/intl';
-import { isDesktop, isMobileMode } from '../helpers';
+import { isDesktop, isMobileMode, isModifiedClick } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
@@ -179,6 +179,7 @@ const Brand = () => {
   const { persistShowHomepage } = useFeatureContext();
 
   const handleClick = (e: React.MouseEvent) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     persistShowHomepage();
   };
@@ -200,6 +201,7 @@ const NavLinks = () => {
   const { homepageShown, persistShowHomepage } = useFeatureContext();
 
   const openHomepage = (e: React.MouseEvent) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     persistShowHomepage();
   };

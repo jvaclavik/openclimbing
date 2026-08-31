@@ -1,5 +1,5 @@
 import { Feature } from '../../../services/types';
-import { useMobileMode } from '../../helpers';
+import { isModifiedClick, useMobileMode } from '../../helpers';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import Router from 'next/router';
 import { getShortId, getUrlOsmId } from '../../../services/helpers';
@@ -28,6 +28,7 @@ export const MemberItem = ({ feature }: Props) => {
   const highlighted = isRouteDrawnOnPhoto(feature.tags, highlightedPhoto);
 
   const handleClick = (e) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     setPreview(null);
     if (feature.center) {

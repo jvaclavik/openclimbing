@@ -5,6 +5,7 @@ import React from 'react';
 import PersonIcon from '@mui/icons-material/Person';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { profilePathForOsmDisplayName } from '../../../services/my-ticks/profilePaths';
+import { isModifiedClick } from '../../helpers';
 
 type MyClimbingProfileMenuItemProps = {
   closeMenu: () => void;
@@ -19,13 +20,17 @@ export const MyClimbingProfileMenuItem = ({
     return null;
   }
 
-  const openProfile = () => {
-    Router.push(profilePathForOsmDisplayName(osmUser));
+  const profileHref = profilePathForOsmDisplayName(osmUser);
+
+  const openProfile = (e: React.MouseEvent) => {
+    if (isModifiedClick(e)) return;
+    e.preventDefault();
+    Router.push(profileHref);
     closeMenu();
   };
 
   return (
-    <ListItemButton onClick={openProfile}>
+    <ListItemButton component="a" href={profileHref} onClick={openProfile}>
       <ListItemIcon>
         <PersonIcon />
       </ListItemIcon>

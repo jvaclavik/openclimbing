@@ -4,6 +4,7 @@ import Router from 'next/router';
 import { getOsmappLink } from '../../../../services/helpers';
 import { removeFilePrefix } from '../../Climbing/utils/photo';
 import { Feature, ImageDef, isTag } from '../../../../services/types';
+import { isModifiedClick } from '../../../helpers';
 
 export const useImgError = () => {
   const [error, setError] = useState<boolean>(false);
@@ -44,43 +45,37 @@ export const getUrlToParentCrag = (
   return null;
 };
 
+const getTopoDialogUrl = (feature: Feature, def: ImageDef): string | null => {
+  if (!isTag(def) || !def.v.startsWith('File:')) {
+    return null;
+  }
+
+  const photo = removeFilePrefix(def.v);
+  if (feature.tags.climbing === 'crag') {
+    return `${getOsmappLink(feature)}/climbing/photo/${photo}`;
+  }
+  if (feature.tags.climbing === 'route_bottom') {
+    return getUrlToParentCrag(feature.parentFeatures, photo);
+  }
+  return null;
+};
+
 export const getClickHandler = (
   feature: Feature,
   def: ImageDef,
 ): ImageClickHandler => {
-  if (!isTag(def)) {
+  const url = getTopoDialogUrl(feature, def);
+  if (!url) {
     return undefined;
   }
 
-  if (!def.v.startsWith('File:')) {
-    return undefined;
-  }
-
-  if (feature.tags.climbing === 'crag') {
-    return (e: React.MouseEvent) => {
-      const featureLink = getOsmappLink(feature);
-      const photoLink = removeFilePrefix(def.v);
-
-      Router.push(`${featureLink}/climbing/photo/${photoLink}`);
-      e.stopPropagation();
-      e.preventDefault();
-    };
-  }
-
-  if (feature.tags.climbing === 'route_bottom') {
-    const cragUrl = getUrlToParentCrag(
-      feature.parentFeatures,
-      removeFilePrefix(def.v),
-    );
-
-    return (e: React.MouseEvent) => {
-      if (cragUrl) {
-        Router.push(cragUrl);
-        e.stopPropagation();
-        e.preventDefault();
-      }
-    };
-  }
-
-  return undefined;
+  return (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isModifiedClick(e)) {
+      window.open(url, '_blank', 'noopener');
+      return;
+    }
+    Router.push(url);
+  };
 };

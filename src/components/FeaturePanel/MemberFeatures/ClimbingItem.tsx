@@ -3,7 +3,7 @@ import React from 'react';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { getOsmappLink } from '../../../services/helpers';
 import Router from 'next/router';
-import { useMobileMode } from '../../helpers';
+import { isModifiedClick, useMobileMode } from '../../helpers';
 import { ClimbingRouteTableRow } from '../Climbing/RouteList/ClimbingRouteTableRow';
 import styled from '@emotion/styled';
 
@@ -28,7 +28,7 @@ export const ClimbingItem = ({ feature, index, cragFeature }: Props) => {
   const handleHover = () => feature.center && setPreview(feature);
 
   const handleClickItem = (event) => {
-    if (event.ctrlKey || event.metaKey) return;
+    if (isModifiedClick(event)) return;
     event.preventDefault();
     event.stopPropagation();
     const cragFeatureLink = getOsmappLink(cragFeature);

@@ -6,7 +6,7 @@ import { useFeatureContext } from '../utils/FeatureContext';
 import { Feature } from '../../services/types';
 import { getOsmappLink, getUrlOsmId } from '../../services/helpers';
 import { t } from '../../services/intl';
-import { DotLoader, useMobileMode } from '../helpers';
+import { DotLoader, isModifiedClick, useMobileMode } from '../helpers';
 import { getLabel } from '../../helpers/featureLabel';
 import { useQuery } from 'react-query';
 import { getImportance } from './helpers/importance';
@@ -18,6 +18,7 @@ const AroundItem = ({ feature }: { feature: Feature }) => {
   const osmId = feature.osmMeta;
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     setPreview(null);
     Router.push(`/${getUrlOsmId(osmId)}${window.location.hash}`);

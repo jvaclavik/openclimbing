@@ -8,7 +8,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useBoolState } from '../../helpers';
+import { isModifiedClick, useBoolState } from '../../helpers';
 import { changeLang, intl, t } from '../../../services/intl';
 import { LANGUAGES, LANGUAGE_FLAGS } from '../../../config.mjs';
 
@@ -18,6 +18,7 @@ export const LangSwitcher = () => {
   const [opened, open, close] = useBoolState(false);
 
   const getLangSetter = (lang) => (e) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     changeLang(lang);
     close();

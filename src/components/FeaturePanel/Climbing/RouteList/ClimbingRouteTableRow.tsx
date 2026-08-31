@@ -25,6 +25,7 @@ import {
 } from '../../../../services/tagging/climbing/routeGrade';
 import { useTheme } from '@mui/material';
 import { Feature, LonLat } from '../../../../services/types';
+import { isModifiedClick } from '../../../helpers';
 import { ListBadges } from '../../../MyLists/ListBadges';
 import { ListPickerDialog } from '../../../MyLists/ListPickerDialog';
 import { useMapStateContext } from '../../../utils/MapStateContext';
@@ -411,6 +412,7 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
           <Row
             $isVisible={isVisible}
             onClick={(e) => {
+              if (isModifiedClick(e)) return;
               onClick(e);
               e.preventDefault();
             }}
