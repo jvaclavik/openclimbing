@@ -72,6 +72,11 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
       addRecord('gym', node);
     }
 
+    // omit playground=climbingwall with sport=climbing
+    else if (!node.tags.playground) {
+      return;
+    }
+
     //
     else if (node.tags.sport === 'climbing') {
       if (
@@ -111,6 +116,11 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
       addRecord('area', centerGeometry(way)); // way climbing=area probably doesnt exist
     }
 
+    // omit playground=climbingwall with sport=climbing
+    else if (!way.tags.playground) {
+      return;
+    }
+
     //
     else if (way.tags.climbing || way.tags.sport === 'climbing') {
       addRecord('crag', centerGeometry(way));
@@ -142,6 +152,11 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
     // usually a type=multipolygon relation
     else if (relation.tags.leisure || relation.tags.building) {
       addRecord('gym', centerGeometry(relation));
+    }
+
+    // omit playground=climbingwall with sport=climbing
+    else if (!relation.tags.playground) {
+      return;
     }
 
     //
