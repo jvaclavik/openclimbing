@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { useTheme } from '@mui/material';
@@ -14,16 +15,24 @@ import { Maki } from './Maki';
 // photo) across all surfaces — map dots, the route-number badge and this icon.
 export const ROUTE_HIGHLIGHT_COLOR = '#4150a0';
 
-const Container = styled.span<{ $highlighted?: boolean }>`
+const Container = styled.span<{ $highlighted?: boolean; $middle?: boolean }>`
   margin-right: 6px;
   font-size: ${({ $highlighted }) => ($highlighted ? '19px' : '12px')};
   transition: font-size 0.15s ease;
+  ${({ $middle }) =>
+    $middle &&
+    css`
+      display: inline-flex;
+      align-items: center;
+    `}
 `;
 
-const ClimbingAreaIcon = (props: { size: number }) => {
+type IconProps = { size: number; middle?: boolean };
+
+const ClimbingAreaIcon = (props: IconProps) => {
   const theme = useTheme();
   return (
-    <Container>
+    <Container $middle={props.middle}>
       <AreaIcon
         fill={theme.palette.text.secondary}
         stroke={theme.palette.text.secondary}
@@ -34,10 +43,10 @@ const ClimbingAreaIcon = (props: { size: number }) => {
   );
 };
 
-const ClimbingCragIcon = (props: { size: number }) => {
+const ClimbingCragIcon = (props: IconProps) => {
   const theme = useTheme();
   return (
-    <Container>
+    <Container $middle={props.middle}>
       <CragIcon
         fill={theme.palette.text.secondary}
         stroke={theme.palette.text.secondary}
@@ -50,11 +59,11 @@ const ClimbingCragIcon = (props: { size: number }) => {
 
 const GYM_ICON_SCALE = 0.7;
 
-const ClimbingGymIcon = (props: { size: number }) => {
+const ClimbingGymIcon = (props: IconProps) => {
   const theme = useTheme();
   const height = props.size * GYM_ICON_SCALE;
   return (
-    <Container>
+    <Container $middle={props.middle}>
       <GymIcon
         fill={theme.palette.text.secondary}
         stroke={theme.palette.text.secondary}
@@ -65,10 +74,10 @@ const ClimbingGymIcon = (props: { size: number }) => {
   );
 };
 
-const ClimbingFerrataIcon = (props: { size: number }) => {
+const ClimbingFerrataIcon = (props: IconProps) => {
   const theme = useTheme();
   return (
-    <Container>
+    <Container $middle={props.middle}>
       <FerrataIcon
         fill={theme.palette.text.secondary}
         stroke={theme.palette.text.secondary}
@@ -79,8 +88,14 @@ const ClimbingFerrataIcon = (props: { size: number }) => {
   );
 };
 
-const ClimbingRouteIcon = ({ highlighted }: { highlighted?: boolean }) => (
-  <Container $highlighted={highlighted}>
+const ClimbingRouteIcon = ({
+  highlighted,
+  middle,
+}: {
+  highlighted?: boolean;
+  middle?: boolean;
+}) => (
+  <Container $highlighted={highlighted} $middle={middle}>
     <ShowChartIcon
       fontSize="inherit"
       color={highlighted ? undefined : 'secondary'}
@@ -119,11 +134,13 @@ export const PoiIcon = ({
     const isClimbingGym = tags.climbing === 'gym';
     const isClimbingFerrata = tags.climbing === 'ferrata';
 
-    if (isClimbingArea) return <ClimbingAreaIcon size={size} />;
-    if (isClimbingCrag) return <ClimbingCragIcon size={size} />;
-    if (isClimbingRoute) return <ClimbingRouteIcon highlighted={highlighted} />;
-    if (isClimbingGym) return <ClimbingGymIcon size={size} />;
-    if (isClimbingFerrata) return <ClimbingFerrataIcon size={size} />;
+    if (isClimbingArea) return <ClimbingAreaIcon size={size} middle={middle} />;
+    if (isClimbingCrag) return <ClimbingCragIcon size={size} middle={middle} />;
+    if (isClimbingRoute)
+      return <ClimbingRouteIcon highlighted={highlighted} middle={middle} />;
+    if (isClimbingGym) return <ClimbingGymIcon size={size} middle={middle} />;
+    if (isClimbingFerrata)
+      return <ClimbingFerrataIcon size={size} middle={middle} />;
   }
 
   const finalIco = ico ? ico : getPoiClass(tags).class;
@@ -134,8 +151,7 @@ export const PoiIcon = ({
       size={highlighted ? size + 4 : size}
       style={{
         opacity: highlighted ? '1' : '0.3',
-        position: 'relative',
-        top: 3,
+        ...(middle ? {} : { position: 'relative', top: 3 }),
         transition: 'opacity 0.15s ease',
       }}
       title={title}
