@@ -77,7 +77,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
       continue;
     }
 
-    //
+    // careful, this has to omit `shop=sports` etc.
     else if (node.tags.sport === 'climbing') {
       if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
         addRecord('gym', node);
