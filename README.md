@@ -18,8 +18,8 @@ Like Wikipedia, but for rock: climbing data lives in public databases that anyon
 
 <br>
 
-[![GitHub Stars](https://img.shields.io/github/stars/jvaclavik/openclimbing?style=for-the-badge\&logo=github\&label=Stars)](https://github.com/jvaclavik/openclimbing/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/jvaclavik/openclimbing?style=for-the-badge\&logo=github\&label=Forks)](https://github.com/jvaclavik/openclimbing/forks)
+[![GitHub Stars](https://img.shields.io/github/stars/jvaclavik/openclimbing?style=for-the-badge&logo=github&label=Stars)](https://github.com/jvaclavik/openclimbing/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/jvaclavik/openclimbing?style=for-the-badge&logo=github&label=Forks)](https://github.com/jvaclavik/openclimbing/forks)
 [![License](https://img.shields.io/github/license/jvaclavik/openclimbing?style=for-the-badge)](./LICENSE.txt)
 
 </div>
@@ -64,9 +64,9 @@ We don't want to build another proprietary climbing database.
 
 Instead:
 
-* 🗺️ **climbing areas and routes live in [OpenStreetMap](https://www.openstreetmap.org)**
-* 📷 **climbing photos live in [Wikimedia Commons](https://commons.wikimedia.org)**
-* 💻 **the OpenClimbing application itself is open source**
+- 🗺️ **climbing areas and routes live in [OpenStreetMap](https://www.openstreetmap.org)**
+- 📷 **climbing photos live in [Wikimedia Commons](https://commons.wikimedia.org)**
+- 💻 **the OpenClimbing application itself is open source**
 
 OpenClimbing brings these open datasets together and turns them into a modern climbing guide.
 
@@ -181,7 +181,7 @@ OpenClimbing is primarily an **interface to open data**, not the owner of the cl
 
 |                          | What is stored there?                                          | Why?                                         |
 | ------------------------ | -------------------------------------------------------------- | -------------------------------------------- |
-| 🗺️ **OpenStreetMap**    | Crags, sectors, routes, grades, geometry and climbing metadata | Anyone can edit and reuse it                 |
+| 🗺️ **OpenStreetMap**     | Crags, sectors, routes, grades, geometry and climbing metadata | Anyone can edit and reuse it                 |
 | 📷 **Wikimedia Commons** | Climbing and topo photographs                                  | Photos remain part of a public media archive |
 | 💻 **GitHub**            | The OpenClimbing application                                   | Anyone can inspect, improve or fork it       |
 
@@ -213,10 +213,10 @@ wikimedia_commons:path = 0.682,0.823|0.642,0.453B|0.557,0.177A
 
 The coordinates describe the route line while markers can describe features such as:
 
-* `B` — bolt
-* `A` — anchor
-* `P` — piton
-* `S` — fixed sling
+- `B` — bolt
+- `A` — anchor
+- `P` — piton
+- `S` — fixed sling
 
 The result is an interactive, machine-readable climbing topo built entirely from open data.
 
@@ -228,12 +228,12 @@ And because the specification is open, **other applications can render exactly t
 
 We think basic information about climbing routes should be open in much the same way as information about:
 
-* streets,
-* hiking trails,
-* peaks,
-* buildings,
-* rivers,
-* or geographical names.
+- streets,
+- hiking trails,
+- peaks,
+- buildings,
+- rivers,
+- or geographical names.
 
 A route's **name, grade, location and line** are part of our shared knowledge of the physical world.
 
@@ -279,11 +279,11 @@ That means something as simple as a GitHub star can make a surprisingly big diff
 
 Stars help us:
 
-* 📈 become more visible on GitHub,
-* 🧑‍💻 attract new developers and contributors,
-* 🧗 reach climbers who haven't heard about OpenClimbing,
-* 🌍 show that people care about open climbing data,
-* ❤️ stay motivated to keep building.
+- 📈 become more visible on GitHub,
+- 🧑‍💻 attract new developers and contributors,
+- 🧗 reach climbers who haven't heard about OpenClimbing,
+- 🌍 show that people care about open climbing data,
+- ❤️ stay motivated to keep building.
 
 You don't need to contribute code.
 
@@ -305,9 +305,9 @@ Add climbing areas and routes to OpenStreetMap, improve existing data and create
 
 Start here:
 
-* [OpenStreetMap climbing documentation](https://wiki.openstreetmap.org/wiki/Climbing)
-* [OpenClimbing OSM Wiki](https://wiki.openstreetmap.org/wiki/Openclimbing.org)
-* [`wikimedia_commons:path`](https://wiki.openstreetmap.org/wiki/Key:wikimedia_commons:path)
+- [OpenStreetMap climbing documentation](https://wiki.openstreetmap.org/wiki/Climbing)
+- [OpenClimbing OSM Wiki](https://wiki.openstreetmap.org/wiki/Openclimbing.org)
+- [`wikimedia_commons:path`](https://wiki.openstreetmap.org/wiki/Key:wikimedia_commons:path)
 
 ### 📷 I'm a photographer
 
@@ -319,9 +319,9 @@ Bug fixes, UI improvements, refactoring and new features are welcome.
 
 You can:
 
-* [browse open issues](https://github.com/jvaclavik/openclimbing/issues),
-* [start a discussion](https://github.com/jvaclavik/openclimbing/discussions),
-* or simply open a pull request.
+- [browse open issues](https://github.com/jvaclavik/openclimbing/issues),
+- [start a discussion](https://github.com/jvaclavik/openclimbing/discussions),
+- or simply open a pull request.
 
 ### 📣 I just like the idea
 
@@ -367,8 +367,8 @@ Every contribution helps.
 
 ### Requirements
 
-* [Node.js](https://nodejs.org/) **22**
-* [Yarn](https://yarnpkg.com/)
+- [Node.js](https://nodejs.org/) **22**
+- [Yarn](https://yarnpkg.com/)
 
 Clone the repository:
 
@@ -411,13 +411,13 @@ yarn build
 
 OpenClimbing is mainly built with:
 
-* **TypeScript**
-* **React**
-* **Next.js**
-* **MapLibre GL**
-* **Material UI**
-* **OpenStreetMap**
-* **Wikimedia Commons**
+- **TypeScript**
+- **React**
+- **Next.js**
+- **MapLibre GL**
+- **Material UI**
+- **OpenStreetMap**
+- **Wikimedia Commons**
 
 See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for more information about the application architecture.
 
@@ -435,16 +435,16 @@ Huge thanks to everyone who has contributed to OsmAPP, OpenStreetMap, Wikimedia 
 
 ## Useful links
 
-* 🧗 [openclimbing.org](https://openclimbing.org)
-* ❤️ [Support OpenClimbing](https://openclimbing.org/about)
-* 💬 [OpenClimbing Community](https://community.openclimbing.org)
-* 🗺️ [OpenClimbing on the OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/Openclimbing.org)
-* 📖 [OSM climbing tagging](https://wiki.openstreetmap.org/wiki/Climbing)
-* 📷 [`wikimedia_commons:path`](https://wiki.openstreetmap.org/wiki/Key:wikimedia_commons:path)
-* 🐛 [GitHub Issues](https://github.com/jvaclavik/openclimbing/issues)
-* 💡 [GitHub Discussions](https://github.com/jvaclavik/openclimbing/discussions)
-* 📖 [The story behind OpenClimbing](https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac)
-* 🗺️ [How to contribute a climbing crag](https://medium.com/@jvaclavik/how-to-contribute-to-openclimbing-org-9a159ddd5d4c)
+- 🧗 [openclimbing.org](https://openclimbing.org)
+- ❤️ [Support OpenClimbing](https://openclimbing.org/about)
+- 💬 [OpenClimbing Community](https://community.openclimbing.org)
+- 🗺️ [OpenClimbing on the OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/Openclimbing.org)
+- 📖 [OSM climbing tagging](https://wiki.openstreetmap.org/wiki/Climbing)
+- 📷 [`wikimedia_commons:path`](https://wiki.openstreetmap.org/wiki/Key:wikimedia_commons:path)
+- 🐛 [GitHub Issues](https://github.com/jvaclavik/openclimbing/issues)
+- 💡 [GitHub Discussions](https://github.com/jvaclavik/openclimbing/discussions)
+- 📖 [The story behind OpenClimbing](https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac)
+- 🗺️ [How to contribute a climbing crag](https://medium.com/@jvaclavik/how-to-contribute-to-openclimbing-org-9a159ddd5d4c)
 
 ---
 
