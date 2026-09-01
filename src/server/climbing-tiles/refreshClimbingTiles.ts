@@ -10,6 +10,7 @@ import {
 } from './refreshClimbingTilesHelpers';
 import { cacheTile000 } from './getClimbingTile';
 import { OsmResponse } from './overpass/types';
+import { FeatureTags } from '../../services/types';
 import { ClimbingFeaturesRow } from '../db/types';
 import { resolveCountryCode } from 'next-codegrid';
 
@@ -33,6 +34,9 @@ const fetchFromOverpass = async () => {
   return data;
 };
 
+const isClimbingDisallowed = (tags: FeatureTags) =>
+  tags.climbing === 'no' || tags.climbing === 'prohibited';
+
 // (splitting this function doesn't make sense - it has very simple structure)
 // eslint-disable-next-line max-lines-per-function
 const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
@@ -40,7 +44,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   const { records, addRecord, addRecordWithLine } = recordsFactory(log);
 
   for (const node of geojsons.node) {
-    if (!node.tags || node.tags.climbing === 'no') continue;
+    if (!node.tags || isClimbingDisallowed(node.tags)) continue;
     if (node.tags.climbing === 'area') {
       addRecord('area', node);
     }
@@ -99,7 +103,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   }
 
   for (const way of geojsons.way) {
-    if (!way.tags || way.tags.climbing === 'no') continue;
+    if (!way.tags || isClimbingDisallowed(way.tags)) continue;
 
     //
     if (way.tags.climbing === 'route' || way.tags.highway === 'via_ferrata') {
@@ -134,7 +138,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   }
 
   for (const relation of geojsons.relation) {
-    if (!relation.tags || relation.tags.climbing === 'no') continue;
+    if (!relation.tags || isClimbingDisallowed(relation.tags)) continue;
 
     // usually climbing=route + route=via_ferrata
     if (
