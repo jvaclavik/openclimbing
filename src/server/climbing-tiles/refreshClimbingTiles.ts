@@ -79,13 +79,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
 
     //
     else if (node.tags.sport === 'climbing') {
-      if (
-        node.tags.opening_hours ||
-        node.tags.phone ||
-        node.tags['addr:street'] ||
-        node.tags.man_made ||
-        node.tags.name?.match(/gym/i)
-      ) {
+      if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
         addRecord('gym', node);
       } else {
         addRecord('crag', node); //this needs tweaking
