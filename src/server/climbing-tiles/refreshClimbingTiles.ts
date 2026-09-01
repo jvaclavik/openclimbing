@@ -37,9 +37,16 @@ const fetchFromOverpass = async () => {
 const isClimbingDisallowed = (tags: FeatureTags) =>
   tags.climbing === 'no' || tags.climbing === 'prohibited';
 
+const ROUTE_VALUES = ['route', 'route_bottom', 'abseil_route'];
+
+const isRoute = (tags: FeatureTags) => ROUTE_VALUES.includes(tags.climbing);
+
 // (splitting this function doesn't make sense - it has very simple structure)
 // eslint-disable-next-line max-lines-per-function
-const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
+export const getNewRecords = (
+  data: OsmResponse,
+  log: (message: string) => void,
+) => {
   const geojsons = overpassToGeojsons(data, log); // 300 ms on 200k items
   const { records, addRecord, addRecordWithLine } = recordsFactory(log);
 
@@ -59,10 +66,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
     }
 
     //
-    else if (
-      node.tags.climbing === 'route' ||
-      node.tags.climbing === 'route_bottom'
-    ) {
+    else if (isRoute(node.tags)) {
       addRecord('route', node);
     }
 
@@ -100,7 +104,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
     if (!way.tags || isClimbingDisallowed(way.tags)) continue;
 
     //
-    if (way.tags.climbing === 'route' || way.tags.highway === 'via_ferrata') {
+    if (isRoute(way.tags) || way.tags.highway === 'via_ferrata') {
       addRecordWithLine('route', way);
     }
 
