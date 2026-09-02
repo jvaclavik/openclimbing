@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { useFeatureContext } from '../../utils/FeatureContext';
+import { t } from '../../../services/intl';
 
 const Container = styled.div`
   display: flex;
@@ -14,12 +15,15 @@ export const FeeRenderer = ({ k, v }) => {
   const charge = feature?.tags?.charge;
 
   if (v === 'no') {
-    return <Container>🆓 Free access</Container>;
+    return <Container>🆓 {t('featurepanel.fee.free_access')}</Container>;
   }
 
   return (
     <Container>
-      💶 {charge ? `${charge} fee` : 'Entrance fee required'}
+      💶{' '}
+      {charge
+        ? t('featurepanel.fee.charge_amount', { amount: charge })
+        : t('featurepanel.fee.required')}
     </Container>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { useFeatureContext } from '../utils/FeatureContext';
+import { t } from '../../services/intl';
 
 const Container = styled.div`
   display: flex;
@@ -16,10 +17,6 @@ const Badge = styled.span`
   border-radius: 12px;
 `;
 
-/**
- * Displays via ferrata equipment features (bridges, ladders, zip lines, nets)
- * and entrance fee information when available in OSM tags.
- */
 export const ViaFerrataFeatures = () => {
   const { feature } = useFeatureContext();
   const { tags } = feature;
@@ -28,21 +25,31 @@ export const ViaFerrataFeatures = () => {
     return null;
   }
 
-  const features: { icon: string; label: string; count: number }[] = [];
+  const features: { icon: string; label: string }[] = [];
 
-  const bridgeCount = parseInt(tags['bridge:count'] || '0', 10);
-  const ladderCount = parseInt(tags['ladder:count'] || '0', 10);
-  const zipLineCount = parseInt(tags['zip_line:count'] || '0', 10);
-  const netCount = parseInt(tags['net:count'] || '0', 10);
+  if (tags.bridge && tags.bridge !== 'no') {
+    features.push({ icon: '🌉', label: t('featurepanel.via_ferrata.bridge') });
+  }
+  if ((tags.ladder && tags.ladder !== 'no') || tags['ladder:length']) {
+    features.push({ icon: '🪜', label: t('featurepanel.via_ferrata.ladder') });
+  }
+  if (tags.aerialway === 'zip_line') {
+    features.push({
+      icon: '🪂',
+      label: t('featurepanel.via_ferrata.zip_line'),
+    });
+  }
+  if (tags.net && tags.net !== 'no') {
+    features.push({ icon: '🕸️', label: t('featurepanel.via_ferrata.net') });
+  }
 
-  if (bridgeCount > 0)
-    features.push({ icon: '🌉', label: 'bridges', count: bridgeCount });
-  if (ladderCount > 0)
-    features.push({ icon: '🪜', label: 'ladders', count: ladderCount });
-  if (zipLineCount > 0)
-    features.push({ icon: '🪂', label: 'zip lines', count: zipLineCount });
-  if (netCount > 0)
-    features.push({ icon: '🕸️', label: 'nets', count: netCount });
+  const cableCount = parseInt(tags.cable || '0', 10);
+  if (cableCount >= 2) {
+    features.push({
+      icon: '🔗',
+      label: t('featurepanel.via_ferrata.cables', { count: cableCount }),
+    });
+  }
 
   if (features.length === 0) {
     return null;
@@ -50,9 +57,9 @@ export const ViaFerrataFeatures = () => {
 
   return (
     <Container>
-      {features.map(({ icon, label, count }) => (
+      {features.map(({ icon, label }) => (
         <Badge key={label}>
-          {icon} {count} {label}
+          {icon} {label}
         </Badge>
       ))}
     </Container>
