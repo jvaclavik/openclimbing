@@ -9,7 +9,7 @@ import {
   recordsFactory,
 } from './refreshClimbingTilesHelpers';
 import { cacheTile000 } from './getClimbingTile';
-import { OsmResponse } from './overpass/types';
+import { GeojsonFeature, OsmResponse } from './overpass/types';
 import { FeatureTags } from '../../services/types';
 import { ClimbingFeaturesRow } from '../db/types';
 import { resolveCountryCode } from 'next-codegrid';
@@ -41,6 +41,40 @@ const ROUTE_VALUES = ['route', 'route_bottom', 'abseil_route'];
 
 const isRoute = (tags: FeatureTags) => ROUTE_VALUES.includes(tags.climbing);
 
+// same condition as the osmium tags-filter which builds ../overpass.json
+const hasClimbingTags = (tags: FeatureTags) =>
+  tags.sport === 'climbing' ||
+  tags.sport === 'via_ferrata' ||
+  tags.leisure === 'climbing' ||
+  tags.route === 'via_ferrata' ||
+  tags.via_ferrata_scale !== undefined ||
+  Object.keys(tags).some((key) => key.startsWith('climbing'));
+
+const getClimbingRelationMemberIds = (relations: GeojsonFeature[]) => {
+  const memberIds = new Set<string>();
+  for (const relation of relations) {
+    if (!relation.tags || isClimbingDisallowed(relation.tags)) continue;
+    if (!hasClimbingTags(relation.tags)) continue;
+
+    for (const member of relation.members ?? []) {
+      memberIds.add(`${member.type}/${member.ref}`);
+    }
+  }
+  return memberIds;
+};
+
+// The dataset contains also elements with no climbing tag at all - nodes forming
+// the geometry of a matched way and members of matched relations. Rules which
+// don't test a climbing tag (natural=peak, leisure, building, type=site) must
+// not pick those up - eg. node/1499407286 natural=peak is only a geometry node
+// of a highway=path tagged climbing:grade:uiaa.
+const isClimbingRelatedFactory =
+  (climbingRelationMemberIds: Set<string>) => (feature: GeojsonFeature) =>
+    hasClimbingTags(feature.tags) ||
+    climbingRelationMemberIds.has(
+      `${feature.osmMeta.type}/${feature.osmMeta.id}`,
+    );
+
 // (splitting this function doesn't make sense - it has very simple structure)
 // eslint-disable-next-line max-lines-per-function
 export const getNewRecords = (
@@ -49,6 +83,9 @@ export const getNewRecords = (
 ) => {
   const geojsons = overpassToGeojsons(data, log); // 300 ms on 200k items
   const { records, addRecord, addRecordWithLine } = recordsFactory(log);
+  const isClimbingRelated = isClimbingRelatedFactory(
+    getClimbingRelationMemberIds(geojsons.relation),
+  );
 
   for (const node of geojsons.node) {
     if (!node.tags || isClimbingDisallowed(node.tags)) continue;
@@ -60,7 +97,7 @@ export const getNewRecords = (
     else if (
       node.tags.climbing === 'crag' ||
       node.tags.climbing === 'boulder' ||
-      node.tags.natural === 'peak'
+      (node.tags.natural === 'peak' && isClimbingRelated(node))
     ) {
       addRecord('crag', node);
     }
@@ -76,7 +113,10 @@ export const getNewRecords = (
     }
 
     //
-    else if (node.tags.leisure || node.tags.building) {
+    else if (
+      (node.tags.leisure || node.tags.building) &&
+      isClimbingRelated(node)
+    ) {
       addRecord('gym', node);
     }
 
@@ -109,7 +149,10 @@ export const getNewRecords = (
     }
 
     //
-    else if (way.tags.leisure || way.tags.building) {
+    else if (
+      (way.tags.leisure || way.tags.building) &&
+      isClimbingRelated(way)
+    ) {
       addRecord('gym', centerGeometry(way));
     }
 
@@ -152,7 +195,10 @@ export const getNewRecords = (
     }
 
     // usually a type=multipolygon relation
-    else if (relation.tags.leisure || relation.tags.building) {
+    else if (
+      (relation.tags.leisure || relation.tags.building) &&
+      isClimbingRelated(relation)
+    ) {
       addRecord('gym', centerGeometry(relation));
     }
 
@@ -165,8 +211,9 @@ export const getNewRecords = (
     else if (
       relation.tags.climbing ||
       relation.tags.sport === 'climbing' ||
-      relation.tags.type === 'site' ||
-      relation.tags.type === 'multipolygon'
+      ((relation.tags.type === 'site' ||
+        relation.tags.type === 'multipolygon') &&
+        isClimbingRelated(relation))
     ) {
       addRecord('crag', centerGeometry(relation));
     }
