@@ -258,7 +258,9 @@ export const ClimbingCragDialogHeader = ({
             noWrap
             variant="h5"
             component="div"
-            fontFamily={'Piazzolla'}
+            sx={{
+              fontFamily: 'Piazzolla',
+            }}
           >
             {label}
           </Typography>
@@ -294,7 +296,13 @@ export const ClimbingCragDialogHeader = ({
         </Title>
 
         {showMobileEditActions ? (
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <Button onClick={onCancel}>{t('editdialog.cancel_button')}</Button>
             <Button onClick={onSave} variant="contained" color="primary">
               {t('editdialog.save_button_edit')}
@@ -362,7 +370,11 @@ export const ClimbingCragDialogHeader = ({
           </>
         ) : (
           <>
-            <Box mr={1}>
+            <Box
+              sx={{
+                mr: 1,
+              }}
+            >
               <Tooltip
                 title={
                   isMapVisible
@@ -383,7 +395,11 @@ export const ClimbingCragDialogHeader = ({
                 </IconButton>
               </Tooltip>
             </Box>
-            <Box mr={1}>
+            <Box
+              sx={{
+                mr: 1,
+              }}
+            >
               <Tooltip title={t('climbingpanel.pdf_export_button')}>
                 <IconButton
                   color="primary"
@@ -394,7 +410,11 @@ export const ClimbingCragDialogHeader = ({
                 </IconButton>
               </Tooltip>
             </Box>
-            <Box mr={2}>
+            <Box
+              sx={{
+                mr: 2,
+              }}
+            >
               <Tooltip title="Show settings">
                 <IconButton
                   color="primary"

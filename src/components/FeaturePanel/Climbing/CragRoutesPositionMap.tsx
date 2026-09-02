@@ -14,8 +14,10 @@ import {
   MenuItem,
   Tooltip,
 } from '@mui/material';
-import maplibregl, { StyleSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { StyleSpecification } from 'maplibre-gl';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import '../../Map/maplibreSetup';
 import { t } from '../../../services/intl';
 import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';

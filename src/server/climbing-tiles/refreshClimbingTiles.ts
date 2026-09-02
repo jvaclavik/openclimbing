@@ -10,6 +10,7 @@ import {
 } from './refreshClimbingTilesHelpers';
 import { cacheTile000 } from './getClimbingTile';
 import { OsmResponse } from './overpass/types';
+import { FeatureTags } from '../../services/types';
 import { ClimbingFeaturesRow } from '../db/types';
 import { resolveCountryCode } from 'next-codegrid';
 
@@ -33,14 +34,24 @@ const fetchFromOverpass = async () => {
   return data;
 };
 
+const isClimbingDisallowed = (tags: FeatureTags) =>
+  tags.climbing === 'no' || tags.climbing === 'prohibited';
+
+const ROUTE_VALUES = ['route', 'route_bottom', 'abseil_route'];
+
+const isRoute = (tags: FeatureTags) => ROUTE_VALUES.includes(tags.climbing);
+
 // (splitting this function doesn't make sense - it has very simple structure)
 // eslint-disable-next-line max-lines-per-function
-const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
+export const getNewRecords = (
+  data: OsmResponse,
+  log: (message: string) => void,
+) => {
   const geojsons = overpassToGeojsons(data, log); // 300 ms on 200k items
   const { records, addRecord, addRecordWithLine } = recordsFactory(log);
 
   for (const node of geojsons.node) {
-    if (!node.tags || node.tags.climbing === 'no') continue;
+    if (!node.tags || isClimbingDisallowed(node.tags)) continue;
     if (node.tags.climbing === 'area') {
       addRecord('area', node);
     }
@@ -55,10 +66,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
     }
 
     //
-    else if (
-      node.tags.climbing === 'route' ||
-      node.tags.climbing === 'route_bottom'
-    ) {
+    else if (isRoute(node.tags)) {
       addRecord('route', node);
     }
 
@@ -72,15 +80,14 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
       addRecord('gym', node);
     }
 
-    //
+    // omit playground=climbingwall with sport=climbing
+    else if (node.tags.playground) {
+      continue;
+    }
+
+    // careful, this has to omit `shop=sports` etc.
     else if (node.tags.sport === 'climbing') {
-      if (
-        node.tags.opening_hours ||
-        node.tags.phone ||
-        node.tags['addr:street'] ||
-        node.tags.man_made ||
-        node.tags.name?.match(/gym/i)
-      ) {
+      if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
         addRecord('gym', node);
       } else {
         addRecord('crag', node); //this needs tweaking
@@ -94,10 +101,10 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   }
 
   for (const way of geojsons.way) {
-    if (!way.tags || way.tags.climbing === 'no') continue;
+    if (!way.tags || isClimbingDisallowed(way.tags)) continue;
 
     //
-    if (way.tags.climbing === 'route' || way.tags.highway === 'via_ferrata') {
+    if (isRoute(way.tags) || way.tags.highway === 'via_ferrata') {
       addRecordWithLine('route', way);
     }
 
@@ -109,6 +116,11 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
     //
     else if (way.tags.climbing === 'area') {
       addRecord('area', centerGeometry(way)); // way climbing=area probably doesnt exist
+    }
+
+    // omit playground=climbingwall with sport=climbing
+    else if (way.tags.playground) {
+      continue;
     }
 
     //
@@ -124,7 +136,7 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
   }
 
   for (const relation of geojsons.relation) {
-    if (!relation.tags || relation.tags.climbing === 'no') continue;
+    if (!relation.tags || isClimbingDisallowed(relation.tags)) continue;
 
     // usually climbing=route + route=via_ferrata
     if (
@@ -137,6 +149,16 @@ const getNewRecords = (data: OsmResponse, log: (message: string) => void) => {
     // climbing=area, boulder, crag, route
     else if (relation.tags.climbing === 'area') {
       addRecord('area', centerGeometry(relation));
+    }
+
+    // usually a type=multipolygon relation
+    else if (relation.tags.leisure || relation.tags.building) {
+      addRecord('gym', centerGeometry(relation));
+    }
+
+    // omit playground=climbingwall with sport=climbing
+    else if (relation.tags.playground) {
+      continue;
     }
 
     //

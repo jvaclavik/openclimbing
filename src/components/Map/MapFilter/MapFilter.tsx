@@ -9,7 +9,6 @@ import { t } from '../../../services/intl';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { useMobileMode } from '../../helpers';
 import { useExclusiveMapControl } from '../mapControlsRegistry';
-import { MapControlAppear } from '../MapControlAppear';
 
 const StyledIconButton = styled(IconButton, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -71,9 +70,7 @@ export const MapFilter = () => {
 
   return (
     <>
-      <MapControlAppear>
-        <MapFilterButton open={open} onClick={handleToggle} />
-      </MapControlAppear>
+      <MapFilterButton open={open} onClick={handleToggle} />
 
       <FilterPopover
         anchorEl={anchorEl}

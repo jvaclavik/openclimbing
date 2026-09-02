@@ -179,7 +179,13 @@ export function ClimbingLeaderboardView({
             onRangeChange={onRangeChange}
             availableYears={availableYears}
           />
-          <Typography variant="body2" color="text.secondary" paragraph>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             {leaderboardPeriodSubtext(state)}
           </Typography>
         </Stack>

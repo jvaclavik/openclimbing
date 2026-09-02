@@ -32,8 +32,18 @@ type Props = {
 const ChooseFileStage: React.FC<{
   onFileChosen: (file: File) => void;
 }> = ({ onFileChosen }) => (
-  <Stack spacing={1} alignItems="stretch">
-    <Typography variant="body2" color="text.secondary">
+  <Stack
+    spacing={1}
+    sx={{
+      alignItems: 'stretch',
+    }}
+  >
+    <Typography
+      variant="body2"
+      sx={{
+        color: 'text.secondary',
+      }}
+    >
       {t('uploaddialog.choose_file_hint')}
     </Typography>
     <Button
@@ -59,7 +69,13 @@ const ChooseFileStage: React.FC<{
 );
 
 const PreparingStage: React.FC = () => (
-  <Stack spacing={1} alignItems="center" p={2}>
+  <Stack
+    spacing={1}
+    sx={{
+      alignItems: 'center',
+      p: 2,
+    }}
+  >
     <CircularProgress />
     <Typography variant="body2">{t('uploaddialog.preparing')}</Typography>
   </Stack>
@@ -76,11 +92,19 @@ const UploadActionsProgress: React.FC<{
     <Stack
       direction="row"
       spacing={1}
-      alignItems="center"
-      sx={{ mr: 'auto', pl: 1 }}
+      sx={{
+        alignItems: 'center',
+        mr: 'auto',
+        pl: 1,
+      }}
     >
       <CircularProgress size={20} />
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {percent !== undefined
           ? t('uploaddialog.uploading_percent', { percent })
           : t('uploaddialog.uploading')}

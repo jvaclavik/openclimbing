@@ -43,7 +43,14 @@ const SavedPopover = ({
     anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     transformOrigin={{ vertical: 'top', horizontal: 'center' }}
   >
-    <Box p={1.5} display="flex" alignItems="center" gap={1}>
+    <Box
+      sx={{
+        p: 1.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
       <Typography variant="body2">
         {t('mylists.saved_to', {
           list: list ? formatListLabel(list) : '',

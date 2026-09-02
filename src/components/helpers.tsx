@@ -21,6 +21,14 @@ export const useBoolState = (
 
 export const capitalize = (s: string) => s && s[0].toUpperCase() + s.slice(1);
 
+export const isModifiedClick = (
+  e: Pick<
+    React.MouseEvent,
+    'metaKey' | 'ctrlKey' | 'shiftKey' | 'altKey' | 'button'
+  >,
+): boolean =>
+  e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
+
 export function isBrowser() {
   return typeof window !== 'undefined';
 }

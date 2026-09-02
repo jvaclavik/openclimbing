@@ -1,10 +1,14 @@
-import { Grid, Typography, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import styled from '@emotion/styled';
 import React from 'react';
 import {
   getHumanDistance,
   highlightText,
   IconPart,
+  OptionBody,
+  OptionMeta,
+  OptionSubtitle,
+  OptionTitle,
   useMapCenter,
 } from '../utils';
 import { fetchJson } from '../../../services/fetch';
@@ -24,6 +28,7 @@ import {
   getDifficultyColor,
   getGradeLabel,
 } from '../../../services/tagging/climbing/routeGrade';
+import { getCountryFlag } from '../../../services/getCountryFlag';
 
 const getApiUrl = (inputValue: string, view: View) => {
   const [_zoom, lat, lon] = view;
@@ -65,54 +70,82 @@ const getTypeLabels = (): Record<ClimbingSearchRecord['type'], string> => ({
   area: getPresetTranslation('type/site/climbing/area'),
   crag: getPresetTranslation('climbing/crag'),
   route: getPresetTranslation('climbing/route'),
-  route_top: getPresetTranslation('climbing/route_top'), // only in ourPresets.ts yet
+  route_top: getPresetTranslation('climbing/route_top'),
   gym: getPresetTranslation('leisure/sports_centre/climbing'),
-  ferrata: t('climbing.type.ferrata'), // no preset yet
+  ferrata: t('climbing.type.ferrata'),
 });
 
-// Rough estimate of how many characters fit on the secondary line (proportional
-// font, so it's only an approximation - occasional overflow is fine).
-const MAX_SECONDARY_CHARS = 43;
-const PARENT_SEPARATOR = ' › ';
+const PARENT_SEPARATOR = ' · ';
 
-const truncate = (text: string, max: number) =>
-  text.length > max ? `${text.slice(0, Math.max(1, max - 1))}…` : text;
-
-// Builds the secondary line, e.g. "crag › area, CZ". With no parents it falls
-// back to just the country code ("CZ"). Each shown parent gets an equal
-// share of the remaining width (total minus the country suffix and separator).
 const buildSecondaryLine = (
+  typeLabel: string,
   parents: ClimbingSearchParent[] | undefined,
-  countryCode: string | undefined,
 ): string => {
-  const countryText = countryCode ? countryCode.toUpperCase() : '';
-
-  if (!parents?.length) {
-    return countryText;
-  }
-
-  const suffix = countryText ? `, ${countryText}` : '';
-  const separatorsLen = PARENT_SEPARATOR.length * (parents.length - 1);
-  const perParent = Math.max(
-    4,
-    Math.floor(
-      (MAX_SECONDARY_CHARS - suffix.length - separatorsLen) / parents.length,
-    ),
-  );
-
-  const shown = parents.map((parent) => truncate(parent.name, perParent));
-  return `${shown.join(PARENT_SEPARATOR)}${suffix}`;
+  const parentNames = (parents ?? [])
+    .map((parent) => parent.name)
+    .filter(Boolean);
+  return [typeLabel, ...parentNames].filter(Boolean).join(PARENT_SEPARATOR);
 };
 
 const RouteGradeDot = styled.span<{ $color: string }>`
-  display: inline-block;
+  display: block;
   width: 14px;
   height: 14px;
-  margin-top: 3px;
   border-radius: 50%;
   background-color: ${({ $color }) => $color};
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 0 2px ${({ $color }) => $color}33;
+`;
+
+const CountChip = styled.span`
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  background: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.1)'
+      : 'rgba(0, 0, 0, 0.06)'};
+  color: ${({ theme }) => theme.palette.text.primary};
+
+  strong {
+    font-size: 12px;
+    font-weight: 700;
+  }
+`;
+
+const GradeChip = styled.span<{ $color: string }>`
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: ${({ $color }) => $color};
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+`;
+
+const Distance = styled.span`
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+
+  ${OptionTitle} {
+    flex: 1;
+    min-width: 0;
+  }
 `;
 
 type Props = {
@@ -146,37 +179,50 @@ export const ClimbingRow = ({ option, inputValue }: Props) => {
         { gradeSystem: 'uiaa', grade: GRADE_TABLE.uiaa[gradeId] },
         theme.palette.mode,
       )
-    : undefined;
+    : theme.palette.text.secondary;
 
   const distance = getHumanDistance(isImperial, mapCenter, [lon, lat]);
-  const label = getTypeLabels()[type] ?? `climbing ${type}`;
-  const secondaryLine = buildSecondaryLine(parents, countryCode);
+  const typeLabel = getTypeLabels()[type] ?? `climbing ${type}`;
+  const secondaryLine = buildSecondaryLine(typeLabel, parents);
+  const flag = getCountryFlag(countryCode);
 
   return (
     <>
       <IconPart>
         {isRoute ? (
-          <RouteGradeDot $color={gradeColor} title={label} />
+          <RouteGradeDot $color={gradeColor} title={typeLabel} />
         ) : (
           <PoiIcon
             tags={{ climbing: type }}
             ico="climbing"
-            size={20}
-            title={label}
+            size={18}
+            title={typeLabel}
           />
         )}
-        <div>{distance}</div>
       </IconPart>
-      <Grid size={{ xs: 12 }}>
-        {highlightText(name, inputValue)}
-        {gradeLabel && ` ${gradeLabel}`}
-        {routeCount ? ` · ${routeCount}` : null}
+      <OptionBody>
+        <TitleRow>
+          <OptionTitle>{highlightText(name, inputValue)}</OptionTitle>
+          {gradeLabel && (
+            <GradeChip $color={gradeColor}>{gradeLabel}</GradeChip>
+          )}
+        </TitleRow>
         {secondaryLine && (
-          <Typography variant="body2" color="textSecondary" noWrap>
+          <OptionSubtitle>
             {secondaryLine}
-          </Typography>
+            {flag ? ` ${flag}` : ''}
+          </OptionSubtitle>
         )}
-      </Grid>
+      </OptionBody>
+      <OptionMeta>
+        {!!routeCount && (
+          <CountChip>
+            <strong>{routeCount}</strong>
+            {t('featurepanel.routes')}
+          </CountChip>
+        )}
+        <Distance>{distance}</Distance>
+      </OptionMeta>
     </>
   );
 };

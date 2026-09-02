@@ -43,11 +43,48 @@ export const getCommonsImageUrl = (
   return encodeUrl`https://upload.wikimedia.org/wikipedia/commons/thumb/${part1}/${part2}/${fileName}/${width}px-${fileName}`;
 };
 
+const isWikimediaUploadHost = (hostname: string) =>
+  hostname === 'upload.wikimedia.org' || hostname === 'thumb.wikimedia.org';
+
+const parseWikimediaUrl = (url: string): URL | null => {
+  try {
+    const parsed = new URL(url);
+    return isWikimediaUploadHost(parsed.hostname) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Commons file name shared by Wikipedia pageimage and Wikidata P18 thumbs. */
+export const getWikimediaCommonsFileName = (url: string): string | null => {
+  const parsed = parseWikimediaUrl(url);
+  if (!parsed) return null;
+  const parts = parsed.pathname.split('/').filter(Boolean);
+  const commons = parts.indexOf('commons');
+  if (commons < 0) return null;
+  const after = parts.slice(commons + 1);
+  const fileName = after[0] === 'thumb' ? after[3] : after[2];
+  if (!fileName) return null;
+  try {
+    return decodeURIComponent(fileName);
+  } catch {
+    return fileName;
+  }
+};
+
+export const getWikimediaThumbWidth = (url: string): number | null => {
+  const parsed = parseWikimediaUrl(url);
+  if (!parsed) return null;
+  const last = parsed.pathname.split('/').pop() ?? '';
+  const match = last.match(/^(\d+)px-/);
+  return match ? Number(match[1]) : null;
+};
+
 // Wikimedia thumbnail URLs look like `.../thumb/x/xx/Name.jpg/500px-Name.jpg`.
 const THUMB_WIDTH_REGEX = /\/(\d+)px-/;
 
 const isWikimediaThumbUrl = (url: string) =>
-  !!url && url.includes('upload.wikimedia.org') && url.includes('/thumb/');
+  !!parseWikimediaUrl(url)?.pathname.includes('/thumb/');
 
 // Returns null for anything that is not a Wikimedia thumbnail, so callers can
 // fall back to whatever the original provider gave them.

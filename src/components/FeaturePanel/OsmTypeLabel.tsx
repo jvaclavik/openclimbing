@@ -23,7 +23,12 @@ const OsmTypeTooltip = ({ shortId }: { shortId: string }) => {
   const isNew = osmId.id < 0;
 
   return (
-    <Stack gap={0.5} sx={{ maxWidth: 260 }}>
+    <Stack
+      sx={{
+        gap: 0.5,
+        maxWidth: 260,
+      }}
+    >
       <span>
         OSM {t(TYPE_LABEL[osmId.type])}
         <br />
@@ -60,9 +65,11 @@ export const OsmTypeLabel = ({ shortId }: Props) => {
     <Tooltip title={<OsmTypeTooltip shortId={shortId} />} arrow>
       <Typography
         variant="caption"
-        color="text.secondary"
         component="span"
-        sx={{ whiteSpace: 'nowrap' }}
+        sx={{
+          color: 'text.secondary',
+          whiteSpace: 'nowrap',
+        }}
       >
         {t(labelId)}
       </Typography>

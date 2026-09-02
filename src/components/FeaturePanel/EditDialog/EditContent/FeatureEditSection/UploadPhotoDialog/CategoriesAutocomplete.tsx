@@ -71,9 +71,9 @@ export const CategoriesAutocomplete: React.FC<Props> = ({
       onChange={handleChange}
       inputValue={inputValue}
       onInputChange={(_, next) => setInputValue(next)}
-      renderTags={(tags, getTagProps) =>
+      renderValue={(tags, getItemProps) =>
         tags.map((tag, index) => {
-          const { key, ...chipProps } = getTagProps({ index });
+          const { key, ...chipProps } = getItemProps({ index });
           return <Chip key={key} {...chipProps} label={tag} size="small" />;
         })
       }

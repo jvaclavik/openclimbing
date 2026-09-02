@@ -51,16 +51,37 @@ export const MemberFeatures = () => {
   ).length;
 
   return (
-    <Box mb={1}>
-      <Box ml={-2} mr={-2}>
+    <Box
+      sx={{
+        mb: 1,
+      }}
+    >
+      <Box
+        sx={{
+          ml: -2,
+          mr: -2,
+        }}
+      >
         <PanelLabel>
-          <Stack direction="row" gap={1.5} alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1.5,
+              alignItems: 'center',
+            }}
+          >
             <div>{getHeading(feature)}</div>
             <Chip
               size="small"
               variant="outlined"
               label={
-                <Stack direction="row" gap={0.75} alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    gap: 0.75,
+                    alignItems: 'center',
+                  }}
+                >
                   <span>{headingNum}</span>
                   {climbingRoutesFeatures.length > 0 && (
                     <PhotoCoverageRing

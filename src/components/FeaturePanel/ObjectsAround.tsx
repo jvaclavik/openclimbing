@@ -6,7 +6,7 @@ import { useFeatureContext } from '../utils/FeatureContext';
 import { Feature } from '../../services/types';
 import { getOsmappLink, getUrlOsmId } from '../../services/helpers';
 import { t } from '../../services/intl';
-import { DotLoader, useMobileMode } from '../helpers';
+import { DotLoader, isModifiedClick, useMobileMode } from '../helpers';
 import { getLabel } from '../../helpers/featureLabel';
 import { useQuery } from 'react-query';
 import { getImportance } from './helpers/importance';
@@ -18,6 +18,7 @@ const AroundItem = ({ feature }: { feature: Feature }) => {
   const osmId = feature.osmMeta;
 
   const handleClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     setPreview(null);
     Router.push(`/${getUrlOsmId(osmId)}${window.location.hash}`);
@@ -80,26 +81,37 @@ export const ObjectsAround = ({ advanced }) => {
   const features = getFeatures(around, advanced, feature);
 
   return (
-    <Box mt={4} mb={4}>
-      <Typography variant="overline" display="block" color="textSecondary">
+    <Box
+      sx={{
+        mt: 4,
+        mb: 4,
+      }}
+    >
+      <Typography
+        variant="overline"
+        color="textSecondary"
+        sx={{
+          display: 'block',
+        }}
+      >
         {t('featurepanel.objects_around')}
       </Typography>
 
       {error && (
-        <Typography color="secondary" paragraph>
+        <Typography color="secondary" sx={{ mb: 2 }}>
           Could not load nearby objects
         </Typography>
       )}
 
       {isFetching && !features.length && (
-        <Typography color="secondary" paragraph>
+        <Typography color="secondary" sx={{ mb: 2 }}>
           {t('loading')}
           <DotLoader />
         </Typography>
       )}
 
       {!isFetching && !error && !features.length && (
-        <Typography color="secondary" paragraph>
+        <Typography color="secondary" sx={{ mb: 2 }}>
           N/A
         </Typography>
       )}

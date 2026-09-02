@@ -25,7 +25,11 @@ const retina =
 
 const ClimbingIcon = () => {
   return (
-    <Box ml={0.5}>
+    <Box
+      sx={{
+        ml: 0.5,
+      }}
+    >
       <PoiIcon ico="climbing" size={16} />
     </Box>
   );

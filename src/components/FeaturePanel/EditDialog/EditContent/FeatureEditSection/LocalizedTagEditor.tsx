@@ -118,9 +118,11 @@ const LocalizedTagLangSelect = ({
     <Stack
       direction="row"
       spacing={0.5}
-      alignItems="center"
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
+      sx={{
+        alignItems: 'center',
+      }}
     >
       {showCustomInput ? (
         <TextField
@@ -138,16 +140,18 @@ const LocalizedTagLangSelect = ({
           }}
           placeholder={t('editdialog.description_lang_custom_code')}
           title={t('editdialog.description_lang_custom')}
-          inputProps={{
-            maxLength: 12,
-            'aria-label': t('editdialog.description_lang_custom'),
-          }}
           sx={{
             width: 48,
             '& .MuiInput-input': {
               fontSize: '0.75rem',
               py: 0.5,
               textAlign: 'center',
+            },
+          }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 12,
+              'aria-label': t('editdialog.description_lang_custom'),
             },
           }}
         />
@@ -165,9 +169,11 @@ const LocalizedTagLangSelect = ({
             return (
               <Typography
                 variant="caption"
-                color="text.secondary"
                 component="span"
-                sx={{ whiteSpace: 'nowrap' }}
+                sx={{
+                  color: 'text.secondary',
+                  whiteSpace: 'nowrap',
+                }}
               >
                 —
               </Typography>
@@ -177,9 +183,11 @@ const LocalizedTagLangSelect = ({
             return (
               <Typography
                 variant="caption"
-                color="text.secondary"
                 component="span"
-                sx={{ whiteSpace: 'nowrap' }}
+                sx={{
+                  color: 'text.secondary',
+                  whiteSpace: 'nowrap',
+                }}
               >
                 …
               </Typography>
@@ -202,10 +210,15 @@ const LocalizedTagLangSelect = ({
             alignItems: 'center',
           },
         }}
-        MenuProps={{ PaperProps: { sx: { maxHeight: 320 } } }}
+        MenuProps={{ slotProps: { paper: { sx: { maxHeight: 320 } } } }}
       >
         <MenuItem value="">
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('editdialog.description_lang_default')}
           </Typography>
         </MenuItem>
@@ -221,9 +234,11 @@ const LocalizedTagLangSelect = ({
             </Typography>
             <Typography
               variant="caption"
-              color="text.secondary"
               component="span"
-              sx={{ ml: 1 }}
+              sx={{
+                color: 'text.secondary',
+                ml: 1,
+              }}
             >
               {name}
             </Typography>
@@ -376,10 +391,17 @@ export const LocalizedTagEditor: React.FC<Props> = ({
             key={key}
             direction="row"
             spacing={0.5}
-            alignItems="center"
-            mb={index === slots.length - 1 ? 0 : 2}
+            sx={{
+              alignItems: 'center',
+              mb: index === slots.length - 1 ? 0 : 2,
+            }}
           >
-            <Box flex={1} minWidth={0}>
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
               <TextFieldWithCharacterCount
                 label={label}
                 k={key}

@@ -8,15 +8,14 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
 import { t } from '../../services/intl';
-import { isDesktop, isMobileMode } from '../helpers';
+import { isDesktop, isMobileMode, isModifiedClick } from '../helpers';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
 import { SearchField } from '../SearchBox/SearchBox';
 import { convertHexToRgba } from '../utils/colorUtils';
 import { useFeatureContext } from '../utils/FeatureContext';
-
-const COMMUNITY_URL = 'https://community.openclimbing.org';
+import { COMMUNITY_URL } from '../consts';
 
 const Bar = styled.div<{ $transparent?: boolean }>`
   position: absolute;
@@ -57,7 +56,7 @@ const MobileBar = styled(Bar)`
   display: none;
   @media ${isMobileMode} {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     padding: 6px;
     height: auto;
     min-height: 0;
@@ -167,7 +166,7 @@ const SearchSlot = styled.div`
   min-width: 0;
 
   @media ${isDesktop} {
-    flex: 0 1 360px;
+    flex: 0 1 280px;
     margin-left: auto;
   }
 
@@ -180,6 +179,7 @@ const Brand = () => {
   const { persistShowHomepage } = useFeatureContext();
 
   const handleClick = (e: React.MouseEvent) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     persistShowHomepage();
   };
@@ -201,6 +201,7 @@ const NavLinks = () => {
   const { homepageShown, persistShowHomepage } = useFeatureContext();
 
   const openHomepage = (e: React.MouseEvent) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     persistShowHomepage();
   };
@@ -211,10 +212,12 @@ const NavLinks = () => {
   return (
     <Stack
       direction="row"
-      alignItems="center"
-      alignSelf="stretch"
       spacing={0.5}
-      minWidth={0}
+      sx={{
+        alignItems: 'center',
+        alignSelf: 'stretch',
+        minWidth: 0,
+      }}
     >
       <NavButton
         label={t('topbar.climbing_areas')}

@@ -60,7 +60,11 @@ export const CragsInAreaSort = ({
       >
         <FilterBody>
           <FilterCard>
-            <Stack gap={0.5}>
+            <Stack
+              sx={{
+                gap: 0.5,
+              }}
+            >
               {OPTIONS.map(({ value, label }) => (
                 <FilterOption
                   key={value}

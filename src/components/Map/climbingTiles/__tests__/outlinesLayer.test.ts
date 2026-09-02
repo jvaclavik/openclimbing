@@ -1,4 +1,8 @@
-import { expression, latest } from '@maplibre/maplibre-gl-style-spec';
+import {
+  expression,
+  latest,
+  type StylePropertySpecification,
+} from '@maplibre/maplibre-gl-style-spec';
 import { outlinesLayer } from '../climbingLayers/outlinesLayer';
 
 const evaluate = (
@@ -10,7 +14,8 @@ const evaluate = (
   const paint = outlinesLayer.paint as Record<string, unknown>;
   const result = expression.createPropertyExpression(
     paint[property],
-    latest.paint_line[property],
+    `paint.${property}`,
+    latest.paint_line[property] as StylePropertySpecification,
   );
   if (result.result === 'error') {
     throw new Error(result.value.map((error) => error.message).join(', '));

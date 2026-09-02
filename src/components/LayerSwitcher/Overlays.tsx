@@ -132,9 +132,11 @@ export const Overlays = ({ overlayLayers }: Props) => {
     <>
       <Typography
         variant="overline"
-        display="block"
         color="textSecondary"
         style={{ padding: '1em 0 0 1em' }}
+        sx={{
+          display: 'block',
+        }}
       >
         {t('layerswitcher.overlays')}
       </Typography>
@@ -161,7 +163,12 @@ export const Overlays = ({ overlayLayers }: Props) => {
             '& .MuiAccordionSummary-content': { my: 0.5 },
           }}
         >
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('layerswitcher.more_overlays')}
           </Typography>
         </AccordionSummary>

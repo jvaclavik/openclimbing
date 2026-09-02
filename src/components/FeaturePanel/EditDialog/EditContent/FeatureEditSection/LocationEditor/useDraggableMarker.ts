@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import maplibregl, { LngLat, MarkerOptions } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { LngLat, MarkerOptions } from 'maplibre-gl';
 import { useCurrentItem, useEditContext } from '../../../context/EditContext';
 import { getTmpNodePosition } from './getTmpNodePosition';
 

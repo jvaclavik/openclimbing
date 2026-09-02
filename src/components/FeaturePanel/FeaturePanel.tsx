@@ -105,7 +105,12 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
           <OsmError />
           <TestApiWarning />
           <FeaturedTag k="description" renderer="DescriptionRenderer" />
-          <Stack spacing={1} alignItems="flex-start">
+          <Stack
+            spacing={1}
+            sx={{
+              alignItems: 'flex-start',
+            }}
+          >
             <ClimbingRouteGrade />
             <PanelClimbingBadges />
           </Stack>
@@ -120,7 +125,11 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
             <>
               <CragsInArea />
 
-              <Box mb={2}>
+              <Box
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <FeatureImages />
               </Box>
 

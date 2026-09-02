@@ -5,7 +5,7 @@ import { CircularProgress, IconButton, Paper } from '@mui/material';
 import { useRouter } from 'next/router';
 import { AutocompleteInput } from './AutocompleteInput';
 import { t } from '../../services/intl';
-import { isDesktop, useMobileMode } from '../helpers';
+import { isDesktop, isMobileMode, useMobileMode } from '../helpers';
 import { SEARCH_BOX_HEIGHT } from './consts';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { usePanelShown } from '../utils/usePanelShown';
@@ -29,9 +29,14 @@ const TopPanel = styled.div`
 const StyledPaper = styled(Paper, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
 })<{ $withShadow: boolean }>`
-  padding: 2px 4px;
+  padding: 0 4px 0 0;
   display: flex;
   align-items: center;
+  height: 36.5px;
+  @media ${isMobileMode} {
+    height: 44px;
+  }
+  box-sizing: border-box;
   background-color: ${({ $withShadow, theme }) =>
     $withShadow
       ? theme.palette.background.searchInput
@@ -44,19 +49,27 @@ const StyledPaper = styled(Paper, {
 
   .MuiAutocomplete-root {
     flex: 1;
+    min-width: 0;
+    height: 100%;
   }
 `;
 
+const SearchForm = styled.form`
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+`;
+
 const SearchIconButton = styled(IconButton)`
+  padding: 6px;
   svg {
+    font-size: 20px;
     transform: scaleX(-1);
     filter: FlipH;
     -ms-filter: 'FlipH';
   }
-`;
-
-const LoadingSpinner = styled(CircularProgress)`
-  padding: 10px;
 `;
 
 // https://docs.mapbox.com/help/troubleshooting/working-with-large-geojson-data/
@@ -82,18 +95,25 @@ export const SearchField = ({
 
   return (
     <StyledPaper $withShadow={withShadow} elevation={1} ref={autocompleteRef}>
-      <SearchIconButton disabled aria-label={t('searchbox.placeholder')}>
-        <SearchIcon />
-      </SearchIconButton>
+      <SearchForm
+        autoComplete="off"
+        onSubmit={(event) => {
+          event.preventDefault();
+        }}
+      >
+        <SearchIconButton disabled aria-label={t('searchbox.placeholder')}>
+          <SearchIcon />
+        </SearchIconButton>
 
-      <AutocompleteInput
-        autocompleteRef={autocompleteRef}
-        setIsLoading={setIsLoading}
-        autoFocus={autoFocus}
-      />
+        <AutocompleteInput
+          autocompleteRef={autocompleteRef}
+          setIsLoading={setIsLoading}
+          autoFocus={autoFocus}
+        />
 
-      {isLoading && <LoadingSpinner />}
-      {showHamburger && isMobileMode && <HamburgerMenu />}
+        {isLoading && <CircularProgress size={16} sx={{ mx: 1 }} />}
+        {showHamburger && isMobileMode && <HamburgerMenu />}
+      </SearchForm>
     </StyledPaper>
   );
 };

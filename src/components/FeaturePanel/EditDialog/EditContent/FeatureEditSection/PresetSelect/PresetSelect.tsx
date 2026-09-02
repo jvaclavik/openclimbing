@@ -37,7 +37,13 @@ export const PresetSelect = () => {
   };
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1}>
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <Tooltip
         arrow
         title={enabled ? '' : t('editdialog.preset_select.change_type_warning')}

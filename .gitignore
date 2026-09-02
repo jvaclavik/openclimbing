@@ -18,4 +18,5 @@ yarn-error.log*
 .env.local
 .env.sentry-build-plugin
 /public/icons-indoor
+/public/maplibre
 package-lock.json

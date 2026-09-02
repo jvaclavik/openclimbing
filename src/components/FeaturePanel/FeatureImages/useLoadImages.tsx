@@ -4,6 +4,10 @@ import {
   getInstantImage,
   ImageType,
 } from '../../../services/images/getImageDefs';
+import {
+  getWikimediaCommonsFileName,
+  getWikimediaThumbWidth,
+} from '../../../services/images/getCommonsImageUrl';
 import { not, publishDbgObject } from '../../../utils';
 import { getImageFromApi } from '../../../services/images/getImageFromApi';
 import { useFeatureContext } from '../../utils/FeatureContext';
@@ -14,40 +18,16 @@ type ImageWithDef = { def: ImageDef; image: ImageType };
 export type ImagesType = ImageWithDef[];
 
 const betterWikimediaImg = (imageA: ImageWithDef, imageB: ImageWithDef) => {
-  const imageAUrl = imageA.image.imageUrl;
-  const imageBUrl = imageB.image.imageUrl;
-
-  const start = 'https://upload.wikimedia.org/';
-  if (!(imageAUrl.startsWith(start) && imageBUrl.startsWith(start))) {
+  const fileA = getWikimediaCommonsFileName(imageA.image.imageUrl);
+  const fileB = getWikimediaCommonsFileName(imageB.image.imageUrl);
+  if (!fileA || fileA !== fileB) {
     return null;
   }
 
-  const partsA = imageAUrl.split('/');
-  const partsB = imageBUrl.split('/');
-
-  const startA = partsA.slice(0, -1).join('/');
-  const startB = partsB.slice(0, -1).join('/');
-
-  const endA = partsA.at(-1);
-  const endB = partsB.at(-1);
-
-  const endAMatch = endA.match(/^\d+px-/)?.[0];
-  const endBMatch = endB.match(/^\d+px-/)?.[0];
-
-  if (startA !== startB || !endAMatch || !endBMatch) {
-    return false;
-  }
-  const isIdentical =
-    endA.slice(endAMatch.length) === endB.slice(endBMatch.length);
-  if (!isIdentical) {
-    return false;
-  }
-
-  const pxA = parseInt(endA.match(/^\d+/)[0]);
-  const pxB = parseInt(endB.match(/^\d+/)[0]);
-
+  const pxA = getWikimediaThumbWidth(imageA.image.imageUrl) ?? 0;
+  const pxB = getWikimediaThumbWidth(imageB.image.imageUrl) ?? 0;
   const preferred = pxA >= pxB ? imageA : imageB;
-  const unpreferred = !(pxA >= pxB) ? imageA : imageB;
+  const unpreferred = pxA >= pxB ? imageB : imageA;
 
   return { preferred, unpreferred };
 };
@@ -56,11 +36,8 @@ const mergeTwoImages = (
   imageA: ImageWithDef,
   imageB: ImageWithDef,
 ): ImageWithDef | null => {
-  const imageAUrl = imageA.image.imageUrl;
-  const imageBUrl = imageB.image.imageUrl;
-
   const mergingData =
-    imageAUrl === imageBUrl
+    imageA.image.imageUrl === imageB.image.imageUrl
       ? { preferred: imageA, unpreferred: imageB }
       : betterWikimediaImg(imageA, imageB);
 
@@ -69,14 +46,16 @@ const mergeTwoImages = (
   }
 
   const { preferred, unpreferred } = mergingData;
-  const newImage = { ...preferred };
-
-  newImage.image.sameUrlResolvedAlsoFrom = uniqBy(
-    [...(newImage.image.sameUrlResolvedAlsoFrom ?? []), unpreferred.image],
-    ({ link }) => link,
-  );
-
-  return newImage;
+  return {
+    ...preferred,
+    image: {
+      ...preferred.image,
+      sameUrlResolvedAlsoFrom: uniqBy(
+        [...(preferred.image.sameUrlResolvedAlsoFrom ?? []), unpreferred.image],
+        ({ link }) => link,
+      ),
+    },
+  };
 };
 
 export const mergeResultFn =

@@ -7,6 +7,7 @@ import { useFeatureContext } from '../utils/FeatureContext';
 import { Chip, Skeleton, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
+import { isModifiedClick } from '../helpers';
 
 const ParentItem = styled.div`
   margin: 12px 0 4px 0;
@@ -23,6 +24,7 @@ export const ParentButton = ({
   hasArrow = true,
 }) => {
   const handleLink = (e, parentFeature) => {
+    if (isModifiedClick(e)) return;
     if (parentFeature.center) {
       // seed the center so fetchFeature() skips the slow Overpass center query
       addFeatureCenterToCache(

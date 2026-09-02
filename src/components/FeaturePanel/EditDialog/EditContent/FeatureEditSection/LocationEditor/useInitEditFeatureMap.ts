@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import '../../../../../Map/maplibreSetup';
 import { outdoorStyle } from '../../../../../Map/styles/outdoorStyle';
 import { COMPASS_TOOLTIP } from '../../../../../Map/useAddTopRightControls';
 import { useCurrentItem, useEditContext } from '../../../context/EditContext';

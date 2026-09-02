@@ -86,8 +86,8 @@ function MonthlyPointsMonthAxis({
         <Typography
           key={`${key}-lbl`}
           variant="caption"
-          color="text.secondary"
           sx={{
+            color: 'text.secondary',
             flex: 1,
             minWidth: 0,
             fontSize: '0.6rem',
@@ -124,8 +124,8 @@ function MonthlyPointsYearAxis({
           <Typography
             key={`${key}-year`}
             variant="caption"
-            color="text.secondary"
             sx={{
+              color: 'text.secondary',
               flex: 1,
               minWidth: 0,
               fontSize: '0.55rem',

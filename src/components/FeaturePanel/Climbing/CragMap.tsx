@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import maplibregl, { GeoJSONSource } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { GeoJSONSource } from 'maplibre-gl';
+import '../../Map/maplibreSetup';
 import { outdoorStyle } from '../../Map/styles/outdoorStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import styled from '@emotion/styled';

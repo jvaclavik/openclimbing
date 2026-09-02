@@ -72,29 +72,42 @@ export const StatementBanner = ({
       <Typography
         variant="h4"
         component="p"
-        fontWeight={800}
-        lineHeight={1.2}
-        sx={{ position: 'relative' }}
+        sx={{
+          fontWeight: 800,
+          lineHeight: 1.2,
+          position: 'relative',
+        }}
       >
         {title}
       </Typography>
       <Typography
         variant="body2"
-        mt={0.75}
-        lineHeight={1.5}
-        sx={{ position: 'relative', opacity: 0.92 }}
+        sx={{
+          mt: 0.75,
+          lineHeight: 1.5,
+          position: 'relative',
+          opacity: 0.92,
+        }}
       >
         {description}
       </Typography>
       {cta && (
         <Stack
           direction="row"
-          alignItems="center"
           spacing={0.5}
-          mt={1.5}
-          sx={{ position: 'relative', fontWeight: 700 }}
+          sx={{
+            alignItems: 'center',
+            mt: 1.5,
+            position: 'relative',
+            fontWeight: 700,
+          }}
         >
-          <Typography variant="body2" fontWeight={800}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 800,
+            }}
+          >
             {cta}
           </Typography>
           <ArrowForwardIcon sx={{ fontSize: 18 }} />

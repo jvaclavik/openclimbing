@@ -20,8 +20,18 @@ export const CharacterCount = ({
 }: CharacterCountProps) =>
   isInputFocused && count > 150 ? (
     <CharacterCountContainer>
-      <Stack direction="row" justifyContent={'flex-end'} whiteSpace="nowrap">
-        <Box color={count >= max ? 'error.main' : undefined}>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: 'flex-end',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <Box
+          sx={{
+            color: count >= max ? 'error.main' : undefined,
+          }}
+        >
           {count} / {max}
         </Box>
       </Stack>

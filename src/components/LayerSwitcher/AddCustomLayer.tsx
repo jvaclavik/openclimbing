@@ -315,7 +315,11 @@ export const AddCustomDialog: React.FC<AddDialogProps> = ({
       </DialogTitle>
 
       <DialogContent>
-        <Box mb={2}>
+        <Box
+          sx={{
+            mb: 2,
+          }}
+        >
           <Typography variant="body1">
             {t('layerswitcher.sourced_prefix')}{' '}
             <a

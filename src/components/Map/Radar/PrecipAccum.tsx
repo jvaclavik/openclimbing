@@ -148,8 +148,11 @@ const Legend = () => (
   <Box sx={{ mt: 1 }}>
     <Typography
       variant="caption"
-      color="text.secondary"
-      sx={{ display: 'block', mb: 0.5 }}
+      sx={{
+        color: 'text.secondary',
+        display: 'block',
+        mb: 0.5,
+      }}
     >
       {t('layerswitcher.precip_legend')}
     </Typography>
@@ -172,8 +175,10 @@ const Legend = () => (
         <Box key={stop.min} sx={{ flex: 1, textAlign: 'center' }}>
           <Typography
             variant="caption"
-            color="text.secondary"
-            sx={{ fontSize: 9 }}
+            sx={{
+              color: 'text.secondary',
+              fontSize: 9,
+            }}
           >
             {LEGEND_LABELS.has(stop.min) ? stop.min : ''}
           </Typography>
@@ -227,19 +232,37 @@ const AccumControls = ({
     </ToggleButtonGroup>
 
     {isLoading || !latest ? (
-      <Typography variant="caption" color="text.secondary">
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('layerswitcher.precip_loading')}
       </Typography>
     ) : (
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="baseline"
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+        }}
       >
-        <Typography variant="body2" fontWeight={700} color="primary">
+        <Typography
+          variant="body2"
+          color="primary"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
           {t('layerswitcher.precip_for_hours', { hours })}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t('layerswitcher.precip_as_of', {
             time: formatDateTime(latest.time),
           })}
@@ -251,8 +274,11 @@ const AccumControls = ({
 
     <Typography
       variant="caption"
-      color="text.secondary"
-      sx={{ display: 'block', mt: 1 }}
+      sx={{
+        color: 'text.secondary',
+        display: 'block',
+        mt: 1,
+      }}
     >
       {t('layerswitcher.opacity')}
     </Typography>
@@ -268,8 +294,11 @@ const AccumControls = ({
 
     <Typography
       variant="caption"
-      color="text.secondary"
-      sx={{ display: 'block', mt: 0.5 }}
+      sx={{
+        color: 'text.secondary',
+        display: 'block',
+        mt: 0.5,
+      }}
     >
       {t('layerswitcher.precip_credit')}
     </Typography>
@@ -452,7 +481,7 @@ export const PrecipAccumMapButton = () => {
 
   return (
     <>
-      <MapControlAppear>
+      <MapControlAppear id="precip">
         <Badge
           color={inCoverage ? 'success' : 'error'}
           variant="dot"

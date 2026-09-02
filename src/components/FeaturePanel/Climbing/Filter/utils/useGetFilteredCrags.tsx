@@ -1,5 +1,6 @@
 import { getGradeIndexFromTags } from '../../../../../services/tagging/climbing/routeGrade';
 import { Feature, FeatureTags } from '../../../../../services/types';
+import { isClimbingCragLike } from '../../../../../utils';
 import { useFeatureContext } from '../../../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
 import { hasWikimediaCommons } from '../../utils/photo';
@@ -11,7 +12,7 @@ import {
 
 export const useGetMemberCrags = () => {
   const { feature } = useFeatureContext();
-  return feature.memberFeatures.filter(({ tags }) => tags.climbing === 'crag');
+  return feature.memberFeatures.filter(({ tags }) => isClimbingCragLike(tags));
 };
 
 const isTagSet = (value?: string) =>

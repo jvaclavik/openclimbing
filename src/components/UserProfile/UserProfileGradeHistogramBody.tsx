@@ -91,8 +91,10 @@ export function UserProfileGradeHistogramBody({
                 </Box>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
-                  sx={{ flexShrink: 0 }}
+                  sx={{
+                    color: 'text.secondary',
+                    flexShrink: 0,
+                  }}
                 >
                   {row.total}
                 </Typography>

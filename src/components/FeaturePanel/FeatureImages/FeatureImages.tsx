@@ -15,7 +15,11 @@ import { t } from '../../../services/intl';
 import { isTag } from '../../../services/types';
 import { photoNameKey } from '../Climbing/utils/photo';
 import { usePhotoHighlightContext } from '../Climbing/contexts/PhotoHighlightContext';
-import { isClimbingCragOrArea, isClimbingRoute } from '../../../utils';
+import {
+  isClimbingCragLike,
+  isClimbingCragOrArea,
+  isClimbingRoute,
+} from '../../../utils';
 
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
 
@@ -163,7 +167,9 @@ export const FeatureImages = () => {
     }
     // Climbing features look cleaner without the big placeholder icon.
     const isClimbingFeature =
-      isClimbingCragOrArea(feature.tags) || isClimbingRoute(feature.tags);
+      isClimbingCragOrArea(feature.tags) ||
+      isClimbingCragLike(feature.tags) ||
+      isClimbingRoute(feature.tags);
     if (isClimbingFeature) {
       return null;
     }

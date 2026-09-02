@@ -1,12 +1,14 @@
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckIcon from '@mui/icons-material/Check';
-import { Box, Stack, Typography } from '@mui/material';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import Router from 'next/router';
 import React from 'react';
 import { intl, t } from '../../services/intl';
 import { TranslationId } from '../../services/types';
-import { useMobileMode } from '../helpers';
+import { COMMUNITY_URL } from '../consts';
+import { isMobileMode, useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import { GradientHeading, TintedCard } from '../utils/panelUi';
@@ -52,14 +54,29 @@ const StoryLink = styled.a`
   }
 `;
 
+const MobileOnly = styled.div`
+  display: none;
+
+  @media ${isMobileMode} {
+    display: block;
+    text-align: center;
+  }
+`;
+
 const Hero = () => (
-  <Box mt={4}>
+  <Box
+    sx={{
+      mt: 4,
+    }}
+  >
     <GradientHeading>{t('about.hero_claim')}</GradientHeading>
     <Typography
       variant="body1"
-      color="text.secondary"
-      mt={1.5}
-      lineHeight={1.7}
+      sx={{
+        color: 'text.secondary',
+        mt: 1.5,
+        lineHeight: 1.7,
+      }}
     >
       {t('about.hero_sub')}
     </Typography>
@@ -71,6 +88,26 @@ const Hero = () => (
       {t('homepage.our_story')}
       <ArrowForwardIcon sx={{ fontSize: 16 }} />
     </StoryLink>
+    <MobileOnly>
+      <Button
+        variant="outlined"
+        color="secondary"
+        size="small"
+        startIcon={<QuestionAnswerIcon />}
+        href={COMMUNITY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{
+          mt: 2.5,
+          borderRadius: '999px',
+          textTransform: 'none',
+          fontWeight: 800,
+          px: 2,
+        }}
+      >
+        {t('climbing.forum')}
+      </Button>
+    </MobileOnly>
   </Box>
 );
 
@@ -83,23 +120,31 @@ const Section = ({
   lead?: string;
   children: React.ReactNode;
 }) => (
-  <Box mt={5}>
+  <Box
+    sx={{
+      mt: 5,
+    }}
+  >
     <Typography
       variant="h5"
       component="h2"
-      fontWeight={800}
-      letterSpacing={-0.4}
-      lineHeight={1.25}
+      sx={{
+        fontWeight: 800,
+        letterSpacing: -0.4,
+        lineHeight: 1.25,
+      }}
     >
       {title}
     </Typography>
     {lead && (
       <Typography
         variant="body1"
-        color="text.secondary"
-        mt={1.25}
-        mb={2}
-        lineHeight={1.7}
+        sx={{
+          color: 'text.secondary',
+          mt: 1.25,
+          mb: 2,
+          lineHeight: 1.7,
+        }}
       >
         {lead}
       </Typography>
@@ -114,9 +159,22 @@ const UsCard = styled(TintedCard)`
 `;
 
 const Point = ({ children }: { children: React.ReactNode }) => (
-  <Stack direction="row" spacing={1.25} alignItems="flex-start" mt={1}>
+  <Stack
+    direction="row"
+    spacing={1.25}
+    sx={{
+      alignItems: 'flex-start',
+      mt: 1,
+    }}
+  >
     <CheckIcon color="primary" sx={{ fontSize: 20, mt: '1px' }} />
-    <Typography variant="body2" fontWeight={600} lineHeight={1.5}>
+    <Typography
+      variant="body2"
+      sx={{
+        fontWeight: 600,
+        lineHeight: 1.5,
+      }}
+    >
       {children}
     </Typography>
   </Stack>
@@ -128,7 +186,13 @@ const Different = () => (
     lead={t('about.different_lead')}
   >
     <UsCard>
-      <Typography variant="caption" color="primary" fontWeight={700}>
+      <Typography
+        variant="caption"
+        color="primary"
+        sx={{
+          fontWeight: 700,
+        }}
+      >
         {t('about.different_us')}
       </Typography>
       {US_POINTS.map((index) => (

@@ -75,16 +75,28 @@ const Urls = () => {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        size="small"
-        href={itemUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        sx={{ mt: 1.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}
-      >
-        {type}/{id}
-      </Button>
+      <Stack direction="row" sx={{ gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
+        <Button
+          variant="outlined"
+          size="small"
+          href={itemUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}
+        >
+          {type}/{id}
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          href={idUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ fontWeight: 700 }}
+        >
+          iD editor
+        </Button>
+      </Stack>
       {(version != null || date || user) && (
         <Meta>
           {version != null && <A href={idUrl}>v{version}</A>}
@@ -115,7 +127,13 @@ export const OpenInProduction = () => {
 
 export const FromOsm = () => (
   <>
-    <Typography variant="body2" color="text.secondary" lineHeight={1.65}>
+    <Typography
+      variant="body2"
+      sx={{
+        color: 'text.secondary',
+        lineHeight: 1.65,
+      }}
+    >
       <Translation id="homepage.about_osm" />
     </Typography>
     <Urls />
@@ -137,7 +155,14 @@ export const FeatureDescription = () => {
   const typeLabel = t(OSM_TYPE_KEY[type]);
 
   return (
-    <Stack direction="row" gap={1.25} alignItems="center" minWidth={0}>
+    <Stack
+      direction="row"
+      sx={{
+        gap: 1.25,
+        alignItems: 'center',
+        minWidth: 0,
+      }}
+    >
       <Tooltip
         title={
           <>
@@ -151,16 +176,29 @@ export const FeatureDescription = () => {
           <img src="/logo-osm.svg" alt="" width={18} height={18} />
         </OsmBadge>
       </Tooltip>
-      <Box minWidth={0}>
-        <Typography variant="body2" fontWeight={700} lineHeight={1.2} noWrap>
+      <Box
+        sx={{
+          minWidth: 0,
+        }}
+      >
+        <Typography
+          variant="body2"
+          noWrap
+          sx={{
+            fontWeight: 700,
+            lineHeight: 1.2,
+          }}
+        >
           OpenStreetMap
         </Typography>
         <Typography
           variant="caption"
-          color="text.secondary"
-          display="block"
-          lineHeight={1.35}
           noWrap
+          sx={{
+            color: 'text.secondary',
+            display: 'block',
+            lineHeight: 1.35,
+          }}
         >
           {typeLabel} · {id}
         </Typography>

@@ -21,8 +21,10 @@ export const LengthFilter = () => {
     <Stack>
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="baseline"
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+        }}
       >
         <FilterSectionLabel $flush>
           {t('crag_filter.length')}

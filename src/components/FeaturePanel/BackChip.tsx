@@ -3,6 +3,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Chip, Typography } from '@mui/material';
 import Router, { useRouter } from 'next/router';
 import { t } from '../../services/intl';
+import { isModifiedClick } from '../helpers';
 
 const DIARY_PATH_RE = /^\/u\//;
 
@@ -42,6 +43,7 @@ export const BackChip = () => {
           component="a"
           href={back}
           onClick={(e) => {
+            if (isModifiedClick(e)) return;
             e.preventDefault();
             Router.push(back);
           }}

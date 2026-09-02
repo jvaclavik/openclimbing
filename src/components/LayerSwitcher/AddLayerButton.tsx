@@ -18,7 +18,12 @@ export const AddUserLayerButton = () => {
 
   return (
     <>
-      <Box m={2} mt={1}>
+      <Box
+        sx={{
+          m: 2,
+          mt: 1,
+        }}
+      >
         <Button size="small" color="secondary" onClick={() => setOpen(true)}>
           {t('layerswitcher.add_layer_button')}
         </Button>

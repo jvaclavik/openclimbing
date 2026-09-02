@@ -31,16 +31,37 @@ const Instruction = ({ instruction }: { instruction: Instruction }) => {
 
   return (
     <StyledListItem>
-      <Stack direction="row" alignItems="center">
-        <Box width={theme.spacing(6)}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            width: theme.spacing(6),
+          }}
+        >
           <Icon sign={instruction.sign} />
         </Box>
-        <Typography variant="subtitle1" fontWeight={700}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
           {instruction.street_name || instruction.text}
         </Typography>
       </Stack>
       {instruction.distance > 0 && (
-        <Stack direction="row" alignItems="center" spacing={2} ml={6}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: 'center',
+            ml: 6,
+          }}
+        >
           <Typography
             noWrap
             color="textSecondary"
@@ -49,7 +70,11 @@ const Instruction = ({ instruction }: { instruction: Instruction }) => {
           >
             <Distance distance={instruction.distance} />
           </Typography>
-          <Stack flex={1}>
+          <Stack
+            sx={{
+              flex: 1,
+            }}
+          >
             <Divider />
           </Stack>
         </Stack>

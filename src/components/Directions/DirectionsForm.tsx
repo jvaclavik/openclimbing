@@ -142,9 +142,11 @@ export const DirectionsForm = ({ setResult, hideForm }: Props) => {
       <Stack
         direction="row"
         spacing={1}
-        mb={2}
-        alignItems="center"
-        justifyContent="space-between"
+        sx={{
+          mb: 2,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
       >
         <ModeToggler
           value={mode}
@@ -154,7 +156,12 @@ export const DirectionsForm = ({ setResult, hideForm }: Props) => {
         <CloseButton />
       </Stack>
 
-      <Stack spacing={1} mb={3}>
+      <Stack
+        spacing={1}
+        sx={{
+          mb: 3,
+        }}
+      >
         {inputs.map((item, index) => {
           const { value, label, pointIndex } = item;
           return (
@@ -164,8 +171,10 @@ export const DirectionsForm = ({ setResult, hideForm }: Props) => {
               )}
               <Stack
                 direction="row"
-                alignItems="center"
                 onDragOver={(e) => handleDragOver(e, index)}
+                sx={{
+                  alignItems: 'center',
+                }}
               >
                 <DragHandler
                   onDragStart={(e) => {

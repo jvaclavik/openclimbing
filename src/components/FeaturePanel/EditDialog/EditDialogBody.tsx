@@ -29,8 +29,10 @@ const CustomizedDialog: React.FC = ({ children }) => {
     <StyledDialog
       fullScreen // the edit dialog always opens fullscreen (shared map needs the room)
       open={opened}
-      onClose={handleClose}
-      disableEscapeKeyDown={isModified && !successInfo}
+      onClose={(event, reason) => {
+        if (isModified && !successInfo && reason === 'escapeKeyDown') return;
+        handleClose();
+      }}
       disableEnforceFocus
       aria-labelledby="edit-dialog-title"
       slotProps={{

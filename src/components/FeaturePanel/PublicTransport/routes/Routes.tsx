@@ -89,7 +89,7 @@ export const PublicTransportInner = () => {
         <PublicTransportDisplay routes={data.routes} geoJson={data.geoJson} />
       )}
       {status === 'error' && (
-        <Typography color="secondary" paragraph>
+        <Typography color="secondary" sx={{ mb: 2 }}>
           Error
         </Typography>
       )}

@@ -122,7 +122,13 @@ const Map = () => {
                 }
                 $bottom={drawerPeek ? QUARTER_PEEK_PX + 8 : 6}
               >
-                <Stack direction="row" alignItems="center" gap={1}>
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
                   <RadarMapButton />
                   <PrecipAccumMapButton />
                   <SunShadowMapButton />

@@ -25,6 +25,7 @@ import {
 } from '../../../../services/tagging/climbing/routeGrade';
 import { useTheme } from '@mui/material';
 import { Feature, LonLat } from '../../../../services/types';
+import { isModifiedClick } from '../../../helpers';
 import { ListBadges } from '../../../MyLists/ListBadges';
 import { ListPickerDialog } from '../../../MyLists/ListPickerDialog';
 import { useMapStateContext } from '../../../utils/MapStateContext';
@@ -321,8 +322,10 @@ const RouteName = (props: {
       <Typography
         variant="inherit"
         component="h3"
-        fontWeight={props.highlighted ? 700 : undefined}
-        lineHeight={1.3}
+        sx={{
+          fontWeight: props.highlighted ? 700 : undefined,
+          lineHeight: 1.3,
+        }}
       >
         {props.feature.tags?.name}
       </Typography>
@@ -409,6 +412,7 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
           <Row
             $isVisible={isVisible}
             onClick={(e) => {
+              if (isModifiedClick(e)) return;
               onClick(e);
               e.preventDefault();
             }}
@@ -430,8 +434,13 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
                 {index + 1}
               </RouteNumber>
             </RouteNumberContainer>
-            <NameColumn justifyContent="stretch" flex={1}>
-              <Stack direction="row" gap={1}>
+            <NameColumn sx={{ justifyContent: 'stretch', flex: 1 }}>
+              <Stack
+                direction="row"
+                sx={{
+                  gap: 1,
+                }}
+              >
                 <RouteName
                   feature={feature}
                   selected={isSelected}

@@ -69,7 +69,11 @@ type LinkSectionProps = {
 };
 
 const ShareLinkSection = ({ url, isMobileMode }: LinkSectionProps) => (
-  <Box mb={2}>
+  <Box
+    sx={{
+      mb: 2,
+    }}
+  >
     <Typography variant="overline">{t('my_ticks.share.link_label')}</Typography>
     <Stack spacing={0}>
       <StyledLinkField
@@ -79,7 +83,13 @@ const ShareLinkSection = ({ url, isMobileMode }: LinkSectionProps) => (
         size={isMobileMode ? 'small' : 'medium'}
         slotProps={{ input: { readOnly: true } }}
       />
-      <Stack direction="row" alignItems="center" sx={{ pt: 0.5 }}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+          pt: 0.5,
+        }}
+      >
         <div style={{ flex: 1 }} />
         <ActionButtons payload={url} type="url" />
       </Stack>
@@ -93,7 +103,11 @@ type TextSectionProps = {
 };
 
 const ShareTextSection = ({ shareText, isMobileMode }: TextSectionProps) => (
-  <Box mb={2}>
+  <Box
+    sx={{
+      mb: 2,
+    }}
+  >
     <Typography variant="overline">{t('my_ticks.share.text_label')}</Typography>
     <Stack spacing={0}>
       <StyledTextArea
@@ -106,7 +120,13 @@ const ShareTextSection = ({ shareText, isMobileMode }: TextSectionProps) => (
         size={isMobileMode ? 'small' : 'medium'}
         slotProps={{ input: { readOnly: true } }}
       />
-      <Stack direction="row" alignItems="center" sx={{ pt: 0.5 }}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+          pt: 0.5,
+        }}
+      >
         <div style={{ flex: 1 }} />
         <ActionButtons payload={shareText} type="text" />
       </Stack>
@@ -199,7 +219,13 @@ export const ShareTickDialog = ({
         {title}
       </DialogTitle>
       <DialogContent sx={isMobileMode ? undefined : { minWidth: 480 }}>
-        <Typography variant="body2" sx={{ mb: 2 }} color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            mb: 2,
+          }}
+        >
           {description}
         </Typography>
         <ShareLinkSection url={url} isMobileMode={isMobileMode} />

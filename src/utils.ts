@@ -73,6 +73,27 @@ export const not =
   (item: T) =>
     !predicate(item);
 
+export const isClimbingRoute = (tags: FeatureTags) =>
+  ['route_bottom', 'route_top', 'route'].includes(tags.climbing);
+
+const hasClimbingTag = (tags: FeatureTags) =>
+  tags.sport === 'climbing' ||
+  Object.keys(tags).some(
+    (key) => key === 'climbing' || key.startsWith('climbing:'),
+  );
+
+const isTowerOrCliff = (tags: FeatureTags) =>
+  tags.natural === 'peak' || tags.natural === 'cliff';
+
+// Destinations in an area list: crag/boulder/peak/stone/… with climbing tags.
+// `climbing=route_bottom` on a peak/cliff is often just the access node.
+export const isClimbingCragLike = (tags: FeatureTags) => {
+  if (!tags || tags.climbing === 'area') return false;
+  if (tags.climbing === 'gym' || tags.climbing === 'ferrata') return false;
+  if (isClimbingRoute(tags) && !isTowerOrCliff(tags)) return false;
+  return hasClimbingTag(tags);
+};
+
 export const isClimbingCragOrArea = (tags: FeatureTags) =>
   tags.climbing === 'crag' || tags.climbing === 'area';
 
@@ -84,10 +105,7 @@ export const isClimbingCrag = (feature: Feature) =>
   feature.osmMeta.type === 'relation' && feature.tags.climbing === 'crag';
 
 export const isFeatureClimbingRoute = (feature: Feature) =>
-  isClimbingRoute(feature?.tags);
-
-export const isClimbingRoute = (tags: FeatureTags) =>
-  ['route_bottom', 'route_top', 'route'].includes(tags.climbing);
+  isClimbingRoute(feature?.tags) && !isClimbingCragLike(feature?.tags);
 
 export const isRouteMaster = ({
   tags,

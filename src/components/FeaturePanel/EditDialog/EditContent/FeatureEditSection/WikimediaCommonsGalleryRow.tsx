@@ -1,4 +1,4 @@
-import DeleteOutline from '@mui/icons-material/DeleteOutline';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
 import CloudUploadOutlined from '@mui/icons-material/CloudUploadOutlined';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import {
@@ -69,7 +69,12 @@ const EmptyRowCta: React.FC<EmptyRowCtaProps> = ({
     );
   }
   return (
-    <Stack spacing={1} alignItems="flex-start">
+    <Stack
+      spacing={1}
+      sx={{
+        alignItems: 'flex-start',
+      }}
+    >
       <Button
         variant="contained"
         size="medium"
@@ -120,13 +125,17 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={1.5}
-        alignItems={{ xs: 'stretch', sm: 'center' }}
+        sx={{
+          alignItems: { xs: 'stretch', sm: 'center' },
+        }}
       >
         <Stack
           direction="row"
           spacing={1}
-          alignItems="center"
-          sx={{ flexShrink: 0 }}
+          sx={{
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
         >
           {dragHandle != null && <Box>{dragHandle}</Box>}
           <WikimediaCommonsThumb
@@ -138,8 +147,19 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
           />
         </Stack>
 
-        <Stack flex={1} minWidth={0} spacing={1}>
-          <Typography variant="caption" color="text.secondary">
+        <Stack
+          spacing={1}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {label}
           </Typography>
 
@@ -189,7 +209,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
               aria-label={t('editdialog.remove')}
               onClick={onRemove}
             >
-              <DeleteOutline fontSize="small" />
+              <DeleteOutlined fontSize="small" />
             </IconButton>
           </Tooltip>
         </Box>

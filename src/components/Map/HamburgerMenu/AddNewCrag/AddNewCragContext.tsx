@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import type maplibregl from 'maplibre-gl';
+import type * as maplibregl from 'maplibre-gl';
 import { getGlobalMap } from '../../../../services/mapStorage';
 import { getCoordsFeature } from '../../../../services/getCoordsFeature';
 import { getRoundedPosition } from '../../../../utils';

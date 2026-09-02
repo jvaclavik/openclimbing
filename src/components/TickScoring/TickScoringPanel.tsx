@@ -28,7 +28,7 @@ export const TickScoringPanel = () => {
               <Typography variant="h4" component="h1" gutterBottom>
                 {t('tick_scoring.page_title')}
               </Typography>
-              <Typography variant="body1" paragraph sx={{ maxWidth: 720 }}>
+              <Typography variant="body1" sx={{ maxWidth: 720, mb: 2 }}>
                 {t('tick_scoring.intro')}
               </Typography>
 
@@ -43,7 +43,13 @@ export const TickScoringPanel = () => {
 
               <TickScoringStylesTable />
 
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  mt: 2,
+                }}
+              >
                 {t('tick_scoring.footer_note')}
               </Typography>
             </PanelSidePadding>

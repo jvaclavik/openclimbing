@@ -45,42 +45,83 @@ export const SupportUs = () => {
   const [isBitcoinDialogOpen, setIsBitcoinDialogOpen] = useState(false);
 
   return (
-    <Box mt={2}>
+    <Box
+      sx={{
+        mt: 2,
+      }}
+    >
       <LinkCard>
         <CardRow>
           <CardTitle icon={<Heart>❤️</Heart>}>
             {t('support_us.title')}
           </CardTitle>
-          <Typography variant="body2" color="text.secondary" mb={1}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              mb: 1,
+            }}
+          >
             {t('support_us.p1')}
           </Typography>
-          <Typography variant="body2" color="text.secondary" mb={2}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             {t('support_us.p2')}
           </Typography>
 
-          <Typography variant="body2" fontWeight={700}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             {t('support_us.how_to_help')}
           </Typography>
           <HelpList>
             <li>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {t('support_us.share')}
               </Typography>
             </li>
             <li>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 <a href="mailto:jvaclavik@gmail.com">
                   {t('support_us.feedback')}
                 </a>
               </Typography>
             </li>
             <li>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {t('support_us.add_content')}
               </Typography>
             </li>
             <li>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 <Translation
                   id="support_us.develop"
                   tags={{
@@ -91,10 +132,22 @@ export const SupportUs = () => {
             </li>
           </HelpList>
 
-          <Typography variant="body2" fontWeight={700} mb={1}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+            }}
+          >
             {t('support_us.contribute_financially')}
           </Typography>
-          <Stack direction="row" flexWrap="wrap" gap={1}>
+          <Stack
+            direction="row"
+            sx={{
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
             <Button
               size="small"
               variant="outlined"
@@ -117,7 +170,13 @@ export const SupportUs = () => {
             ))}
           </Stack>
 
-          <Typography variant="body2" color="text.secondary" mt={2}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              mt: 2,
+            }}
+          >
             {t('support_us.thanks')}
           </Typography>
         </CardRow>

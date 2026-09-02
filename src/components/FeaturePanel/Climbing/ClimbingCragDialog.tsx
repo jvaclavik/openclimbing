@@ -206,8 +206,10 @@ export const ClimbingCragDialog = ({
     <Dialog
       fullScreen
       open={!closing}
-      onClose={handleClose}
-      disableEscapeKeyDown={isEditMode}
+      onClose={(_event, reason) => {
+        if (isEditMode && reason === 'escapeKeyDown') return;
+        handleClose();
+      }}
       disableEnforceFocus={isEditDialogOpened}
       disableAutoFocus={isEditDialogOpened}
       disableRestoreFocus={isEditDialogOpened}
@@ -242,7 +244,13 @@ export const ClimbingCragDialog = ({
         <DialogActions>
           <Flex>
             <LeftActions>
-              <Stack spacing={1} alignItems="flex-start" width="100%">
+              <Stack
+                spacing={1}
+                sx={{
+                  alignItems: 'flex-start',
+                  width: '100%',
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <ClimbingEditorHelperText />
                 </div>

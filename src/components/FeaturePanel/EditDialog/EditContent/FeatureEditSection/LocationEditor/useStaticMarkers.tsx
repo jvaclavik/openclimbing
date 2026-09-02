@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import ReactDOM from 'react-dom/client';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { Button, Stack, Typography } from '@mui/material';
 import { createMapEffectHook } from '../../../../../helpers';
 import { t } from '../../../../../../services/intl';
@@ -45,7 +45,12 @@ const useUpdateFeatureMarkers = createMapEffectHook<
 
     const MyPopupContent = () => {
       return (
-        <Stack direction="column" gap={2}>
+        <Stack
+          direction="column"
+          sx={{
+            gap: 2,
+          }}
+        >
           <Typography variant="subtitle2" color="primary">
             {item.tags?.name || item.shortId}
           </Typography>

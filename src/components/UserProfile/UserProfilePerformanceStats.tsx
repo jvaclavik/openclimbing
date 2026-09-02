@@ -30,7 +30,15 @@ function UserProfileStatSimple({
 }) {
   return (
     <Box sx={STAT_BOX_SX}>
-      <Typography variant="body2" color="text.secondary" sx={STAT_LABEL_SX}>
+      <Typography
+        variant="body2"
+        sx={[
+          {
+            color: 'text.secondary',
+          },
+          ...(Array.isArray(STAT_LABEL_SX) ? STAT_LABEL_SX : [STAT_LABEL_SX]),
+        ]}
+      >
         {label}
       </Typography>
       <Typography component="p" sx={STAT_VALUE_SX}>
@@ -46,9 +54,13 @@ function UserProfileStatTotalPoints({ totalPoints }: { totalPoints: number }) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
         <Typography
           variant="body2"
-          color="text.secondary"
           component="span"
-          sx={STAT_LABEL_SX}
+          sx={[
+            {
+              color: 'text.secondary',
+            },
+            ...(Array.isArray(STAT_LABEL_SX) ? STAT_LABEL_SX : [STAT_LABEL_SX]),
+          ]}
         >
           {t('user_profile.total_points')}
         </Typography>
@@ -78,7 +90,15 @@ function UserProfileStatTotalPoints({ totalPoints }: { totalPoints: number }) {
 function UserProfileStatLeaderboardRank({ rank }: { rank: number | null }) {
   return (
     <Box sx={STAT_BOX_SX}>
-      <Typography variant="body2" color="text.secondary" sx={STAT_LABEL_SX}>
+      <Typography
+        variant="body2"
+        sx={[
+          {
+            color: 'text.secondary',
+          },
+          ...(Array.isArray(STAT_LABEL_SX) ? STAT_LABEL_SX : [STAT_LABEL_SX]),
+        ]}
+      >
         {t('user_profile.leaderboard_rank')}
       </Typography>
       <Typography

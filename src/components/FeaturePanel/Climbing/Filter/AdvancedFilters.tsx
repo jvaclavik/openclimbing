@@ -27,7 +27,7 @@ import {
   getClimbingRockTranslationKey,
 } from '../../../../services/tagging/climbing/climbingRockData';
 import { LengthFilter } from './LengthFilter';
-import { FilterCard, FilterSectionLabel, chipOutline } from './filterUi';
+import { FilterCard, FilterSectionLabel, filterChipSx } from './filterUi';
 import { tint } from '../../../utils/panelUi';
 
 const ExpandIcon = styled(ExpandMoreIcon, {
@@ -52,7 +52,13 @@ type ChipGroupProps = {
 const ChipGroup = ({ label, options, selected, onChange }: ChipGroupProps) => (
   <Box>
     <FilterSectionLabel>{t(label)}</FilterSectionLabel>
-    <Stack direction="row" gap={0.5} flexWrap="wrap">
+    <Stack
+      direction="row"
+      sx={{
+        gap: 0.5,
+        flexWrap: 'wrap',
+      }}
+    >
       {options.map((option) => {
         const isSelected = selected.includes(option.value);
         return (
@@ -63,11 +69,7 @@ const ChipGroup = ({ label, options, selected, onChange }: ChipGroupProps) => (
             color={isSelected ? 'primary' : 'default'}
             variant={isSelected ? 'filled' : 'outlined'}
             onClick={() => onChange(toggle(selected, option.value))}
-            sx={(theme) => ({
-              fontWeight: 600,
-              borderRadius: '8px',
-              ...(isSelected ? undefined : chipOutline(theme)),
-            })}
+            sx={(theme) => filterChipSx(theme, !isSelected)}
           />
         );
       })}
@@ -138,6 +140,7 @@ export const AdvancedFilters = ({
         fullWidth
         size="small"
         color="inherit"
+        disableRipple
         onClick={() => setOpen((prev) => !prev)}
         startIcon={
           <Badge
@@ -164,7 +167,13 @@ export const AdvancedFilters = ({
         </Box>
       </Button>
       <Collapse in={open}>
-        <Stack gap={1.5} sx={{ paddingTop: 1, paddingBottom: 0.5 }}>
+        <Stack
+          sx={{
+            gap: 1.5,
+            paddingTop: 1,
+            paddingBottom: 0.5,
+          }}
+        >
           {showClimbingType && (
             <ChipGroup
               label="climbing_badges.type_label"
@@ -222,18 +231,20 @@ export const AdvancedFilters = ({
               <FilterSectionLabel>
                 {t('crag_filter.photo_drawn')}
               </FilterSectionLabel>
-              <Stack direction="row" gap={0.5} flexWrap="wrap">
+              <Stack
+                direction="row"
+                sx={{
+                  gap: 0.5,
+                  flexWrap: 'wrap',
+                }}
+              >
                 <Chip
                   label={t('crag_filter.photo_drawn_with')}
                   size="small"
                   color={photoDrawn === 'with' ? 'primary' : 'default'}
                   variant={photoDrawn === 'with' ? 'filled' : 'outlined'}
                   onClick={() => togglePhotoDrawn('with')}
-                  sx={(theme) => ({
-                    fontWeight: 600,
-                    borderRadius: '8px',
-                    ...(photoDrawn === 'with' ? undefined : chipOutline(theme)),
-                  })}
+                  sx={(theme) => filterChipSx(theme, photoDrawn !== 'with')}
                 />
                 <Chip
                   label={t('crag_filter.photo_drawn_without')}
@@ -241,13 +252,7 @@ export const AdvancedFilters = ({
                   color={photoDrawn === 'without' ? 'primary' : 'default'}
                   variant={photoDrawn === 'without' ? 'filled' : 'outlined'}
                   onClick={() => togglePhotoDrawn('without')}
-                  sx={(theme) => ({
-                    fontWeight: 600,
-                    borderRadius: '8px',
-                    ...(photoDrawn === 'without'
-                      ? undefined
-                      : chipOutline(theme)),
-                  })}
+                  sx={(theme) => filterChipSx(theme, photoDrawn !== 'without')}
                 />
               </Stack>
             </Box>
@@ -271,7 +276,7 @@ export const AdvancedFilters = ({
               }
               label={t('climbing_badges.family_friendly_label')}
               slotProps={{
-                typography: { fontWeight: 600, fontSize: '0.85rem' },
+                typography: { sx: { fontWeight: 600, fontSize: '0.85rem' } },
               }}
             />
           )}

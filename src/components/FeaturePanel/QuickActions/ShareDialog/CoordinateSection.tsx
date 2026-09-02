@@ -41,7 +41,11 @@ export const CoordinateSection = () => {
   };
 
   return (
-    <Box mb={1}>
+    <Box
+      sx={{
+        mb: 1,
+      }}
+    >
       <Typography variant="overline">{t('sharedialog.coordinates')}</Typography>
       <Stack
         spacing={0.5}

@@ -32,7 +32,13 @@ const IconContainer = styled.div`
 
 const ClimbingMultiValuesInner = () => {
   return (
-    <Stack gap={1} ml={2} mt={2}>
+    <Stack
+      sx={{
+        gap: 1,
+        ml: 2,
+        mt: 2,
+      }}
+    >
       <MultiValueKeyEditor
         label={t('climbing_badges.type_label')}
         keys={[
@@ -116,7 +122,13 @@ export const ClimbingEditor = () => {
           aria-controls="panel1-content"
           id="panel1-header"
         >
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <IconContainer>
               <Maki ico="climbing" size={18} themed withMarginRight={false} />
             </IconContainer>
@@ -126,7 +138,11 @@ export const ClimbingEditor = () => {
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
-          <Box ml={2}>
+          <Box
+            sx={{
+              ml: 2,
+            }}
+          >
             <ClimbingGradesEditor />
             <ClimbingRockSelect />
             <ClimbingStartSelect />

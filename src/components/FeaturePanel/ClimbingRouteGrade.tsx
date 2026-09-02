@@ -14,7 +14,14 @@ export const ClimbingRouteGrade = () => {
   const routeDifficulties = getDifficulties(feature?.tags);
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center" paddingBottom={2}>
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+        paddingBottom: 2,
+      }}
+    >
       <ConvertedRouteDifficultyBadge routeDifficulties={routeDifficulties} />
       <GradeSystemSelect />
     </Stack>

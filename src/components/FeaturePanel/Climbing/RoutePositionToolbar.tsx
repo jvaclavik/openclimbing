@@ -1,12 +1,12 @@
 import React from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import styled from '@emotion/styled';
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import TimelineIcon from '@mui/icons-material/Timeline';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { t } from '../../../services/intl';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
@@ -167,7 +167,13 @@ export const RoutePositionToolbar = ({
     <ToolbarContainer>
       {isHelpOpen && (
         <HelperPaper>
-          <Stack direction="row" spacing={1} alignItems="flex-start">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: 'flex-start',
+            }}
+          >
             <Typography variant="body2">
               {t('climbing.route_positions_help')}
             </Typography>
@@ -201,7 +207,7 @@ export const RoutePositionToolbar = ({
               onClick={clearGuide}
               aria-label={t('climbing.clear_guide_points')}
             >
-              <DeleteOutlineIcon fontSize="small" />
+              <DeleteOutlinedIcon fontSize="small" />
             </GlassCircleButton>
           </span>
         </Tooltip>
@@ -212,7 +218,7 @@ export const RoutePositionToolbar = ({
               onClick={() => setHelpDismissed(false)}
               aria-label={t('climbing.show_help')}
             >
-              <HelpOutlineIcon fontSize="small" />
+              <HelpOutlinedIcon fontSize="small" />
             </GlassCircleButton>
           </Tooltip>
         )}

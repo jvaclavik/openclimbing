@@ -18,7 +18,7 @@ const RunwaysInner = () => {
       return data.length > 0 && <SuccessRunways runways={data} />;
     case 'error':
       return (
-        <Typography color="secondary" paragraph>
+        <Typography color="secondary" sx={{ mb: 2 }}>
           Error
         </Typography>
       );

@@ -72,27 +72,46 @@ const Content = styled.div`
   display: inline-flex;
 `;
 
+const ANIMATION_MS = 1200;
+
 // MapFilter (and similar always-on controls) mount with the page – skip those.
 // Later mounts (user just enabled shadows/radar/…) still get the hint.
 let initialControlsSettled = false;
+const playedIds = new Set<string>();
+
+type Props = {
+  id?: string;
+  children: ReactNode;
+};
 
 /** Draws the eye to a newly appeared bottom-right map control. */
-export const MapControlAppear = ({ children }: { children: ReactNode }) => {
-  const [animate] = useState(initialControlsSettled);
+export const MapControlAppear = ({ id, children }: Props) => {
+  const [play] = useState(() => {
+    if (id && playedIds.has(id)) return false;
+    if (id) playedIds.add(id);
+    return initialControlsSettled;
+  });
+  const [done, setDone] = useState(!play);
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
+    const settle = window.setTimeout(() => {
       initialControlsSettled = true;
     }, 400);
-    return () => clearTimeout(id);
+    return () => clearTimeout(settle);
   }, []);
 
-  if (!animate) {
+  useEffect(() => {
+    if (!play || done) return undefined;
+    const finish = window.setTimeout(() => setDone(true), ANIMATION_MS);
+    return () => clearTimeout(finish);
+  }, [play, done]);
+
+  if (!play || done) {
     return <>{children}</>;
   }
 
   return (
-    <Wrap>
+    <Wrap onClick={() => setDone(true)}>
       <Wave $delay="0s" />
       <Wave $delay="0.28s" />
       <Content>{children}</Content>

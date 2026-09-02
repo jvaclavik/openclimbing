@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import styled from '@emotion/styled';
 import React from 'react';
@@ -89,14 +89,20 @@ const RowLabel = ({
   return (
     <Stack
       direction="row"
-      gap={1}
-      alignItems="center"
-      justifyContent="space-between"
-      width="100%"
-      mr={1}
+      sx={{
+        gap: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        mr: 1,
+      }}
     >
       <Stack direction="column">
-        <Typography fontWeight={highlighted ? 700 : loaded ? 500 : undefined}>
+        <Typography
+          sx={{
+            fontWeight: highlighted ? 700 : loaded ? 500 : undefined,
+          }}
+        >
           {title}
         </Typography>
         {meta ? (
@@ -143,7 +149,7 @@ const FeatureRowMoreMenu = ({ onRemove }: FeatureRowMoreMenuProps) => {
           }}
         >
           <ListItemIcon>
-            <DeleteOutlineIcon fontSize="small" />
+            <DeleteOutlinedIcon fontSize="small" />
           </ListItemIcon>
           {t('editdialog.remove')}
         </MenuItem>
@@ -191,17 +197,21 @@ export const FeatureRow = ({
   return (
     <StyledListItem onClick={handleClick}>
       <Stack
-        alignItems="center"
-        justifyContent="space-between"
         direction="row"
-        width="100%"
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
       >
         <ListItemText>
           <Stack
             direction="row"
-            gap={2}
-            alignItems="center"
-            sx={{ opacity: loaded ? 1 : 0.55 }}
+            sx={{
+              gap: 2,
+              alignItems: 'center',
+              opacity: loaded ? 1 : 0.55,
+            }}
           >
             {tags ? (
               <PoiIcon
@@ -233,10 +243,12 @@ export const FeatureRow = ({
         ) : (
           <Stack
             direction="row"
-            alignItems="center"
-            flexShrink={0}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
+            sx={{
+              alignItems: 'center',
+              flexShrink: 0,
+            }}
           >
             {onRemove && <FeatureRowMoreMenu onRemove={onRemove} />}
             <ChevronRightIcon color={loaded ? 'primary' : 'disabled'} />

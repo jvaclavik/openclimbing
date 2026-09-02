@@ -8,7 +8,8 @@ import { getLabel } from '../../helpers/featureLabel';
 import { getOsmappLink, getShortId, getUrlOsmId } from '../../services/helpers';
 import { addFeatureCenterToCache } from '../../services/osm/featureCenterToCache';
 import { Feature, isInstant } from '../../services/types';
-import { ClientOnly, useMobileMode } from '../helpers';
+import { isClimbingCragLike } from '../../utils';
+import { ClientOnly, isModifiedClick, useMobileMode } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { PANEL_GAP, PanelSidePadding } from '../utils/PanelHelpers';
 import { tint } from '../utils/panelUi';
@@ -32,7 +33,6 @@ import { Slider, Wrapper } from './FeatureImages/FeatureImages';
 import { getClickHandler } from './FeatureImages/Image/helpers';
 import { Image } from './FeatureImages/Image/Image';
 import { getClimbingPhotoAlt } from './FeatureImages/getClimbingPhotoAlt';
-import { MemberItem } from './MemberFeatures/MemberItem';
 
 const MAX_CRAG_CARD_IMAGES = 3;
 
@@ -157,14 +157,23 @@ const Header = ({
 }) => (
   <PanelSidePadding>
     <CragName>
-      <Box display="flex" alignItems="baseline" gap={1} overflow="hidden">
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 1,
+          overflow: 'hidden',
+        }}
+      >
         <Typography
           variant="h4"
           component="h3"
-          overflow="hidden"
-          textOverflow="ellipsis"
           color="primary"
-          lineHeight={1.2}
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            lineHeight: 1.2,
+          }}
         >
           {label}
         </Typography>
@@ -269,7 +278,7 @@ const getFeatureImages = (feature: Feature, limit = MAX_CRAG_CARD_IMAGES) =>
 
 const countRoutesInArea = (feature: Feature): number =>
   (feature.memberFeatures ?? []).reduce((acc, child) => {
-    if (child.tags.climbing === 'crag') {
+    if (isClimbingCragLike(child.tags)) {
       return acc + (child.memberFeatures?.length ?? 0);
     }
     if (child.tags.climbing === 'area') {
@@ -283,7 +292,7 @@ const countRoutesWithPhoto = (routes: Feature[] = []): number =>
 
 const countRoutesWithPhotoInArea = (feature: Feature): number =>
   (feature.memberFeatures ?? []).reduce((acc, child) => {
-    if (child.tags.climbing === 'crag') {
+    if (isClimbingCragLike(child.tags)) {
       return acc + countRoutesWithPhoto(child.memberFeatures);
     }
     if (child.tags.climbing === 'area') {
@@ -314,8 +323,11 @@ const CragItem = ({
   const handleHover = () => feature.center && setPreview(feature);
 
   const images = getFeatureImages(feature);
+  const isTypedCrag = feature.tags.climbing === 'crag';
+  const label = getLabel(feature);
 
   const getOnClickWithHash = (e) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     if (feature.center) {
       // seed the center so fetchFeature() skips the slow Overpass center query
@@ -332,11 +344,11 @@ const CragItem = ({
         onClick={getOnClickWithHash}
         onMouseEnter={mobileMode ? undefined : handleHover}
         onMouseLeave={() => setPreview(null)}
-        title={`${t('featurepanel.sector')} ${getLabel(feature)}`}
+        title={isTypedCrag ? `${t('featurepanel.sector')} ${label}` : label}
       >
         <InnerContainer>
           <Header
-            label={getLabel(feature)}
+            label={label}
             chipContent={
               feature.members?.length ? (
                 <ChipContent>
@@ -351,14 +363,18 @@ const CragItem = ({
                 </ChipContent>
               ) : undefined
             }
-            typeLabel={showTypeLabel ? t('featurepanel.type_crag') : undefined}
+            typeLabel={
+              showTypeLabel && isTypedCrag
+                ? t('featurepanel.type_crag')
+                : undefined
+            }
           />
           {images.length ? (
             <Gallery feature={feature} images={images} priority={priority} />
           ) : null}
         </InnerContainer>
       </StyledLink>
-      {feature.memberFeatures.length > 0 && (
+      {feature.memberFeatures?.length > 0 && (
         <RouteDistribution
           features={feature.memberFeatures}
           variant="compact"
@@ -381,7 +397,7 @@ const AreaItem = ({
 
   const images = collectAreaImages(feature);
   const cragCount =
-    feature.memberFeatures?.filter(({ tags }) => tags.climbing === 'crag')
+    feature.memberFeatures?.filter(({ tags }) => isClimbingCragLike(tags))
       .length ?? 0;
   const subAreaCount =
     feature.memberFeatures?.filter(({ tags }) => tags.climbing === 'area')
@@ -406,6 +422,7 @@ const AreaItem = ({
   ) : undefined;
 
   const getOnClickWithHash = (e) => {
+    if (isModifiedClick(e)) return;
     e.preventDefault();
     if (feature.center) {
       // seed the center so fetchFeature() skips the slow Overpass center query
@@ -458,7 +475,7 @@ const CragList = ({
 
   const items = useMemo<ListItem[]>(() => {
     const otherFeatures = feature.memberFeatures.filter(
-      ({ tags }) => tags.climbing !== 'crag' && tags.climbing !== 'area',
+      ({ tags }) => !isClimbingCragLike(tags) && tags.climbing !== 'area',
     );
     return [
       ...subAreas.map((f) => ({ kind: 'area' as const, feature: f })),
@@ -468,7 +485,12 @@ const CragList = ({
   }, [crags, feature.memberFeatures, subAreas]);
 
   return (
-    <Box mt={2} mb={4}>
+    <Box
+      sx={{
+        mt: 2,
+        mb: 4,
+      }}
+    >
       <CragListContainer ref={setListEl}>
         {scrollParent && items.length > 0 ? (
           <Virtuoso
@@ -491,7 +513,9 @@ const CragList = ({
                     priority={_index === 0}
                   />
                 )}
-                {item.kind === 'other' && <MemberItem feature={item.feature} />}
+                {item.kind === 'other' && (
+                  <CragItem feature={item.feature} priority={_index === 0} />
+                )}
               </ListRow>
             )}
           />
@@ -607,9 +631,11 @@ const FilterRow: React.FC = ({ children }) => (
   <Stack
     direction="row"
     spacing={0.5}
-    justifyContent="flex-end"
-    m={1}
-    alignItems="center"
+    sx={{
+      justifyContent: 'flex-end',
+      m: 1,
+      alignItems: 'center',
+    }}
   >
     {children}
   </Stack>

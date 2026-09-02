@@ -10,8 +10,18 @@ export const Members = () => {
   } = useFeatureContext();
 
   return members?.length ? (
-    <Box mt={4}>
-      <Typography variant="overline" display="block" color="textSecondary">
+    <Box
+      sx={{
+        mt: 4,
+      }}
+    >
+      <Typography
+        variant="overline"
+        color="textSecondary"
+        sx={{
+          display: 'block',
+        }}
+      >
         Relation members
       </Typography>
       <ul>

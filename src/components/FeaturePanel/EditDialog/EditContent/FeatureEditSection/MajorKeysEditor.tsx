@@ -114,7 +114,11 @@ export const MajorKeysEditor: React.FC = () => {
   }, [activeMajorKeys, focusTag]);
 
   return (
-    <Box mb={3}>
+    <Box
+      sx={{
+        mb: 3,
+      }}
+    >
       <MajorKeysFieldList
         data={data}
         tags={tags}

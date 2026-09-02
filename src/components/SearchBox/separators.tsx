@@ -1,11 +1,9 @@
-import { Divider } from '@mui/material';
 import styled from '@emotion/styled';
 import React from 'react';
 import { Option } from './types';
+import { t } from '../../services/intl';
+import type { TranslationId } from '../../services/types';
 
-// Groups that can appear in the results, in the order they're built in
-// useGetOptions. A separator is inserted wherever two neighbouring options
-// belong to a different group.
 const getSection = (option: Option): string => {
   if (option.type === 'climbing') {
     const { type } = option.climbing;
@@ -32,13 +30,31 @@ export const withSeparators = (options: Option[]): Option[] => {
   return result;
 };
 
-const StyledDivider = styled(Divider)`
+const SECTION_LABELS: Record<string, TranslationId> = {
+  'climbing-group': 'searchbox.section.climbing',
+  'climbing-route': 'searchbox.section.routes',
+  geocoder: 'searchbox.section.places',
+  preset: 'searchbox.section.categories',
+};
+
+const Header = styled.div`
   width: 100%;
-  margin: 4px 0;
-  border-color: ${({ theme }) =>
-    theme.palette.mode === 'dark'
-      ? 'rgba(255, 255, 255, 0.12)'
-      : 'rgba(0, 0, 0, 0.12)'};
+  padding: 10px 12px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-export const SeparatorRow = () => <StyledDivider />;
+type SeparatorRowProps = {
+  section?: string;
+};
+
+export const SeparatorRow = ({ section }: SeparatorRowProps) => {
+  const labelId = section ? SECTION_LABELS[section] : undefined;
+  if (!labelId) {
+    return null;
+  }
+  return <Header>{t(labelId)}</Header>;
+};

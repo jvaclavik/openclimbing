@@ -56,8 +56,10 @@ const LayerSwitcher = () => {
             disableBackdropTransition
             disableSwipeToOpen
             sx={{ zIndex: LAYERS_DRAWER_Z, pointerEvents: 'all' }}
-            ModalProps={{ sx: { zIndex: LAYERS_DRAWER_Z } }}
-            PaperProps={{ sx: { zIndex: LAYERS_DRAWER_Z } }}
+            slotProps={{
+              root: { sx: { zIndex: LAYERS_DRAWER_Z } },
+              paper: { sx: { zIndex: LAYERS_DRAWER_Z } },
+            }}
           >
             <div role="presentation" style={{ width: '280px', height: '100%' }}>
               <ClosePanelButton right onClick={close} />

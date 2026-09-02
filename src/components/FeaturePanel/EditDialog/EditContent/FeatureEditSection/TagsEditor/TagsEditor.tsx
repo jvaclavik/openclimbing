@@ -55,7 +55,13 @@ const Table = styled.table`
 const TagsEditorInfo = () => (
   <tr>
     <td colSpan={2}>
-      <Typography variant="body2" color="textSecondary" mt={2}>
+      <Typography
+        variant="body2"
+        color="textSecondary"
+        sx={{
+          mt: 2,
+        }}
+      >
         <Translation id="editdialog.tags_editor_info" />
       </Typography>
     </td>
@@ -134,7 +140,13 @@ export const TagsEditor = () => {
           aria-controls="panel1-content"
           id="panel1-header"
         >
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <AppsIcon />
             <Typography variant="button">
               {t('editdialog.tags_editor')}
@@ -154,7 +166,11 @@ export const TagsEditor = () => {
           <OptionsEditor />
 
           <Divider sx={{ my: 1 }} />
-          <Stack alignItems="flex-start">
+          <Stack
+            sx={{
+              alignItems: 'flex-start',
+            }}
+          >
             <CommentField />
             <DownloadEditButton />
           </Stack>

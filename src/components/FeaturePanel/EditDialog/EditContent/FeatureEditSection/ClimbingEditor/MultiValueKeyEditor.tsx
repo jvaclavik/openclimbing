@@ -19,7 +19,14 @@ export const MultiValueKeyEditor: React.FC<{
     <>
       <EditorHeader label={label} inactive={inactive} setVisible={setVisible} />
       {visible.length > 0 && (
-        <Box display="flex" flexDirection="column" gap={1} mb={2}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            mb: 2,
+          }}
+        >
           {visible.map((k) => (
             <EditorItem
               key={k}

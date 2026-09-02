@@ -43,8 +43,20 @@ const CustomValueInput = ({ k }: CustomValueInputProps) => {
   };
 
   return (
-    <Box mt={1} display="flex" alignItems="center" gap={1}>
-      <Typography variant="caption" color="text.secondary">
+    <Box
+      sx={{
+        mt: 1,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('editdialog.custom_value')}:
       </Typography>
       <TextField
@@ -75,7 +87,13 @@ const ToggleTagButton = ({ k }: { k: string }) => {
   const onSwitch = (checked: boolean) => setTag(k, checked ? 'yes' : 'no');
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       <Switch
         size="small"
         checked={value === 'yes' || (value && value !== 'no')}
@@ -90,11 +108,21 @@ const TagLabel = ({ k }: { k: string }) => {
   const desc = getDescription(k);
   return (
     <>
-      <Typography variant="body2" fontWeight="bold">
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         {getLabel(k)}
       </Typography>
       {!!desc && (
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {desc}
         </Typography>
       )}
@@ -122,13 +150,30 @@ export const EditorItem = ({ k, customValue, setVisible }: Props) => {
 
   return (
     <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Box flex={1} mr={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            mr: 2,
+          }}
+        >
           <TagLabel k={k} />
           {customValue && showCustom && <CustomValueInput k={k} />}
         </Box>
 
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
           <ToggleTagButton k={k} />
 
           {customValue && <EditButton onClick={toggleCustom} />}

@@ -1,8 +1,7 @@
-import { Grid, Typography } from '@mui/material';
 import { Feature, LonLat } from '../../../services/types';
 import { Setter } from '../../../types';
 import { CoordsOption } from '../types';
-import { IconPart } from '../utils';
+import { IconPart, OptionBody, OptionSubtitle, OptionTitle } from '../utils';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { getCoordsFeature } from '../../../services/getCoordsFeature';
 import { t } from '../../../services/intl';
@@ -85,12 +84,10 @@ export const CoordsRow = ({ option: { coords } }: Props) => (
     <IconPart>
       <TravelExploreIcon />
     </IconPart>
-    <Grid size={12}>
-      <span style={{ fontWeight: 700 }}>{coords.label}</span>
-      <Typography variant="body2" color="textSecondary">
-        {coords.sublabel}
-      </Typography>
-    </Grid>
+    <OptionBody>
+      <OptionTitle>{coords.label}</OptionTitle>
+      <OptionSubtitle>{coords.sublabel}</OptionSubtitle>
+    </OptionBody>
   </>
 );
 

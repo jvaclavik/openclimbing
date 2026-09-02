@@ -23,16 +23,6 @@ const PoiType = styled.span<{ $srOnly?: boolean }>`
     white-space: nowrap;
     border: 0;
   `}
-
-  img {
-    position: relative;
-    top: -1px;
-    left: 1px;
-  }
-  svg {
-    position: relative;
-    top: 1px;
-  }
 `;
 
 type PoiDescriptionProps = {
@@ -49,8 +39,10 @@ export const PoiDescription = ({ srOnly }: PoiDescriptionProps) => {
       <Typography
         variant="caption"
         color="secondary"
-        textTransform="lowercase"
         component="span"
+        sx={{
+          textTransform: 'lowercase',
+        }}
       >
         {poiType}
       </Typography>

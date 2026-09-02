@@ -1,4 +1,5 @@
-import maplibregl, { Map } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { Map } from 'maplibre-gl';
 import { useEffect } from 'react';
 import { createMapEffectHook } from '../../helpers';
 import { convertOsmIdToMapId, layersWithOsmId } from '../helpers';

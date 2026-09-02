@@ -114,7 +114,12 @@ export const BaseLayers = ({ baseLayers }: { baseLayers: Layer[] }) => {
               '& .MuiAccordionSummary-content': { my: 0.5 },
             }}
           >
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {t('layerswitcher.more_maps')}
             </Typography>
           </AccordionSummary>

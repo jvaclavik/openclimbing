@@ -131,7 +131,11 @@ export const GradeSystemSelect = ({
       >
         <FilterBody>
           <FilterCard>
-            <Stack gap={0.5}>
+            <Stack
+              sx={{
+                gap: 0.5,
+              }}
+            >
               <FilterOption
                 type="button"
                 $selected={!selectedGradeSystem}
@@ -173,7 +177,13 @@ export const GradeSystemSelect = ({
               handleClose();
             }}
           >
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <ViewListIcon fontSize="small" />
               <span>{t('climbing_grade_table.title')}</span>
             </Stack>

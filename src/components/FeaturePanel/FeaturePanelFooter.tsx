@@ -90,7 +90,11 @@ export const FeaturePanelFooter = ({
           <PanelSidePadding>
             {feature.point ? null : <FromOsm />}
             {point || nonOsmObject ? null : (
-              <Box mt={2}>
+              <Box
+                sx={{
+                  mt: 2,
+                }}
+              >
                 <Button
                   variant="outlined"
                   size="small"
@@ -109,7 +113,12 @@ export const FeaturePanelFooter = ({
                 </Button>
               </Box>
             )}
-            <Box mt={3} mb={1}>
+            <Box
+              sx={{
+                mt: 3,
+                mb: 1,
+              }}
+            >
               <Typography color="secondary">
                 <label>
                   <input

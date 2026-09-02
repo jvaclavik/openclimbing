@@ -27,13 +27,15 @@ export const OpeningHoursInput = ({ cantEdit }: { cantEdit?: boolean }) => {
     <TextField
       label={t('tags.opening_hours')}
       value={tags.opening_hours ?? ''}
-      InputLabelProps={{ shrink: true }}
       variant="outlined"
       margin="normal"
       onChange={(e) => setTag('opening_hours', e.target.value)}
       fullWidth
       autoFocus={focusTag === 'opening_hours'}
       helperText={cantEdit ? <CantEditText /> : undefined}
+      slotProps={{
+        inputLabel: { shrink: true },
+      }}
     />
   );
 };

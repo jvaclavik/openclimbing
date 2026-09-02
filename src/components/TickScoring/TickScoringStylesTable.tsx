@@ -54,13 +54,21 @@ export const TickScoringStylesTable = () => {
             {styleRows.map((row) => (
               <TableRow key={row.tickStyle ?? 'none'}>
                 <TableCell>
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <TickStyleBadge style={row.tickStyle} />
                     {row.tickStyle === null ? (
                       <Typography
                         variant="body2"
                         component="span"
-                        color="text.secondary"
+                        sx={{
+                          color: 'text.secondary',
+                        }}
                       >
                         ({tickStyles[0].name})
                       </Typography>

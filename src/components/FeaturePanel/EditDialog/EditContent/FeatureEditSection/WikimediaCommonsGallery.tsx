@@ -73,7 +73,12 @@ export const WikimediaCommonsGallery: React.FC<Props> = ({
   const canReorder = fileKeys.length > 1;
 
   return (
-    <Stack spacing={2} mb={2}>
+    <Stack
+      spacing={2}
+      sx={{
+        mb: 2,
+      }}
+    >
       {fileKeys.map((fileKey, index) => {
         const value = tags[fileKey] ?? '';
         const rowKey = value ? photoNameKey(value) : null;

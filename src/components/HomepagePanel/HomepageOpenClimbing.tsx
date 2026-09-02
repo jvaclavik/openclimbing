@@ -1,10 +1,12 @@
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
 import { intl, t } from '../../services/intl';
+import { COMMUNITY_URL } from '../consts';
 import { isMobileMode, useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { DRAWER_MOTION } from '../utils/drawerSnap';
@@ -83,8 +85,8 @@ const Description = () => (
   <Typography
     variant="body2"
     component="p"
-    color="text.secondary"
     sx={{
+      color: 'text.secondary',
       maxWidth: 380,
       mx: 'auto',
       mb: 3,
@@ -93,7 +95,12 @@ const Description = () => (
     }}
   >
     {t('homepage.openclimbing_description_p1')}{' '}
-    <Box component="strong" color="text.primary">
+    <Box
+      component="strong"
+      sx={{
+        color: 'text.primary',
+      }}
+    >
       {t('homepage.openclimbing_description_p2')}
     </Box>
   </Typography>
@@ -112,14 +119,34 @@ const Buttons = ({ onClose }) => (
     >
       {t('homepage.go_to_map_button')}
     </Button>
+    <Button
+      variant="text"
+      color="secondary"
+      startIcon={<QuestionAnswerIcon />}
+      href={COMMUNITY_URL}
+      target="_blank"
+      fullWidth
+      sx={{ mt: 1 }}
+    >
+      {t('climbing.forum')}
+    </Button>
   </MobileOnly>
 );
 
 const Gallery = () => (
-  <Box mt={4}>
+  <Box
+    sx={{
+      mt: 4,
+    }}
+  >
     <SectionHeading centered>{t('homepage.gallery.title')}</SectionHeading>
     <HomepageOpenClimbingGallery />
-    <Stack alignItems="center" mt={1}>
+    <Stack
+      sx={{
+        alignItems: 'center',
+        mt: 1,
+      }}
+    >
       <Button
         component={Link}
         href="/climbing-areas"
@@ -159,11 +186,28 @@ const AboutTeaser = styled(Link)`
 
 const AboutLink = () => (
   <AboutTeaser href="/about" locale={intl.lang}>
-    <Stack spacing={0.5} minWidth={0}>
-      <Typography variant="subtitle1" fontWeight={800} lineHeight={1.25}>
+    <Stack
+      spacing={0.5}
+      sx={{
+        minWidth: 0,
+      }}
+    >
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: 800,
+          lineHeight: 1.25,
+        }}
+      >
         {t('topbar.about')}
       </Typography>
-      <Typography variant="body2" sx={{ opacity: 0.9 }} lineHeight={1.45}>
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.45,
+          opacity: 0.9,
+        }}
+      >
         {t('homepage.about_banner_desc')}
       </Typography>
     </Stack>
@@ -175,10 +219,12 @@ const Footer = () => (
   <Typography
     variant="caption"
     color="secondary"
-    letterSpacing={1}
-    textAlign="center"
-    mt={5}
-    pb={2}
+    sx={{
+      letterSpacing: 1,
+      textAlign: 'center',
+      mt: 5,
+      pb: 2,
+    }}
   >
     Made in Prague with ♥
   </Typography>
@@ -200,9 +246,24 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
       </MobileOnly>
       <ClosePanelButton right onClick={onClose} />
       <Content>
-        <Stack height="100%">
-          <Stack flex={1} justifyContent="center">
-            <Stack component="section" alignItems="center" mt={2} mb={2}>
+        <Stack
+          sx={{
+            height: '100%',
+          }}
+        >
+          <Stack
+            sx={{
+              flex: 1,
+            }}
+          >
+            <Stack
+              component="section"
+              sx={{
+                alignItems: 'center',
+                mt: 2,
+                mb: 2,
+              }}
+            >
               <DesktopOnly>
                 <Brand>OpenClimbing</Brand>
               </DesktopOnly>
@@ -210,7 +271,11 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
             </Stack>
             <Description />
             <Gallery />
-            <Box mt={3}>
+            <Box
+              sx={{
+                mt: 3,
+              }}
+            >
               <ClimbingNumbers stats={stats} />
             </Box>
             <Buttons onClose={onClose} />

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import {
   Avatar,
   IconButton,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  MenuItem,
   Stack,
   styled,
   Typography,
@@ -46,9 +46,11 @@ const LogoutButton = ({ onClick }: { onClick: () => void }) => (
   <StyleLogoutText // TODO make it a Button for accessibility
     variant="caption"
     onClick={onClick}
-    textTransform="lowercase"
-    color="text.secondary"
-    sx={{ cursor: 'pointer' }}
+    sx={{
+      cursor: 'pointer',
+      textTransform: 'lowercase',
+      color: 'text.secondary',
+    }}
   >
     {t('user.logout')}
   </StyleLogoutText>
@@ -114,18 +116,32 @@ const LoggedUserHeader = ({ onClose, openUserSettings }: HeaderProps) => {
   return (
     <Stack
       direction="row"
-      justifyContent="space-between"
-      gap={1}
-      alignItems="center"
-      m={1}
-      mt={2}
-      mb={2}
+      sx={{
+        justifyContent: 'space-between',
+        gap: 1,
+        alignItems: 'center',
+        m: 1,
+        mt: 2,
+        mb: 2,
+      }}
     >
-      <Stack direction="row" gap={1.5} alignItems="center" ml={0.5}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1.5,
+          alignItems: 'center',
+          ml: 0.5,
+        }}
+      >
         <DebugModeActivator sx={{ display: 'inline-flex' }}>
           <LoginIconButton size={32} />
         </DebugModeActivator>
-        <Stack direction="column" justifyContent="center">
+        <Stack
+          direction="column"
+          sx={{
+            justifyContent: 'center',
+          }}
+        >
           <OsmUserLink osmUser={osmUser} onClose={onClose} />
           <LogoutButton onClick={handleLogout} />
         </Stack>
@@ -141,17 +157,19 @@ const LoggedOutUserHeader = ({ onClose, openUserSettings }: HeaderProps) => {
   return (
     <Stack
       direction="row"
-      gap={1}
-      alignItems="center"
-      justifyContent="space-between"
-      mt={1}
+      sx={{
+        gap: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mt: 1,
+      }}
     >
-      <MenuItem onClick={handleLogin}>
+      <ListItemButton onClick={handleLogin}>
         <ListItemIcon>
           <Avatar sx={{ width: 24, height: 24 }} />
         </ListItemIcon>
         <ListItemText>{t('user.login_register')}</ListItemText>
-      </MenuItem>
+      </ListItemButton>
       <HeaderIcons onClick={onClose} openUserSettings={openUserSettings} />
     </Stack>
   );

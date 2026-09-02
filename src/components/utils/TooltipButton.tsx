@@ -1,31 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, IconButton, SxProps, Theme, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { isMobileDevice, useBoolState } from '../helpers';
-
-const useClickAwayListener = (
-  tooltipRef: React.MutableRefObject<HTMLDivElement>,
-  hide: () => void,
-  isMobile: boolean,
-) => {
-  useEffect(() => {
-    const clickAway = (e: MouseEvent) => {
-      if (e.target instanceof Node && !tooltipRef.current.contains(e.target)) {
-        hide();
-      }
-    };
-
-    if (isMobile) {
-      window.addEventListener('click', clickAway);
-    }
-
-    return () => {
-      if (isMobile) {
-        window.removeEventListener('click', clickAway);
-      }
-    };
-  }, [hide, isMobile, tooltipRef]);
-};
+import { isMobileDevice } from '../helpers';
 
 type Props = {
   tooltip: React.ReactNode;
@@ -38,6 +14,9 @@ type Props = {
 /**
  * Desktop: tooltip on hover. Mobile: tooltip on tap (MUI hover tooltips
  * don't work on touch). Optional children replace the default info icon.
+ *
+ * Always controlled (`open` is a boolean) so SSR vs client hydration
+ * cannot switch the Tooltip between uncontrolled and controlled.
  */
 export const TooltipButton = ({
   tooltip,
@@ -46,19 +25,28 @@ export const TooltipButton = ({
   enterDelay,
   enterNextDelay,
 }: Props) => {
-  const isMobile = isMobileDevice();
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const [mobileTooltipShown, show, hide] = useBoolState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isMobileDevice()) return undefined;
+
+    const clickAway = (e: MouseEvent) => {
+      if (e.target instanceof Node && !tooltipRef.current?.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('click', clickAway);
+    return () => window.removeEventListener('click', clickAway);
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isMobile) {
+    if (isMobileDevice()) {
       e.preventDefault();
-      show();
+      setOpen(true);
     }
   };
-
-  useClickAwayListener(tooltipRef, hide, isMobile);
 
   const trigger = children ? (
     <Box
@@ -74,22 +62,18 @@ export const TooltipButton = ({
     </IconButton>
   );
 
-  // There is a bug in MUI, passing `open={undefined}` prop to Tooltip makes it uninteractive TODO check again eg 6/2025, or report
-  return isMobile ? (
+  return (
     <Tooltip
       arrow
       title={tooltip}
       placement="top"
-      open={mobileTooltipShown}
-      ref={tooltipRef}
-    >
-      {trigger}
-    </Tooltip>
-  ) : (
-    <Tooltip
-      arrow
-      title={tooltip}
-      placement="top"
+      open={open}
+      onOpen={() => {
+        if (!isMobileDevice()) setOpen(true);
+      }}
+      onClose={() => {
+        if (!isMobileDevice()) setOpen(false);
+      }}
       enterDelay={enterDelay}
       enterNextDelay={enterNextDelay}
       ref={tooltipRef}

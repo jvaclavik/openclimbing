@@ -68,11 +68,11 @@ export const SuccessContent = () => {
           </Typography>
         </CenterText>
 
-        <Typography variant="body2" paragraph>
+        <Typography variant="body2" sx={{ mb: 2 }}>
           {texts.body}
         </Typography>
 
-        <Typography variant="body2" paragraph>
+        <Typography variant="body2" sx={{ mb: 2 }}>
           {texts.urlLabel}
           <br />
           <a href={successInfo.url} target="_blank">
@@ -80,7 +80,7 @@ export const SuccessContent = () => {
           </a>
         </Typography>
 
-        <GrayBox mt={6}>
+        <GrayBox sx={{ mt: 6 }}>
           <Typography variant="overline" color="textSecondary">
             {texts.textLabel}
           </Typography>

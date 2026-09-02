@@ -71,7 +71,12 @@ export const OpenInSection = () => {
               <Typography variant="body1">{label}</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Stack direction="column" gap={2}>
+              <Stack
+                direction="column"
+                sx={{
+                  gap: 2,
+                }}
+              >
                 <QrCode payload={href} image={image} />
                 <LinkItem href={href} label={label} />
               </Stack>

@@ -49,7 +49,14 @@ export const FilterPopover = ({
       sx={{ minWidth: 320, maxWidth: 360 }}
       paperSx={GLASS_PAPER_SX}
       addition={
-        <Stack direction="row" gap={0.5} alignItems="center" mr={1}>
+        <Stack
+          direction="row"
+          sx={{
+            gap: 0.5,
+            alignItems: 'center',
+            mr: 1,
+          }}
+        >
           <Tooltip title={t('crag_filter.reset')}>
             <span>
               <IconButton

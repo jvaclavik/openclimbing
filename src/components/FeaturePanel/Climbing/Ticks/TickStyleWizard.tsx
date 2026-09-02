@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Collapse, Stack, Typography, alpha } from '@mui/material';
 import styled from '@emotion/styled';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -101,17 +101,33 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
   if (finalStyle) {
     questionNode = (
       <Stack spacing={1}>
-        <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <CheckCircleIcon fontSize="small" color="success" />
           <Typography variant="subtitle2">
             {t('tick.wizard.result_label')}
           </Typography>
-          <Typography variant="subtitle2" fontWeight={700}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             {styleConfig?.name}
           </Typography>
         </Stack>
         {styleConfig?.description && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {styleConfig.description}
           </Typography>
         )}
@@ -234,7 +250,7 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
         variant="text"
         size="small"
         color="primary"
-        startIcon={<HelpOutlineIcon />}
+        startIcon={<HelpOutlinedIcon />}
         onClick={() => {
           if (open) reset();
           setOpen((v) => !v);
@@ -285,7 +301,12 @@ const Question = ({ title, helper, options }: QuestionProps) => (
   <Stack spacing={1}>
     <Typography variant="subtitle2">{title}</Typography>
     {helper && (
-      <Typography variant="caption" color="text.secondary">
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {helper}
       </Typography>
     )}

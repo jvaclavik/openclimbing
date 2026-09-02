@@ -74,17 +74,23 @@ export const Homepage = ({ mobileMode, onClick }: Props) => {
           <div>
             <Center $mb>
               <StyledLogoOsmapp width={130} height={130} />
-              <Typography variant="h4" component="h1" color="inherit">
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
+                  color: 'inherit',
+                }}
+              >
                 {PROJECT_NAME}
               </Typography>
               <Typography variant="subtitle1" color="textSecondary">
                 {t(PROJECT_DECRIPTION)}
               </Typography>
             </Center>
-            <Typography variant="body1" paragraph>
+            <Typography variant="body1" sx={{ mb: 2 }}>
               {nl2br(t('homepage.how_to_start'))}
             </Typography>
-            <Typography variant="body2" paragraph>
+            <Typography variant="body2" sx={{ mb: 2 }}>
               <Examples />
             </Typography>
             {mobileMode && (
@@ -124,16 +130,18 @@ export const Homepage = ({ mobileMode, onClick }: Props) => {
             <Spacer />
             <Typography
               variant="overline"
-              display="block"
               color="textSecondary"
               component="h2"
+              sx={{
+                display: 'block',
+              }}
             >
               {t('homepage.heading_about_osmapp')}
             </Typography>
-            <Typography variant="body2" paragraph>
+            <Typography variant="body2" sx={{ mb: 2 }}>
               <Translation id="homepage.about_osmapp" />
             </Typography>
-            <Typography variant="body2" paragraph>
+            <Typography variant="body2" sx={{ mb: 2 }}>
               <GithubIcon
                 width="32"
                 height="32"

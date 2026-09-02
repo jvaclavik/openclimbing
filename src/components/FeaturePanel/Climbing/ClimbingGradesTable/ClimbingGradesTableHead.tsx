@@ -38,8 +38,10 @@ export const ClimbingGradesTableHead = ({
               <Stack
                 direction="row"
                 spacing={1}
-                alignItems="center"
-                justifyContent="space-between"
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
               >
                 <Tooltip
                   arrow
@@ -47,8 +49,19 @@ export const ClimbingGradesTableHead = ({
                   placement="right"
                   enterDelay={1000}
                 >
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="caption" fontWeight={900}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 900,
+                      }}
+                    >
                       {gs.name} {gs.flags}
                     </Typography>
                     {currentGradeSystem === key && (
@@ -75,7 +88,13 @@ export const ClimbingGradesTableHead = ({
             title={t('climbing_grade_table.tick_base_tooltip')}
             placement="left"
           >
-            <Typography variant="caption" fontWeight={900} component="span">
+            <Typography
+              variant="caption"
+              component="span"
+              sx={{
+                fontWeight: 900,
+              }}
+            >
               {t('climbing_grade_table.tick_base_points')}
             </Typography>
           </Tooltip>

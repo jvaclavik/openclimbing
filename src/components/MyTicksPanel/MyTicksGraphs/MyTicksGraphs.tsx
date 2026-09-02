@@ -19,7 +19,12 @@ export const MyTicksGraphs = ({ features }: MyTicksGraphsProps) => {
   return (
     <>
       <PanelSidePadding>
-        <Typography variant="h6" mt={2}>
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 2,
+          }}
+        >
           {t('my_ticks.graphs.routes_distribution')}
         </Typography>
       </PanelSidePadding>

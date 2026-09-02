@@ -171,6 +171,16 @@ export default {
   'user_profile.chart_weekday_radar': 'Které dny v týdnu lezu nejvíc',
   'user_profile.chart_area_days': 'Sektory podle dnů lezení',
   'user_profile.chart_grade_distribution': 'Přelezy podle obtížnosti',
+  'user_profile.chart_grade_pyramid': 'Pyramida obtížností',
+  'user_profile.chart_ascents_unit': 'přelezů',
+  'user_profile.chart_yearly_ascents': 'Přelezy podle roku',
+  'user_profile.chart_all_time_note': 'Všechny zaznamenané přelezy',
+  'user_profile.chart_cumulative': 'Kumulativní přelezy a body',
+  'user_profile.chart_cumulative_ascents': 'Přelezy',
+  'user_profile.chart_progression': 'Vývoj obtížnosti',
+  'user_profile.chart_progression_note': 'Nejtěžší přelez a průměr nejtěžších přelezů v měsíci',
+  'user_profile.chart_progression_best': 'Nejtěžší přelez',
+  'user_profile.chart_progression_top_avg': 'Průměr nejtěžších',
   'user_profile.area_unknown': 'Neznámý sektor',
   'user_profile.area_days_unit': 'dní',
   'user_profile.chart_no_send': 'Žádný',
@@ -232,7 +242,7 @@ export default {
 
   'project.openclimbing.description': 'Otevřený lezecký průvodce',
   'project.openclimbing.serpDescription': 'Otevřený lezecký průvodce s vyznačením cest. Postaveno na projektech OpenStreetMap a Wikipedie.',
-  'project.openclimbing.climbing_guide': 'Lezecký průvodce | OpenClimbing',
+  'project.openclimbing.climbing_guide': 'Lezecký průvodce zdarma | OpenClimbing',
 
   'climbing.guideinfo.title': 'Otevřený lezecký průvodce',
   'climbing.guideinfo.description':
@@ -369,6 +379,10 @@ export default {
   'searchbox.overpass_error': 'Chyba při načítání výsledků. __message__',
   'searchbox.overpass_custom_query': 'vlastní dotaz',
   'searchbox.tile_boundaries': 'hranice dlaždice z/x/y',
+  'searchbox.section.climbing': 'Lezení',
+  'searchbox.section.routes': 'Cesty',
+  'searchbox.section.places': 'Místa',
+  'searchbox.section.categories': 'Kategorie',
 
   'directions.get_directions': 'Vyhledat trasu',
   'directions.form.start_or_click': 'Zvolte začátek nebo klikněte do mapy',

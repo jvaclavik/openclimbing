@@ -117,10 +117,12 @@ const FormPane: React.FC = () => {
   return (
     <Stack
       direction={isSmallScreen ? 'column' : 'row'}
-      gap={1}
-      overflow="hidden"
-      height="100%"
-      sx={{ borderTop: `solid 1px ${theme.palette.divider}` }}
+      sx={{
+        gap: 1,
+        overflow: 'hidden',
+        height: '100%',
+        borderTop: `solid 1px ${theme.palette.divider}`,
+      }}
     >
       <ItemsTabs />
       <DialogContent dividers sx={{ flex: 1, borderTop: 0 }}>
@@ -131,8 +133,16 @@ const FormPane: React.FC = () => {
         >
           <LoginToSaveBanner />
 
-          <Stack height="100%">
-            <Stack flex={1}>
+          <Stack
+            sx={{
+              height: '100%',
+            }}
+          >
+            <Stack
+              sx={{
+                flex: 1,
+              }}
+            >
               <ItemEditSection />
               <Typography
                 variant="body2"

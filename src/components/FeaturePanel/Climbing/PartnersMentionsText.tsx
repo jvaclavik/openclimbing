@@ -25,7 +25,13 @@ export const PartnersMentionsText = ({
 
   const parts = text.split(mentionRegex);
   return (
-    <Typography variant={variant} component={component} color="text.secondary">
+    <Typography
+      variant={variant}
+      component={component}
+      sx={{
+        color: 'text.secondary',
+      }}
+    >
       {parts.map((part, i) => {
         if (part.startsWith('@') && part.length > 1) {
           const nick = part.slice(1);

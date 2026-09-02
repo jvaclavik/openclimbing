@@ -46,8 +46,19 @@ const getAllLayers = (userLayers: Layer[], view: View): AllLayers => {
 
 const MapExtras = () => (
   <>
-    <Box px={2} pt={1.5} pb={0.5}>
-      <Typography variant="body2" color="text.secondary">
+    <Box
+      sx={{
+        px: 2,
+        pt: 1.5,
+        pb: 0.5,
+      }}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {t('layerswitcher.extras')}
       </Typography>
     </Box>

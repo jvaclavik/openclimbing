@@ -12,7 +12,11 @@ export const OsmError = () => {
   if (feature.deleted) {
     const historyUrl = `${OSM_WEBSITE}/${getUrlOsmId(feature.osmMeta)}/history`;
     return (
-      <Box mb={3}>
+      <Box
+        sx={{
+          mb: 3,
+        }}
+      >
         <Alert variant="outlined" severity="warning">
           {t('featurepanel.error_deleted')}{' '}
           <a href={historyUrl} target="_blank">

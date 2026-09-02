@@ -44,10 +44,22 @@ const PhotosSkeleton = ({ count }: { count: number }) => (
 );
 
 const RouteRowSkeleton = () => (
-  <Stack direction="row" alignItems="center" gap={1.5} py={1} px={1.5}>
+  <Stack
+    direction="row"
+    sx={{
+      alignItems: 'center',
+      gap: 1.5,
+      py: 1,
+      px: 1.5,
+    }}
+  >
     <Skeleton variant="circular" width={22} height={22} />
     <Skeleton variant="text" width="58%" height={22} />
-    <Box flex={1} />
+    <Box
+      sx={{
+        flex: 1,
+      }}
+    />
     <Skeleton
       variant="rounded"
       width={36}
@@ -78,16 +90,36 @@ const CragCardSkeleton = () => (
 );
 
 const MemberRowSkeleton = () => (
-  <Stack direction="row" alignItems="center" gap={1} py={0.75}>
+  <Stack
+    direction="row"
+    sx={{
+      alignItems: 'center',
+      gap: 1,
+      py: 0.75,
+    }}
+  >
     <Skeleton variant="circular" width={16} height={16} />
     <Skeleton variant="text" width="64%" height={18} />
   </Stack>
 );
 
 const PropertiesSkeleton = () => (
-  <Box mt={1} mb={2}>
+  <Box
+    sx={{
+      mt: 1,
+      mb: 2,
+    }}
+  >
     {[72, 54, 66, 40].map((width) => (
-      <Stack key={width} direction="row" gap={2} py={0.6} alignItems="center">
+      <Stack
+        key={width}
+        direction="row"
+        sx={{
+          gap: 2,
+          py: 0.6,
+          alignItems: 'center',
+        }}
+      >
         <Skeleton variant="text" width={96} height={18} />
         <Skeleton variant="text" width={`${width}%`} height={18} />
       </Stack>
@@ -96,7 +128,13 @@ const PropertiesSkeleton = () => (
 );
 
 const HistogramSkeleton = () => (
-  <Box px={2} mt={1} mb={1}>
+  <Box
+    sx={{
+      px: 2,
+      mt: 1,
+      mb: 1,
+    }}
+  >
     <Skeleton variant="rounded" height={72} sx={{ borderRadius: 1 }} />
   </Box>
 );
@@ -128,7 +166,11 @@ export const FeaturePanelSkeleton = ({ feature }: Props) => {
       {showPhotos && <PhotosSkeleton count={photoCount} />}
 
       {cragCards > 0 && (
-        <Box mb={1}>
+        <Box
+          sx={{
+            mb: 1,
+          }}
+        >
           <PanelLabel>{t('featurepanel.climbing_sectors')}</PanelLabel>
           {Array.from({ length: cragCards }, (_, i) => (
             <CragCardSkeleton key={i} />
@@ -140,7 +182,13 @@ export const FeaturePanelSkeleton = ({ feature }: Props) => {
 
       <PanelSidePadding>
         {routeRows > 0 && (
-          <Box ml={-2} mr={-2} mb={1}>
+          <Box
+            sx={{
+              ml: -2,
+              mr: -2,
+              mb: 1,
+            }}
+          >
             <PanelLabel>{t('member_features.climbing')}</PanelLabel>
             {Array.from({ length: routeRows }, (_, i) => (
               <RouteRowSkeleton key={i} />
@@ -149,7 +197,11 @@ export const FeaturePanelSkeleton = ({ feature }: Props) => {
         )}
 
         {memberRows > 0 && (
-          <Box mb={1}>
+          <Box
+            sx={{
+              mb: 1,
+            }}
+          >
             {Array.from({ length: memberRows }, (_, i) => (
               <MemberRowSkeleton key={i} />
             ))}

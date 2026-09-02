@@ -47,7 +47,7 @@ export const renderOptionFactory = (inputValue: string) => {
           {...props} // eslint-disable-line react/jsx-props-no-spreading
           style={{ padding: 0, minHeight: 0, pointerEvents: 'none' }}
         >
-          <SeparatorRow />
+          <SeparatorRow section={option.separator.section} />
         </li>
       );
     }

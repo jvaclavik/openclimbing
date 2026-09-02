@@ -2,7 +2,13 @@ import { Typography } from '@mui/material';
 import React from 'react';
 
 export const Subheading = ({ children }) => (
-  <Typography variant="overline" display="block" color="textSecondary">
+  <Typography
+    variant="overline"
+    color="textSecondary"
+    sx={{
+      display: 'block',
+    }}
+  >
     {children}
   </Typography>
 );

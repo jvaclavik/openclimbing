@@ -13,7 +13,8 @@ import { maptilerFix } from './maptilerFix';
 import { Feature, LonLat, OsmId } from '../../../services/types';
 import { createCoordsFeature, pushFeatureToRouter } from './utils';
 import { SetFeature } from '../../utils/FeatureContext';
-import maplibregl, { Map, MapGeoJSONFeature } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { Map, MapGeoJSONFeature } from 'maplibre-gl';
 import type { MapClickOverrideRef } from '../../utils/MapStateContext';
 
 const isSameOsmId = (feature: Feature, skeleton: Feature) =>
