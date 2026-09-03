@@ -31,6 +31,7 @@ import { Runways } from './Runways/Runways';
 import { Sockets } from './Sockets/Sockets';
 import { useFeaturePanelShortcuts } from './useFeaturePanelShortcuts';
 import { useRouter } from 'next/router';
+import { ViaFerrataFeatures } from './ViaFerrataFeatures';
 
 const Flex = styled.div`
   flex: 1;
@@ -113,6 +114,7 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
             <ClimbingRouteGrade />
             <PanelClimbingBadges />
           </Stack>
+          <ViaFerrataFeatures />
           {isMobileMode && <ParentLink />}
         </PanelSidePadding>
 

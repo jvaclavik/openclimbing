@@ -13,6 +13,7 @@ import { FeaturedKeyRenderer } from '../../services/tagging/featuredKeys';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { Typography } from '@mui/material';
 import { ScaleRenderer } from './renderers/ScaleRenderer';
+import { FeeRenderer } from './renderers/FeeRenderer';
 import { getDescription } from '../../helpers/featureLabel';
 
 const Wrapper = styled.div`
@@ -64,6 +65,7 @@ const components: RendererComponents = {
   WikidataRenderer: WikidataRenderer,
   ClimbingGradeRenderer: ClimbingGradeRenderer,
   ScaleRenderer: ScaleRenderer,
+  FeeRenderer: FeeRenderer,
   DescriptionRenderer: ParagraphRenderer,
   NullRenderer: null,
 };
