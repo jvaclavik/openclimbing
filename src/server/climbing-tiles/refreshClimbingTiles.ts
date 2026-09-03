@@ -14,6 +14,9 @@ import { FeatureTags } from '../../services/types';
 import { ClimbingFeaturesRow } from '../db/types';
 import { resolveCountryCode } from 'next-codegrid';
 
+// Overpass is a fallback. On production we use:
+// - https://github.com/zbycz/openclimbing-osmium-import
+// - https://github.com/zbycz/openclimbing-minutely-replication
 const fetchFromOverpass = async () => {
   if (existsSync('../overpass.json')) {
     console.log('fetchFromOverpass: Using cache in ../overpass.json'); //eslint-disable-line no-console
@@ -21,9 +24,8 @@ const fetchFromOverpass = async () => {
   }
 
   // takes about 42 secs, 25MB; in May25 = 25MB - 217k items->55k records
-  // Keep in sync with the osmium seed (openclimbing-osmium-import `osmium tags-filter`)
-  // and the minutely replication filter:
-  // https://github.com/zbycz/openclimbing-minutely-replication/blob/main/src/utils/filter.ts
+  // sync this with openclimbing-osmium-import/02_extract_climbing_osmium.sh 
+  //              + openclimbing-minutely-replication/src/utils/filter.ts
   const query = `[out:json][timeout:100];(nwr[~"^climbing"~"."];nwr["sport"="climbing"];nwr["sport"="via_ferrata"];nwr["highway"="via_ferrata"];nwr["route"="via_ferrata"];nwr["via_ferrata_scale"];);(._;>>;);out qt;`;
   const data = await fetchOverpass(query, { nocache: true });
 
