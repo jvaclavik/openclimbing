@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import dynamic from 'next/dynamic';
 import BugReport from '@mui/icons-material/BugReport';
 import { Button, CircularProgress, Stack } from '@mui/material';
+import { MapAttributionChrome } from './MapFooter/MapAttributionChrome';
 import { MapFooter } from './MapFooter/MapFooter';
 import { SHOW_PROTOTYPE_UI } from '../../config.mjs';
 import { LayerSwitcherButton } from '../LayerSwitcher/LayerSwitcherButton';
@@ -53,18 +54,6 @@ const Spinner = styled(CircularProgress)`
   margin: -20px 0 0 -20px;
 `;
 
-const BottomLeft = styled.div`
-  position: absolute;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 999;
-  left: 0px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 0 0 4px 4px;
-`;
-
 const BottomRight = styled.div<{ $zIndex: number; $bottom: number }>`
   position: absolute;
   right: 6px;
@@ -106,11 +95,11 @@ const Map = () => {
       {mapLoaded && <CragPhotoMarkers />}
       {!mapLoaded && <Spinner color="secondary" />}
       <NoscriptMessage />
-      <BottomLeft>
+      <MapAttributionChrome>
         {SHOW_PROTOTYPE_UI && <BugReportButton />}
         <MaptilerLogo />
         <MapFooter />
-      </BottomLeft>
+      </MapAttributionChrome>
       {/* providers only wrap controls that need them – pan/zoom must not re-render the map tree */}
       <SunShadowProvider>
         <RadarProvider>
