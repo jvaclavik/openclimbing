@@ -22,13 +22,12 @@ const Icon = styled.img`
 
 const Container = styled.div`
   pointer-events: all;
-  border-radius: 8px;
-  padding: 0 4px 2px 4px;
+  border-radius: 6px;
+  padding: 0 3px 2px;
   color: rgba(0, 0, 0, 0.8);
   background-color: rgba(250, 250, 250, 0.5);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  margin-top: 4px;
 `;
 
 const Item = styled.div`
