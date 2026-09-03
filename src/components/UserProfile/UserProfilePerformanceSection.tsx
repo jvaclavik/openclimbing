@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import DownloadIcon from '@mui/icons-material/Download';
 import {
   Alert,
   Box,
+  Button,
   SelectChangeEvent,
   Stack,
   Tab,
@@ -29,6 +31,10 @@ import { useUserProfilePerformanceDerived } from './useUserProfilePerformanceDer
 import { useUserProfileLeaderboardRank } from './useUserProfileLeaderboardRank';
 import type { GradeStyleSegment } from './userProfilePerformanceAggregates';
 import { t } from '../../services/intl';
+import {
+  buildTicksCsv,
+  buildTicksCsvFilename,
+} from '../../services/my-ticks/exportTicksCsv';
 
 const UserProfileChartsTab = dynamic(
   () => import('./UserProfileChartsTab').then((m) => m.UserProfileChartsTab),
@@ -39,10 +45,14 @@ function UserProfilePerformanceTopBar({
   years,
   selectValue,
   onRangeChange,
+  onExportCsv,
+  exportDisabled,
 }: {
   years: number[];
   selectValue: string;
   onRangeChange: (e: SelectChangeEvent<string>) => void;
+  onExportCsv: () => void;
+  exportDisabled: boolean;
 }) {
   return (
     <Stack
@@ -60,6 +70,16 @@ function UserProfilePerformanceTopBar({
         years={years}
       />
       <Box sx={{ flex: 1 }} />
+      <Button
+        size="small"
+        variant="outlined"
+        color="secondary"
+        startIcon={<DownloadIcon />}
+        onClick={onExportCsv}
+        disabled={exportDisabled}
+      >
+        {t('user_profile.export_csv')}
+      </Button>
       <GradeSystemSelect size="small" />
     </Stack>
   );
@@ -93,6 +113,21 @@ export const UserProfilePerformanceSection = ({
     displayName,
     selectValue,
   );
+  const exportDisabled = !ticksPanelEnabled || fetchedTicks.length === 0;
+
+  const onExportCsv = () => {
+    const csv = buildTicksCsv(fetchedTicks);
+    const filename = buildTicksCsvFilename(displayName);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Box sx={{ px: PANEL_GAP, pb: 2 }}>
@@ -100,6 +135,8 @@ export const UserProfilePerformanceSection = ({
         years={d.years}
         selectValue={selectValue}
         onRangeChange={onRangeChange}
+        onExportCsv={onExportCsv}
+        exportDisabled={exportDisabled}
         totalPoints={d.totalPoints}
         tickCount={d.tickCount}
         leaderboardRank={leaderboardRank}
@@ -127,6 +164,8 @@ function UserProfilePerformanceContent({
   years,
   selectValue,
   onRangeChange,
+  onExportCsv,
+  exportDisabled,
   totalPoints,
   tickCount,
   leaderboardRank,
@@ -149,6 +188,8 @@ function UserProfilePerformanceContent({
   years: number[];
   selectValue: string;
   onRangeChange: (e: SelectChangeEvent<string>) => void;
+  onExportCsv: () => void;
+  exportDisabled: boolean;
   totalPoints: number;
   tickCount: number;
   leaderboardRank: number | null;
@@ -179,6 +220,8 @@ function UserProfilePerformanceContent({
         years={years}
         selectValue={selectValue}
         onRangeChange={onRangeChange}
+        onExportCsv={onExportCsv}
+        exportDisabled={exportDisabled}
       />
 
       <UserProfilePerformanceStats
