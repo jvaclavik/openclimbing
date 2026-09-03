@@ -24,7 +24,7 @@ const fetchFromOverpass = async () => {
   }
 
   // takes about 42 secs, 25MB; in May25 = 25MB - 217k items->55k records
-  // sync this with openclimbing-osmium-import/02_extract_climbing_osmium.sh 
+  // sync this with openclimbing-osmium-import/02_extract_climbing_osmium.sh
   //              + openclimbing-minutely-replication/src/utils/filter.ts
   const query = `[out:json][timeout:100];(nwr[~"^climbing"~"."];nwr["sport"="climbing"];nwr["sport"="via_ferrata"];nwr["highway"="via_ferrata"];nwr["route"="via_ferrata"];nwr["via_ferrata_scale"];);(._;>>;);out qt;`;
   const data = await fetchOverpass(query, { nocache: true });
