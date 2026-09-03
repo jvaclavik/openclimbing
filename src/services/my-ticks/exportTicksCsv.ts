@@ -50,5 +50,8 @@ export const buildTicksCsvFilename = (
       .trim()
       .replace(/\s+/g, '-')
       .replace(/[^A-Za-z0-9._-]/g, '_') || 'profile';
-  return `openclimbing-ticks-${safeDisplayName}-${now.toISOString().slice(0, 10)}.csv`;
+  const yyyy = String(now.getFullYear());
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `openclimbing-ticks-${safeDisplayName}-${yyyy}-${mm}-${dd}.csv`;
 };

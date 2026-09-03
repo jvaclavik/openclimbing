@@ -39,6 +39,8 @@ export default {
   'user_profile.ticks_count': 'Ascensiones',
   'user_profile.leaderboard_rank': 'Puesto en la clasificación',
   'user_profile.export_csv': 'Exportar CSV',
+  'user_profile.export_csv_disabled':
+    'Exportar CSV (disponible cuando se carguen las ascensiones)',
   'user_profile.ticks_table_title': 'Ascensiones',
   'user_profile.tab_ticks': 'Ascensiones',
   'user_profile.tab_charts': 'Gráficos',

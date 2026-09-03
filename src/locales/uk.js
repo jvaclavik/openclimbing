@@ -39,6 +39,8 @@ export default {
   'user_profile.ticks_count': 'Проходження',
   'user_profile.leaderboard_rank': 'Місце в рейтингу',
   'user_profile.export_csv': 'Експортувати CSV',
+  'user_profile.export_csv_disabled':
+    'Експортувати CSV (доступно після завантаження проходжень)',
   'user_profile.ticks_table_title': 'Проходження',
   'user_profile.tab_ticks': 'Проходження',
   'user_profile.tab_charts': 'Графіки',

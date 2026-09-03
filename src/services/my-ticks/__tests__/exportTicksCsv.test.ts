@@ -51,7 +51,7 @@ describe('buildTicksCsvFilename', () => {
   test('sanitizes display name and appends date', () => {
     const filename = buildTicksCsvFilename(
       'John Doe/č',
-      new Date('2026-09-03T12:00:00.000Z'),
+      new Date(2026, 8, 3, 12, 0, 0),
     );
     expect(filename).toBe('openclimbing-ticks-John-Doe__-2026-09-03.csv');
   });

@@ -159,6 +159,8 @@ export default {
   'user_profile.ticks_count': 'Přelezů',
   'user_profile.leaderboard_rank': 'Pořadí v žebříčku',
   'user_profile.export_csv': 'Export CSV',
+  'user_profile.export_csv_disabled':
+    'Export CSV (dostupné po načtení přelezů)',
   'user_profile.ticks_table_title': 'Přelezy',
   'user_profile.tab_ticks': 'Přelezy',
   'user_profile.tab_charts': 'Grafy',

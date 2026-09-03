@@ -77,6 +77,11 @@ function UserProfilePerformanceTopBar({
         startIcon={<DownloadIcon />}
         onClick={onExportCsv}
         disabled={exportDisabled}
+        aria-label={
+          exportDisabled
+            ? t('user_profile.export_csv_disabled')
+            : t('user_profile.export_csv')
+        }
       >
         {t('user_profile.export_csv')}
       </Button>
@@ -116,17 +121,24 @@ export const UserProfilePerformanceSection = ({
   const exportDisabled = !ticksPanelEnabled || fetchedTicks.length === 0;
 
   const onExportCsv = () => {
+    if (exportDisabled) {
+      return;
+    }
     const csv = buildTicksCsv(fetchedTicks);
     const filename = buildTicksCsvFilename(displayName);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
+    try {
+      anchor.style.display = 'none';
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+    } finally {
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
   };
 
   return (
