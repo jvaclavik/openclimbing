@@ -46,6 +46,12 @@ const ROUTE_VALUES = ['route', 'route_bottom', 'abseil_route'];
 
 const isRoute = (tags: FeatureTags) => ROUTE_VALUES.includes(tags.climbing);
 
+const isFerrata = (tags: FeatureTags) =>
+  tags.highway === 'via_ferrata' ||
+  tags.route === 'via_ferrata' ||
+  tags.sport === 'via_ferrata' ||
+  !!tags.via_ferrata_scale;
+
 // (splitting this function doesn't make sense - it has very simple structure)
 // eslint-disable-next-line max-lines-per-function
 export const getNewRecords = (
@@ -90,6 +96,11 @@ export const getNewRecords = (
       continue;
     }
 
+    // usually natural=cliff + sport=via_ferrata + via_ferrata=start
+    else if (isFerrata(node.tags)) {
+      addRecord('ferrata', node);
+    }
+
     // careful, this has to omit `shop=sports` etc.
     else if (node.tags.sport === 'climbing') {
       if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
@@ -109,7 +120,7 @@ export const getNewRecords = (
     if (!way.tags || isClimbingDisallowed(way.tags)) continue;
 
     //
-    if (isRoute(way.tags) || way.tags.highway === 'via_ferrata') {
+    if (isRoute(way.tags) || isFerrata(way.tags)) {
       addRecordWithLine('route', way);
     }
 
@@ -144,10 +155,7 @@ export const getNewRecords = (
     if (!relation.tags || isClimbingDisallowed(relation.tags)) continue;
 
     // usually climbing=route + route=via_ferrata
-    if (
-      relation.tags.route === 'via_ferrata' ||
-      relation.tags.via_ferrata_scale
-    ) {
+    if (isFerrata(relation.tags)) {
       addRecord('ferrata', centerGeometry(relation));
     }
 
