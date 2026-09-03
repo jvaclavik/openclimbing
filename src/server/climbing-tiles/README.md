@@ -33,7 +33,7 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 
 `/api/climbing-tiles/refresh`:
 
-- download overpass query – all `climbing=*` or `sport=climbing` elements and all relation members
+- download overpass query – all `climbing*=*`, `sport=climbing` and via ferrata elements (same filter as the [osmium seed](https://github.com/zbycz/openclimbing-osmium-import) and the [minutely replication](https://github.com/zbycz/openclimbing-minutely-replication/blob/main/src/utils/filter.ts)) and all relation members
 - contruct full geometries from OSM elements - `overpassToGeojsons()`
 - filter only relevant data + create SQL records (each record also stores the raw OSM `tags` as JSON, and for relations the `members` array as JSON)
 - insert the records them in `climbing_features` table
