@@ -56,8 +56,8 @@ describe('getNewRecords', () => {
 
     expect(records.map(({ type, osmType }) => `${osmType}:${type}`)).toEqual([
       'node:ferrata',
-      'way:route',
-      'way:route',
+      'way:ferrata',
+      'way:ferrata',
       'relation:ferrata',
       'relation:ferrata',
     ]);

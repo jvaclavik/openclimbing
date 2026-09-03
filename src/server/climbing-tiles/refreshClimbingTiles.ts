@@ -120,8 +120,13 @@ export const getNewRecords = (
     if (!way.tags || isClimbingDisallowed(way.tags)) continue;
 
     //
-    if (isRoute(way.tags) || isFerrata(way.tags)) {
+    if (isRoute(way.tags)) {
       addRecordWithLine('route', way);
+    }
+
+    //
+    else if (isFerrata(way.tags)) {
+      addRecordWithLine('ferrata', way);
     }
 
     //
