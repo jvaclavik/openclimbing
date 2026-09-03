@@ -981,7 +981,7 @@ export default {
   'osmtype.way.description': 'Line consisting of severel (many) nodes.',
   'osmtype.relation': 'Relation',
   'osmtype.relation.description': 'Group of other elements – ways, nodes, and even other relations.',
-  'climbing_tiles.stats': `Refreshed: ~1× / month (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">until overpass issues are resolved</a>)<br />Last refresh: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 hour`,
+  'climbing_tiles.stats': `Refreshed: continuously (<a href="https://github.com/zbycz/openclimbing-minutely-replication" target="_blank">minutely OSM replication</a>)<br />Last refresh: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 minute`,
   'climbing.type.ferrata': 'Via Ferrata',
   'climbing.forum': 'Community board',
 

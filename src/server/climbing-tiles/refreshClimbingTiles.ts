@@ -14,6 +14,9 @@ import { FeatureTags } from '../../services/types';
 import { ClimbingFeaturesRow } from '../db/types';
 import { resolveCountryCode } from 'next-codegrid';
 
+// Overpass is a fallback. On production we use:
+// - https://github.com/zbycz/openclimbing-osmium-import
+// - https://github.com/zbycz/openclimbing-minutely-replication
 const fetchFromOverpass = async () => {
   if (existsSync('../overpass.json')) {
     console.log('fetchFromOverpass: Using cache in ../overpass.json'); //eslint-disable-line no-console
@@ -21,7 +24,9 @@ const fetchFromOverpass = async () => {
   }
 
   // takes about 42 secs, 25MB; in May25 = 25MB - 217k items->55k records
-  const query = `[out:json][timeout:100];(nwr["climbing"];nwr["sport"="climbing"];);(._;>>;);out qt;`; // TODO add + test speed: nwr["sport"="via_ferrata"];nwr[~"^climbing"~".*"];
+  // sync this with openclimbing-osmium-import/02_extract_climbing_osmium.sh
+  //              + openclimbing-minutely-replication/src/utils/filter.ts
+  const query = `[out:json][timeout:100];(nwr[~"^climbing"~"."];nwr["sport"="climbing"];nwr["sport"="via_ferrata"];nwr["highway"="via_ferrata"];nwr["route"="via_ferrata"];nwr["via_ferrata_scale"];);(._;>>;);out qt;`;
   const data = await fetchOverpass(query, { nocache: true });
 
   if (data.elements.length < 1000) {
@@ -40,6 +45,12 @@ const isClimbingDisallowed = (tags: FeatureTags) =>
 const ROUTE_VALUES = ['route', 'route_bottom', 'abseil_route'];
 
 const isRoute = (tags: FeatureTags) => ROUTE_VALUES.includes(tags.climbing);
+
+const isFerrata = (tags: FeatureTags) =>
+  tags.highway === 'via_ferrata' ||
+  tags.route === 'via_ferrata' ||
+  tags.sport === 'via_ferrata' ||
+  !!tags.via_ferrata_scale;
 
 // (splitting this function doesn't make sense - it has very simple structure)
 // eslint-disable-next-line max-lines-per-function
@@ -85,6 +96,11 @@ export const getNewRecords = (
       continue;
     }
 
+    // usually natural=cliff + sport=via_ferrata + via_ferrata=start
+    else if (isFerrata(node.tags)) {
+      addRecord('ferrata', node);
+    }
+
     // careful, this has to omit `shop=sports` etc.
     else if (node.tags.sport === 'climbing') {
       if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
@@ -104,8 +120,13 @@ export const getNewRecords = (
     if (!way.tags || isClimbingDisallowed(way.tags)) continue;
 
     //
-    if (isRoute(way.tags) || way.tags.highway === 'via_ferrata') {
+    if (isRoute(way.tags)) {
       addRecordWithLine('route', way);
+    }
+
+    //
+    else if (isFerrata(way.tags)) {
+      addRecordWithLine('ferrata', way);
     }
 
     //
@@ -139,10 +160,7 @@ export const getNewRecords = (
     if (!relation.tags || isClimbingDisallowed(relation.tags)) continue;
 
     // usually climbing=route + route=via_ferrata
-    if (
-      relation.tags.route === 'via_ferrata' ||
-      relation.tags.via_ferrata_scale
-    ) {
+    if (isFerrata(relation.tags)) {
       addRecord('ferrata', centerGeometry(relation));
     }
 
