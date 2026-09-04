@@ -38,6 +38,9 @@ export default {
   'user_profile.total_points': 'Gesamtpunkte',
   'user_profile.ticks_count': 'Begehungen',
   'user_profile.leaderboard_rank': 'Platz in der Rangliste',
+  'user_profile.export_csv': 'CSV exportieren',
+  'user_profile.export_csv_disabled':
+    'CSV exportieren (verfügbar, sobald Begehungen geladen sind)',
   'user_profile.ticks_table_title': 'Begehungen',
   'user_profile.tab_ticks': 'Begehungen',
   'user_profile.tab_charts': 'Diagramme',

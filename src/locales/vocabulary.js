@@ -31,6 +31,8 @@ export default {
   'user_profile.total_points': 'Total points',
   'user_profile.ticks_count': 'Ticks',
   'user_profile.leaderboard_rank': 'Leaderboard rank',
+  'user_profile.export_csv': 'Export CSV',
+  'user_profile.export_csv_disabled': 'Export CSV (unavailable until ticks are loaded)',
   'user_profile.ticks_table_title': 'Ticks',
   'user_profile.tab_ticks': 'Ticks',
   'user_profile.tab_charts': 'Charts',

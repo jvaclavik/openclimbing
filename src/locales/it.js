@@ -38,6 +38,9 @@ export default {
   'user_profile.total_points': 'Punti totali',
   'user_profile.ticks_count': 'Vie',
   'user_profile.leaderboard_rank': 'Posizione in classifica',
+  'user_profile.export_csv': 'Esporta CSV',
+  'user_profile.export_csv_disabled':
+    'Esporta CSV (disponibile quando le vie sono state caricate)',
   'user_profile.ticks_table_title': 'Vie',
   'user_profile.tab_ticks': 'Vie',
   'user_profile.tab_charts': 'Grafici',

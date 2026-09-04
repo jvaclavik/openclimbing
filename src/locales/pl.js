@@ -37,6 +37,9 @@ export default {
   'user_profile.total_points': 'Łączna liczba punktów',
   'user_profile.ticks_count': 'Przejścia',
   'user_profile.leaderboard_rank': 'Miejsce w rankingu',
+  'user_profile.export_csv': 'Eksportuj CSV',
+  'user_profile.export_csv_disabled':
+    'Eksportuj CSV (dostępne po wczytaniu przejść)',
   'user_profile.ticks_table_title': 'Przejścia',
   'user_profile.tab_ticks': 'Przejścia',
   'user_profile.tab_charts': 'Wykresy',
