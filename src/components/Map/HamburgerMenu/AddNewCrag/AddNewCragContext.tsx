@@ -18,7 +18,7 @@ import { animateMarkerDrop, createCragMarkerOptions } from './cragMarker';
 
 // matches the `climbing/crag` preset in the iD tagging schema, so it is
 // preselected in the EditDialog (see findPreset / getPresetKey)
-const CRAG_PRESET_TAGS = { climbing: 'crag' };
+const CRAG_PRESET_TAGS = { climbing: 'crag', sport: 'climbing' };
 
 type StartOptions = {
   /** the caller closes the panel at the same time, so ignore its width */
