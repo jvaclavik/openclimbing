@@ -18,6 +18,17 @@ export const FeeRenderer = ({ k, v }) => {
     return <Container>🆓 {t('featurepanel.fee.free_access')}</Container>;
   }
 
+  if (v === 'donation') {
+    return (
+      <Container>
+        💶{' '}
+        {charge
+          ? t('featurepanel.fee.donation_with_amount', { amount: charge })
+          : t('featurepanel.fee.donation')}
+      </Container>
+    );
+  }
+
   return (
     <Container>
       💶{' '}

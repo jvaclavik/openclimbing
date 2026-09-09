@@ -2,8 +2,8 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { t } from '../../../services/intl';
 import {
+  getViaFerrataScaleColor,
   getViaFerrataGrades,
-  VIA_FERRATA_SCALE_COLORS,
 } from '../../../services/tagging/viaFerrataScale';
 
 const Container = styled.div`
@@ -38,9 +38,7 @@ export const ScaleRenderer = ({ k, v }) => {
         : k;
 
   const color =
-    k === 'via_ferrata_scale'
-      ? (VIA_FERRATA_SCALE_COLORS[v] ?? '#555')
-      : '#555';
+    k === 'via_ferrata_scale' ? (getViaFerrataScaleColor(v) ?? '#555') : '#555';
 
   const grades = k === 'via_ferrata_scale' ? getViaFerrataGrades(v) : null;
 
@@ -50,7 +48,8 @@ export const ScaleRenderer = ({ k, v }) => {
       <span>{label}</span>
       {grades && (
         <GradeDetail>
-          ({grades.french} / {grades.german})
+          ({grades.french}
+          {grades.german ? ` / ${grades.german}` : ''})
         </GradeDetail>
       )}
     </Container>

@@ -9,12 +9,12 @@
 
 export interface ViaFerrataGrades {
   french: string;
-  german: string;
+  german?: string;
 }
 
 // Mapping from OSM via_ferrata_scale value to French and German grades
 const GRADE_MAP: Record<string, ViaFerrataGrades> = {
-  '0': { french: 'F', german: 'K0' },
+  '0': { french: 'F' },
   '1': { french: 'PD', german: 'K1' },
   '2': { french: 'AD', german: 'K2' },
   '3': { french: 'D', german: 'K3' },
@@ -34,6 +34,8 @@ export const VIA_FERRATA_SCALE_COLORS: Record<string, string> = {
   '6': '#212121',
 };
 
+const FERRATA_SCALE_REGEX = /^([0-6])([+-])?$/;
+
 /**
  * Returns the French and German grade equivalents for a given via_ferrata_scale value.
  * Returns undefined if the value is not a valid scale number.
@@ -41,5 +43,28 @@ export const VIA_FERRATA_SCALE_COLORS: Record<string, string> = {
 export const getViaFerrataGrades = (
   value: string,
 ): ViaFerrataGrades | undefined => {
-  return GRADE_MAP[value];
+  const match = value.match(FERRATA_SCALE_REGEX);
+  if (!match) {
+    return undefined;
+  }
+
+  const [, baseScale, suffix = ''] = match;
+  const baseGrade = GRADE_MAP[baseScale];
+  if (!baseGrade) {
+    return undefined;
+  }
+
+  return {
+    french: `${baseGrade.french}${suffix}`,
+    german: baseGrade.german ? `${baseGrade.german}${suffix}` : undefined,
+  };
+};
+
+export const getViaFerrataScaleColor = (value: string): string | undefined => {
+  const match = value.match(FERRATA_SCALE_REGEX);
+  if (!match) {
+    return undefined;
+  }
+  const [, baseScale] = match;
+  return VIA_FERRATA_SCALE_COLORS[baseScale];
 };
