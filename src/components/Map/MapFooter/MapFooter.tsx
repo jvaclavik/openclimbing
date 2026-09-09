@@ -8,32 +8,41 @@ import { usePersistedState } from '../../utils/usePersistedState';
 import { AttributionLinks } from './AttributionLinks';
 import { ClimbingLegend } from './ClimbingLegend';
 
+const CHROME_PAD = 3;
+
 const IconContainer = styled.div<{ $isVisible: boolean }>`
   width: ${({ $isVisible }) => ($isVisible ? '20px' : '0')};
   height: 20px;
   transition: width 0.15s ease-out;
-  margin-left: -4px;
-  margin-right: 4px;
+  margin-left: -${CHROME_PAD}px;
+  margin-right: ${CHROME_PAD}px;
 `;
 
 const StyledIconButton = styled(IconButton)`
   position: relative;
-  top: -5px;
+  top: -4px;
 `;
 
-const FooterContainer = styled.div<{ $legendShown: boolean }>`
+const ChromePill = styled.div`
   pointer-events: all;
-  border-radius: 8px;
-  padding: 1px 4px;
+  border-radius: 6px;
+  padding: 0 ${CHROME_PAD}px;
   color: rgba(0, 0, 0, 0.8);
   background-color: rgba(250, 250, 250, 0.5);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  margin-top: 4px;
+`;
+
+const FooterStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
 `;
 
 const Wrapper = styled.div`
   font-size: 12px;
+  line-height: 1.25;
   color: rgba(0, 0, 0, 0.5);
   font-weight: 400;
   text-align: left;
@@ -44,7 +53,7 @@ const Wrapper = styled.div`
 
   a {
     color: rgba(0, 0, 0, 0.8);
-    text-decoration: underline;
+    text-decoration: none;
   }
 `;
 
@@ -85,14 +94,14 @@ export const MapFooter = () => {
   }
 
   return (
-    <>
+    <FooterStack>
       {hasLegend && (
         <ClimbingLegend
           isVisible={legendShown}
           setLegendShown={setLegendShown}
         />
       )}
-      <FooterContainer $legendShown={hasLegend && legendShown}>
+      <ChromePill>
         <Wrapper>
           <AttributionLinks />
 
@@ -103,7 +112,7 @@ export const MapFooter = () => {
             />
           )}
         </Wrapper>
-      </FooterContainer>
-    </>
+      </ChromePill>
+    </FooterStack>
   );
 };

@@ -55,6 +55,14 @@ export const EditTickFormFields = ({
   );
 
   const maxDay = todayDateInputMax();
+  const dateValue = tickTimestampToDateInputValue(tempTick.timestamp);
+  const setDateValue = (yyyyMmDd: string) => {
+    const clamped = clampDateInputYyyyMmDd(yyyyMmDd, maxDay);
+    updateTempTick(
+      'timestamp',
+      applyDateInputToTickTimestamp(tempTick.timestamp, clamped),
+    );
+  };
 
   return (
     <Stack spacing={2.5}>
@@ -67,27 +75,32 @@ export const EditTickFormFields = ({
         <TickStyleWizard onSelect={(style) => updateTempTick('style', style)} />
       </Stack>
 
-      <TextField
-        label={t('tick.date_label')}
-        type="date"
-        fullWidth
-        size="small"
-        value={tickTimestampToDateInputValue(tempTick.timestamp)}
-        onChange={(e) => {
-          const clamped = clampDateInputYyyyMmDd(e.target.value, maxDay);
-          updateTempTick(
-            'timestamp',
-            applyDateInputToTickTimestamp(tempTick.timestamp, clamped),
-          );
-        }}
-        slotProps={{
-          htmlInput: {
-            max: maxDay,
-          },
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <TextField
+          label={t('tick.date_label')}
+          type="date"
+          fullWidth
+          size="small"
+          value={dateValue}
+          onChange={(e) => setDateValue(e.target.value)}
+          slotProps={{
+            htmlInput: {
+              max: maxDay,
+            },
 
-          inputLabel: { shrink: true },
-        }}
-      />
+            inputLabel: { shrink: true },
+          }}
+        />
+        <Button
+          variant="outlined"
+          size="small"
+          disabled={dateValue === maxDay}
+          onClick={() => setDateValue(maxDay)}
+          sx={{ flexShrink: 0 }}
+        >
+          {t('tick.today_button')}
+        </Button>
+      </Stack>
 
       <PartnersTextField
         label={t('tick.partners_label')}

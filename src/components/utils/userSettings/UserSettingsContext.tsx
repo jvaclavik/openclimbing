@@ -22,6 +22,8 @@ export type TickDefaults = {
   style: TickStyle;
   timestamp: string;
   pairing: Record<string, string> | null;
+  /** Local calendar day (yyyy-MM-dd) when defaults were saved. */
+  savedOn?: string;
 };
 
 export type UserSettingsType = Partial<{

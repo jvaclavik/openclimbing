@@ -7,7 +7,7 @@ import { useIsClient } from '../../helpers';
 const Link = styled.a`
   pointer-events: all;
   font-size: 0;
-  margin-bottom: 4px;
+  line-height: 0;
 `;
 
 export const MaptilerLogo = () => {

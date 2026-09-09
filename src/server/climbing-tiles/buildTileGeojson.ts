@@ -145,13 +145,17 @@ export const getProperties = (
   return undefined;
 };
 
-const buildGeojson = (record: ClimbingFeaturesRow): ClimbingTilesFeature => {
+const buildGeojson = (
+  record: ClimbingFeaturesRow,
+  withLines: boolean,
+): ClimbingTilesFeature => {
   const { osmType, osmId, line, lon, lat } = record;
   const id = convertOsmIdToMapId({ type: osmType, id: osmId });
   const properties = getProperties(record);
-  const geometry: Geometry = line
-    ? { type: 'LineString', coordinates: JSON.parse(line) }
-    : { type: 'Point', coordinates: [lon, lat] };
+  const geometry: Geometry =
+    line && withLines
+      ? { type: 'LineString', coordinates: JSON.parse(line) }
+      : { type: 'Point', coordinates: [lon, lat] };
 
   return { type: 'Feature', id, geometry, properties };
 };
@@ -190,7 +194,11 @@ export const buildTileGeojson = (
   recordsInBbox: ClimbingFeaturesRow[],
   bbox: BBox,
 ): GeoJSON.FeatureCollection => {
-  const featuresInBbox = recordsInBbox.map(buildGeojson);
+  // ferratas skip the grid, so in the world/z6 tiles their lines would be sent
+  // whole - the center point is enough for the icon there
+  const featuresInBbox = recordsInBbox.map((record) =>
+    buildGeojson(record, !isOptimizedToGrid),
+  );
 
   let features: ClimbingTilesFeature[];
   if (isOptimizedToGrid) {

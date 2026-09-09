@@ -33,7 +33,7 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 
 `/api/climbing-tiles/refresh`:
 
-- download overpass query – all `climbing=*` or `sport=climbing` elements and all relation members
+- download overpass query – all `climbing*=*`, `sport=climbing` and via ferrata elements (same filter as the [osmium seed](https://github.com/zbycz/openclimbing-osmium-import) and the [minutely replication](https://github.com/zbycz/openclimbing-minutely-replication/blob/main/src/utils/filter.ts)) and all relation members
 - contruct full geometries from OSM elements - `overpassToGeojsons()`
 - filter only relevant data + create SQL records (each record also stores the raw OSM `tags` as JSON, and for relations the `members` array as JSON)
 - insert the records them in `climbing_features` table
@@ -54,6 +54,7 @@ We serve ~1000 tile requests/day, server cache HITS are ~1ms, MISSes ~12ms.
 - for zooms 0+6 we `optimizeFeaturesToGrid()` spliting the tile to 500x500 cells, and returning only the one feature with maximal `routeCount`. Otherwise we would have to return all 60k rows for zoom 0.
 - for zoom 9 we return all `type` (crags, areas, gyms) except for routes
 - for zoom 12 we return even all routes
+- unnamed via ferratas are returned only in zoom 12 - in zooms 0, 6 and 9 we keep just the named ones
 - finally we cache that tile in `climbing_tiles_cache` table
 
 `/api/climbing-tiles/crags.csv`:

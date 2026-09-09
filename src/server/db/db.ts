@@ -240,6 +240,15 @@ const runPendingMigrations = (db: Database) => {
 
     console.log(`Database ${DB_PATH} migrated from version 12 to 13`); // eslint-disable-line no-console
   }
+  if (getDbVersion(db) === 13) {
+    // Unnamed ferratas are no longer in the z0/z6/z9 tiles - drop stale cache.
+    db.transaction(() => {
+      db.exec('DELETE FROM climbing_tiles_cache');
+      db.pragma('user_version = 14');
+    })();
+
+    console.log(`Database ${DB_PATH} migrated from version 13 to 14`); // eslint-disable-line no-console
+  }
 };
 
 // global to allow hot-reload in dev
@@ -255,10 +264,10 @@ export function getDb() {
     if (getDbVersion(db) === 0) {
       db.transaction(() => {
         db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
-        db.pragma('user_version = 13');
+        db.pragma('user_version = 14');
       })();
 
-      console.log(`Database ${DB_PATH} initialized to version 13`); // eslint-disable-line no-console
+      console.log(`Database ${DB_PATH} initialized to version 14`); // eslint-disable-line no-console
     }
 
     store.db = db;

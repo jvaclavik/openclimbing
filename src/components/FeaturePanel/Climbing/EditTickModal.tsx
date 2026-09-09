@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,6 +11,7 @@ import {
   MenuItem,
   Stack,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,6 +31,9 @@ import {
 } from '../../../services/my-ticks/tickTimestampInput';
 import { t } from '../../../services/intl';
 import { EditTickFormFields } from './EditTickFormFields';
+import { getShortId } from '../../../services/helpers';
+import { getTickRouteLabel } from '../../../services/my-ticks/getTickRouteLabel';
+import { useFeatureContext } from '../../utils/FeatureContext';
 
 const useTempTick = () => {
   const { editedTickId, ticks, isFetching } = useTicksContext();
@@ -69,8 +73,22 @@ export const EditTickModal = () => {
   const { showToast } = useSnackbar();
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const { tempTick, updateTempTick } = useTempTick();
+  const { feature } = useFeatureContext();
   const [loading, setLoading] = useState<boolean>(false);
   const { MoreMenu, handleClickMore, handleCloseMore } = useMoreMenu();
+
+  const routeLabel = useMemo(() => {
+    if (!tempTick) {
+      return null;
+    }
+    const featureName =
+      feature && tempTick.shortId === getShortId(feature.osmMeta)
+        ? (feature.tags?.name ?? feature.tags?.ref)
+        : null;
+    const name = getTickRouteLabel(tempTick, featureName);
+    const grade = tempTick.routeGradeTxt?.trim();
+    return grade ? `${name} · ${grade}` : name;
+  }, [tempTick, feature]);
 
   const onClose = () => {
     setEditedTickId(null);
@@ -102,6 +120,7 @@ export const EditTickModal = () => {
           style: tempTick.style as TickStyle,
           timestamp: tempTick.timestamp,
           pairing: tempTick.pairing,
+          savedOn: todayDateInputMax(),
         });
       }
       const savedTickId = tempTick.id;
@@ -138,6 +157,15 @@ export const EditTickModal = () => {
         }}
       >
         {t('tick.edit_dialog_title')}
+        {routeLabel && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 0.5, fontWeight: 400 }}
+          >
+            {routeLabel}
+          </Typography>
+        )}
         <Tooltip title={t('close_panel')}>
           <IconButton
             aria-label={t('close_panel')}

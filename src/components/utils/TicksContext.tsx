@@ -15,6 +15,7 @@ import {
 import { useQuery, useQueryClient } from 'react-query';
 import { PROJECT_ID } from '../../services/project';
 import { useOsmAuthContext } from './OsmAuthContext';
+import { getTickDefaultsForToday } from '../../services/my-ticks/tickDefaultsForToday';
 import { t } from '../../services/intl';
 
 const QUERY_KEY = ['climbing-ticks'];
@@ -76,9 +77,7 @@ const useGetAddTick = (setEditedTickId: Setter<number>) => {
 
   return async (shortId: string) => {
     if (!shortId) return;
-    const remembered = userSettings['climbing.rememberTickDefaults']
-      ? userSettings['climbing.tickDefaults']
-      : null;
+    const remembered = getTickDefaultsForToday(userSettings);
     const timestamp = remembered?.timestamp ?? new Date().toISOString();
     const id = await postClimbingTick({
       shortId,

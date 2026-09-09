@@ -194,8 +194,9 @@ export default {
   'tick.save_success': 'Tick was updated',
   'tick.date_label': 'Date',
   'tick.date_future_error': 'Climb date cannot be in the future.',
-  'tick.remember_defaults_label': 'Remember for next time',
-  'tick.remember_defaults_helper': 'New ticks will start with this date, style, and partners.',
+  'tick.today_button': 'Today',
+  'tick.remember_defaults_label': 'Remember for today',
+  'tick.remember_defaults_helper': 'New ticks added today will start with this date, style, and partners.',
   'tick.my_grade_label': 'My grade',
   'tick.note_label': 'Note for other climbers',
 
@@ -989,7 +990,7 @@ export default {
   'osmtype.way.description': 'Line consisting of severel (many) nodes.',
   'osmtype.relation': 'Relation',
   'osmtype.relation.description': 'Group of other elements – ways, nodes, and even other relations.',
-  'climbing_tiles.stats': `Refreshed: ~1× / month (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">until overpass issues are resolved</a>)<br />Last refresh: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 hour`,
+  'climbing_tiles.stats': `Refreshed: continuously (<a href="https://github.com/zbycz/openclimbing-minutely-replication" target="_blank">minutely OSM replication</a>)<br />Last refresh: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 minute`,
   'climbing.type.ferrata': 'Via Ferrata',
   'climbing.forum': 'Community board',
 

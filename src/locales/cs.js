@@ -54,8 +54,9 @@ export default {
   'tick.save_success': 'Přelez byl uložen',
   'tick.date_label': 'Datum',
   'tick.date_future_error': 'Datum výlezu nemůže být v budoucnosti.',
-  'tick.remember_defaults_label': 'Pamatovat si pro příště',
-  'tick.remember_defaults_helper': 'Nové přelezy budou mít předvyplněné stejné datum, styl a spolulezce.',
+  'tick.today_button': 'Dnes',
+  'tick.remember_defaults_label': 'Pamatovat pro dnešek',
+  'tick.remember_defaults_helper': 'Nové přelezy přidané dnes budou mít předvyplněné stejné datum, styl a spolulezce.',
   'tick.my_grade_label': 'Má obtížnost',
   'tick.note_label': 'Poznámka pro ostatní',
 
@@ -917,7 +918,7 @@ export default {
   'osmtype.way.description': 'Linie se skládá z dalších uzlů (node).',
   'osmtype.relation': 'Relace',
   'osmtype.relation.description': 'Skupina dalších prvků – cest, uzlů a případně dalších relací.',
-  'climbing_tiles.stats': `Obnovuje se: cca 1× / měsíc (<a href="https://community.openstreetmap.org/t/overpass-api-performance-issues/140598">dokud nejsou vyřešeny problémy s Overpass</a>)<br />Naposledy: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 hodina`,
+  'climbing_tiles.stats': `Obnovuje se: průběžně (<a href="https://github.com/zbycz/openclimbing-minutely-replication" target="_blank">minutová replikace OSM</a>)<br />Naposledy: __lastRefresh__<br />OSM timestamp: __osmTime__<br/>CDN cache: 1 minuta`,
   'climbing.type.ferrata': 'Via Ferrata',
   'climbing.forum': 'Diskusní fórum',
 
