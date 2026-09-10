@@ -93,6 +93,7 @@ export const UserProfileTicksPanel = ({
             ticksPanelEnabled={ticksPanelEnabled}
             isLoading={isLoading}
             fetchedTicks={fetchedTicks}
+            rawTicks={readyTicks ?? []}
             onClose={handleClose}
           />
         </PanelContent>

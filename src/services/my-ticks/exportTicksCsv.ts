@@ -1,11 +1,13 @@
-import { FetchedClimbingTick } from './getMyTicks';
+import { ClimbingTick } from '../../types';
 
 const CSV_HEADERS = [
   'date',
   'route_name',
-  'grade',
+  'route_grade',
+  'grade_system',
+  'my_grade',
   'style',
-  'points',
+  'note',
   'crag',
   'area',
   'route_short_id',
@@ -14,25 +16,38 @@ const CSV_HEADERS = [
 ] as const;
 
 const escapeCsv = (value: string) => `"${value.replace(/"/g, '""')}"`;
+const DANGEROUS_SPREADSHEET_PREFIX = /^[\t\r ]*[=+\-@]/;
 
-const toCsvValue = (value: string | number | null | undefined) =>
-  escapeCsv(value == null ? '' : String(value));
+const neutralizeSpreadsheetFormula = (value: string) =>
+  DANGEROUS_SPREADSHEET_PREFIX.test(value) ? `'${value}` : value;
 
-export const buildTicksCsv = (ticks: FetchedClimbingTick[]): string => {
+const toCsvValue = (value: string | number | null | undefined) => {
+  if (value == null) {
+    return escapeCsv('');
+  }
+  if (typeof value === 'number') {
+    return escapeCsv(String(value));
+  }
+  return escapeCsv(neutralizeSpreadsheetFormula(value));
+};
+
+export const buildTicksCsv = (ticks: ClimbingTick[]): string => {
   const lines = [
     CSV_HEADERS.join(','),
     ...ticks.map((tick) =>
       [
-        tick.date,
-        tick.name,
-        tick.grade,
+        tick.timestamp,
+        tick.routeName?.trim(),
+        tick.routeGradeTxt?.trim(),
+        'original',
+        tick.myGrade,
         tick.style,
-        tick.tickScore.points,
-        tick.cragName,
-        tick.areaName,
-        tick.tick.shortId,
-        tick.tick.routeLon ?? tick.center?.[0],
-        tick.tick.routeLat ?? tick.center?.[1],
+        tick.note,
+        tick.routeCragName?.trim(),
+        tick.routeAreaName?.trim(),
+        tick.shortId,
+        tick.routeLon,
+        tick.routeLat,
       ]
         .map(toCsvValue)
         .join(','),

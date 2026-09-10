@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
+import { ClimbingTick } from '../../types';
 import {
   DEFAULT_CLIMBING_STATS_DATE_RANGE,
   climbingStatsDateRangeToSelectValue,
@@ -95,11 +96,13 @@ export const UserProfilePerformanceSection = ({
   own,
   ticksPanelEnabled,
   fetchedTicks,
+  rawTicks,
 }: {
   displayName: string;
   own: boolean;
   ticksPanelEnabled: boolean;
   fetchedTicks: FetchedClimbingTick[];
+  rawTicks: ClimbingTick[];
 }) => {
   const [range, setRange] = useState<ClimbingStatsDateRange>(
     DEFAULT_CLIMBING_STATS_DATE_RANGE,
@@ -118,13 +121,13 @@ export const UserProfilePerformanceSection = ({
     displayName,
     selectValue,
   );
-  const exportDisabled = !ticksPanelEnabled || fetchedTicks.length === 0;
+  const exportDisabled = !ticksPanelEnabled || rawTicks.length === 0;
 
   const onExportCsv = () => {
     if (exportDisabled) {
       return;
     }
-    const csv = buildTicksCsv(fetchedTicks);
+    const csv = buildTicksCsv(rawTicks);
     const filename = buildTicksCsvFilename(displayName);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);

@@ -38,9 +38,9 @@ export default {
   'user_profile.total_points': 'Points totaux',
   'user_profile.ticks_count': 'Croix',
   'user_profile.leaderboard_rank': 'Rang au classement',
-  'user_profile.export_csv': 'Exporter CSV',
+  'user_profile.export_csv': 'Exporter le carnet',
   'user_profile.export_csv_disabled':
-    'Exporter CSV (disponible une fois les croix chargées)',
+    'Exporter le carnet (disponible une fois les croix chargées)',
   'user_profile.ticks_table_title': 'Croix',
   'user_profile.tab_ticks': 'Croix',
   'user_profile.tab_charts': 'Graphiques',

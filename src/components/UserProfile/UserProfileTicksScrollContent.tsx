@@ -7,6 +7,7 @@ import { UserProfileHero } from './UserProfileHero';
 import { UserProfilePerformanceSection } from './UserProfilePerformanceSection';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { UserProfileFetchState } from './useUserProfileFetch';
+import { ClimbingTick } from '../../types';
 
 type Props = {
   titleName: string;
@@ -16,6 +17,7 @@ type Props = {
   ticksPanelEnabled: boolean;
   isLoading: boolean;
   fetchedTicks: FetchedClimbingTick[];
+  rawTicks: ClimbingTick[];
   onClose: () => void;
 };
 
@@ -55,6 +57,7 @@ export const UserProfileTicksScrollContent = ({
   ticksPanelEnabled,
   isLoading,
   fetchedTicks,
+  rawTicks,
   onClose,
 }: Props) => (
   <PanelScrollbars>
@@ -67,6 +70,7 @@ export const UserProfileTicksScrollContent = ({
         own={own}
         ticksPanelEnabled={ticksPanelEnabled}
         fetchedTicks={fetchedTicks}
+        rawTicks={rawTicks}
       />
     ) : null}
 
