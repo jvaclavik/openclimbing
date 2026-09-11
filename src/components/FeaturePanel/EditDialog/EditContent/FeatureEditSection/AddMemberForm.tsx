@@ -310,7 +310,9 @@ const BatchTextarea = (props: { label: string; setLabel: Setter<string> }) => {
         placeholder={placeholder}
         onChange={(e) => props.setLabel(e.target.value)}
       />
-      {gradeSystem ? <GradeSystemSelect showDefaultOnButton /> : null}
+      {gradeSystem ? (
+        <GradeSystemSelect orderByFeature showDefaultOnButton />
+      ) : null}
     </>
   );
 };

@@ -1551,7 +1551,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
           </MenuItem>
           <MenuItem disableRipple sx={{ cursor: 'default', gap: 1 }}>
             <ListItemText primary={t('user_settings.default_grade_system')} />
-            <GradeSystemSelect />
+            <GradeSystemSelect orderByFeature />
           </MenuItem>
         </Menu>
         <Button

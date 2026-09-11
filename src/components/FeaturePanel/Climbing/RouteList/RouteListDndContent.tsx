@@ -119,7 +119,7 @@ export const RouteListDndContent = () => {
                 mr: 1,
               }}
             >
-              <GradeSystemSelect />
+              <GradeSystemSelect orderByFeature />
             </Box>
           </MaxWidthContainer>
         </TableHeader>
@@ -153,7 +153,7 @@ export const RouteListDndContent = () => {
       })}
       {isMobileMode && (
         <BottomGradeSystem>
-          <GradeSystemSelect />
+          <GradeSystemSelect orderByFeature />
         </BottomGradeSystem>
       )}
     </Container>

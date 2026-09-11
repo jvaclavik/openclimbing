@@ -4,6 +4,7 @@ import { Button, Stack, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
   DEFAULT_GRADE_SYSTEM,
+  getGradeSystemCategoriesForTags,
   getGradeSystemName,
   GRADE_SYSTEMS,
   GradeSystem,
@@ -14,44 +15,68 @@ import { t } from '../../../services/intl';
 import { ClimbingGradesTable } from './ClimbingGradesTable/ClimbingGradesTable';
 import { useVisibleGradeSystems } from './utils/useVisibleGradeSystems';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { useFeatureContext } from '../../utils/FeatureContext';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
-import { FilterBody, FilterCard, FilterOption } from './Filter/filterUi';
+import {
+  FilterBody,
+  FilterCard,
+  FilterOption,
+  FilterSectionLabel,
+} from './Filter/filterUi';
 
-const GradeSystemItems = ({
-  showMinor,
+const GradeSystemCategories = ({
+  showMore,
   onClick,
   selectedGradeSystem,
+  orderByFeature,
 }: {
-  showMinor: boolean;
+  showMore: boolean;
   onClick: (key: GradeSystem) => void;
   selectedGradeSystem: GradeSystem | undefined;
+  orderByFeature?: boolean;
 }) => {
   const visibleGradeSystems = useVisibleGradeSystems();
+  const { feature } = useFeatureContext();
 
-  const filteredGradeSystems = GRADE_SYSTEMS.filter(({ key }) =>
-    showMinor
-      ? !visibleGradeSystems.includes(key)
-      : visibleGradeSystems.includes(key),
-  );
+  const categories = getGradeSystemCategoriesForTags(
+    orderByFeature ? feature?.tags : undefined,
+  )
+    .map((category) => ({
+      ...category,
+      gradeSystems: GRADE_SYSTEMS.filter(
+        ({ key, category: gradeSystemCategory }) =>
+          gradeSystemCategory === category.key &&
+          (showMore || visibleGradeSystems.includes(key)),
+      ),
+    }))
+    .filter(({ gradeSystems }) => gradeSystems.length);
+
   return (
     <>
-      {filteredGradeSystems.map(({ key, name, description, flags }) => (
-        <Tooltip
-          title={description}
-          placement="right"
-          enterDelay={1000}
-          arrow
-          key={key}
-        >
-          <FilterOption
-            type="button"
-            $selected={selectedGradeSystem === key}
-            onClick={() => onClick(key)}
-          >
-            <span>{name}</span>
-            <span>{flags}</span>
-          </FilterOption>
-        </Tooltip>
+      {categories.map(({ key: categoryKey, label, gradeSystems }, index) => (
+        <React.Fragment key={categoryKey}>
+          <FilterSectionLabel $flush style={{ marginTop: index ? 8 : 4 }}>
+            {t(label)}
+          </FilterSectionLabel>
+          {gradeSystems.map(({ key, name, description, flags }) => (
+            <Tooltip
+              title={description}
+              placement="right"
+              enterDelay={1000}
+              arrow
+              key={key}
+            >
+              <FilterOption
+                type="button"
+                $selected={selectedGradeSystem === key}
+                onClick={() => onClick(key)}
+              >
+                <span>{name}</span>
+                <span>{flags}</span>
+              </FilterOption>
+            </Tooltip>
+          ))}
+        </React.Fragment>
       ))}
     </>
   );
@@ -61,12 +86,14 @@ type Props = {
   size?: 'small' | 'tiny';
   onGradeSystemChange?: (gradeSystem: GradeSystem) => void;
   showDefaultOnButton?: boolean;
+  orderByFeature?: boolean;
 };
 
 export const GradeSystemSelect = ({
   size,
   onGradeSystemChange,
   showDefaultOnButton,
+  orderByFeature,
 }: Props) => {
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const [isGradeTableOpen, setIsGradeTableOpen] = useState(false);
@@ -143,18 +170,12 @@ export const GradeSystemSelect = ({
               >
                 {t('grade_system_select.default_grade_system')}
               </FilterOption>
-              <GradeSystemItems
-                showMinor={false}
+              <GradeSystemCategories
+                showMore={showMore}
                 onClick={changeGradeSystem}
                 selectedGradeSystem={selectedGradeSystem}
+                orderByFeature={orderByFeature}
               />
-              {showMore && (
-                <GradeSystemItems
-                  showMinor
-                  onClick={changeGradeSystem}
-                  selectedGradeSystem={selectedGradeSystem}
-                />
-              )}
             </Stack>
           </FilterCard>
           {!showMore && (

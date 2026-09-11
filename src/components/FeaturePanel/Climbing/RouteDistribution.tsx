@@ -396,7 +396,7 @@ const CompactChart = ({
 // ------------------------------------------------------------------- heading
 
 const DistributionLabel = () => (
-  <PanelLabel addition={<GradeSystemSelect size="tiny" />}>
+  <PanelLabel addition={<GradeSystemSelect orderByFeature size="tiny" />}>
     {t('featurepanel.grade_range')}
   </PanelLabel>
 );
@@ -449,7 +449,7 @@ export const RouteDistribution = ({
   // the untrimmed count, so a crag with a single grade still gets its chart
   if (allBuckets.length < 2) {
     return (
-      <PanelLabel addition={<GradeSystemSelect />}>
+      <PanelLabel addition={<GradeSystemSelect orderByFeature />}>
         {t('grade_system_select.convert_grade')}
       </PanelLabel>
     );
@@ -469,7 +469,7 @@ export const RouteDistribution = ({
                     gradeSystemName: getGradeSystemName(gradeSystem),
                   })}
                 >
-                  <GradeSystemSelect size="tiny" />
+                  <GradeSystemSelect orderByFeature size="tiny" />
                 </Tooltip>
               </GradeSystemName>
             )}
