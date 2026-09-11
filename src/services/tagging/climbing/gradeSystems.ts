@@ -149,10 +149,13 @@ export const GRADE_SYSTEM_CATEGORIES: {
   },
 ];
 
+// Only the feature's own tags - a climbing=crag does not inherit boulder-ness of its routes
 export const getGradeSystemCategoriesForTags = (tags: FeatureTags = {}) => {
   const { climbingTypes } = getClimbingAttributes(tags);
   const matches = (category: (typeof GRADE_SYSTEM_CATEGORIES)[number]) =>
-    category.climbingTypes.some((type) => climbingTypes.includes(type));
+    category.climbingTypes.some(
+      (type) => type === tags.climbing || climbingTypes.includes(type),
+    );
 
   return [
     ...GRADE_SYSTEM_CATEGORIES.filter(matches),
