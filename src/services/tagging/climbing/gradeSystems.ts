@@ -5,7 +5,7 @@ import { getClimbingAttributes } from './climbingAttributes';
 export const GRADE_SYSTEMS = [
   {
     key: 'uiaa', // TODO this should be `as const` otherwise it is just string
-    category: 'roped',
+    category: 'routes',
     name: 'UIAA',
     flags: '🇪🇺',
     minor: false,
@@ -14,7 +14,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'french',
-    category: 'roped',
+    category: 'routes',
     name: 'French',
     flags: '🇪🇺',
     minor: false,
@@ -23,7 +23,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'saxon',
-    category: 'roped',
+    category: 'routes',
     name: 'Saxon',
     flags: '🇩🇪🇨🇿',
     minor: false,
@@ -32,7 +32,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'yds_class',
-    category: 'roped',
+    category: 'routes',
     name: 'YDS',
     flags: '🇺🇸',
     minor: false,
@@ -50,7 +50,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'british_traditional',
-    category: 'roped',
+    category: 'routes',
     name: 'British technical',
     flags: '🇬🇧',
     minor: true,
@@ -58,7 +58,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'british_adjectival',
-    category: 'roped',
+    category: 'routes',
     name: 'British Adjectival',
     flags: '🇬🇧',
     minor: true,
@@ -67,7 +67,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'french_british',
-    category: 'roped',
+    category: 'routes',
     name: 'French British',
     flags: '🇬🇧🇮🇪',
     minor: true,
@@ -76,7 +76,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'norwegian',
-    category: 'roped',
+    category: 'routes',
     name: 'Norwegian',
     flags: '🇳🇴🇸🇪',
     minor: true,
@@ -100,7 +100,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'polish',
-    category: 'roped',
+    category: 'routes',
     name: 'Polish',
     flags: '🇵🇱',
     minor: true,
@@ -123,7 +123,7 @@ export const getGradeSystemName = (gradeSystemKey: GradeSystem) =>
 
 export const DEFAULT_GRADE_SYSTEM = 'uiaa';
 
-export type GradeSystemCategory = 'boulder' | 'roped' | 'ice' | 'mixed';
+export type GradeSystemCategory = 'boulder' | 'routes' | 'ice' | 'mixed';
 
 // Grouping follows the climbing style -> grading system table of id-tagging-schema
 export const GRADE_SYSTEM_CATEGORIES: {
@@ -132,8 +132,8 @@ export const GRADE_SYSTEM_CATEGORIES: {
   climbingTypes: string[];
 }[] = [
   {
-    key: 'roped',
-    label: 'grade_system_select.category_roped',
+    key: 'routes',
+    label: 'grade_system_select.category_routes',
     climbingTypes: ['sport', 'trad', 'deepwater'],
   },
   {
