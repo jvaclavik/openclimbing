@@ -236,6 +236,11 @@ export default {
   'climbing_renderer.climbing_grade_maximum': 'maximum climbing grade',
   'climbing_renderer.via_ferrata_scale': 'via ferrata scale',
   'climbing_renderer.sac_scale': 'SAC scale',
+  'featurepanel.fee.free_access': 'No fee',
+  'featurepanel.fee.required': 'Fee required',
+  'featurepanel.fee.charge_amount': '__amount__ fee',
+  'featurepanel.fee.donation': 'Donation',
+  'featurepanel.fee.donation_with_amount': 'Donation (__amount__)',
   'climbing.photos': 'Photos',
 
   'project.osmapp.description': 'A universal app for OpenStreetMap',

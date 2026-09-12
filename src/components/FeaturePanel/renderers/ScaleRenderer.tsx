@@ -1,10 +1,15 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { t } from '../../../services/intl';
+import {
+  getViaFerrataScaleColor,
+  getViaFerrataGrades,
+} from '../../../services/tagging/viaFerrataScale';
 
 const Container = styled.div`
   display: flex;
   gap: 8px;
+  align-items: center;
 `;
 
 const Circle = styled.div<{ $color: string }>`
@@ -18,6 +23,11 @@ const Circle = styled.div<{ $color: string }>`
   font-family: monospace;
 `;
 
+const GradeDetail = styled.span`
+  font-size: 12px;
+  opacity: 0.8;
+`;
+
 // TODO perhaps merge with ClimbingGradeRenderer in future
 export const ScaleRenderer = ({ k, v }) => {
   const label =
@@ -27,10 +37,21 @@ export const ScaleRenderer = ({ k, v }) => {
         ? t('climbing_renderer.sac_scale')
         : k;
 
+  const color =
+    k === 'via_ferrata_scale' ? (getViaFerrataScaleColor(v) ?? '#555') : '#555';
+
+  const grades = k === 'via_ferrata_scale' ? getViaFerrataGrades(v) : null;
+
   return (
     <Container>
-      <Circle $color="#555">{v}</Circle>
+      <Circle $color={color}>{v}</Circle>
       <span>{label}</span>
+      {grades && (
+        <GradeDetail>
+          ({grades.french}
+          {grades.german ? ` / ${grades.german}` : ''})
+        </GradeDetail>
+      )}
     </Container>
   );
 };
