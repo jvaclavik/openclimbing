@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import styled from '@emotion/styled';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { Button, Stack, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
@@ -23,6 +24,27 @@ import {
   FilterOption,
   FilterSectionLabel,
 } from './Filter/filterUi';
+import { tint } from '../../utils/panelUi';
+
+// own wrapper per category, so each heading is pushed out by the next section
+const CategorySection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+// opaque, so options scrolling underneath don't show through the pinned heading
+const CategoryLabel = styled(FilterSectionLabel)`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 0 4px;
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-image: linear-gradient(
+    ${({ theme }) => tint(theme, 0.045)},
+    ${({ theme }) => tint(theme, 0.045)}
+  );
+`;
 
 const GradeSystemCategories = ({
   showMore,
@@ -54,10 +76,10 @@ const GradeSystemCategories = ({
   return (
     <>
       {categories.map(({ key: categoryKey, label, gradeSystems }, index) => (
-        <React.Fragment key={categoryKey}>
-          <FilterSectionLabel $flush style={{ marginTop: index ? 8 : 4 }}>
+        <CategorySection key={categoryKey}>
+          <CategoryLabel $flush style={{ marginTop: index ? 8 : 0 }}>
             {t(label)}
-          </FilterSectionLabel>
+          </CategoryLabel>
           {gradeSystems.map(({ key, name, description, flags }) => (
             <Tooltip
               title={description}
@@ -76,7 +98,7 @@ const GradeSystemCategories = ({
               </FilterOption>
             </Tooltip>
           ))}
-        </React.Fragment>
+        </CategorySection>
       ))}
     </>
   );
