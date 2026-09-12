@@ -158,6 +158,9 @@ export default {
   'user_profile.total_points': 'Celkem bodů',
   'user_profile.ticks_count': 'Přelezů',
   'user_profile.leaderboard_rank': 'Pořadí v žebříčku',
+  'user_profile.export_csv': 'Export deníku',
+  'user_profile.export_csv_disabled':
+    'Export deníku (dostupné po načtení přelezů)',
   'user_profile.ticks_table_title': 'Přelezy',
   'user_profile.tab_ticks': 'Přelezy',
   'user_profile.tab_charts': 'Grafy',
