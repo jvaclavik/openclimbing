@@ -51,7 +51,7 @@ export const ClimbingGradesEditor = () => {
             tags={tags}
           />
         </Box>
-        <GradeSystemSelect showDefaultOnButton />
+        <GradeSystemSelect orderByFeature showDefaultOnButton />
       </Stack>
     </Box>
   );

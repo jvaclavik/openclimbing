@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import styled from '@emotion/styled';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { Button, Stack, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
   DEFAULT_GRADE_SYSTEM,
+  getGradeSystemCategoriesForTags,
   getGradeSystemName,
   GRADE_SYSTEMS,
   GradeSystem,
@@ -14,44 +16,89 @@ import { t } from '../../../services/intl';
 import { ClimbingGradesTable } from './ClimbingGradesTable/ClimbingGradesTable';
 import { useVisibleGradeSystems } from './utils/useVisibleGradeSystems';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { useFeatureContext } from '../../utils/FeatureContext';
 import { GLASS_PAPER_SX, PopperWithArrow } from '../../utils/PopperWithArrow';
-import { FilterBody, FilterCard, FilterOption } from './Filter/filterUi';
+import {
+  FilterBody,
+  FilterCard,
+  FilterOption,
+  FilterSectionLabel,
+} from './Filter/filterUi';
+import { tint } from '../../utils/panelUi';
 
-const GradeSystemItems = ({
-  showMinor,
+// own wrapper per category, so each heading is pushed out by the next section
+const CategorySection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+// opaque, so options scrolling underneath don't show through the pinned heading
+const CategoryLabel = styled(FilterSectionLabel)`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 0 4px;
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-image: linear-gradient(
+    ${({ theme }) => tint(theme, 0.045)},
+    ${({ theme }) => tint(theme, 0.045)}
+  );
+`;
+
+const GradeSystemCategories = ({
+  showMore,
   onClick,
   selectedGradeSystem,
+  orderByFeature,
 }: {
-  showMinor: boolean;
+  showMore: boolean;
   onClick: (key: GradeSystem) => void;
   selectedGradeSystem: GradeSystem | undefined;
+  orderByFeature?: boolean;
 }) => {
   const visibleGradeSystems = useVisibleGradeSystems();
+  const { feature } = useFeatureContext();
 
-  const filteredGradeSystems = GRADE_SYSTEMS.filter(({ key }) =>
-    showMinor
-      ? !visibleGradeSystems.includes(key)
-      : visibleGradeSystems.includes(key),
-  );
+  const categories = getGradeSystemCategoriesForTags(
+    orderByFeature ? feature?.tags : undefined,
+  )
+    .map((category) => ({
+      ...category,
+      gradeSystems: GRADE_SYSTEMS.filter(
+        ({ key, category: gradeSystemCategory }) =>
+          gradeSystemCategory === category.key &&
+          (showMore || visibleGradeSystems.includes(key)),
+      ),
+    }))
+    .filter(({ gradeSystems }) => gradeSystems.length);
+
   return (
     <>
-      {filteredGradeSystems.map(({ key, name, description, flags }) => (
-        <Tooltip
-          title={description}
-          placement="right"
-          enterDelay={1000}
-          arrow
-          key={key}
-        >
-          <FilterOption
-            type="button"
-            $selected={selectedGradeSystem === key}
-            onClick={() => onClick(key)}
-          >
-            <span>{name}</span>
-            <span>{flags}</span>
-          </FilterOption>
-        </Tooltip>
+      {categories.map(({ key: categoryKey, label, gradeSystems }, index) => (
+        <CategorySection key={categoryKey}>
+          <CategoryLabel $flush style={{ marginTop: index ? 8 : 0 }}>
+            {t(label)}
+          </CategoryLabel>
+          {gradeSystems.map(({ key, name, description, flags }) => (
+            <Tooltip
+              title={description}
+              placement="right"
+              enterDelay={1000}
+              arrow
+              key={key}
+            >
+              <FilterOption
+                type="button"
+                $selected={selectedGradeSystem === key}
+                onClick={() => onClick(key)}
+              >
+                <span>{name}</span>
+                <span>{flags}</span>
+              </FilterOption>
+            </Tooltip>
+          ))}
+        </CategorySection>
       ))}
     </>
   );
@@ -61,12 +108,14 @@ type Props = {
   size?: 'small' | 'tiny';
   onGradeSystemChange?: (gradeSystem: GradeSystem) => void;
   showDefaultOnButton?: boolean;
+  orderByFeature?: boolean;
 };
 
 export const GradeSystemSelect = ({
   size,
   onGradeSystemChange,
   showDefaultOnButton,
+  orderByFeature,
 }: Props) => {
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const [isGradeTableOpen, setIsGradeTableOpen] = useState(false);
@@ -143,18 +192,12 @@ export const GradeSystemSelect = ({
               >
                 {t('grade_system_select.default_grade_system')}
               </FilterOption>
-              <GradeSystemItems
-                showMinor={false}
+              <GradeSystemCategories
+                showMore={showMore}
                 onClick={changeGradeSystem}
                 selectedGradeSystem={selectedGradeSystem}
+                orderByFeature={orderByFeature}
               />
-              {showMore && (
-                <GradeSystemItems
-                  showMinor
-                  onClick={changeGradeSystem}
-                  selectedGradeSystem={selectedGradeSystem}
-                />
-              )}
             </Stack>
           </FilterCard>
           {!showMore && (

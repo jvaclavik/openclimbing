@@ -1,7 +1,11 @@
+import { FeatureTags, TranslationId } from '../../types';
+import { getClimbingAttributes } from './climbingAttributes';
+
 // The order of this array must be the same as CSV in gradeData.ts
 export const GRADE_SYSTEMS = [
   {
     key: 'uiaa', // TODO this should be `as const` otherwise it is just string
+    category: 'routes',
     name: 'UIAA',
     flags: '🇪🇺',
     minor: false,
@@ -10,6 +14,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'french',
+    category: 'routes',
     name: 'French',
     flags: '🇪🇺',
     minor: false,
@@ -18,6 +23,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'saxon',
+    category: 'routes',
     name: 'Saxon',
     flags: '🇩🇪🇨🇿',
     minor: false,
@@ -26,6 +32,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'yds_class',
+    category: 'routes',
     name: 'YDS',
     flags: '🇺🇸',
     minor: false,
@@ -34,6 +41,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'hueco',
+    category: 'boulder',
     name: 'V scale',
     flags: '🇺🇸',
     minor: false,
@@ -42,6 +50,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'british_traditional',
+    category: 'routes',
     name: 'British technical',
     flags: '🇬🇧',
     minor: true,
@@ -49,6 +58,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'british_adjectival',
+    category: 'routes',
     name: 'British Adjectival',
     flags: '🇬🇧',
     minor: true,
@@ -57,6 +67,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'french_british',
+    category: 'routes',
     name: 'French British',
     flags: '🇬🇧🇮🇪',
     minor: true,
@@ -65,6 +76,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'norwegian',
+    category: 'routes',
     name: 'Norwegian',
     flags: '🇳🇴🇸🇪',
     minor: true,
@@ -72,6 +84,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'ice',
+    category: 'ice',
     name: 'WI',
     flags: '🇨🇦',
     minor: true,
@@ -79,6 +92,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'mixed',
+    category: 'mixed',
     name: 'Mixed',
     minor: true,
     description:
@@ -86,6 +100,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'polish',
+    category: 'routes',
     name: 'Polish',
     flags: '🇵🇱',
     minor: true,
@@ -93,6 +108,7 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'fb',
+    category: 'boulder',
     name: 'Fontainebleau',
     flags: '🇪🇺',
     minor: true,
@@ -106,3 +122,43 @@ export const getGradeSystemName = (gradeSystemKey: GradeSystem) =>
   GRADE_SYSTEMS.find((item) => item.key === gradeSystemKey)?.name;
 
 export const DEFAULT_GRADE_SYSTEM = 'uiaa';
+
+export type GradeSystemCategory = 'boulder' | 'routes' | 'ice' | 'mixed';
+
+// Grouping follows the climbing style -> grading system table of id-tagging-schema
+export const GRADE_SYSTEM_CATEGORIES: {
+  key: GradeSystemCategory;
+  label: TranslationId;
+  climbingTypes: string[];
+}[] = [
+  {
+    key: 'routes',
+    label: 'grade_system_select.category_routes',
+    climbingTypes: ['sport', 'trad', 'deepwater'],
+  },
+  {
+    key: 'boulder',
+    label: 'climbing_badges.boulder_label',
+    climbingTypes: ['boulder'],
+  },
+  { key: 'ice', label: 'climbing_badges.ice_label', climbingTypes: ['ice'] },
+  {
+    key: 'mixed',
+    label: 'climbing_badges.mixed_label',
+    climbingTypes: ['mixed'],
+  },
+];
+
+// Only the feature's own tags - a climbing=crag does not inherit boulder-ness of its routes
+export const getGradeSystemCategoriesForTags = (tags: FeatureTags = {}) => {
+  const { climbingTypes } = getClimbingAttributes(tags);
+  const matches = (category: (typeof GRADE_SYSTEM_CATEGORIES)[number]) =>
+    category.climbingTypes.some(
+      (type) => type === tags.climbing || climbingTypes.includes(type),
+    );
+
+  return [
+    ...GRADE_SYSTEM_CATEGORIES.filter(matches),
+    ...GRADE_SYSTEM_CATEGORIES.filter((category) => !matches(category)),
+  ];
+};

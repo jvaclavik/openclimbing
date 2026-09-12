@@ -875,6 +875,7 @@ export default {
   'grade_system_select.convert_grade_short': 'Převést',
   'grade_system_select.convert_grade': 'Převést klasifikaci',
   'grade_system_select.select_grade_system': 'Vybrat klasifikaci',
+  'grade_system_select.category_routes': 'Cesty',
 
   'crag_sort.title': 'Seřadit',
   'crag_sort.option_default': 'Defaultní',

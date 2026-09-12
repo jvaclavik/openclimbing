@@ -944,6 +944,7 @@ export default {
   'grade_system_select.convert_grade_short': 'Convert',
   'grade_system_select.convert_grade': 'Convert grades',
   'grade_system_select.select_grade_system': 'Select grade system',
+  'grade_system_select.category_routes': 'Routes',
 
   'crag_sort.title': 'Sort',
   'crag_sort.option_default': 'Default',

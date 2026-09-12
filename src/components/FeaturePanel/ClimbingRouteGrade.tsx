@@ -23,7 +23,7 @@ export const ClimbingRouteGrade = () => {
       }}
     >
       <ConvertedRouteDifficultyBadge routeDifficulties={routeDifficulties} />
-      <GradeSystemSelect />
+      <GradeSystemSelect orderByFeature />
     </Stack>
   );
 };
