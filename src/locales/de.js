@@ -464,14 +464,15 @@ export default {
   'uploaddialog.close': 'Schließen',
   'uploaddialog.cancel': 'Abbrechen',
   'uploaddialog.upload': 'Hochladen',
+  'uploaddialog.upload_all': 'Alle hochladen',
   'uploaddialog.done': 'Fertig',
   'uploaddialog.login': 'Anmelden',
   'uploaddialog.logout': 'Abmelden',
   'uploaddialog.login_hint':
     'Melde dich mit deinem Wikimedia-Commons-Konto an, um Fotos hochzuladen. Dafür brauchst du ein eigenes Konto, getrennt von deinem OSM-Konto.',
   'uploaddialog.logged_in_as': 'Bei Wikimedia Commons angemeldet als <b>__user__</b>',
-  'uploaddialog.choose_file': 'Foto wählen…',
-  'uploaddialog.choose_file_hint': 'Wähle ein Bild von deinem Gerät. HEIC-Fotos vom iPhone werden automatisch in JPG umgewandelt.',
+  'uploaddialog.choose_file': 'Fotos wählen…',
+  'uploaddialog.choose_file_hint': 'Wähle ein oder mehrere Bilder von deinem Gerät. Du kannst mehrere auf einmal auswählen und in einem Rutsch hochladen. HEIC-Fotos vom iPhone werden automatisch in JPG umgewandelt.',
   'uploaddialog.preparing': 'EXIF-Daten werden gelesen und das Foto zum Hochladen vorbereitet…',
   'uploaddialog.filename_label': 'Dateiname auf Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -489,12 +490,25 @@ export default {
   'uploaddialog.uploading': 'Wird zu Wikimedia Commons hochgeladen…',
   'uploaddialog.uploading_percent': 'Wird zu Wikimedia Commons hochgeladen… __percent__%',
   'uploaddialog.success': 'Foto hochgeladen! Speichere die Änderungen, um es diesem Ort zuzuordnen.',
+  'uploaddialog.success_multiple':
+    '__count__ Fotos hochgeladen! Speichere die Änderungen, um sie diesem Ort zuzuordnen.',
+  'uploaddialog.skipped_single':
+    '1 ausgewähltes Foto wurde übersprungen: __reason__',
+  'uploaddialog.skipped_multiple':
+    '__count__ ausgewählte Fotos wurden übersprungen. Letzter Fehler: __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 ausgewähltes Foto wurde übersprungen.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ ausgewählte Fotos wurden übersprungen.',
+  'uploaddialog.photo_progress': 'Foto __current__ von __total__',
+  'uploaddialog.previous_photo': 'Vorheriges',
+  'uploaddialog.next_photo': 'Nächstes',
   'uploaddialog.enter_filename_manually': 'oder Dateinamen manuell eingeben',
   'uploaddialog.row_upload_cta': 'Foto hochladen',
   'uploaddialog.row_manual_label': 'oder einen vorhandenen Dateinamen einfügen',
   'uploaddialog.row_paste_existing': 'Vorhandenes Foto einfügen',
   'uploaddialog.row_back_to_upload': 'Zurück',
-  'uploaddialog.drop_to_upload': 'Foto hier ablegen, um es zu Wikimedia Commons hochzuladen',
+  'uploaddialog.drop_to_upload': 'Fotos hier ablegen, um sie zu Wikimedia Commons hochzuladen',
   'uploaddialog.debug_mode_on': 'Foto-Upload (Debug) ist aktiviert',
   'editdialog.location_checkbox': 'Position ändern',
   'editdialog.location_placeholder': 'z.B. gegenüber auf der Straße',

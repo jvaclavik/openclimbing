@@ -13,7 +13,6 @@ import {
   SetSections,
   SetShortId,
   SetTagsEntries,
-  TagsEntries,
 } from './types';
 import { convertToRelationFactory } from './convertToRelationFactory';
 import { getPresetKey } from './utils';
@@ -30,11 +29,11 @@ const setDataItemFactory =
   };
 
 const setTagsEntriesFactory =
-  (setDataItem: SetDataItem, tagsEntries: TagsEntries): SetTagsEntries =>
+  (setDataItem: SetDataItem): SetTagsEntries =>
   (updateFn) =>
     setDataItem((prev) => ({
       ...prev,
-      tagsEntries: updateFn(tagsEntries),
+      tagsEntries: updateFn(prev.tagsEntries),
     }));
 
 const setShortIdFactory =
@@ -142,7 +141,7 @@ export const useEditItems = () => {
       data.map((dataItem) => {
         const { shortId, tagsEntries, members } = dataItem;
         const setDataItem = setDataItemFactory(setData, shortId);
-        const setTagsEntries = setTagsEntriesFactory(setDataItem, tagsEntries);
+        const setTagsEntries = setTagsEntriesFactory(setDataItem);
         const presetKey = getPresetKey(dataItem);
         return {
           ...dataItem,

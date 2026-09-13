@@ -462,13 +462,14 @@ export default {
   'uploaddialog.close': 'Chiudi',
   'uploaddialog.cancel': 'Annulla',
   'uploaddialog.upload': 'Carica',
+  'uploaddialog.upload_all': 'Carica tutto',
   'uploaddialog.done': 'Fatto',
   'uploaddialog.login': 'Accedi',
   'uploaddialog.logout': 'Esci',
   'uploaddialog.login_hint': 'Accedi con il tuo account Wikimedia Commons per caricare foto. Serve un account separato da quello OSM.',
   'uploaddialog.logged_in_as': 'Connesso a Wikimedia Commons come <b>__user__</b>',
   'uploaddialog.choose_file': 'Scegli foto…',
-  'uploaddialog.choose_file_hint': 'Scegli un’immagine dal tuo dispositivo. Le foto HEIC da iPhone verranno convertite automaticamente in JPG.',
+  'uploaddialog.choose_file_hint': 'Scegli una o più immagini dal tuo dispositivo. Puoi selezionarne diverse in una volta sola per caricarle tutte insieme. Le foto HEIC da iPhone verranno convertite automaticamente in JPG.',
   'uploaddialog.preparing': 'Lettura dei dati EXIF e preparazione della foto per il caricamento…',
   'uploaddialog.filename_label': 'Nome file su Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -486,12 +487,25 @@ export default {
   'uploaddialog.uploading': 'Caricamento su Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Caricamento su Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Foto caricata! Salva le modifiche per allegarla a questo luogo.',
+  'uploaddialog.success_multiple':
+    '__count__ foto caricate! Salva le modifiche per allegarle a questo luogo.',
+  'uploaddialog.skipped_single':
+    '1 foto selezionata è stata saltata: __reason__',
+  'uploaddialog.skipped_multiple':
+    '__count__ foto selezionate sono state saltate. Ultimo errore: __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 foto selezionata è stata saltata.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ foto selezionate sono state saltate.',
+  'uploaddialog.photo_progress': 'Foto __current__ di __total__',
+  'uploaddialog.previous_photo': 'Precedente',
+  'uploaddialog.next_photo': 'Successiva',
   'uploaddialog.enter_filename_manually': 'oppure inserisci il nome file manualmente',
   'uploaddialog.row_upload_cta': 'Carica foto',
   'uploaddialog.row_manual_label': 'oppure incolla un nome file esistente',
   'uploaddialog.row_paste_existing': 'Incolla foto esistente',
   'uploaddialog.row_back_to_upload': 'Indietro',
-  'uploaddialog.drop_to_upload': 'Trascina qui la foto per caricarla su Wikimedia Commons',
+  'uploaddialog.drop_to_upload': 'Trascina qui le foto per caricarle su Wikimedia Commons',
   'uploaddialog.debug_mode_on': 'Il caricamento foto (debug) è abilitato',
   'editdialog.location_checkbox': 'Cambia posizione',
   'editdialog.location_placeholder': 'ad es. dall’altra parte della strada',

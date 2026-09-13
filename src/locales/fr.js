@@ -466,14 +466,15 @@ export default {
   'uploaddialog.close': 'Fermer',
   'uploaddialog.cancel': 'Annuler',
   'uploaddialog.upload': 'Téléverser',
+  'uploaddialog.upload_all': 'Tout téléverser',
   'uploaddialog.done': 'Terminé',
   'uploaddialog.login': 'Se connecter',
   'uploaddialog.logout': 'Se déconnecter',
   'uploaddialog.login_hint':
     'Connectez-vous avec votre compte Wikimedia Commons pour téléverser des photos. Il vous faut un compte distinct de votre compte OSM.',
   'uploaddialog.logged_in_as': 'Connecté à Wikimedia Commons en tant que <b>__user__</b>',
-  'uploaddialog.choose_file': 'Choisir une photo…',
-  'uploaddialog.choose_file_hint': 'Choisissez une image sur votre appareil. Les photos HEIC de l’iPhone seront converties automatiquement en JPG.',
+  'uploaddialog.choose_file': 'Choisir des photos…',
+  'uploaddialog.choose_file_hint': 'Choisissez une ou plusieurs images sur votre appareil. Vous pouvez en sélectionner plusieurs à la fois pour les téléverser d’un seul coup. Les photos HEIC de l’iPhone seront converties automatiquement en JPG.',
   'uploaddialog.preparing': 'Lecture des données EXIF et préparation de la photo pour le téléversement…',
   'uploaddialog.filename_label': 'Nom du fichier sur Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -492,12 +493,25 @@ export default {
   'uploaddialog.uploading': 'Téléversement vers Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Téléversement vers Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Photo téléversée ! Enregistrez les modifications pour la joindre à ce lieu.',
+  'uploaddialog.success_multiple':
+    '__count__ photos téléversées ! Enregistrez les modifications pour les joindre à ce lieu.',
+  'uploaddialog.skipped_single':
+    '1 photo sélectionnée a été ignorée : __reason__',
+  'uploaddialog.skipped_multiple':
+    '__count__ photos sélectionnées ont été ignorées. Dernière erreur : __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 photo sélectionnée a été ignorée.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ photos sélectionnées ont été ignorées.',
+  'uploaddialog.photo_progress': 'Photo __current__ sur __total__',
+  'uploaddialog.previous_photo': 'Précédente',
+  'uploaddialog.next_photo': 'Suivante',
   'uploaddialog.enter_filename_manually': 'ou saisissez le nom du fichier manuellement',
   'uploaddialog.row_upload_cta': 'Téléverser une photo',
   'uploaddialog.row_manual_label': 'ou collez un nom de fichier existant',
   'uploaddialog.row_paste_existing': 'Coller une photo existante',
   'uploaddialog.row_back_to_upload': 'Retour',
-  'uploaddialog.drop_to_upload': 'Déposez la photo ici pour la téléverser vers Wikimedia Commons',
+  'uploaddialog.drop_to_upload': 'Déposez ici les photos pour les téléverser vers Wikimedia Commons',
   'uploaddialog.debug_mode_on': 'Le téléversement de photos (débogage) est activé',
   'editdialog.location_checkbox': 'Déplacer',
   'editdialog.location_placeholder': 'ex : de l’autre côté de la rue',

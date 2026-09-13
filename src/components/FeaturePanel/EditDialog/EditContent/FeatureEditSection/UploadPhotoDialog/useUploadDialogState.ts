@@ -25,7 +25,15 @@ type Args = {
   open: boolean;
   feature: Feature | null;
   onUploaded: (fileTagValue: string) => void;
-  initialFile?: File | null;
+  initialFiles?: File[] | null;
+};
+
+type ReviewPhoto = {
+  prepared: PreparedUpload;
+  filenameStem: string;
+  description: string;
+  categories: string[];
+  license: LicenseId;
 };
 
 const useResetOnClose = (open: boolean, reset: () => void) => {
@@ -41,108 +49,164 @@ const useResetOnClose = (open: boolean, reset: () => void) => {
   }, [open]);
 };
 
-const useRevokeOnUnmount = (url: string | null) => {
-  useEffect(
-    () => () => {
-      if (url) URL.revokeObjectURL(url);
-    },
-    [url],
-  );
-};
-
 type FormState = {
   stage: Stage;
   setStage: (s: Stage) => void;
-  prepared: PreparedUpload | null;
-  setPrepared: (p: PreparedUpload | null) => void;
+  batchItems: ReviewPhoto[];
+  setBatchItems: (items: ReviewPhoto[]) => void;
+  batchItemsRef: { current: ReviewPhoto[] };
   previewUrl: string | null;
   setPreviewUrl: (
-    u: string | null | ((prev: string | null) => string | null),
+    url: string | null | ((prev: string | null) => string | null),
   ) => void;
-  filenameStem: string;
-  setFilenameStem: (v: string) => void;
-  description: string;
-  setDescription: (v: string) => void;
-  categories: string[];
-  setCategories: (v: string[]) => void;
-  license: LicenseId;
-  setLicense: (v: LicenseId) => void;
+  currentIndex: number;
+  setCurrentIndex: (index: number) => void;
   progress: UploadProgressEvent | null;
   setProgress: (v: UploadProgressEvent | null) => void;
   errorMessage: string | null;
   setErrorMessage: (v: string | null) => void;
+  skippedFilesCount: number;
+  setSkippedFilesCount: (v: number) => void;
+  skippedFilesMessage: string | null;
+  setSkippedFilesMessage: (v: string | null) => void;
+  successfulUploads: number;
+  setSuccessfulUploads: (v: number) => void;
+  successfulUploadsRef: { current: number };
+  /**
+   * Monotonic id of the active batch. Bumped when a batch starts or the form
+   * resets, so async work (prepare/upload) started for an old batch can detect
+   * it has been superseded/canceled and drop its results instead of writing
+   * them back into a reset or unrelated dialog.
+   */
+  generationRef: { current: number };
 };
 
 const useFormState = (): FormState => {
   const [stage, setStage] = useState<Stage>('choose-file');
-  const [prepared, setPrepared] = useState<PreparedUpload | null>(null);
+  const [batchItemsState, setBatchItemsState] = useState<ReviewPhoto[]>([]);
+  const batchItemsRef = useRef<ReviewPhoto[]>([]);
+  const setBatchItems = (items: ReviewPhoto[]) => {
+    batchItemsRef.current = items;
+    setBatchItemsState(items);
+  };
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [filenameStem, setFilenameStem] = useState('');
-  const [description, setDescription] = useState('');
-  const [categories, setCategories] = useState<string[]>([]);
-  const [license, setLicense] = useState<LicenseId>(DEFAULT_LICENSE);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState<UploadProgressEvent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [skippedFilesCount, setSkippedFilesCount] = useState(0);
+  const [skippedFilesMessage, setSkippedFilesMessage] = useState<string | null>(
+    null,
+  );
+  const [successfulUploadsState, setSuccessfulUploadsState] = useState(0);
+  const successfulUploadsRef = useRef(0);
+  const setSuccessfulUploads = (value: number) => {
+    successfulUploadsRef.current = value;
+    setSuccessfulUploadsState(value);
+  };
+  const generationRef = useRef(0);
   return {
     stage,
     setStage,
-    prepared,
-    setPrepared,
+    batchItems: batchItemsState,
+    setBatchItems,
+    batchItemsRef,
     previewUrl,
     setPreviewUrl: setPreviewUrl as FormState['setPreviewUrl'],
-    filenameStem,
-    setFilenameStem,
-    description,
-    setDescription,
-    categories,
-    setCategories,
-    license,
-    setLicense,
+    currentIndex,
+    setCurrentIndex,
     progress,
     setProgress,
     errorMessage,
     setErrorMessage,
+    skippedFilesCount,
+    setSkippedFilesCount,
+    skippedFilesMessage,
+    setSkippedFilesMessage,
+    successfulUploads: successfulUploadsState,
+    setSuccessfulUploads,
+    successfulUploadsRef,
+    generationRef,
   };
 };
 
-const prepareAndPopulate = async (
-  rawFile: File,
-  feature: Feature,
-  form: FormState,
-) => {
-  form.setErrorMessage(null);
-  form.setStage('preparing');
-  try {
-    const preparedFile = await preparePhotoForUpload(rawFile, feature);
-    const url = URL.createObjectURL(preparedFile.file);
-    const suggestedCategories = await suggestCommonsCategories(feature);
-    form.setPrepared(preparedFile);
-    form.setPreviewUrl(url);
-    form.setFilenameStem(preparedFile.filenameParts.stem);
-    form.setCategories(suggestedCategories);
-    form.setDescription(getDefaultDescription(feature));
-    form.setStage('review');
-  } catch (e) {
-    form.setErrorMessage(
-      e instanceof Error ? e.message : 'Failed to prepare file for upload',
-    );
-    form.setStage('choose-file');
-  }
-};
-
 const resetForm = (form: FormState) => {
+  // Invalidate any prepare/upload still awaiting for the batch being torn down.
+  form.generationRef.current += 1;
   form.setStage('choose-file');
-  form.setPrepared(null);
+  form.setBatchItems([]);
   form.setPreviewUrl((url) => {
     if (url) URL.revokeObjectURL(url);
     return null;
   });
-  form.setFilenameStem('');
-  form.setDescription('');
-  form.setCategories([]);
-  form.setLicense(DEFAULT_LICENSE);
+  form.setCurrentIndex(0);
   form.setProgress(null);
   form.setErrorMessage(null);
+  form.setSkippedFilesCount(0);
+  form.setSkippedFilesMessage(null);
+  form.setSuccessfulUploads(0);
+};
+
+const startBatch = async (files: File[], feature: Feature, form: FormState) => {
+  if (files.length === 0) return;
+
+  const generation = form.generationRef.current + 1;
+  form.generationRef.current = generation;
+  form.setBatchItems([]);
+  form.setPreviewUrl((url) => {
+    if (url) URL.revokeObjectURL(url);
+    return null;
+  });
+  form.setCurrentIndex(0);
+  form.setStage('preparing');
+  form.setProgress(null);
+  form.setErrorMessage(null);
+  form.setSkippedFilesCount(0);
+  form.setSkippedFilesMessage(null);
+  form.setSuccessfulUploads(0);
+
+  const suggestedCategoriesPromise = suggestCommonsCategories(feature);
+  const nextBatchItems: ReviewPhoto[] = [];
+  let skippedFilesCount = 0;
+  let skippedFilesMessage: string | null = null;
+
+  for (const rawFile of files) {
+    try {
+      const [prepared, suggestedCategories] = await Promise.all([
+        preparePhotoForUpload(rawFile, feature),
+        suggestedCategoriesPromise,
+      ]);
+      if (form.generationRef.current !== generation) return;
+      nextBatchItems.push({
+        prepared,
+        filenameStem: prepared.filenameParts.stem,
+        description: getDefaultDescription(feature),
+        categories: [...suggestedCategories],
+        license: DEFAULT_LICENSE,
+      });
+    } catch (e) {
+      if (form.generationRef.current !== generation) return;
+      skippedFilesCount += 1;
+      skippedFilesMessage =
+        e instanceof Error ? e.message : 'Failed to prepare file for upload';
+    }
+  }
+
+  if (form.generationRef.current !== generation) return;
+
+  form.setSkippedFilesCount(skippedFilesCount);
+  form.setSkippedFilesMessage(skippedFilesMessage);
+
+  if (nextBatchItems.length === 0) {
+    form.setErrorMessage(
+      skippedFilesMessage ?? 'Failed to prepare file for upload',
+    );
+    form.setStage('choose-file');
+    return;
+  }
+
+  form.setBatchItems(nextBatchItems);
+  form.setCurrentIndex(0);
+  form.setStage('review');
 };
 
 const performUpload = async (
@@ -150,62 +214,140 @@ const performUpload = async (
   feature: Feature,
   activeUser: { username: string; realname?: string },
   onUploaded: (fileTagValue: string) => void,
+  generation: number,
 ) => {
+  if (form.generationRef.current !== generation) return;
+  const items = form.batchItemsRef.current;
+  if (items.length === 0) return;
+
+  // Resume where a previous attempt stopped, so retrying after a failure does
+  // not re-upload the photos that already made it to Commons.
+  const startIndex = Math.min(form.successfulUploadsRef.current, items.length);
+
   form.setStage('uploading');
+  form.setCurrentIndex(startIndex);
   form.setProgress(null);
   form.setErrorMessage(null);
-  try {
-    const result = await uploadPhotoToCommons({
-      prepared: form.prepared!,
-      filenameStem: form.filenameStem,
-      feature,
-      user: activeUser,
-      description: form.description,
-      categories: form.categories,
-      license: form.license,
-      onProgress: form.setProgress,
-    });
-    form.setStage('success');
-    onUploaded(result.fileTagValue);
-  } catch (e) {
-    form.setErrorMessage(
-      e instanceof Error ? e.message : 'Upload to Wikimedia Commons failed',
-    );
-    form.setStage('review');
+
+  let successfulUploads = startIndex;
+
+  for (let index = startIndex; index < items.length; index += 1) {
+    if (form.generationRef.current !== generation) return;
+    form.setCurrentIndex(index);
+    form.setProgress(null);
+
+    const item = form.batchItemsRef.current[index];
+    if (!item) return;
+
+    try {
+      const result = await uploadPhotoToCommons({
+        prepared: item.prepared,
+        filenameStem: item.filenameStem,
+        feature,
+        user: activeUser,
+        description: item.description,
+        categories: item.categories,
+        license: item.license,
+        onProgress: (progress) => {
+          if (form.generationRef.current === generation) {
+            form.setProgress(progress);
+          }
+        },
+      });
+      // The photo really did upload, so always record it into a slot.
+      onUploaded(result.fileTagValue);
+      successfulUploads += 1;
+      // If a new batch took over meanwhile, let it drive the UI from here.
+      if (form.generationRef.current !== generation) return;
+      form.setSuccessfulUploads(successfulUploads);
+    } catch (e) {
+      if (form.generationRef.current !== generation) return;
+      form.setSuccessfulUploads(successfulUploads);
+      form.setErrorMessage(
+        e instanceof Error ? e.message : 'Upload to Wikimedia Commons failed',
+      );
+      form.setStage('review');
+      return;
+    }
   }
+
+  if (form.generationRef.current !== generation) return;
+  form.setStage('success');
 };
 
 export const useUploadDialogState = ({
   open,
   feature,
   onUploaded,
-  initialFile,
+  initialFiles,
 }: Args) => {
   const { user, handleLogin } = useWikimediaCommonsAuthContext();
-  const lastConsumedInitialFile = useRef<File | null>(null);
+  const lastConsumedInitialFiles = useRef<File[] | null>(null);
   const form = useFormState();
+  const currentPhoto = form.batchItems[form.currentIndex] ?? null;
+  const currentPhotoFile = currentPhoto?.prepared.file ?? null;
+  const { setPreviewUrl } = form;
+  const firstEditableIndex = Math.min(
+    form.successfulUploads,
+    Math.max(form.batchItems.length - 1, 0),
+  );
 
   useResetOnClose(open, () => {
     resetForm(form);
-    lastConsumedInitialFile.current = null;
+    lastConsumedInitialFiles.current = null;
   });
-  useRevokeOnUnmount(form.previewUrl);
+  useEffect(
+    () => () => {
+      form.generationRef.current += 1;
+    },
+    [form.generationRef],
+  );
+  useEffect(() => {
+    if (!currentPhotoFile) {
+      setPreviewUrl((url) => {
+        if (url) URL.revokeObjectURL(url);
+        return null;
+      });
+      return;
+    }
+    const nextUrl = URL.createObjectURL(currentPhotoFile);
+    setPreviewUrl((url) => {
+      if (url) URL.revokeObjectURL(url);
+      return nextUrl;
+    });
+    return () => {
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [currentPhotoFile, setPreviewUrl]);
 
-  const handleFileChosen = (rawFile: File) => {
-    if (!feature) return;
-    return prepareAndPopulate(rawFile, feature, form);
+  const handleFilesChosen = (files: File[]) => {
+    if (!feature) return undefined;
+    return startBatch(files, feature, form);
   };
 
   useEffect(() => {
-    if (!open || !initialFile || !feature) return;
-    if (lastConsumedInitialFile.current === initialFile) return;
-    lastConsumedInitialFile.current = initialFile;
-    prepareAndPopulate(initialFile, feature, form);
+    if (!open || !initialFiles || initialFiles.length === 0 || !feature) return;
+    if (lastConsumedInitialFiles.current === initialFiles) return;
+    lastConsumedInitialFiles.current = initialFiles;
+    void startBatch(initialFiles, feature, form);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialFile, feature]);
+  }, [open, initialFiles, feature]);
+
+  const updateCurrentPhoto = (
+    updater: (current: ReviewPhoto) => ReviewPhoto,
+  ) => {
+    const current = form.batchItemsRef.current[form.currentIndex];
+    if (!current) return;
+    form.setBatchItems(
+      form.batchItemsRef.current.map((item, index) =>
+        index === form.currentIndex ? updater(current) : item,
+      ),
+    );
+  };
 
   const handleUpload = async () => {
-    if (!form.prepared || !feature) return;
+    if (!currentPhoto || !feature) return;
+    const generation = form.generationRef.current;
     let activeUser = user;
     if (!activeUser) {
       try {
@@ -214,25 +356,49 @@ export const useUploadDialogState = ({
         return;
       }
     }
-    if (!activeUser) return;
-    await performUpload(form, feature, activeUser, onUploaded);
+    if (!activeUser || form.generationRef.current !== generation) return;
+    await performUpload(form, feature, activeUser, onUploaded, generation);
   };
 
   return {
     stage: form.stage,
-    prepared: form.prepared,
+    prepared: currentPhoto?.prepared ?? null,
     previewUrl: form.previewUrl,
-    filenameStem: form.filenameStem,
-    setFilenameStem: form.setFilenameStem,
-    description: form.description,
-    setDescription: form.setDescription,
-    categories: form.categories,
-    setCategories: form.setCategories,
-    license: form.license,
-    setLicense: form.setLicense,
+    filenameStem: currentPhoto?.filenameStem ?? '',
+    setFilenameStem: (filenameStem: string) =>
+      updateCurrentPhoto((item) => ({ ...item, filenameStem })),
+    description: currentPhoto?.description ?? '',
+    setDescription: (description: string) =>
+      updateCurrentPhoto((item) => ({ ...item, description })),
+    categories: currentPhoto?.categories ?? [],
+    setCategories: (categories: string[]) =>
+      updateCurrentPhoto((item) => ({ ...item, categories })),
+    license: currentPhoto?.license ?? DEFAULT_LICENSE,
+    setLicense: (license: LicenseId) =>
+      updateCurrentPhoto((item) => ({ ...item, license })),
     progress: form.progress,
     errorMessage: form.errorMessage,
-    handleFileChosen,
+    skippedFilesCount: form.skippedFilesCount,
+    skippedFilesMessage: form.skippedFilesMessage,
+    batchTotal: form.batchItems.length,
+    isBatchValid:
+      form.batchItems.length > 0 &&
+      form.batchItems.every((item) => item.filenameStem.trim().length > 0),
+    successfulUploads: form.successfulUploads,
+    batchPosition: currentPhoto ? form.currentIndex + 1 : 0,
+    canGoPrevious: form.currentIndex > firstEditableIndex,
+    canGoNext: form.currentIndex < form.batchItems.length - 1,
+    handlePreviousPhoto: () => {
+      if (form.currentIndex > firstEditableIndex) {
+        form.setCurrentIndex(form.currentIndex - 1);
+      }
+    },
+    handleNextPhoto: () => {
+      if (form.currentIndex < form.batchItems.length - 1) {
+        form.setCurrentIndex(form.currentIndex + 1);
+      }
+    },
+    handleFilesChosen,
     handleUpload,
   };
 };

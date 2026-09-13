@@ -462,13 +462,14 @@ export default {
   'uploaddialog.close': 'Zamknij',
   'uploaddialog.cancel': 'Anuluj',
   'uploaddialog.upload': 'Prześlij',
+  'uploaddialog.upload_all': 'Prześlij wszystko',
   'uploaddialog.done': 'Gotowe',
   'uploaddialog.login': 'Zaloguj się',
   'uploaddialog.logout': 'Wyloguj się',
   'uploaddialog.login_hint': 'Zaloguj się kontem Wikimedia Commons, aby przesyłać zdjęcia. Potrzebujesz konta oddzielnego od konta OSM.',
   'uploaddialog.logged_in_as': 'Zalogowano do Wikimedia Commons jako <b>__user__</b>',
-  'uploaddialog.choose_file': 'Wybierz zdjęcie…',
-  'uploaddialog.choose_file_hint': 'Wybierz obraz z urządzenia. Zdjęcia HEIC z iPhone’a zostaną automatycznie przekonwertowane do JPG.',
+  'uploaddialog.choose_file': 'Wybierz zdjęcia…',
+  'uploaddialog.choose_file_hint': 'Wybierz jeden lub więcej obrazów z urządzenia. Możesz zaznaczyć kilka naraz, aby przesłać je za jednym razem. Zdjęcia HEIC z iPhone’a zostaną automatycznie przekonwertowane do JPG.',
   'uploaddialog.preparing': 'Odczyt danych EXIF i przygotowywanie zdjęcia do przesłania…',
   'uploaddialog.filename_label': 'Nazwa pliku w Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -486,12 +487,25 @@ export default {
   'uploaddialog.uploading': 'Przesyłanie do Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Przesyłanie do Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Zdjęcie przesłane! Zapisz zmiany, aby przypisać je do tego miejsca.',
+  'uploaddialog.success_multiple':
+    'Przesłano __count__ zdjęć! Zapisz zmiany, aby przypisać je do tego miejsca.',
+  'uploaddialog.skipped_single':
+    'Pominięto 1 wybrane zdjęcie: __reason__',
+  'uploaddialog.skipped_multiple':
+    'Pominięto __count__ wybranych zdjęć. Ostatni błąd: __reason__',
+  'uploaddialog.skipped_single_success':
+    'Pominięto 1 wybrane zdjęcie.',
+  'uploaddialog.skipped_multiple_success':
+    'Pominięto __count__ wybranych zdjęć.',
+  'uploaddialog.photo_progress': 'Zdjęcie __current__ z __total__',
+  'uploaddialog.previous_photo': 'Poprzednie',
+  'uploaddialog.next_photo': 'Następne',
   'uploaddialog.enter_filename_manually': 'lub wpisz nazwę pliku ręcznie',
   'uploaddialog.row_upload_cta': 'Prześlij zdjęcie',
   'uploaddialog.row_manual_label': 'lub wklej istniejącą nazwę pliku',
   'uploaddialog.row_paste_existing': 'Wklej istniejące zdjęcie',
   'uploaddialog.row_back_to_upload': 'Wstecz',
-  'uploaddialog.drop_to_upload': 'Upuść tutaj zdjęcie, aby przesłać je do Wikimedia Commons',
+  'uploaddialog.drop_to_upload': 'Upuść tutaj zdjęcia, aby przesłać je do Wikimedia Commons',
   'uploaddialog.debug_mode_on': 'Przesyłanie zdjęć (debug) jest włączone',
   'editdialog.location_checkbox': 'Zmień położenie',
   'editdialog.location_placeholder': 'np. przez ulicę',
