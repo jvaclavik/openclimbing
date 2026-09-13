@@ -498,6 +498,10 @@ export default {
     '1 photo sélectionnée a été ignorée : __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ photos sélectionnées ont été ignorées. Dernière erreur : __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 photo sélectionnée a été ignorée.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ photos sélectionnées ont été ignorées.',
   'uploaddialog.photo_progress': 'Photo __current__ sur __total__',
   'uploaddialog.enter_filename_manually': 'ou saisissez le nom du fichier manuellement',
   'uploaddialog.row_upload_cta': 'Téléverser une photo',

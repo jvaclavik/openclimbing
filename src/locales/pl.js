@@ -492,6 +492,10 @@ export default {
     'Pominięto 1 wybrane zdjęcie: __reason__',
   'uploaddialog.skipped_multiple':
     'Pominięto __count__ wybranych zdjęć. Ostatni błąd: __reason__',
+  'uploaddialog.skipped_single_success':
+    'Pominięto 1 wybrane zdjęcie.',
+  'uploaddialog.skipped_multiple_success':
+    'Pominięto __count__ wybranych zdjęć.',
   'uploaddialog.photo_progress': 'Zdjęcie __current__ z __total__',
   'uploaddialog.enter_filename_manually': 'lub wpisz nazwę pliku ręcznie',
   'uploaddialog.row_upload_cta': 'Prześlij zdjęcie',

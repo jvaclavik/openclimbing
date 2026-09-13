@@ -492,6 +492,10 @@ export default {
     '1 foto selezionata è stata saltata: __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ foto selezionate sono state saltate. Ultimo errore: __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 foto selezionata è stata saltata.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ foto selezionate sono state saltate.',
   'uploaddialog.photo_progress': 'Foto __current__ di __total__',
   'uploaddialog.enter_filename_manually': 'oppure inserisci il nome file manualmente',
   'uploaddialog.row_upload_cta': 'Carica foto',

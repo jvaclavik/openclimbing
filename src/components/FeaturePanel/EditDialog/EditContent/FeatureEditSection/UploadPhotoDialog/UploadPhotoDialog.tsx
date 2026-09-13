@@ -225,15 +225,24 @@ export const UploadPhotoDialog: React.FC<Props> = ({
             skippedFilesCount > 0 &&
             skippedFilesMessage && (
             <Alert severity="warning">
-              {t(
-                skippedFilesCount === 1
-                  ? 'uploaddialog.skipped_single'
-                  : 'uploaddialog.skipped_multiple',
-                {
-                  count: skippedFilesCount,
-                  reason: skippedFilesMessage,
-                },
-              )}
+              {stage === 'success'
+                ? t(
+                    skippedFilesCount === 1
+                      ? 'uploaddialog.skipped_single_success'
+                      : 'uploaddialog.skipped_multiple_success',
+                    {
+                      count: skippedFilesCount,
+                    },
+                  )
+                : t(
+                    skippedFilesCount === 1
+                      ? 'uploaddialog.skipped_single'
+                      : 'uploaddialog.skipped_multiple',
+                    {
+                      count: skippedFilesCount,
+                      reason: skippedFilesMessage,
+                    },
+                  )}
             </Alert>
           )}
           {stage === 'choose-file' && (

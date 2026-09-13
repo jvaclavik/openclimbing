@@ -495,6 +495,10 @@ export default {
     '1 ausgewähltes Foto wurde übersprungen: __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ ausgewählte Fotos wurden übersprungen. Letzter Fehler: __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 ausgewähltes Foto wurde übersprungen.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ ausgewählte Fotos wurden übersprungen.',
   'uploaddialog.photo_progress': 'Foto __current__ von __total__',
   'uploaddialog.enter_filename_manually': 'oder Dateinamen manuell eingeben',
   'uploaddialog.row_upload_cta': 'Foto hochladen',

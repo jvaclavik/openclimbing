@@ -585,6 +585,9 @@ export default {
   'uploaddialog.skipped_single': '1 vybraná fotka byla přeskočena: __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ vybraných fotek bylo přeskočeno. Poslední chyba: __reason__',
+  'uploaddialog.skipped_single_success': '1 vybraná fotka byla přeskočena.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ vybraných fotek bylo přeskočeno.',
   'uploaddialog.photo_progress': 'Fotka __current__ z __total__',
   'uploaddialog.enter_filename_manually': 'nebo zadat název ručně',
   'uploaddialog.row_upload_cta': 'Nahrát fotku',

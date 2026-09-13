@@ -494,6 +494,10 @@ export default {
     '1 вибране фото було пропущено: __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ вибраних фото було пропущено. Остання помилка: __reason__',
+  'uploaddialog.skipped_single_success':
+    '1 вибране фото було пропущено.',
+  'uploaddialog.skipped_multiple_success':
+    '__count__ вибраних фото було пропущено.',
   'uploaddialog.photo_progress': 'Фото __current__ з __total__',
   'uploaddialog.enter_filename_manually': 'або введіть назву файлу вручну',
   'uploaddialog.row_upload_cta': 'Завантажити фото',

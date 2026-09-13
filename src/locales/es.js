@@ -495,6 +495,10 @@ export default {
     'Se omitió 1 foto seleccionada: __reason__',
   'uploaddialog.skipped_multiple':
     'Se omitieron __count__ fotos seleccionadas. Último error: __reason__',
+  'uploaddialog.skipped_single_success':
+    'Se omitió 1 foto seleccionada.',
+  'uploaddialog.skipped_multiple_success':
+    'Se omitieron __count__ fotos seleccionadas.',
   'uploaddialog.photo_progress': 'Foto __current__ de __total__',
   'uploaddialog.enter_filename_manually': 'o introduce el nombre del archivo manualmente',
   'uploaddialog.row_upload_cta': 'Subir foto',
