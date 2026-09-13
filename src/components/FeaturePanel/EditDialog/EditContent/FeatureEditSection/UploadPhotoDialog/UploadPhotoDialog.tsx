@@ -239,6 +239,13 @@ export const UploadPhotoDialog: React.FC<Props> = ({
                     size="small"
                     onClick={handlePreviousPhoto}
                     disabled={!canGoPrevious}
+                    aria-label={`${t('uploaddialog.previous_photo')} (${t(
+                      'uploaddialog.photo_progress',
+                      {
+                        current: batchPosition - 1,
+                        total: batchTotal,
+                      },
+                    )})`}
                   >
                     {t('uploaddialog.previous_photo')}
                   </Button>
@@ -246,6 +253,13 @@ export const UploadPhotoDialog: React.FC<Props> = ({
                     size="small"
                     onClick={handleNextPhoto}
                     disabled={!canGoNext}
+                    aria-label={`${t('uploaddialog.next_photo')} (${t(
+                      'uploaddialog.photo_progress',
+                      {
+                        current: batchPosition + 1,
+                        total: batchTotal,
+                      },
+                    )})`}
                   >
                     {t('uploaddialog.next_photo')}
                   </Button>

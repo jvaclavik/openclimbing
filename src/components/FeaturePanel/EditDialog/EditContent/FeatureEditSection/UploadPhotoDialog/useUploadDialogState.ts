@@ -202,12 +202,15 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
     return;
   }
 
-  form.setBatchItems(
-    nextBatchDrafts.map((item) => ({
-      ...item,
-      previewUrl: URL.createObjectURL(item.prepared.file),
-    })),
-  );
+  const nextBatchItems = nextBatchDrafts.map((item) => ({
+    ...item,
+    previewUrl: URL.createObjectURL(item.prepared.file),
+  }));
+  if (form.generationRef.current !== generation) {
+    revokeBatchItems(nextBatchItems);
+    return;
+  }
+  form.setBatchItems(nextBatchItems);
   form.setCurrentIndex(0);
   form.setStage('review');
 };
