@@ -36,6 +36,8 @@ describe('EditContextProvider', () => {
     expect(result.current.items).toHaveLength(1);
     expect(result.current.current).toBe('n1');
     expect(result.current.comment).toBe('some comment');
+    const staleAddItem = result.current.addItem;
+    const staleSetCurrent = result.current.setCurrent;
 
     // Close the dialog – the whole edit session should be discarded.
     act(() => {
@@ -46,5 +48,23 @@ describe('EditContextProvider', () => {
     expect(result.current.items).toHaveLength(0);
     expect(result.current.current).toBe('');
     expect(result.current.comment).toBe('');
+
+    // Async continuations from the previous session must be ignored.
+    act(() => {
+      staleAddItem(initialItem);
+      staleSetCurrent('n1');
+    });
+    expect(result.current.items).toHaveLength(0);
+    expect(result.current.current).toBe('');
+
+    // New session updates should still work.
+    act(() => {
+      mockOpened = true;
+      rerender();
+      result.current.addItem(initialItem);
+      result.current.setCurrent('n1');
+    });
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.current).toBe('n1');
   });
 });

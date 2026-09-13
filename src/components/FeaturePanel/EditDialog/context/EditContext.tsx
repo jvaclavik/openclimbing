@@ -45,15 +45,102 @@ const EditContext = createContext<EditContextType>(undefined);
 
 export const EditContextProvider: React.FC = ({ children }) => {
   const { opened } = useEditDialogContext();
-  const [successInfo, setSuccessInfo] = useState<undefined | SuccessInfo>();
-  const [isSaving, setIsSaving] = useState(false);
-  const [location, setLocation] = useState(''); // only for note
-  const [comment, setComment] = useState('');
-  const [validate, setValidate] = useState(false);
-  const { items, addItem, removeItem, reset: resetItems } = useEditItems();
-  const [current, setCurrent] = useState<ShortId>(''); // to get currentItem - use `useCurrentItem()`
-  const [selectedIds, setSelectedIds] = useState<ShortId[]>([]);
-  const [activeCragId, setActiveCragId] = useState<ShortId>('');
+  const [successInfo, setSuccessInfoState] = useState<undefined | SuccessInfo>();
+  const [isSaving, setIsSavingState] = useState(false);
+  const [location, setLocationState] = useState(''); // only for note
+  const [comment, setCommentState] = useState('');
+  const [validate, setValidateState] = useState(false);
+  const {
+    items,
+    addItem: addItemState,
+    removeItem: removeItemState,
+    reset: resetItems,
+  } = useEditItems();
+  const [current, setCurrentState] = useState<ShortId>(''); // to get currentItem - use `useCurrentItem()`
+  const [selectedIds, setSelectedIdsState] = useState<ShortId[]>([]);
+  const [activeCragId, setActiveCragIdState] = useState<ShortId>('');
+  const sessionGenerationRef = useRef(0);
+  const generation = sessionGenerationRef.current;
+
+  const addItem = useCallback(
+    (newItem: DataItem) => {
+      if (generation !== sessionGenerationRef.current) return;
+      addItemState(newItem);
+    },
+    [addItemState, generation],
+  );
+
+  const removeItem = useCallback(
+    (shortId: string) => {
+      if (generation !== sessionGenerationRef.current) return;
+      removeItemState(shortId);
+    },
+    [generation, removeItemState],
+  );
+
+  const setCurrent = useCallback<Setter<string>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setCurrentState(updateFn);
+    },
+    [generation],
+  );
+
+  const setSelectedIds = useCallback<Setter<string[]>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setSelectedIdsState(updateFn);
+    },
+    [generation],
+  );
+
+  const setActiveCragId = useCallback<Setter<string>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setActiveCragIdState(updateFn);
+    },
+    [generation],
+  );
+
+  const setLocation = useCallback<Setter<string>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setLocationState(updateFn);
+    },
+    [generation],
+  );
+
+  const setComment = useCallback<Setter<string>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setCommentState(updateFn);
+    },
+    [generation],
+  );
+
+  const setSuccessInfo = useCallback<Setter<undefined | SuccessInfo>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setSuccessInfoState(updateFn);
+    },
+    [generation],
+  );
+
+  const setValidate = useCallback<Setter<boolean>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setValidateState(updateFn);
+    },
+    [generation],
+  );
+
+  const setIsSaving = useCallback<Setter<boolean>>(
+    (updateFn) => {
+      if (generation !== sessionGenerationRef.current) return;
+      setIsSavingState(updateFn);
+    },
+    [generation],
+  );
 
   // Keep the multi-selection in sync with `current`. Multi-select actions set
   // `current` to a member of the selection, so this only fires when `current`
@@ -67,15 +154,16 @@ export const EditContextProvider: React.FC = ({ children }) => {
   // Discard the whole edit session so the next time the dialog opens it starts
   // from freshly fetched data instead of the previous (e.g. cancelled) changes.
   const reset = useCallback(() => {
+    sessionGenerationRef.current += 1;
     resetItems();
-    setCurrent('');
-    setSelectedIds([]);
-    setActiveCragId('');
-    setLocation('');
-    setComment('');
-    setSuccessInfo(undefined);
-    setValidate(false);
-    setIsSaving(false);
+    setCurrentState('');
+    setSelectedIdsState([]);
+    setActiveCragIdState('');
+    setLocationState('');
+    setCommentState('');
+    setSuccessInfoState(undefined);
+    setValidateState(false);
+    setIsSavingState(false);
   }, [resetItems]);
 
   // Reset only on the open -> closed transition (cancel, escape, backdrop, X,
