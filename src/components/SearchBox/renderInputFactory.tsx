@@ -12,6 +12,17 @@ type SearchBoxInputProps = {
   autoFocus?: boolean;
 };
 
+// iOS Safari zooms the whole page in when a focused <input> has a font-size
+// below 16px. Because the map owns pinch-zoom, the user then can't zoom back
+// out and gets stuck (#209). Rendering the search input at 16px on touch
+// devices prevents that auto-zoom, and avoids `user-scalable=no` (which harms
+// accessibility). Pointer (desktop) devices keep the compact 14px design.
+export const searchInputSx = {
+  height: '100%',
+  fontSize: 14,
+  '@media (hover: none) and (pointer: coarse)': { fontSize: 16 },
+} as const;
+
 const SearchBoxInput = ({
   params,
   setInputValue,
@@ -35,7 +46,7 @@ const SearchBoxInput = ({
   return (
     <InputBase
       {...restParams} // eslint-disable-line react/jsx-props-no-spreading
-      sx={{ height: '100%', fontSize: 14 }}
+      sx={searchInputSx}
       inputRef={inputRef}
       autoFocus={autoFocus}
       placeholder={t('searchbox.placeholder')}
