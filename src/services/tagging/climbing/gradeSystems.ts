@@ -1,10 +1,21 @@
 import { FeatureTags, TranslationId } from '../../types';
 import { getClimbingAttributes } from './climbingAttributes';
 
+type GradeSystemDefinition = {
+  key: string; // TODO this should be `as const` otherwise it is just string
+  category: GradeSystemCategory;
+  name: string;
+  flags?: string;
+  minor: boolean;
+  description: string;
+  // spelled out next to the name for disciplines nobody recognizes from the scale alone
+  styleLabel?: TranslationId;
+};
+
 // The order of this array must be the same as CSV in gradeData.ts
-export const GRADE_SYSTEMS = [
+export const GRADE_SYSTEMS: GradeSystemDefinition[] = [
   {
-    key: 'uiaa', // TODO this should be `as const` otherwise it is just string
+    key: 'uiaa',
     category: 'routes',
     name: 'UIAA',
     flags: '🇪🇺',
@@ -84,19 +95,21 @@ export const GRADE_SYSTEMS = [
   },
   {
     key: 'ice',
-    category: 'ice',
+    category: 'other',
     name: 'WI',
     flags: '🇨🇦',
     minor: true,
     description: 'Waterfall ice rating system as used in the Canadian Rockies.',
+    styleLabel: 'grade_system_select.style_ice',
   },
   {
     key: 'mixed',
-    category: 'mixed',
-    name: 'Mixed',
+    category: 'other',
+    name: 'M',
     minor: true,
     description:
       'Mixed climbing has its own grading scale that roughly follows the WI rating system.',
+    styleLabel: 'grade_system_select.style_mixed',
   },
   {
     key: 'polish',
@@ -111,7 +124,7 @@ export const GRADE_SYSTEMS = [
     category: 'boulder',
     name: 'Fontainebleau',
     flags: '🇪🇺',
-    minor: true,
+    minor: false,
     description: 'Fontainebleau grading system for bouldering.',
   },
 ];
@@ -123,7 +136,7 @@ export const getGradeSystemName = (gradeSystemKey: GradeSystem) =>
 
 export const DEFAULT_GRADE_SYSTEM = 'uiaa';
 
-export type GradeSystemCategory = 'boulder' | 'routes' | 'ice' | 'mixed';
+export type GradeSystemCategory = 'boulder' | 'routes' | 'other';
 
 // Grouping follows the climbing style -> grading system table of id-tagging-schema
 export const GRADE_SYSTEM_CATEGORIES: {
@@ -141,11 +154,10 @@ export const GRADE_SYSTEM_CATEGORIES: {
     label: 'climbing_badges.boulder_label',
     climbingTypes: ['boulder'],
   },
-  { key: 'ice', label: 'climbing_badges.ice_label', climbingTypes: ['ice'] },
   {
-    key: 'mixed',
-    label: 'climbing_badges.mixed_label',
-    climbingTypes: ['mixed'],
+    key: 'other',
+    label: 'grade_system_select.category_other',
+    climbingTypes: ['ice', 'mixed'],
   },
 ];
 

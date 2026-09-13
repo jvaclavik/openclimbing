@@ -32,8 +32,7 @@ export default {
   'user_profile.ticks_count': 'Ticks',
   'user_profile.leaderboard_rank': 'Leaderboard rank',
   'user_profile.export_csv': 'Export logbook',
-  'user_profile.export_csv_disabled':
-    'Export logbook (unavailable until ticks are loaded)',
+  'user_profile.export_csv_disabled': 'Export logbook (unavailable until ticks are loaded)',
   'user_profile.ticks_table_title': 'Ticks',
   'user_profile.tab_ticks': 'Ticks',
   'user_profile.tab_charts': 'Charts',
@@ -615,7 +614,8 @@ export default {
   'uploaddialog.login_hint': 'Sign in with your Wikimedia Commons account to upload photos. You need a separate account from your OSM one.',
   'uploaddialog.logged_in_as': 'Signed in to Wikimedia Commons as <b>__user__</b>',
   'uploaddialog.choose_file': 'Choose photos…',
-  'uploaddialog.choose_file_hint': 'Pick one or more images from your device — select several at once to upload them in one go. HEIC photos from iPhone will be converted to JPG automatically.',
+  'uploaddialog.choose_file_hint':
+    'Pick one or more images from your device — select several at once to upload them in one go. HEIC photos from iPhone will be converted to JPG automatically.',
   'uploaddialog.preparing': 'Reading EXIF data and preparing the photo for upload…',
   'uploaddialog.filename_label': 'Filename on Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -635,11 +635,9 @@ export default {
   'uploaddialog.success': 'Photo uploaded! Save the changes to attach it to this place.',
   'uploaddialog.success_multiple': '__count__ photos uploaded! Save the changes to attach them to this place.',
   'uploaddialog.skipped_single': '1 selected photo was skipped: __reason__',
-  'uploaddialog.skipped_multiple':
-    '__count__ selected photos were skipped. Last error: __reason__',
+  'uploaddialog.skipped_multiple': '__count__ selected photos were skipped. Last error: __reason__',
   'uploaddialog.skipped_single_success': '1 selected photo was skipped.',
-  'uploaddialog.skipped_multiple_success':
-    '__count__ selected photos were skipped.',
+  'uploaddialog.skipped_multiple_success': '__count__ selected photos were skipped.',
   'uploaddialog.photo_progress': 'Photo __current__ of __total__',
   'uploaddialog.previous_photo': 'Previous',
   'uploaddialog.next_photo': 'Next',
@@ -956,6 +954,9 @@ export default {
   'grade_system_select.convert_grade': 'Convert grades',
   'grade_system_select.select_grade_system': 'Select grade system',
   'grade_system_select.category_routes': 'Routes',
+  'grade_system_select.category_other': 'Other',
+  'grade_system_select.style_ice': 'Ice climbing',
+  'grade_system_select.style_mixed': 'Mixed climbing',
 
   'crag_sort.title': 'Sort',
   'crag_sort.option_default': 'Default',
