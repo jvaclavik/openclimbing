@@ -159,8 +159,7 @@ export default {
   'user_profile.ticks_count': 'Přelezů',
   'user_profile.leaderboard_rank': 'Pořadí v žebříčku',
   'user_profile.export_csv': 'Export deníku',
-  'user_profile.export_csv_disabled':
-    'Export deníku (dostupné po načtení přelezů)',
+  'user_profile.export_csv_disabled': 'Export deníku (dostupné po načtení přelezů)',
   'user_profile.ticks_table_title': 'Přelezy',
   'user_profile.tab_ticks': 'Přelezy',
   'user_profile.tab_charts': 'Grafy',
@@ -564,7 +563,8 @@ export default {
     'Pro nahrávání fotek se přihlas svým účtem na Wikimedia Commons. Je nezávislý na OSM účtu — pokud ho ještě nemáš, založ si ho na commons.wikimedia.org.',
   'uploaddialog.logged_in_as': 'Přihlášen na Wikimedia Commons jako <b>__user__</b>',
   'uploaddialog.choose_file': 'Vybrat fotky…',
-  'uploaddialog.choose_file_hint': 'Vyber jeden nebo více obrázků ze svého zařízení. Vyber jich víc najednou a nahraj je v jednom kroku. HEIC fotky z iPhonu se automaticky převedou na JPG.',
+  'uploaddialog.choose_file_hint':
+    'Vyber jeden nebo více obrázků ze svého zařízení. Vyber jich víc najednou a nahraj je v jednom kroku. HEIC fotky z iPhonu se automaticky převedou na JPG.',
   'uploaddialog.preparing': 'Čtení EXIF dat a příprava fotky…',
   'uploaddialog.filename_label': 'Název souboru na Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -581,14 +581,11 @@ export default {
   'uploaddialog.uploading': 'Nahrávám na Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Nahrávám na Wikimedia Commons… __percent__ %',
   'uploaddialog.success': 'Fotka nahrána! Uložením změn ji přidáš k tomuto místu.',
-  'uploaddialog.success_multiple':
-    '__count__ fotek nahráno! Uložením změn je přidáš k tomuto místu.',
+  'uploaddialog.success_multiple': '__count__ fotek nahráno! Uložením změn je přidáš k tomuto místu.',
   'uploaddialog.skipped_single': '1 vybraná fotka byla přeskočena: __reason__',
-  'uploaddialog.skipped_multiple':
-    '__count__ vybraných fotek bylo přeskočeno. Poslední chyba: __reason__',
+  'uploaddialog.skipped_multiple': '__count__ vybraných fotek bylo přeskočeno. Poslední chyba: __reason__',
   'uploaddialog.skipped_single_success': '1 vybraná fotka byla přeskočena.',
-  'uploaddialog.skipped_multiple_success':
-    '__count__ vybraných fotek bylo přeskočeno.',
+  'uploaddialog.skipped_multiple_success': '__count__ vybraných fotek bylo přeskočeno.',
   'uploaddialog.photo_progress': 'Fotka __current__ z __total__',
   'uploaddialog.previous_photo': 'Předchozí',
   'uploaddialog.next_photo': 'Další',
@@ -888,6 +885,9 @@ export default {
   'grade_system_select.convert_grade': 'Převést klasifikaci',
   'grade_system_select.select_grade_system': 'Vybrat klasifikaci',
   'grade_system_select.category_routes': 'Cesty',
+  'grade_system_select.category_other': 'Ostatní',
+  'grade_system_select.style_ice': 'ledové lezení',
+  'grade_system_select.style_mixed': 'mixové lezení',
 
   'crag_sort.title': 'Seřadit',
   'crag_sort.option_default': 'Defaultní',

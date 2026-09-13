@@ -26,6 +26,11 @@ import {
 } from './Filter/filterUi';
 import { tint } from '../../utils/panelUi';
 
+const StyleHint = styled.span`
+  font-weight: 600;
+  opacity: 0.6;
+`;
+
 // own wrapper per category, so each heading is pushed out by the next section
 const CategorySection = styled.div`
   display: flex;
@@ -80,7 +85,7 @@ const GradeSystemCategories = ({
           <CategoryLabel $flush style={{ marginTop: index ? 8 : 0 }}>
             {t(label)}
           </CategoryLabel>
-          {gradeSystems.map(({ key, name, description, flags }) => (
+          {gradeSystems.map(({ key, name, description, flags, styleLabel }) => (
             <Tooltip
               title={description}
               placement="right"
@@ -93,7 +98,10 @@ const GradeSystemCategories = ({
                 $selected={selectedGradeSystem === key}
                 onClick={() => onClick(key)}
               >
-                <span>{name}</span>
+                <span>
+                  {name}
+                  {styleLabel && <StyleHint> ({t(styleLabel)})</StyleHint>}
+                </span>
                 <span>{flags}</span>
               </FilterOption>
             </Tooltip>
