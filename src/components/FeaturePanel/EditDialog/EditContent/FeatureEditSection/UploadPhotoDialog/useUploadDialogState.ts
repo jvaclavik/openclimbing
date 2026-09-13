@@ -30,14 +30,11 @@ type Args = {
 
 type ReviewPhoto = {
   prepared: PreparedUpload;
-  previewUrl: string;
   filenameStem: string;
   description: string;
   categories: string[];
   license: LicenseId;
 };
-
-type ReviewPhotoDraft = Omit<ReviewPhoto, 'previewUrl'>;
 
 const useResetOnClose = (open: boolean, reset: () => void) => {
   // `reset` is a fresh closure every render, so it must not be an effect
@@ -52,27 +49,16 @@ const useResetOnClose = (open: boolean, reset: () => void) => {
   }, [open]);
 };
 
-const revokeBatchItems = (items: ReviewPhoto[]) => {
-  for (const item of items) {
-    URL.revokeObjectURL(item.previewUrl);
-  }
-};
-
-const useRevokeOnUnmount = (batchItemsRef: { current: ReviewPhoto[] }) => {
-  useEffect(
-    () => () => {
-      revokeBatchItems(batchItemsRef.current);
-    },
-    [batchItemsRef],
-  );
-};
-
 type FormState = {
   stage: Stage;
   setStage: (s: Stage) => void;
   batchItems: ReviewPhoto[];
   setBatchItems: (items: ReviewPhoto[]) => void;
   batchItemsRef: { current: ReviewPhoto[] };
+  previewUrl: string | null;
+  setPreviewUrl: (
+    url: string | null | ((prev: string | null) => string | null),
+  ) => void;
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   progress: UploadProgressEvent | null;
@@ -102,6 +88,7 @@ const useFormState = (): FormState => {
     batchItemsRef.current = items;
     setBatchItemsState(items);
   };
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState<UploadProgressEvent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -117,6 +104,8 @@ const useFormState = (): FormState => {
     batchItems: batchItemsState,
     setBatchItems,
     batchItemsRef,
+    previewUrl,
+    setPreviewUrl: setPreviewUrl as FormState['setPreviewUrl'],
     currentIndex,
     setCurrentIndex,
     progress,
@@ -137,8 +126,11 @@ const resetForm = (form: FormState) => {
   // Invalidate any prepare/upload still awaiting for the batch being torn down.
   form.generationRef.current += 1;
   form.setStage('choose-file');
-  revokeBatchItems(form.batchItemsRef.current);
   form.setBatchItems([]);
+  form.setPreviewUrl((url) => {
+    if (url) URL.revokeObjectURL(url);
+    return null;
+  });
   form.setCurrentIndex(0);
   form.setProgress(null);
   form.setErrorMessage(null);
@@ -152,8 +144,11 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
 
   const generation = form.generationRef.current + 1;
   form.generationRef.current = generation;
-  revokeBatchItems(form.batchItemsRef.current);
   form.setBatchItems([]);
+  form.setPreviewUrl((url) => {
+    if (url) URL.revokeObjectURL(url);
+    return null;
+  });
   form.setCurrentIndex(0);
   form.setStage('preparing');
   form.setProgress(null);
@@ -163,7 +158,7 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
   form.setSuccessfulUploads(0);
 
   const suggestedCategoriesPromise = suggestCommonsCategories(feature);
-  const nextBatchDrafts: ReviewPhotoDraft[] = [];
+  const nextBatchItems: ReviewPhoto[] = [];
   let skippedFilesCount = 0;
   let skippedFilesMessage: string | null = null;
 
@@ -174,7 +169,7 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
         suggestedCategoriesPromise,
       ]);
       if (form.generationRef.current !== generation) return;
-      nextBatchDrafts.push({
+      nextBatchItems.push({
         prepared,
         filenameStem: prepared.filenameParts.stem,
         description: getDefaultDescription(feature),
@@ -194,7 +189,7 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
   form.setSkippedFilesCount(skippedFilesCount);
   form.setSkippedFilesMessage(skippedFilesMessage);
 
-  if (nextBatchDrafts.length === 0) {
+  if (nextBatchItems.length === 0) {
     form.setErrorMessage(
       skippedFilesMessage ?? 'Failed to prepare file for upload',
     );
@@ -202,14 +197,6 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
     return;
   }
 
-  const nextBatchItems = nextBatchDrafts.map((item) => ({
-    ...item,
-    previewUrl: URL.createObjectURL(item.prepared.file),
-  }));
-  if (form.generationRef.current !== generation) {
-    revokeBatchItems(nextBatchItems);
-    return;
-  }
   form.setBatchItems(nextBatchItems);
   form.setCurrentIndex(0);
   form.setStage('review');
@@ -287,18 +274,36 @@ export const useUploadDialogState = ({
   const lastConsumedInitialFiles = useRef<File[] | null>(null);
   const form = useFormState();
   const currentPhoto = form.batchItems[form.currentIndex] ?? null;
+  const currentPhotoFile = currentPhoto?.prepared.file ?? null;
+  const { setPreviewUrl } = form;
 
   useResetOnClose(open, () => {
     resetForm(form);
     lastConsumedInitialFiles.current = null;
   });
-  useRevokeOnUnmount(form.batchItemsRef);
   useEffect(
     () => () => {
       form.generationRef.current += 1;
     },
     [form.generationRef],
   );
+  useEffect(() => {
+    if (!currentPhotoFile) {
+      setPreviewUrl((url) => {
+        if (url) URL.revokeObjectURL(url);
+        return null;
+      });
+      return;
+    }
+    const nextUrl = URL.createObjectURL(currentPhotoFile);
+    setPreviewUrl((url) => {
+      if (url) URL.revokeObjectURL(url);
+      return nextUrl;
+    });
+    return () => {
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [currentPhotoFile, setPreviewUrl]);
 
   const handleFilesChosen = (files: File[]) => {
     if (!feature) return undefined;
@@ -343,7 +348,7 @@ export const useUploadDialogState = ({
   return {
     stage: form.stage,
     prepared: currentPhoto?.prepared ?? null,
-    previewUrl: currentPhoto?.previewUrl ?? null,
+    previewUrl: form.previewUrl,
     filenameStem: currentPhoto?.filenameStem ?? '',
     setFilenameStem: (filenameStem: string) =>
       updateCurrentPhoto((item) => ({ ...item, filenameStem })),
