@@ -39,8 +39,7 @@ export default {
   'user_profile.ticks_count': 'Проходження',
   'user_profile.leaderboard_rank': 'Місце в рейтингу',
   'user_profile.export_csv': 'Експортувати логбук',
-  'user_profile.export_csv_disabled':
-    'Експортувати логбук (доступно після завантаження проходжень)',
+  'user_profile.export_csv_disabled': 'Експортувати логбук (доступно після завантаження проходжень)',
   'user_profile.ticks_table_title': 'Проходження',
   'user_profile.tab_ticks': 'Проходження',
   'user_profile.tab_charts': 'Графіки',
@@ -471,7 +470,8 @@ export default {
     'Увійдіть із обліковим записом Wikimedia Commons, щоб завантажувати фото. Потрібен окремий обліковий запис від вашого OSM.',
   'uploaddialog.logged_in_as': 'Вхід у Wikimedia Commons як <b>__user__</b>',
   'uploaddialog.choose_file': 'Виберіть фото…',
-  'uploaddialog.choose_file_hint': 'Виберіть одне або кілька зображень зі свого пристрою. Можна вибрати кілька одразу й завантажити їх за один раз. Фото HEIC з iPhone будуть автоматично перетворені на JPG.',
+  'uploaddialog.choose_file_hint':
+    'Виберіть одне або кілька зображень зі свого пристрою. Можна вибрати кілька одразу й завантажити їх за один раз. Фото HEIC з iPhone будуть автоматично перетворені на JPG.',
   'uploaddialog.preparing': 'Зчитування даних EXIF і підготовка фото до завантаження…',
   'uploaddialog.filename_label': 'Назва файлу у Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -489,16 +489,11 @@ export default {
   'uploaddialog.uploading': 'Завантаження у Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Завантаження у Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Фото завантажено! Збережіть зміни, щоб прикріпити його до цього місця.',
-  'uploaddialog.success_multiple':
-    '__count__ фото завантажено! Збережіть зміни, щоб прикріпити їх до цього місця.',
-  'uploaddialog.skipped_single':
-    '1 вибране фото було пропущено: __reason__',
-  'uploaddialog.skipped_multiple':
-    '__count__ вибраних фото було пропущено. Остання помилка: __reason__',
-  'uploaddialog.skipped_single_success':
-    '1 вибране фото було пропущено.',
-  'uploaddialog.skipped_multiple_success':
-    '__count__ вибраних фото було пропущено.',
+  'uploaddialog.success_multiple': '__count__ фото завантажено! Збережіть зміни, щоб прикріпити їх до цього місця.',
+  'uploaddialog.skipped_single': '1 вибране фото було пропущено: __reason__',
+  'uploaddialog.skipped_multiple': '__count__ вибраних фото було пропущено. Остання помилка: __reason__',
+  'uploaddialog.skipped_single_success': '1 вибране фото було пропущено.',
+  'uploaddialog.skipped_multiple_success': '__count__ вибраних фото було пропущено.',
   'uploaddialog.photo_progress': 'Фото __current__ з __total__',
   'uploaddialog.previous_photo': 'Попереднє',
   'uploaddialog.next_photo': 'Наступне',

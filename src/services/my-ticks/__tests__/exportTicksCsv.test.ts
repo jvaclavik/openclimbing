@@ -1,31 +1,27 @@
-import {
-  buildTicksCsv,
-  buildTicksCsvFilename,
-} from '../exportTicksCsv';
+import { buildTicksCsv, buildTicksCsvFilename } from '../exportTicksCsv';
 import { ClimbingTick } from '../../../types';
 
-const tick = (overrides: Partial<ClimbingTick>): ClimbingTick =>
-  ({
-    id: 1,
-    osmUserId: 11,
-    shortId: 'w1',
-    timestamp: '2026-08-20',
-    style: 'RP',
-    myGrade: '7a+',
-    note: 'Great day',
-    pairing: null,
-    routeName: 'Route "A"',
-    routeGradeTxt: '7a',
-    routeCragName: 'Main Crag',
-    routeCragOsmType: null,
-    routeCragOsmId: null,
-    routeAreaName: 'Area, North',
-    routeAreaOsmType: null,
-    routeAreaOsmId: null,
-    routeLon: 14.123,
-    routeLat: 50.456,
-    ...overrides,
-  });
+const tick = (overrides: Partial<ClimbingTick>): ClimbingTick => ({
+  id: 1,
+  osmUserId: 11,
+  shortId: 'w1',
+  timestamp: '2026-08-20',
+  style: 'RP',
+  myGrade: '7a+',
+  note: 'Great day',
+  pairing: null,
+  routeName: 'Route "A"',
+  routeGradeTxt: '7a',
+  routeCragName: 'Main Crag',
+  routeCragOsmType: null,
+  routeCragOsmId: null,
+  routeAreaName: 'Area, North',
+  routeAreaOsmType: null,
+  routeAreaOsmId: null,
+  routeLon: 14.123,
+  routeLat: 50.456,
+  ...overrides,
+});
 
 describe('buildTicksCsv', () => {
   test('exports all canonical tick fields with escaped values and header', () => {

@@ -141,11 +141,9 @@ describe('useUploadDialogState multi-file batches', () => {
 
     expect(uploadPhotoToCommonsMock).toHaveBeenCalledTimes(3);
     expect(suggestCommonsCategoriesMock).toHaveBeenCalledTimes(1);
-    expect(uploadPhotoToCommonsMock.mock.calls.map(([args]) => args.description)).toEqual([
-      'first description',
-      'second description',
-      '',
-    ]);
+    expect(
+      uploadPhotoToCommonsMock.mock.calls.map(([args]) => args.description),
+    ).toEqual(['first description', 'second description', '']);
     expect(onUploaded).toHaveBeenCalledTimes(3);
     expect(onUploaded.mock.calls.map((c) => c[0])).toEqual([
       'File:mock 1.jpg',

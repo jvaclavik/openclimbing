@@ -39,8 +39,7 @@ export default {
   'user_profile.ticks_count': 'Croix',
   'user_profile.leaderboard_rank': 'Rang au classement',
   'user_profile.export_csv': 'Exporter le carnet',
-  'user_profile.export_csv_disabled':
-    'Exporter le carnet (disponible une fois les croix chargées)',
+  'user_profile.export_csv_disabled': 'Exporter le carnet (disponible une fois les croix chargées)',
   'user_profile.ticks_table_title': 'Croix',
   'user_profile.tab_ticks': 'Croix',
   'user_profile.tab_charts': 'Graphiques',
@@ -474,7 +473,8 @@ export default {
     'Connectez-vous avec votre compte Wikimedia Commons pour téléverser des photos. Il vous faut un compte distinct de votre compte OSM.',
   'uploaddialog.logged_in_as': 'Connecté à Wikimedia Commons en tant que <b>__user__</b>',
   'uploaddialog.choose_file': 'Choisir des photos…',
-  'uploaddialog.choose_file_hint': 'Choisissez une ou plusieurs images sur votre appareil. Vous pouvez en sélectionner plusieurs à la fois pour les téléverser d’un seul coup. Les photos HEIC de l’iPhone seront converties automatiquement en JPG.',
+  'uploaddialog.choose_file_hint':
+    'Choisissez une ou plusieurs images sur votre appareil. Vous pouvez en sélectionner plusieurs à la fois pour les téléverser d’un seul coup. Les photos HEIC de l’iPhone seront converties automatiquement en JPG.',
   'uploaddialog.preparing': 'Lecture des données EXIF et préparation de la photo pour le téléversement…',
   'uploaddialog.filename_label': 'Nom du fichier sur Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -493,16 +493,11 @@ export default {
   'uploaddialog.uploading': 'Téléversement vers Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Téléversement vers Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Photo téléversée ! Enregistrez les modifications pour la joindre à ce lieu.',
-  'uploaddialog.success_multiple':
-    '__count__ photos téléversées ! Enregistrez les modifications pour les joindre à ce lieu.',
-  'uploaddialog.skipped_single':
-    '1 photo sélectionnée a été ignorée : __reason__',
-  'uploaddialog.skipped_multiple':
-    '__count__ photos sélectionnées ont été ignorées. Dernière erreur : __reason__',
-  'uploaddialog.skipped_single_success':
-    '1 photo sélectionnée a été ignorée.',
-  'uploaddialog.skipped_multiple_success':
-    '__count__ photos sélectionnées ont été ignorées.',
+  'uploaddialog.success_multiple': '__count__ photos téléversées ! Enregistrez les modifications pour les joindre à ce lieu.',
+  'uploaddialog.skipped_single': '1 photo sélectionnée a été ignorée : __reason__',
+  'uploaddialog.skipped_multiple': '__count__ photos sélectionnées ont été ignorées. Dernière erreur : __reason__',
+  'uploaddialog.skipped_single_success': '1 photo sélectionnée a été ignorée.',
+  'uploaddialog.skipped_multiple_success': '__count__ photos sélectionnées ont été ignorées.',
   'uploaddialog.photo_progress': 'Photo __current__ sur __total__',
   'uploaddialog.previous_photo': 'Précédente',
   'uploaddialog.next_photo': 'Suivante',

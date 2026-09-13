@@ -45,7 +45,9 @@ const EditContext = createContext<EditContextType>(undefined);
 
 export const EditContextProvider: React.FC = ({ children }) => {
   const { opened } = useEditDialogContext();
-  const [successInfo, setSuccessInfoState] = useState<undefined | SuccessInfo>();
+  const [successInfo, setSuccessInfoState] = useState<
+    undefined | SuccessInfo
+  >();
   const [isSaving, setIsSavingState] = useState(false);
   const [location, setLocationState] = useState(''); // only for note
   const [comment, setCommentState] = useState('');

@@ -39,8 +39,7 @@ export default {
   'user_profile.ticks_count': 'Vie',
   'user_profile.leaderboard_rank': 'Posizione in classifica',
   'user_profile.export_csv': 'Esporta logbook',
-  'user_profile.export_csv_disabled':
-    'Esporta logbook (disponibile quando le vie sono state caricate)',
+  'user_profile.export_csv_disabled': 'Esporta logbook (disponibile quando le vie sono state caricate)',
   'user_profile.ticks_table_title': 'Vie',
   'user_profile.tab_ticks': 'Vie',
   'user_profile.tab_charts': 'Grafici',
@@ -469,7 +468,8 @@ export default {
   'uploaddialog.login_hint': 'Accedi con il tuo account Wikimedia Commons per caricare foto. Serve un account separato da quello OSM.',
   'uploaddialog.logged_in_as': 'Connesso a Wikimedia Commons come <b>__user__</b>',
   'uploaddialog.choose_file': 'Scegli foto…',
-  'uploaddialog.choose_file_hint': 'Scegli una o più immagini dal tuo dispositivo. Puoi selezionarne diverse in una volta sola per caricarle tutte insieme. Le foto HEIC da iPhone verranno convertite automaticamente in JPG.',
+  'uploaddialog.choose_file_hint':
+    'Scegli una o più immagini dal tuo dispositivo. Puoi selezionarne diverse in una volta sola per caricarle tutte insieme. Le foto HEIC da iPhone verranno convertite automaticamente in JPG.',
   'uploaddialog.preparing': 'Lettura dei dati EXIF e preparazione della foto per il caricamento…',
   'uploaddialog.filename_label': 'Nome file su Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -487,16 +487,11 @@ export default {
   'uploaddialog.uploading': 'Caricamento su Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Caricamento su Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Foto caricata! Salva le modifiche per allegarla a questo luogo.',
-  'uploaddialog.success_multiple':
-    '__count__ foto caricate! Salva le modifiche per allegarle a questo luogo.',
-  'uploaddialog.skipped_single':
-    '1 foto selezionata è stata saltata: __reason__',
-  'uploaddialog.skipped_multiple':
-    '__count__ foto selezionate sono state saltate. Ultimo errore: __reason__',
-  'uploaddialog.skipped_single_success':
-    '1 foto selezionata è stata saltata.',
-  'uploaddialog.skipped_multiple_success':
-    '__count__ foto selezionate sono state saltate.',
+  'uploaddialog.success_multiple': '__count__ foto caricate! Salva le modifiche per allegarle a questo luogo.',
+  'uploaddialog.skipped_single': '1 foto selezionata è stata saltata: __reason__',
+  'uploaddialog.skipped_multiple': '__count__ foto selezionate sono state saltate. Ultimo errore: __reason__',
+  'uploaddialog.skipped_single_success': '1 foto selezionata è stata saltata.',
+  'uploaddialog.skipped_multiple_success': '__count__ foto selezionate sono state saltate.',
   'uploaddialog.photo_progress': 'Foto __current__ di __total__',
   'uploaddialog.previous_photo': 'Precedente',
   'uploaddialog.next_photo': 'Successiva',
