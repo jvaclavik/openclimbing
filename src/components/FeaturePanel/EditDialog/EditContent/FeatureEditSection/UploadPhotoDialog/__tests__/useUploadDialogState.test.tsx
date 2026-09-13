@@ -172,4 +172,61 @@ describe('useUploadDialogState multi-file batches', () => {
     expect(result.current.batchPosition).toBe(2);
     expect(onUploaded).toHaveBeenCalledTimes(1);
   });
+
+  it('skips a file that fails to prepare and continues the batch', async () => {
+    const { result } = renderState();
+    preparePhotoForUploadMock.mockRejectedValueOnce(new Error('corrupt image'));
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('bad.jpg'),
+        imageFile('good.jpg'),
+      ]);
+    });
+
+    // First file failed to prepare, so we move on to the second one.
+    expect(result.current.stage).toBe('review');
+    expect(result.current.batchTotal).toBe(2);
+    expect(result.current.batchPosition).toBe(2);
+    expect(preparePhotoForUploadMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not resurrect a file whose preparation finishes after the dialog closed', async () => {
+    let resolvePrepare: (value: unknown) => void = () => {};
+    preparePhotoForUploadMock.mockImplementationOnce(
+      (file: File) =>
+        new Promise((resolve) => {
+          resolvePrepare = () =>
+            resolve({
+              file,
+              exifDate: null,
+              exifLocation: null,
+              filenameParts: { stem: 'late', ext: 'jpg' },
+            });
+        }),
+    );
+
+    const onUploaded = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ open }) =>
+        useUploadDialogState({ open, feature, onUploaded, initialFiles: null }),
+      { initialProps: { open: true } },
+    );
+
+    act(() => {
+      result.current.handleFilesChosen([imageFile('late.jpg')]);
+    });
+    expect(result.current.stage).toBe('preparing');
+
+    // Close the dialog while it is still preparing, then let prepare resolve.
+    rerender({ open: false });
+    await act(async () => {
+      resolvePrepare(undefined);
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // The stale preparation must not push the form back into the review stage.
+    expect(result.current.stage).toBe('choose-file');
+    expect(result.current.prepared).toBeNull();
+  });
 });

@@ -77,6 +77,13 @@ type FormState = {
   /** Total number of files in the current batch (1 for a single upload). */
   batchTotal: number;
   setBatchTotal: (v: number) => void;
+  /**
+   * Monotonic id of the active batch. Bumped when a batch starts or the form
+   * resets, so async work (prepare/upload) started for an old batch can detect
+   * it has been superseded/canceled and drop its results instead of writing
+   * them back into a reset or unrelated dialog.
+   */
+  generationRef: { current: number };
 };
 
 const useFormState = (): FormState => {
@@ -91,6 +98,7 @@ const useFormState = (): FormState => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [queue, setQueue] = useState<File[]>([]);
   const [batchTotal, setBatchTotal] = useState(0);
+  const generationRef = useRef(0);
   return {
     stage,
     setStage,
@@ -114,20 +122,27 @@ const useFormState = (): FormState => {
     setQueue,
     batchTotal,
     setBatchTotal,
+    generationRef,
   };
 };
 
 const prepareAndPopulate = async (
   rawFile: File,
+  remainingQueue: File[],
   feature: Feature,
   form: FormState,
+  generation: number,
 ) => {
   form.setErrorMessage(null);
   form.setStage('preparing');
   try {
     const preparedFile = await preparePhotoForUpload(rawFile, feature);
-    const url = URL.createObjectURL(preparedFile.file);
     const suggestedCategories = await suggestCommonsCategories(feature);
+    // The dialog was closed or a new batch started while we were awaiting —
+    // drop this result so it can't resurrect a canceled file (and don't create
+    // an object URL we'd then have to revoke).
+    if (form.generationRef.current !== generation) return;
+    const url = URL.createObjectURL(preparedFile.file);
     form.setPrepared(preparedFile);
     // Revoke the previous preview (e.g. the prior file in a multi-file batch)
     // so its object URL doesn't leak when we swap in the new one.
@@ -140,10 +155,21 @@ const prepareAndPopulate = async (
     form.setDescription(getDefaultDescription(feature));
     form.setStage('review');
   } catch (e) {
+    if (form.generationRef.current !== generation) return;
     form.setErrorMessage(
       e instanceof Error ? e.message : 'Failed to prepare file for upload',
     );
-    form.setStage('choose-file');
+    // Don't strand the rest of a multi-file batch on one bad file — move on to
+    // the next queued one, or fall back to the file picker if it was the last.
+    // `remainingQueue` is threaded explicitly (not read from form state) because
+    // this runs inside an async chain where form.queue would be stale.
+    const [next, ...rest] = remainingQueue;
+    if (next) {
+      form.setQueue(rest);
+      await prepareAndPopulate(next, rest, feature, form, generation);
+    } else {
+      form.setStage('choose-file');
+    }
   }
 };
 
@@ -155,12 +181,17 @@ const prepareAndPopulate = async (
 const startBatch = (files: File[], feature: Feature, form: FormState) => {
   if (files.length === 0) return undefined;
   const [first, ...rest] = files;
+  // New batch — invalidate any async work still in flight from a previous one.
+  const generation = form.generationRef.current + 1;
+  form.generationRef.current = generation;
   form.setBatchTotal(files.length);
   form.setQueue(rest);
-  return prepareAndPopulate(first, feature, form);
+  return prepareAndPopulate(first, rest, feature, form, generation);
 };
 
 const resetForm = (form: FormState) => {
+  // Invalidate any prepare/upload still awaiting for the batch being torn down.
+  form.generationRef.current += 1;
   form.setStage('choose-file');
   form.setPrepared(null);
   form.setPreviewUrl((url) => {
@@ -183,6 +214,7 @@ const performUpload = async (
   activeUser: { username: string; realname?: string },
   onUploaded: (fileTagValue: string) => void,
 ) => {
+  const generation = form.generationRef.current;
   form.setStage('uploading');
   form.setProgress(null);
   form.setErrorMessage(null);
@@ -197,17 +229,22 @@ const performUpload = async (
       license: form.license,
       onProgress: form.setProgress,
     });
+    // The photo really did upload, so always record it into a slot.
     onUploaded(result.fileTagValue);
+    // If a new batch took over meanwhile, let it drive the UI from here.
+    if (form.generationRef.current !== generation) return;
     // Move on to the next file in the batch (each gets its own review step),
-    // or finish when the queue is empty.
+    // or finish when the queue is empty. `form.queue` is fresh here because each
+    // upload is a separate user action (its own render).
     const [next, ...rest] = form.queue;
     if (next) {
       form.setQueue(rest);
-      await prepareAndPopulate(next, feature, form);
+      await prepareAndPopulate(next, rest, feature, form, generation);
     } else {
       form.setStage('success');
     }
   } catch (e) {
+    if (form.generationRef.current !== generation) return;
     form.setErrorMessage(
       e instanceof Error ? e.message : 'Upload to Wikimedia Commons failed',
     );
