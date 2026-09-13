@@ -228,6 +228,48 @@ describe('useUploadDialogState multi-file batches', () => {
     ]);
   });
 
+  it('does not allow retry navigation back into already uploaded photos', async () => {
+    const { result } = renderState();
+    uploadPhotoToCommonsMock
+      .mockImplementationOnce(async () => ({ fileTagValue: 'File:first.jpg' }))
+      .mockRejectedValueOnce(new Error('network down'));
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('first.jpg'),
+        imageFile('second.jpg'),
+        imageFile('third.jpg'),
+      ]);
+    });
+
+    await act(async () => {
+      await result.current.handleUpload();
+    });
+
+    expect(result.current.stage).toBe('review');
+    expect(result.current.successfulUploads).toBe(1);
+    expect(result.current.batchPosition).toBe(2);
+    expect(result.current.canGoPrevious).toBe(false);
+    expect(result.current.canGoNext).toBe(true);
+
+    await act(async () => {
+      result.current.handlePreviousPhoto();
+    });
+    expect(result.current.batchPosition).toBe(2);
+
+    await act(async () => {
+      result.current.handleNextPhoto();
+    });
+    expect(result.current.batchPosition).toBe(3);
+    expect(result.current.canGoPrevious).toBe(true);
+
+    await act(async () => {
+      result.current.handlePreviousPhoto();
+    });
+    expect(result.current.batchPosition).toBe(2);
+    expect(result.current.canGoPrevious).toBe(false);
+  });
+
   it('reports the batch as invalid when any photo has an empty filename', async () => {
     const { result } = renderState();
 

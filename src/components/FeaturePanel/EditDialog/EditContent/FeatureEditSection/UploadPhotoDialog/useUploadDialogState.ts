@@ -287,6 +287,10 @@ export const useUploadDialogState = ({
   const currentPhoto = form.batchItems[form.currentIndex] ?? null;
   const currentPhotoFile = currentPhoto?.prepared.file ?? null;
   const { setPreviewUrl } = form;
+  const firstEditableIndex = Math.min(
+    form.successfulUploads,
+    Math.max(form.batchItems.length - 1, 0),
+  );
 
   useResetOnClose(open, () => {
     resetForm(form);
@@ -382,10 +386,10 @@ export const useUploadDialogState = ({
       form.batchItems.every((item) => item.filenameStem.trim().length > 0),
     successfulUploads: form.successfulUploads,
     batchPosition: currentPhoto ? form.currentIndex + 1 : 0,
-    canGoPrevious: form.currentIndex > 0,
+    canGoPrevious: form.currentIndex > firstEditableIndex,
     canGoNext: form.currentIndex < form.batchItems.length - 1,
     handlePreviousPhoto: () => {
-      if (form.currentIndex > 0) {
+      if (form.currentIndex > firstEditableIndex) {
         form.setCurrentIndex(form.currentIndex - 1);
       }
     },
