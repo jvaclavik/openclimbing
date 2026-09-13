@@ -275,6 +275,8 @@ const performUpload = async (
   generation: number,
 ) => {
   if (form.generationRef.current !== generation) return;
+  const suggestedCategoriesPromise = form.suggestedCategoriesPromiseRef.current;
+  if (!suggestedCategoriesPromise) return;
   form.setStage('uploading');
   form.setProgress(null);
   form.setErrorMessage(null);
@@ -312,7 +314,7 @@ const performUpload = async (
         feature,
         form,
         generation,
-        form.suggestedCategoriesPromiseRef.current ?? Promise.resolve([]),
+        suggestedCategoriesPromise,
       );
     } else {
       form.setStage('success');
