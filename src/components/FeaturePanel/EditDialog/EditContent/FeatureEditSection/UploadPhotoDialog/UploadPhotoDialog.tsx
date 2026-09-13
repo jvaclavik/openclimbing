@@ -241,7 +241,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
           )}
           {stage === 'success' && (
             <Alert severity="success">
-              {successfulUploads > 1
+              {successfulUploads !== 1
                 ? t('uploaddialog.success_multiple', {
                     count: successfulUploads,
                   })
