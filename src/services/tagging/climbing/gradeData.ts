@@ -16,9 +16,9 @@ export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_clas
 2-,           2,      II,          5.1,           VB-,     2,       M/D,    1,                 2-,                     WI2,  M2,    II-,     2-
 2,            2,      II,          5.1,           VB-,     2,       M/D,    1,                 2,                      WI2,  M2,    II,      2
 2+,           2,      II,          5.2,           VB-,     2,       M/D,    1,                 2+,                     WI2,  M2,    II+,     2
-3-,           3-,     III,         5.2,           VB-,     3,       D,      1/2,               3-,                     WI2,  M2,    III-,    2+
-3,            3,      III,         5.3,           VB-,     3,       D,      1/2,               3,                      WI3,  M3,    III,     2+
-3+,           3+,     III,         5.3,           VB-,     3,       D,      1/2,               3+,                     WI3,  M3,    III+,    2+
+3-,           3a,     III,         5.2,           VB-,     3,       D,      1/2,               3-,                     WI2,  M2,    III-,    2+
+3,            3b,     III,         5.3,           VB-,     3,       D,      1/2,               3,                      WI3,  M3,    III,     2+
+3+,           3c,     III,         5.3,           VB-,     3,       D,      1/2,               3+,                     WI3,  M3,    III+,    2+
 4-,           4a,     IV,          5.4,           VB-,     4a,      D/VD,   2,                 4-,                     WI3,  M3,    IV-,     2+
 4-,           4a+,    IV,          5.4,           VB-,     4a,      D/VD,   2,                 4-,                     WI3,  M3,    IV-,     2+
 4,            4b,     IV,          5.4,           VB-,     4a,      D/VD,   2,                 4,                      WI3,  M3,    IV,      2+
