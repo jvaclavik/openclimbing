@@ -90,7 +90,9 @@ describe('EditContextProvider', () => {
 
   it('discards the edit session when the dialog transitions from open to closed', () => {
     mockOpened = true;
-    const { result, rerender } = renderHook(() => useEditContext(), { wrapper });
+    const { result, rerender } = renderHook(() => useEditContext(), {
+      wrapper,
+    });
 
     act(() => {
       result.current.addItem(initialItem);

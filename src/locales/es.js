@@ -39,8 +39,7 @@ export default {
   'user_profile.ticks_count': 'Ascensiones',
   'user_profile.leaderboard_rank': 'Puesto en la clasificación',
   'user_profile.export_csv': 'Exportar cuaderno',
-  'user_profile.export_csv_disabled':
-    'Exportar cuaderno (disponible cuando se carguen las ascensiones)',
+  'user_profile.export_csv_disabled': 'Exportar cuaderno (disponible cuando se carguen las ascensiones)',
   'user_profile.ticks_table_title': 'Ascensiones',
   'user_profile.tab_ticks': 'Ascensiones',
   'user_profile.tab_charts': 'Gráficos',
@@ -471,7 +470,8 @@ export default {
   'uploaddialog.login_hint': 'Inicia sesión con tu cuenta de Wikimedia Commons para subir fotos. Necesitas una cuenta separada de la de OSM.',
   'uploaddialog.logged_in_as': 'Sesión iniciada en Wikimedia Commons como <b>__user__</b>',
   'uploaddialog.choose_file': 'Elegir fotos…',
-  'uploaddialog.choose_file_hint': 'Elige una o varias imágenes de tu dispositivo. Puedes seleccionar varias a la vez para subirlas de una sola vez. Las fotos HEIC del iPhone se convertirán automáticamente a JPG.',
+  'uploaddialog.choose_file_hint':
+    'Elige una o varias imágenes de tu dispositivo. Puedes seleccionar varias a la vez para subirlas de una sola vez. Las fotos HEIC del iPhone se convertirán automáticamente a JPG.',
   'uploaddialog.preparing': 'Leyendo los datos EXIF y preparando la foto para subirla…',
   'uploaddialog.filename_label': 'Nombre de archivo en Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -490,16 +490,11 @@ export default {
   'uploaddialog.uploading': 'Subiendo a Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Subiendo a Wikimedia Commons… __percent__%',
   'uploaddialog.success': '¡Foto subida! Guarda los cambios para adjuntarla a este lugar.',
-  'uploaddialog.success_multiple':
-    '¡__count__ fotos subidas! Guarda los cambios para adjuntarlas a este lugar.',
-  'uploaddialog.skipped_single':
-    'Se omitió 1 foto seleccionada: __reason__',
-  'uploaddialog.skipped_multiple':
-    'Se omitieron __count__ fotos seleccionadas. Último error: __reason__',
-  'uploaddialog.skipped_single_success':
-    'Se omitió 1 foto seleccionada.',
-  'uploaddialog.skipped_multiple_success':
-    'Se omitieron __count__ fotos seleccionadas.',
+  'uploaddialog.success_multiple': '¡__count__ fotos subidas! Guarda los cambios para adjuntarlas a este lugar.',
+  'uploaddialog.skipped_single': 'Se omitió 1 foto seleccionada: __reason__',
+  'uploaddialog.skipped_multiple': 'Se omitieron __count__ fotos seleccionadas. Último error: __reason__',
+  'uploaddialog.skipped_single_success': 'Se omitió 1 foto seleccionada.',
+  'uploaddialog.skipped_multiple_success': 'Se omitieron __count__ fotos seleccionadas.',
   'uploaddialog.photo_progress': 'Foto __current__ de __total__',
   'uploaddialog.previous_photo': 'Anterior',
   'uploaddialog.next_photo': 'Siguiente',

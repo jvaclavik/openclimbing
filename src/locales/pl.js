@@ -38,8 +38,7 @@ export default {
   'user_profile.ticks_count': 'Przejścia',
   'user_profile.leaderboard_rank': 'Miejsce w rankingu',
   'user_profile.export_csv': 'Eksportuj dziennik',
-  'user_profile.export_csv_disabled':
-    'Eksportuj dziennik (dostępne po wczytaniu przejść)',
+  'user_profile.export_csv_disabled': 'Eksportuj dziennik (dostępne po wczytaniu przejść)',
   'user_profile.ticks_table_title': 'Przejścia',
   'user_profile.tab_ticks': 'Przejścia',
   'user_profile.tab_charts': 'Wykresy',
@@ -469,7 +468,8 @@ export default {
   'uploaddialog.login_hint': 'Zaloguj się kontem Wikimedia Commons, aby przesyłać zdjęcia. Potrzebujesz konta oddzielnego od konta OSM.',
   'uploaddialog.logged_in_as': 'Zalogowano do Wikimedia Commons jako <b>__user__</b>',
   'uploaddialog.choose_file': 'Wybierz zdjęcia…',
-  'uploaddialog.choose_file_hint': 'Wybierz jeden lub więcej obrazów z urządzenia. Możesz zaznaczyć kilka naraz, aby przesłać je za jednym razem. Zdjęcia HEIC z iPhone’a zostaną automatycznie przekonwertowane do JPG.',
+  'uploaddialog.choose_file_hint':
+    'Wybierz jeden lub więcej obrazów z urządzenia. Możesz zaznaczyć kilka naraz, aby przesłać je za jednym razem. Zdjęcia HEIC z iPhone’a zostaną automatycznie przekonwertowane do JPG.',
   'uploaddialog.preparing': 'Odczyt danych EXIF i przygotowywanie zdjęcia do przesłania…',
   'uploaddialog.filename_label': 'Nazwa pliku w Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -487,16 +487,11 @@ export default {
   'uploaddialog.uploading': 'Przesyłanie do Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Przesyłanie do Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Zdjęcie przesłane! Zapisz zmiany, aby przypisać je do tego miejsca.',
-  'uploaddialog.success_multiple':
-    'Przesłano __count__ zdjęć! Zapisz zmiany, aby przypisać je do tego miejsca.',
-  'uploaddialog.skipped_single':
-    'Pominięto 1 wybrane zdjęcie: __reason__',
-  'uploaddialog.skipped_multiple':
-    'Pominięto __count__ wybranych zdjęć. Ostatni błąd: __reason__',
-  'uploaddialog.skipped_single_success':
-    'Pominięto 1 wybrane zdjęcie.',
-  'uploaddialog.skipped_multiple_success':
-    'Pominięto __count__ wybranych zdjęć.',
+  'uploaddialog.success_multiple': 'Przesłano __count__ zdjęć! Zapisz zmiany, aby przypisać je do tego miejsca.',
+  'uploaddialog.skipped_single': 'Pominięto 1 wybrane zdjęcie: __reason__',
+  'uploaddialog.skipped_multiple': 'Pominięto __count__ wybranych zdjęć. Ostatni błąd: __reason__',
+  'uploaddialog.skipped_single_success': 'Pominięto 1 wybrane zdjęcie.',
+  'uploaddialog.skipped_multiple_success': 'Pominięto __count__ wybranych zdjęć.',
   'uploaddialog.photo_progress': 'Zdjęcie __current__ z __total__',
   'uploaddialog.previous_photo': 'Poprzednie',
   'uploaddialog.next_photo': 'Następne',

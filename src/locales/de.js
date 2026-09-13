@@ -39,8 +39,7 @@ export default {
   'user_profile.ticks_count': 'Begehungen',
   'user_profile.leaderboard_rank': 'Platz in der Rangliste',
   'user_profile.export_csv': 'Logbuch exportieren',
-  'user_profile.export_csv_disabled':
-    'Logbuch exportieren (verfügbar, sobald Begehungen geladen sind)',
+  'user_profile.export_csv_disabled': 'Logbuch exportieren (verfügbar, sobald Begehungen geladen sind)',
   'user_profile.ticks_table_title': 'Begehungen',
   'user_profile.tab_ticks': 'Begehungen',
   'user_profile.tab_charts': 'Diagramme',
@@ -472,7 +471,8 @@ export default {
     'Melde dich mit deinem Wikimedia-Commons-Konto an, um Fotos hochzuladen. Dafür brauchst du ein eigenes Konto, getrennt von deinem OSM-Konto.',
   'uploaddialog.logged_in_as': 'Bei Wikimedia Commons angemeldet als <b>__user__</b>',
   'uploaddialog.choose_file': 'Fotos wählen…',
-  'uploaddialog.choose_file_hint': 'Wähle ein oder mehrere Bilder von deinem Gerät. Du kannst mehrere auf einmal auswählen und in einem Rutsch hochladen. HEIC-Fotos vom iPhone werden automatisch in JPG umgewandelt.',
+  'uploaddialog.choose_file_hint':
+    'Wähle ein oder mehrere Bilder von deinem Gerät. Du kannst mehrere auf einmal auswählen und in einem Rutsch hochladen. HEIC-Fotos vom iPhone werden automatisch in JPG umgewandelt.',
   'uploaddialog.preparing': 'EXIF-Daten werden gelesen und das Foto zum Hochladen vorbereitet…',
   'uploaddialog.filename_label': 'Dateiname auf Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -490,16 +490,11 @@ export default {
   'uploaddialog.uploading': 'Wird zu Wikimedia Commons hochgeladen…',
   'uploaddialog.uploading_percent': 'Wird zu Wikimedia Commons hochgeladen… __percent__%',
   'uploaddialog.success': 'Foto hochgeladen! Speichere die Änderungen, um es diesem Ort zuzuordnen.',
-  'uploaddialog.success_multiple':
-    '__count__ Fotos hochgeladen! Speichere die Änderungen, um sie diesem Ort zuzuordnen.',
-  'uploaddialog.skipped_single':
-    '1 ausgewähltes Foto wurde übersprungen: __reason__',
-  'uploaddialog.skipped_multiple':
-    '__count__ ausgewählte Fotos wurden übersprungen. Letzter Fehler: __reason__',
-  'uploaddialog.skipped_single_success':
-    '1 ausgewähltes Foto wurde übersprungen.',
-  'uploaddialog.skipped_multiple_success':
-    '__count__ ausgewählte Fotos wurden übersprungen.',
+  'uploaddialog.success_multiple': '__count__ Fotos hochgeladen! Speichere die Änderungen, um sie diesem Ort zuzuordnen.',
+  'uploaddialog.skipped_single': '1 ausgewähltes Foto wurde übersprungen: __reason__',
+  'uploaddialog.skipped_multiple': '__count__ ausgewählte Fotos wurden übersprungen. Letzter Fehler: __reason__',
+  'uploaddialog.skipped_single_success': '1 ausgewähltes Foto wurde übersprungen.',
+  'uploaddialog.skipped_multiple_success': '__count__ ausgewählte Fotos wurden übersprungen.',
   'uploaddialog.photo_progress': 'Foto __current__ von __total__',
   'uploaddialog.previous_photo': 'Vorheriges',
   'uploaddialog.next_photo': 'Nächstes',
