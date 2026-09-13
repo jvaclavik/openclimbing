@@ -1,7 +1,7 @@
 import { LonLat } from '../../../../services/types';
 import { getApiId } from '../../../../services/helpers';
 import { Setter } from '../../../../types';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { publishDbgObject } from '../../../../utils';
 import { getPresetTranslation } from '../../../../services/tagging/translations';
 import isEqual from 'lodash/isEqual';
@@ -123,7 +123,19 @@ const getModifiedFlag = (dataItem: DataItem): boolean => {
 };
 
 export const useEditItems = () => {
-  const [data, setData] = useState<DataItem[]>([]);
+  const [data, setDataState] = useState<DataItem[]>([]);
+  const generationRef = useRef(0);
+  const generation = generationRef.current;
+  const setData = useCallback<Setter<DataItem[]>>(
+    (update) => {
+      if (generation !== generationRef.current) return;
+      setDataState((prev) => {
+        if (generation !== generationRef.current) return prev;
+        return typeof update === 'function' ? update(prev) : update;
+      });
+    },
+    [generation],
+  );
 
   const items = useMemo<EditDataItem[]>(
     () =>
@@ -150,21 +162,26 @@ export const useEditItems = () => {
         };
         // TODO maybe keep reference to original EditDataItem if DataItem didnt change? #performance
       }),
-    [data],
+    [data, setData],
   );
 
   const addItem = useCallback((newItem: DataItem) => {
-    setData((state) => [...state, newItem]);
+    setDataState((state) => [...state, newItem]);
   }, []);
 
   const removeItem = useCallback((shortId: string) => {
     if (getApiId(shortId).id > 0) {
       throw new Error('Existing item should not be removed from items.');
     }
-    setData((state) => state.filter((item) => item.shortId !== shortId));
+    setDataState((state) => state.filter((item) => item.shortId !== shortId));
+  }, []);
+
+  const reset = useCallback(() => {
+    generationRef.current += 1;
+    setDataState([]);
   }, []);
 
   publishDbgObject('EditContext state', data);
 
-  return { items, addItem, removeItem };
+  return { items, addItem, removeItem, reset };
 };

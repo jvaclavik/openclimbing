@@ -111,4 +111,24 @@ describe('useEditItems', () => {
     expect(result.current.items[0].nodeLonLat).toEqual([14, 50]);
     expect(result.current.items[0].modified).toBe(false);
   });
+
+  it('should discard all items on reset', () => {
+    const { result } = renderHook(() => useEditItems());
+
+    act(() => {
+      result.current.addItem(initialItem);
+    });
+
+    act(() => {
+      result.current.items[0].setTag('name', 'Test Cafe');
+    });
+
+    expect(result.current.items).toHaveLength(1);
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.items).toHaveLength(0);
+  });
 });
