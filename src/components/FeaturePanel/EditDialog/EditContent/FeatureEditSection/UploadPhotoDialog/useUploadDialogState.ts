@@ -83,7 +83,7 @@ type FormState = {
   setBatchTotal: (v: number) => void;
   /** Number of files successfully uploaded in the active batch. */
   successfulUploads: number;
-  setSuccessfulUploads: (v: number) => void;
+  setSuccessfulUploads: (v: number | ((prev: number) => number)) => void;
   successfulUploadsRef: { current: number };
   /**
    * Monotonic id of the active batch. Bumped when a batch starts or the form
