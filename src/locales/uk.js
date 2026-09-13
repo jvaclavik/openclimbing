@@ -463,6 +463,7 @@ export default {
   'uploaddialog.close': 'Закрити',
   'uploaddialog.cancel': 'Скасувати',
   'uploaddialog.upload': 'Завантажити',
+  'uploaddialog.upload_all': 'Завантажити все',
   'uploaddialog.done': 'Готово',
   'uploaddialog.login': 'Увійти',
   'uploaddialog.logout': 'Вийти',
@@ -499,6 +500,8 @@ export default {
   'uploaddialog.skipped_multiple_success':
     '__count__ вибраних фото було пропущено.',
   'uploaddialog.photo_progress': 'Фото __current__ з __total__',
+  'uploaddialog.previous_photo': 'Попереднє',
+  'uploaddialog.next_photo': 'Наступне',
   'uploaddialog.enter_filename_manually': 'або введіть назву файлу вручну',
   'uploaddialog.row_upload_cta': 'Завантажити фото',
   'uploaddialog.row_manual_label': 'або вставте наявну назву файлу',

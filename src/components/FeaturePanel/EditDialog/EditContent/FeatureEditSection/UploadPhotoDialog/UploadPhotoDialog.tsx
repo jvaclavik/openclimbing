@@ -118,9 +118,10 @@ const UploadDialogActions: React.FC<{
   stage: string;
   uploading: boolean;
   uploadDisabled: boolean;
+  uploadLabel: string;
   onClose: () => void;
   onUpload: () => void;
-}> = ({ stage, uploading, uploadDisabled, onClose, onUpload }) => {
+}> = ({ stage, uploading, uploadDisabled, uploadLabel, onClose, onUpload }) => {
   if (stage === 'success') {
     return (
       <Button onClick={onClose} variant="contained">
@@ -134,7 +135,7 @@ const UploadDialogActions: React.FC<{
         {t('uploaddialog.cancel')}
       </Button>
       <Button onClick={onUpload} variant="contained" disabled={uploadDisabled}>
-        {t('uploaddialog.upload')}
+        {uploadLabel}
       </Button>
     </>
   );
@@ -176,12 +177,17 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     batchTotal,
     successfulUploads,
     batchPosition,
+    canGoPrevious,
+    canGoNext,
+    handlePreviousPhoto,
+    handleNextPhoto,
     handleFilesChosen,
     handleUpload,
   } = state;
 
   const uploading = stage === 'uploading';
-  const showBatchProgress = batchTotal > 1 && stage !== 'success';
+  const showBatchProgress =
+    batchTotal > 1 && (stage === 'review' || stage === 'uploading');
 
   return (
     <Dialog
@@ -207,18 +213,45 @@ export const UploadPhotoDialog: React.FC<Props> = ({
         <Stack spacing={2}>
           <UploadDialogAuthBar />
           {showBatchProgress && (
-            <Typography
-              variant="body2"
+            <Stack
+              direction="row"
+              spacing={1}
               sx={{
-                color: 'text.secondary',
-                fontWeight: 'medium',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
-              {t('uploaddialog.photo_progress', {
-                current: batchPosition,
-                total: batchTotal,
-              })}
-            </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  fontWeight: 'medium',
+                }}
+              >
+                {t('uploaddialog.photo_progress', {
+                  current: batchPosition,
+                  total: batchTotal,
+                })}
+              </Typography>
+              {stage === 'review' && (
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    size="small"
+                    onClick={handlePreviousPhoto}
+                    disabled={!canGoPrevious}
+                  >
+                    {t('uploaddialog.previous_photo')}
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleNextPhoto}
+                    disabled={!canGoNext}
+                  >
+                    {t('uploaddialog.next_photo')}
+                  </Button>
+                </Stack>
+              )}
+            </Stack>
           )}
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           {(stage !== 'choose-file' || successfulUploads > 0) &&
@@ -285,6 +318,9 @@ export const UploadPhotoDialog: React.FC<Props> = ({
           uploadDisabled={
             stage !== 'review' || !filenameStem || !prepared || authLoading
           }
+          uploadLabel={t(
+            batchTotal > 1 ? 'uploaddialog.upload_all' : 'uploaddialog.upload',
+          )}
           onClose={onClose}
           onUpload={handleUpload}
         />

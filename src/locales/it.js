@@ -462,6 +462,7 @@ export default {
   'uploaddialog.close': 'Chiudi',
   'uploaddialog.cancel': 'Annulla',
   'uploaddialog.upload': 'Carica',
+  'uploaddialog.upload_all': 'Carica tutto',
   'uploaddialog.done': 'Fatto',
   'uploaddialog.login': 'Accedi',
   'uploaddialog.logout': 'Esci',
@@ -497,6 +498,8 @@ export default {
   'uploaddialog.skipped_multiple_success':
     '__count__ foto selezionate sono state saltate.',
   'uploaddialog.photo_progress': 'Foto __current__ di __total__',
+  'uploaddialog.previous_photo': 'Precedente',
+  'uploaddialog.next_photo': 'Successiva',
   'uploaddialog.enter_filename_manually': 'oppure inserisci il nome file manualmente',
   'uploaddialog.row_upload_cta': 'Carica foto',
   'uploaddialog.row_manual_label': 'oppure incolla un nome file esistente',

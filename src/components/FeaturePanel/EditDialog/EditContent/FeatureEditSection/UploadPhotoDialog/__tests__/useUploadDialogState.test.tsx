@@ -92,7 +92,7 @@ describe('useUploadDialogState multi-file batches', () => {
     expect(onUploaded).toHaveBeenCalledWith('File:mock 1.jpg');
   });
 
-  it('reviews and uploads each file of a batch sequentially', async () => {
+  it('prepares a batch for review, allows navigation, and uploads all files', async () => {
     const { result, onUploaded } = renderState();
     const files = [imageFile('a.jpg'), imageFile('b.jpg'), imageFile('c.jpg')];
 
@@ -100,33 +100,52 @@ describe('useUploadDialogState multi-file batches', () => {
       await result.current.handleFilesChosen(files);
     });
 
-    // First photo ready for review.
     expect(result.current.stage).toBe('review');
     expect(result.current.batchTotal).toBe(3);
     expect(result.current.batchPosition).toBe(1);
+    expect(result.current.canGoPrevious).toBe(false);
+    expect(result.current.canGoNext).toBe(true);
+    expect(preparePhotoForUploadMock).toHaveBeenCalledTimes(3);
 
-    // Upload #1 -> advance to the second photo's review.
     await act(async () => {
-      await result.current.handleUpload();
+      result.current.setDescription('first description');
+      result.current.handleNextPhoto();
     });
-    expect(result.current.stage).toBe('review');
     expect(result.current.batchPosition).toBe(2);
+    expect(result.current.description).toBe('');
 
-    // Upload #2 -> advance to the third photo's review.
     await act(async () => {
-      await result.current.handleUpload();
+      result.current.setDescription('second description');
+      result.current.handleNextPhoto();
     });
-    expect(result.current.stage).toBe('review');
     expect(result.current.batchPosition).toBe(3);
+    expect(result.current.canGoNext).toBe(false);
 
-    // Upload #3 -> finished.
+    await act(async () => {
+      result.current.handlePreviousPhoto();
+    });
+    expect(result.current.batchPosition).toBe(2);
+    expect(result.current.description).toBe('second description');
+
+    await act(async () => {
+      result.current.handlePreviousPhoto();
+    });
+    expect(result.current.batchPosition).toBe(1);
+    expect(result.current.description).toBe('first description');
+
     await act(async () => {
       await result.current.handleUpload();
     });
     expect(result.current.stage).toBe('success');
+    expect(result.current.successfulUploads).toBe(3);
 
     expect(uploadPhotoToCommonsMock).toHaveBeenCalledTimes(3);
     expect(suggestCommonsCategoriesMock).toHaveBeenCalledTimes(1);
+    expect(uploadPhotoToCommonsMock.mock.calls.map(([args]) => args.description)).toEqual([
+      'first description',
+      'second description',
+      '',
+    ]);
     expect(onUploaded).toHaveBeenCalledTimes(3);
     expect(onUploaded.mock.calls.map((c) => c[0])).toEqual([
       'File:mock 1.jpg',
@@ -142,6 +161,7 @@ describe('useUploadDialogState multi-file batches', () => {
     await waitFor(() => expect(result.current.stage).toBe('review'));
     expect(result.current.batchTotal).toBe(2);
     expect(result.current.batchPosition).toBe(1);
+    expect(preparePhotoForUploadMock).toHaveBeenCalledTimes(2);
   });
 
   it('keeps the current file for retry when an upload fails', async () => {
@@ -159,19 +179,17 @@ describe('useUploadDialogState multi-file batches', () => {
       await result.current.handleUpload();
     });
 
-    // Still on the first photo, with an error, nothing uploaded yet.
     expect(result.current.stage).toBe('review');
     expect(result.current.batchPosition).toBe(1);
     expect(result.current.errorMessage).toBe('network down');
     expect(onUploaded).not.toHaveBeenCalled();
 
-    // Retrying succeeds and advances to the second photo.
     await act(async () => {
       await result.current.handleUpload();
     });
-    expect(result.current.stage).toBe('review');
-    expect(result.current.batchPosition).toBe(2);
-    expect(onUploaded).toHaveBeenCalledTimes(1);
+    expect(result.current.stage).toBe('success');
+    expect(result.current.successfulUploads).toBe(2);
+    expect(onUploaded).toHaveBeenCalledTimes(2);
   });
 
   it('skips a file that fails to prepare and continues the batch', async () => {
@@ -185,10 +203,9 @@ describe('useUploadDialogState multi-file batches', () => {
       ]);
     });
 
-    // First file failed to prepare, so we move on to the second one.
     expect(result.current.stage).toBe('review');
-    expect(result.current.batchTotal).toBe(2);
-    expect(result.current.batchPosition).toBe(2);
+    expect(result.current.batchTotal).toBe(1);
+    expect(result.current.batchPosition).toBe(1);
     expect(preparePhotoForUploadMock).toHaveBeenCalledTimes(2);
   });
 
@@ -208,7 +225,7 @@ describe('useUploadDialogState multi-file batches', () => {
     });
 
     expect(result.current.stage).toBe('success');
-    expect(result.current.batchTotal).toBe(2);
+    expect(result.current.batchTotal).toBe(1);
     expect(result.current.successfulUploads).toBe(1);
     expect(result.current.skippedFilesCount).toBe(1);
     expect(result.current.skippedFilesMessage).toBe('corrupt image');
@@ -233,9 +250,51 @@ describe('useUploadDialogState multi-file batches', () => {
     });
 
     expect(result.current.stage).toBe('success');
+    expect(result.current.batchTotal).toBe(1);
     expect(result.current.successfulUploads).toBe(1);
     expect(result.current.skippedFilesCount).toBe(1);
     expect(result.current.skippedFilesMessage).toBe('broken second file');
+  });
+
+  it('preserves per-photo edits while moving between photos before upload', async () => {
+    const { result } = renderState();
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('first.jpg'),
+        imageFile('second.jpg'),
+      ]);
+    });
+
+    await act(async () => {
+      result.current.setFilenameStem('first-custom');
+      result.current.setDescription('first description');
+      result.current.setCategories(['Category:First']);
+      result.current.handleNextPhoto();
+    });
+
+    expect(result.current.batchPosition).toBe(2);
+    expect(result.current.filenameStem).toBe('second');
+
+    await act(async () => {
+      result.current.setFilenameStem('second-custom');
+      result.current.setDescription('second description');
+      result.current.setCategories(['Category:Second']);
+      result.current.handlePreviousPhoto();
+    });
+
+    expect(result.current.batchPosition).toBe(1);
+    expect(result.current.filenameStem).toBe('first-custom');
+    expect(result.current.description).toBe('first description');
+    expect(result.current.categories).toEqual(['Category:First']);
+
+    await act(async () => {
+      result.current.handleNextPhoto();
+    });
+
+    expect(result.current.filenameStem).toBe('second-custom');
+    expect(result.current.description).toBe('second description');
+    expect(result.current.categories).toEqual(['Category:Second']);
   });
 
   it('does not resurrect a file whose preparation finishes after the dialog closed', async () => {
@@ -275,6 +334,7 @@ describe('useUploadDialogState multi-file batches', () => {
     // The stale preparation must not push the form back into the review stage.
     expect(result.current.stage).toBe('choose-file');
     expect(result.current.prepared).toBeNull();
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
 
   it('invalidates generation when unmounted during preparation', async () => {
