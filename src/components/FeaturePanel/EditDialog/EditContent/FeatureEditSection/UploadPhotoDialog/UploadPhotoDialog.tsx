@@ -141,6 +141,82 @@ const UploadDialogActions: React.FC<{
   );
 };
 
+const BatchReviewNavigation: React.FC<{
+  batchPosition: number;
+  batchTotal: number;
+  canGoPrevious: boolean;
+  canGoNext: boolean;
+  handlePreviousPhoto: () => void;
+  handleNextPhoto: () => void;
+}> = ({
+  batchPosition,
+  batchTotal,
+  canGoPrevious,
+  canGoNext,
+  handlePreviousPhoto,
+  handleNextPhoto,
+}) => (
+  <Stack
+    direction="row"
+    spacing={1}
+    sx={{
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}
+  >
+    <Typography
+      variant="body2"
+      sx={{
+        color: 'text.secondary',
+        fontWeight: 'medium',
+      }}
+    >
+      {t('uploaddialog.photo_progress', {
+        current: batchPosition,
+        total: batchTotal,
+      })}
+    </Typography>
+    <Stack direction="row" spacing={1}>
+      <Button
+        size="small"
+        onClick={handlePreviousPhoto}
+        disabled={!canGoPrevious}
+        aria-label={
+          canGoPrevious
+            ? `${t('uploaddialog.previous_photo')} (${t(
+                'uploaddialog.photo_progress',
+                {
+                  current: batchPosition - 1,
+                  total: batchTotal,
+                },
+              )})`
+            : t('uploaddialog.previous_photo')
+        }
+      >
+        {t('uploaddialog.previous_photo')}
+      </Button>
+      <Button
+        size="small"
+        onClick={handleNextPhoto}
+        disabled={!canGoNext}
+        aria-label={
+          canGoNext
+            ? `${t('uploaddialog.next_photo')} (${t(
+                'uploaddialog.photo_progress',
+                {
+                  current: batchPosition + 1,
+                  total: batchTotal,
+                },
+              )})`
+            : t('uploaddialog.next_photo')
+        }
+      >
+        {t('uploaddialog.next_photo')}
+      </Button>
+    </Stack>
+  </Stack>
+);
+
 export const UploadPhotoDialog: React.FC<Props> = ({
   open,
   onClose,
@@ -213,14 +289,16 @@ export const UploadPhotoDialog: React.FC<Props> = ({
         <Stack spacing={2}>
           <UploadDialogAuthBar />
           {showBatchProgress && (
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
+            stage === 'review' ? (
+              <BatchReviewNavigation
+                batchPosition={batchPosition}
+                batchTotal={batchTotal}
+                canGoPrevious={canGoPrevious}
+                canGoNext={canGoNext}
+                handlePreviousPhoto={handlePreviousPhoto}
+                handleNextPhoto={handleNextPhoto}
+              />
+            ) : (
               <Typography
                 variant="body2"
                 sx={{
@@ -233,39 +311,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
                   total: batchTotal,
                 })}
               </Typography>
-              {stage === 'review' && (
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    size="small"
-                    onClick={handlePreviousPhoto}
-                    disabled={!canGoPrevious}
-                    aria-label={`${t('uploaddialog.previous_photo')} (${t(
-                      'uploaddialog.photo_progress',
-                      {
-                        current: batchPosition - 1,
-                        total: batchTotal,
-                      },
-                    )})`}
-                  >
-                    {t('uploaddialog.previous_photo')}
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={handleNextPhoto}
-                    disabled={!canGoNext}
-                    aria-label={`${t('uploaddialog.next_photo')} (${t(
-                      'uploaddialog.photo_progress',
-                      {
-                        current: batchPosition + 1,
-                        total: batchTotal,
-                      },
-                    )})`}
-                  >
-                    {t('uploaddialog.next_photo')}
-                  </Button>
-                </Stack>
-              )}
-            </Stack>
+            )
           )}
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           {(stage !== 'choose-file' || successfulUploads > 0) &&
