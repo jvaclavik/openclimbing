@@ -251,6 +251,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     skippedFilesCount,
     skippedFilesMessage,
     batchTotal,
+    isBatchValid,
     successfulUploads,
     batchPosition,
     canGoPrevious,
@@ -376,7 +377,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
           stage={stage}
           uploading={uploading}
           uploadDisabled={
-            stage !== 'review' || !filenameStem || !prepared || authLoading
+            stage !== 'review' || !isBatchValid || !prepared || authLoading
           }
           uploadLabel={t(
             batchTotal > 1 ? 'uploaddialog.upload_all' : 'uploaddialog.upload',

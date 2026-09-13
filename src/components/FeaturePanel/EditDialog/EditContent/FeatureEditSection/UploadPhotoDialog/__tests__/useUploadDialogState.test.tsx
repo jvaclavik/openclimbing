@@ -192,6 +192,68 @@ describe('useUploadDialogState multi-file batches', () => {
     expect(onUploaded).toHaveBeenCalledTimes(2);
   });
 
+  it('resumes a retry after the successful photos instead of uploading them again', async () => {
+    const { result, onUploaded } = renderState();
+    uploadPhotoToCommonsMock
+      .mockImplementationOnce(async () => ({ fileTagValue: 'File:first.jpg' }))
+      .mockRejectedValueOnce(new Error('network down'));
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('first.jpg'),
+        imageFile('second.jpg'),
+      ]);
+    });
+
+    await act(async () => {
+      await result.current.handleUpload();
+    });
+
+    expect(result.current.stage).toBe('review');
+    expect(result.current.errorMessage).toBe('network down');
+    expect(result.current.successfulUploads).toBe(1);
+    expect(onUploaded).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await result.current.handleUpload();
+    });
+
+    expect(result.current.stage).toBe('success');
+    expect(result.current.successfulUploads).toBe(2);
+    expect(uploadPhotoToCommonsMock).toHaveBeenCalledTimes(3);
+    expect(onUploaded).toHaveBeenCalledTimes(2);
+    expect(onUploaded.mock.calls.map((c) => c[0])).toEqual([
+      'File:first.jpg',
+      'File:mock 1.jpg',
+    ]);
+  });
+
+  it('reports the batch as invalid when any photo has an empty filename', async () => {
+    const { result } = renderState();
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('first.jpg'),
+        imageFile('second.jpg'),
+      ]);
+    });
+
+    expect(result.current.isBatchValid).toBe(true);
+
+    await act(async () => {
+      result.current.handleNextPhoto();
+    });
+    await act(async () => {
+      result.current.setFilenameStem('  ');
+    });
+    await act(async () => {
+      result.current.handlePreviousPhoto();
+    });
+
+    expect(result.current.filenameStem).toBe('first');
+    expect(result.current.isBatchValid).toBe(false);
+  });
+
   it('skips a file that fails to prepare and continues the batch', async () => {
     const { result } = renderState();
     preparePhotoForUploadMock.mockRejectedValueOnce(new Error('corrupt image'));

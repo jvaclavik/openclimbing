@@ -71,6 +71,7 @@ type FormState = {
   setSkippedFilesMessage: (v: string | null) => void;
   successfulUploads: number;
   setSuccessfulUploads: (v: number) => void;
+  successfulUploadsRef: { current: number };
   /**
    * Monotonic id of the active batch. Bumped when a batch starts or the form
    * resets, so async work (prepare/upload) started for an old batch can detect
@@ -96,7 +97,12 @@ const useFormState = (): FormState => {
   const [skippedFilesMessage, setSkippedFilesMessage] = useState<string | null>(
     null,
   );
-  const [successfulUploads, setSuccessfulUploads] = useState(0);
+  const [successfulUploadsState, setSuccessfulUploadsState] = useState(0);
+  const successfulUploadsRef = useRef(0);
+  const setSuccessfulUploads = (value: number) => {
+    successfulUploadsRef.current = value;
+    setSuccessfulUploadsState(value);
+  };
   const generationRef = useRef(0);
   return {
     stage,
@@ -116,8 +122,9 @@ const useFormState = (): FormState => {
     setSkippedFilesCount,
     skippedFilesMessage,
     setSkippedFilesMessage,
-    successfulUploads,
+    successfulUploads: successfulUploadsState,
     setSuccessfulUploads,
+    successfulUploadsRef,
     generationRef,
   };
 };
@@ -213,14 +220,18 @@ const performUpload = async (
   const items = form.batchItemsRef.current;
   if (items.length === 0) return;
 
+  // Resume where a previous attempt stopped, so retrying after a failure does
+  // not re-upload the photos that already made it to Commons.
+  const startIndex = Math.min(form.successfulUploadsRef.current, items.length);
+
   form.setStage('uploading');
-  form.setCurrentIndex(0);
+  form.setCurrentIndex(startIndex);
   form.setProgress(null);
   form.setErrorMessage(null);
 
-  let successfulUploads = 0;
+  let successfulUploads = startIndex;
 
-  for (let index = 0; index < items.length; index += 1) {
+  for (let index = startIndex; index < items.length; index += 1) {
     if (form.generationRef.current !== generation) return;
     form.setCurrentIndex(index);
     form.setProgress(null);
@@ -366,6 +377,9 @@ export const useUploadDialogState = ({
     skippedFilesCount: form.skippedFilesCount,
     skippedFilesMessage: form.skippedFilesMessage,
     batchTotal: form.batchItems.length,
+    isBatchValid:
+      form.batchItems.length > 0 &&
+      form.batchItems.every((item) => item.filenameStem.trim().length > 0),
     successfulUploads: form.successfulUploads,
     batchPosition: currentPhoto ? form.currentIndex + 1 : 0,
     canGoPrevious: form.currentIndex > 0,
