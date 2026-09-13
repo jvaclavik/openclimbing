@@ -7,12 +7,10 @@ import { useEditDialogUploadContext } from './EditDialogUploadContext';
 const containsFiles = (event: DragEvent) =>
   Array.from(event.dataTransfer?.types ?? []).includes('Files');
 
-const pickImage = (event: DragEvent): File | null => {
+const pickImages = (event: DragEvent): File[] => {
   const items = Array.from(event.dataTransfer?.files ?? []);
-  return (
-    items.find(
-      (f) => f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name),
-    ) ?? null
+  return items.filter(
+    (f) => f.type.startsWith('image/') || /\.(heic|heif)$/i.test(f.name),
   );
 };
 
@@ -27,7 +25,7 @@ const pickImage = (event: DragEvent): File | null => {
  * one, which is the top-most/visible dialog.
  */
 type Subscriber = {
-  openUpload: (file: File) => void;
+  openUpload: (files: File[]) => void;
   setDraggingOver: (value: boolean) => void;
 };
 
@@ -61,8 +59,8 @@ const onDrop = (e: DragEvent) => {
   dragDepth = 0;
   const active = activeSubscriber();
   active?.setDraggingOver(false);
-  const file = pickImage(e);
-  if (file && active) active.openUpload(file);
+  const files = pickImages(e);
+  if (files.length && active) active.openUpload(files);
 };
 
 const installListeners = () => {
@@ -110,7 +108,7 @@ export const EditDialogDropZone: React.FC = ({ children }) => {
 
   useEffect(() => {
     const unregister = registerDropZone({
-      openUpload: (file) => openUploadRef.current({ initialFile: file }),
+      openUpload: (files) => openUploadRef.current({ initialFiles: files }),
       setDraggingOver,
     });
     return () => {

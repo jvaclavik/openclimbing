@@ -25,7 +25,7 @@ type Args = {
   open: boolean;
   feature: Feature | null;
   onUploaded: (fileTagValue: string) => void;
-  initialFile?: File | null;
+  initialFiles?: File[] | null;
 };
 
 const useResetOnClose = (open: boolean, reset: () => void) => {
@@ -71,6 +71,12 @@ type FormState = {
   setProgress: (v: UploadProgressEvent | null) => void;
   errorMessage: string | null;
   setErrorMessage: (v: string | null) => void;
+  /** Files still waiting to be prepared/uploaded (excludes the current one). */
+  queue: File[];
+  setQueue: (v: File[]) => void;
+  /** Total number of files in the current batch (1 for a single upload). */
+  batchTotal: number;
+  setBatchTotal: (v: number) => void;
 };
 
 const useFormState = (): FormState => {
@@ -83,6 +89,8 @@ const useFormState = (): FormState => {
   const [license, setLicense] = useState<LicenseId>(DEFAULT_LICENSE);
   const [progress, setProgress] = useState<UploadProgressEvent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [queue, setQueue] = useState<File[]>([]);
+  const [batchTotal, setBatchTotal] = useState(0);
   return {
     stage,
     setStage,
@@ -102,6 +110,10 @@ const useFormState = (): FormState => {
     setProgress,
     errorMessage,
     setErrorMessage,
+    queue,
+    setQueue,
+    batchTotal,
+    setBatchTotal,
   };
 };
 
@@ -117,7 +129,12 @@ const prepareAndPopulate = async (
     const url = URL.createObjectURL(preparedFile.file);
     const suggestedCategories = await suggestCommonsCategories(feature);
     form.setPrepared(preparedFile);
-    form.setPreviewUrl(url);
+    // Revoke the previous preview (e.g. the prior file in a multi-file batch)
+    // so its object URL doesn't leak when we swap in the new one.
+    form.setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return url;
+    });
     form.setFilenameStem(preparedFile.filenameParts.stem);
     form.setCategories(suggestedCategories);
     form.setDescription(getDefaultDescription(feature));
@@ -128,6 +145,19 @@ const prepareAndPopulate = async (
     );
     form.setStage('choose-file');
   }
+};
+
+/**
+ * Starts a batch of one or more files: remembers the batch size, queues the
+ * rest, and begins preparing the first one. Non-image files should be filtered
+ * out by the caller.
+ */
+const startBatch = (files: File[], feature: Feature, form: FormState) => {
+  if (files.length === 0) return undefined;
+  const [first, ...rest] = files;
+  form.setBatchTotal(files.length);
+  form.setQueue(rest);
+  return prepareAndPopulate(first, feature, form);
 };
 
 const resetForm = (form: FormState) => {
@@ -143,6 +173,8 @@ const resetForm = (form: FormState) => {
   form.setLicense(DEFAULT_LICENSE);
   form.setProgress(null);
   form.setErrorMessage(null);
+  form.setQueue([]);
+  form.setBatchTotal(0);
 };
 
 const performUpload = async (
@@ -165,8 +197,16 @@ const performUpload = async (
       license: form.license,
       onProgress: form.setProgress,
     });
-    form.setStage('success');
     onUploaded(result.fileTagValue);
+    // Move on to the next file in the batch (each gets its own review step),
+    // or finish when the queue is empty.
+    const [next, ...rest] = form.queue;
+    if (next) {
+      form.setQueue(rest);
+      await prepareAndPopulate(next, feature, form);
+    } else {
+      form.setStage('success');
+    }
   } catch (e) {
     form.setErrorMessage(
       e instanceof Error ? e.message : 'Upload to Wikimedia Commons failed',
@@ -179,30 +219,30 @@ export const useUploadDialogState = ({
   open,
   feature,
   onUploaded,
-  initialFile,
+  initialFiles,
 }: Args) => {
   const { user, handleLogin } = useWikimediaCommonsAuthContext();
-  const lastConsumedInitialFile = useRef<File | null>(null);
+  const lastConsumedInitialFiles = useRef<File[] | null>(null);
   const form = useFormState();
 
   useResetOnClose(open, () => {
     resetForm(form);
-    lastConsumedInitialFile.current = null;
+    lastConsumedInitialFiles.current = null;
   });
   useRevokeOnUnmount(form.previewUrl);
 
-  const handleFileChosen = (rawFile: File) => {
-    if (!feature) return;
-    return prepareAndPopulate(rawFile, feature, form);
+  const handleFilesChosen = (files: File[]) => {
+    if (!feature) return undefined;
+    return startBatch(files, feature, form);
   };
 
   useEffect(() => {
-    if (!open || !initialFile || !feature) return;
-    if (lastConsumedInitialFile.current === initialFile) return;
-    lastConsumedInitialFile.current = initialFile;
-    prepareAndPopulate(initialFile, feature, form);
+    if (!open || !initialFiles || initialFiles.length === 0 || !feature) return;
+    if (lastConsumedInitialFiles.current === initialFiles) return;
+    lastConsumedInitialFiles.current = initialFiles;
+    startBatch(initialFiles, feature, form);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialFile, feature]);
+  }, [open, initialFiles, feature]);
 
   const handleUpload = async () => {
     if (!form.prepared || !feature) return;
@@ -232,7 +272,10 @@ export const useUploadDialogState = ({
     setLicense: form.setLicense,
     progress: form.progress,
     errorMessage: form.errorMessage,
-    handleFileChosen,
+    batchTotal: form.batchTotal,
+    // 1-based index of the file currently being prepared/reviewed/uploaded.
+    batchPosition: form.batchTotal - form.queue.length,
+    handleFilesChosen,
     handleUpload,
   };
 };

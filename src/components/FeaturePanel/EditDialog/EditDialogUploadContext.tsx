@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 import { useDebugMode } from '../../utils/debug';
 
 type UploadRequest = {
-  initialFile: File | null;
+  initialFiles: File[];
   /** Specific slot key to fill (e.g. wikimedia_commons:2). When omitted, the next free slot is used. */
   targetSlotKey: string | null;
 };
@@ -31,7 +31,7 @@ export const EditDialogUploadProvider: React.FC = ({ children }) => {
 
   const openUpload = useCallback((req?: Partial<UploadRequest>) => {
     setUploadRequest({
-      initialFile: req?.initialFile ?? null,
+      initialFiles: req?.initialFiles ?? [],
       targetSlotKey: req?.targetSlotKey ?? null,
     });
   }, []);

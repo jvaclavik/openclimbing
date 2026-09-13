@@ -26,12 +26,12 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onUploaded: (fileTagValue: string) => void;
-  initialFile?: File | null;
+  initialFiles?: File[] | null;
 };
 
 const ChooseFileStage: React.FC<{
-  onFileChosen: (file: File) => void;
-}> = ({ onFileChosen }) => (
+  onFilesChosen: (files: File[]) => void;
+}> = ({ onFilesChosen }) => (
   <Stack
     spacing={1}
     sx={{
@@ -57,11 +57,12 @@ const ChooseFileStage: React.FC<{
       <input
         type="file"
         hidden
+        multiple
         accept="image/*,.heic,.heif"
         onChange={(e) => {
-          const f = e.target.files?.[0];
+          const files = Array.from(e.target.files ?? []);
           e.target.value = '';
-          if (f) onFileChosen(f);
+          if (files.length) onFilesChosen(files);
         }}
       />
     </Button>
@@ -143,7 +144,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
   open,
   onClose,
   onUploaded,
-  initialFile,
+  initialFiles,
 }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -154,7 +155,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     open,
     feature,
     onUploaded,
-    initialFile,
+    initialFiles,
   });
   const {
     stage,
@@ -170,11 +171,14 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     setLicense,
     progress,
     errorMessage,
-    handleFileChosen,
+    batchTotal,
+    batchPosition,
+    handleFilesChosen,
     handleUpload,
   } = state;
 
   const uploading = stage === 'uploading';
+  const showBatchProgress = batchTotal > 1 && stage !== 'success';
 
   return (
     <Dialog
@@ -199,9 +203,23 @@ export const UploadPhotoDialog: React.FC<Props> = ({
       <DialogContent dividers>
         <Stack spacing={2}>
           <UploadDialogAuthBar />
+          {showBatchProgress && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                fontWeight: 'medium',
+              }}
+            >
+              {t('uploaddialog.photo_progress', {
+                current: batchPosition,
+                total: batchTotal,
+              })}
+            </Typography>
+          )}
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           {stage === 'choose-file' && (
-            <ChooseFileStage onFileChosen={handleFileChosen} />
+            <ChooseFileStage onFilesChosen={handleFilesChosen} />
           )}
           {stage === 'preparing' && <PreparingStage />}
           {(stage === 'review' || stage === 'uploading') && previewUrl && (
@@ -221,7 +239,11 @@ export const UploadPhotoDialog: React.FC<Props> = ({
             />
           )}
           {stage === 'success' && (
-            <Alert severity="success">{t('uploaddialog.success')}</Alert>
+            <Alert severity="success">
+              {batchTotal > 1
+                ? t('uploaddialog.success_multiple', { count: batchTotal })
+                : t('uploaddialog.success')}
+            </Alert>
           )}
         </Stack>
       </DialogContent>

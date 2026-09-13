@@ -25,7 +25,10 @@ export const EditDialogUploadHost: React.FC<{
 
   const handleUploaded = (fileTagValue: string) => {
     const targetKey = uploadRequest?.targetSlotKey;
-    if (targetKey) {
+    // Use the explicitly requested slot only while it's still empty. In a
+    // multi-file batch the first photo fills it; the rest must land in new
+    // slots instead of overwriting it.
+    if (targetKey && !tags[targetKey]?.trim()) {
       setTag(targetKey, fileTagValue);
       return;
     }
@@ -44,7 +47,7 @@ export const EditDialogUploadHost: React.FC<{
   return (
     <UploadPhotoDialog
       open={uploadRequest !== null}
-      initialFile={uploadRequest?.initialFile ?? null}
+      initialFiles={uploadRequest?.initialFiles ?? null}
       onClose={closeUpload}
       onUploaded={handleUploaded}
     />
