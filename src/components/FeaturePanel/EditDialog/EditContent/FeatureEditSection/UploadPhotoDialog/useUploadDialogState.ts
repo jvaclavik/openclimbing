@@ -71,6 +71,10 @@ type FormState = {
   setProgress: (v: UploadProgressEvent | null) => void;
   errorMessage: string | null;
   setErrorMessage: (v: string | null) => void;
+  skippedFilesCount: number;
+  setSkippedFilesCount: (v: number | ((prev: number) => number)) => void;
+  skippedFilesMessage: string | null;
+  setSkippedFilesMessage: (v: string | null) => void;
   /** Files still waiting to be prepared/uploaded (excludes the current one). */
   queue: File[];
   setQueue: (v: File[]) => void;
@@ -79,7 +83,8 @@ type FormState = {
   setBatchTotal: (v: number) => void;
   /** Number of files successfully uploaded in the active batch. */
   successfulUploads: number;
-  setSuccessfulUploads: (v: number | ((prev: number) => number)) => void;
+  setSuccessfulUploads: (v: number) => void;
+  successfulUploadsRef: { current: number };
   /**
    * Monotonic id of the active batch. Bumped when a batch starts or the form
    * resets, so async work (prepare/upload) started for an old batch can detect
@@ -99,9 +104,14 @@ const useFormState = (): FormState => {
   const [license, setLicense] = useState<LicenseId>(DEFAULT_LICENSE);
   const [progress, setProgress] = useState<UploadProgressEvent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [skippedFilesCount, setSkippedFilesCount] = useState(0);
+  const [skippedFilesMessage, setSkippedFilesMessage] = useState<string | null>(
+    null,
+  );
   const [queue, setQueue] = useState<File[]>([]);
   const [batchTotal, setBatchTotal] = useState(0);
   const [successfulUploads, setSuccessfulUploads] = useState(0);
+  const successfulUploadsRef = useRef(0);
   const generationRef = useRef(0);
   return {
     stage,
@@ -122,12 +132,17 @@ const useFormState = (): FormState => {
     setProgress,
     errorMessage,
     setErrorMessage,
+    skippedFilesCount,
+    setSkippedFilesCount,
+    skippedFilesMessage,
+    setSkippedFilesMessage,
     queue,
     setQueue,
     batchTotal,
     setBatchTotal,
     successfulUploads,
     setSuccessfulUploads,
+    successfulUploadsRef,
     generationRef,
   };
 };
@@ -162,9 +177,10 @@ const prepareAndPopulate = async (
     form.setStage('review');
   } catch (e) {
     if (form.generationRef.current !== generation) return;
-    form.setErrorMessage(
-      e instanceof Error ? e.message : 'Failed to prepare file for upload',
-    );
+    const message =
+      e instanceof Error ? e.message : 'Failed to prepare file for upload';
+    form.setSkippedFilesCount((prev) => prev + 1);
+    form.setSkippedFilesMessage(message);
     // Don't strand the rest of a multi-file batch on one bad file — move on to
     // the next queued one, or fall back to the file picker if it was the last.
     // `remainingQueue` is threaded explicitly (not read from form state) because
@@ -174,7 +190,12 @@ const prepareAndPopulate = async (
       form.setQueue(rest);
       await prepareAndPopulate(next, rest, feature, form, generation);
     } else {
-      form.setStage('choose-file');
+      if (form.successfulUploadsRef.current > 0) {
+        form.setStage('success');
+      } else {
+        form.setErrorMessage(message);
+        form.setStage('choose-file');
+      }
     }
   }
 };
@@ -190,7 +211,11 @@ const startBatch = (files: File[], feature: Feature, form: FormState) => {
   // New batch — invalidate any async work still in flight from a previous one.
   const generation = form.generationRef.current + 1;
   form.generationRef.current = generation;
+  form.setErrorMessage(null);
+  form.setSkippedFilesCount(0);
+  form.setSkippedFilesMessage(null);
   form.setBatchTotal(files.length);
+  form.successfulUploadsRef.current = 0;
   form.setSuccessfulUploads(0);
   form.setQueue(rest);
   return prepareAndPopulate(first, rest, feature, form, generation);
@@ -211,8 +236,11 @@ const resetForm = (form: FormState) => {
   form.setLicense(DEFAULT_LICENSE);
   form.setProgress(null);
   form.setErrorMessage(null);
+  form.setSkippedFilesCount(0);
+  form.setSkippedFilesMessage(null);
   form.setQueue([]);
   form.setBatchTotal(0);
+  form.successfulUploadsRef.current = 0;
   form.setSuccessfulUploads(0);
 };
 
@@ -221,8 +249,9 @@ const performUpload = async (
   feature: Feature,
   activeUser: { username: string; realname?: string },
   onUploaded: (fileTagValue: string) => void,
+  generation: number,
 ) => {
-  const generation = form.generationRef.current;
+  if (form.generationRef.current !== generation) return;
   form.setStage('uploading');
   form.setProgress(null);
   form.setErrorMessage(null);
@@ -235,13 +264,19 @@ const performUpload = async (
       description: form.description,
       categories: form.categories,
       license: form.license,
-      onProgress: form.setProgress,
+      onProgress: (progress) => {
+        if (form.generationRef.current === generation) {
+          form.setProgress(progress);
+        }
+      },
     });
     // The photo really did upload, so always record it into a slot.
     onUploaded(result.fileTagValue);
     // If a new batch took over meanwhile, let it drive the UI from here.
     if (form.generationRef.current !== generation) return;
-    form.setSuccessfulUploads((prev) => prev + 1);
+    const nextSuccessfulUploads = form.successfulUploadsRef.current + 1;
+    form.successfulUploadsRef.current = nextSuccessfulUploads;
+    form.setSuccessfulUploads(nextSuccessfulUploads);
     // Move on to the next file in the batch (each gets its own review step),
     // or finish when the queue is empty. `form.queue` is fresh here because each
     // upload is a separate user action (its own render).
@@ -298,6 +333,7 @@ export const useUploadDialogState = ({
 
   const handleUpload = async () => {
     if (!form.prepared || !feature) return;
+    const generation = form.generationRef.current;
     let activeUser = user;
     if (!activeUser) {
       try {
@@ -306,8 +342,8 @@ export const useUploadDialogState = ({
         return;
       }
     }
-    if (!activeUser) return;
-    await performUpload(form, feature, activeUser, onUploaded);
+    if (!activeUser || form.generationRef.current !== generation) return;
+    await performUpload(form, feature, activeUser, onUploaded, generation);
   };
 
   return {
@@ -324,6 +360,8 @@ export const useUploadDialogState = ({
     setLicense: form.setLicense,
     progress: form.progress,
     errorMessage: form.errorMessage,
+    skippedFilesCount: form.skippedFilesCount,
+    skippedFilesMessage: form.skippedFilesMessage,
     batchTotal: form.batchTotal,
     successfulUploads: form.successfulUploads,
     // 1-based index of the file currently being prepared/reviewed/uploaded.

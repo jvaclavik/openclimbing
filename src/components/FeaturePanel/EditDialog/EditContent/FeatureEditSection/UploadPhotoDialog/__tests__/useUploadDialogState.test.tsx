@@ -209,7 +209,32 @@ describe('useUploadDialogState multi-file batches', () => {
     expect(result.current.stage).toBe('success');
     expect(result.current.batchTotal).toBe(2);
     expect(result.current.successfulUploads).toBe(1);
+    expect(result.current.skippedFilesCount).toBe(1);
+    expect(result.current.skippedFilesMessage).toBe('corrupt image');
     expect(onUploaded).toHaveBeenCalledTimes(1);
+  });
+
+  it('finishes with success when the last queued file is skipped after earlier uploads', async () => {
+    const { result } = renderState();
+    preparePhotoForUploadMock.mockRejectedValueOnce(
+      new Error('broken second file'),
+    );
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('good.jpg'),
+        imageFile('bad.jpg'),
+      ]);
+    });
+
+    await act(async () => {
+      await result.current.handleUpload();
+    });
+
+    expect(result.current.stage).toBe('success');
+    expect(result.current.successfulUploads).toBe(1);
+    expect(result.current.skippedFilesCount).toBe(1);
+    expect(result.current.skippedFilesMessage).toBe('broken second file');
   });
 
   it('does not resurrect a file whose preparation finishes after the dialog closed', async () => {
@@ -288,5 +313,93 @@ describe('useUploadDialogState multi-file batches', () => {
     });
 
     expect(URL.createObjectURL).not.toHaveBeenCalled();
+  });
+
+  it('does not start an upload after login resolves for a stale dialog generation', async () => {
+    let resolveLogin: (value: { username: string }) => void = () => {};
+    useAuthMock.mockReturnValue({
+      user: null,
+      loading: false,
+      handleLogin: jest.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveLogin = resolve;
+          }),
+      ),
+    });
+
+    const onUploaded = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ open }) =>
+        useUploadDialogState({ open, feature, onUploaded, initialFiles: null }),
+      { initialProps: { open: true } },
+    );
+
+    await act(async () => {
+      await result.current.handleFilesChosen([imageFile('late.jpg')]);
+    });
+
+    act(() => {
+      void result.current.handleUpload();
+    });
+
+    rerender({ open: false });
+    await act(async () => {
+      resolveLogin({ username: 'Tester' });
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(uploadPhotoToCommonsMock).not.toHaveBeenCalled();
+    expect(onUploaded).not.toHaveBeenCalled();
+  });
+
+  it('ignores stale upload progress after the dialog generation changes', async () => {
+    let resolveUpload: (value: { fileTagValue: string }) => void = () => {};
+    let staleProgress:
+      | ((progress: { loaded: number; total: number }) => void)
+      | undefined;
+    uploadPhotoToCommonsMock.mockImplementationOnce(
+      ({
+        onProgress,
+      }: {
+        onProgress: (progress: { loaded: number; total: number }) => void;
+      }) =>
+        new Promise((resolve) => {
+          staleProgress = onProgress;
+          resolveUpload = resolve;
+        }),
+    );
+
+    const onUploaded = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ open }) =>
+        useUploadDialogState({ open, feature, onUploaded, initialFiles: null }),
+      { initialProps: { open: true } },
+    );
+
+    await act(async () => {
+      await result.current.handleFilesChosen([imageFile('first.jpg')]);
+    });
+
+    act(() => {
+      void result.current.handleUpload();
+    });
+
+    rerender({ open: false });
+    rerender({ open: true });
+    await act(async () => {
+      await result.current.handleFilesChosen([imageFile('second.jpg')]);
+    });
+
+    act(() => {
+      staleProgress?.({ loaded: 5, total: 10 });
+    });
+
+    expect(result.current.progress).toBeNull();
+
+    await act(async () => {
+      resolveUpload({ fileTagValue: 'File:first.jpg' });
+      await new Promise((r) => setTimeout(r, 0));
+    });
   });
 });

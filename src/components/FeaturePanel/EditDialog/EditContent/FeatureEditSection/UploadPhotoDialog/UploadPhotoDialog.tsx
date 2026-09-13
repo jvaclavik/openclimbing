@@ -171,6 +171,8 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     setLicense,
     progress,
     errorMessage,
+    skippedFilesCount,
+    skippedFilesMessage,
     batchTotal,
     successfulUploads,
     batchPosition,
@@ -219,6 +221,21 @@ export const UploadPhotoDialog: React.FC<Props> = ({
             </Typography>
           )}
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+          {(stage !== 'choose-file' || successfulUploads > 0) &&
+            skippedFilesCount > 0 &&
+            skippedFilesMessage && (
+            <Alert severity="warning">
+              {t(
+                skippedFilesCount === 1
+                  ? 'uploaddialog.skipped_single'
+                  : 'uploaddialog.skipped_multiple',
+                {
+                  count: skippedFilesCount,
+                  reason: skippedFilesMessage,
+                },
+              )}
+            </Alert>
+          )}
           {stage === 'choose-file' && (
             <ChooseFileStage onFilesChosen={handleFilesChosen} />
           )}

@@ -94,6 +94,12 @@ describe('EditDialogUploadHost', () => {
       freshOnUploaded('File:new.jpg');
       staleOnUploaded('File:old.jpg');
     });
+    rerender(
+      <EditDialogUploadHost
+        activeMajorKeys={activeMajorKeys}
+        setActiveMajorKeys={setActiveMajorKeys}
+      />,
+    );
 
     expect(currentItem.tags.wikimedia_commons).toBe('File:new.jpg');
     expect(currentItem.tags['wikimedia_commons:2']).toBe('File:old.jpg');

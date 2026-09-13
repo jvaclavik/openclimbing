@@ -580,6 +580,9 @@ export default {
   'uploaddialog.uploading': 'Nahrávám na Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Nahrávám na Wikimedia Commons… __percent__ %',
   'uploaddialog.success': 'Fotka nahrána! Uložením změn ji přidáš k tomuto místu.',
+  'uploaddialog.skipped_single': '1 vybraná fotka byla přeskočena: __reason__',
+  'uploaddialog.skipped_multiple':
+    '__count__ vybraných fotek bylo přeskočeno. Poslední chyba: __reason__',
   'uploaddialog.enter_filename_manually': 'nebo zadat název ručně',
   'uploaddialog.row_upload_cta': 'Nahrát fotku',
   'uploaddialog.row_manual_label': 'nebo vložit název existujícího souboru',

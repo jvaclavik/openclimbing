@@ -486,6 +486,10 @@ export default {
   'uploaddialog.uploading': 'Caricamento su Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Caricamento su Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Foto caricata! Salva le modifiche per allegarla a questo luogo.',
+  'uploaddialog.skipped_single':
+    '1 foto selezionata è stata saltata: __reason__',
+  'uploaddialog.skipped_multiple':
+    '__count__ foto selezionate sono state saltate. Ultimo errore: __reason__',
   'uploaddialog.enter_filename_manually': 'oppure inserisci il nome file manualmente',
   'uploaddialog.row_upload_cta': 'Carica foto',
   'uploaddialog.row_manual_label': 'oppure incolla un nome file esistente',

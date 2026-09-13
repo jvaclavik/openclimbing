@@ -633,6 +633,9 @@ export default {
   'uploaddialog.uploading_percent': 'Uploading to Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Photo uploaded! Save the changes to attach it to this place.',
   'uploaddialog.success_multiple': '__count__ photos uploaded! Save the changes to attach them to this place.',
+  'uploaddialog.skipped_single': '1 selected photo was skipped: __reason__',
+  'uploaddialog.skipped_multiple':
+    '__count__ selected photos were skipped. Last error: __reason__',
   'uploaddialog.photo_progress': 'Photo __current__ of __total__',
   'uploaddialog.enter_filename_manually': 'or enter filename manually',
   'uploaddialog.row_upload_cta': 'Upload photo',

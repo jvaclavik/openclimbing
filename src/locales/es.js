@@ -489,6 +489,10 @@ export default {
   'uploaddialog.uploading': 'Subiendo a Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Subiendo a Wikimedia Commons… __percent__%',
   'uploaddialog.success': '¡Foto subida! Guarda los cambios para adjuntarla a este lugar.',
+  'uploaddialog.skipped_single':
+    'Se omitió 1 foto seleccionada: __reason__',
+  'uploaddialog.skipped_multiple':
+    'Se omitieron __count__ fotos seleccionadas. Último error: __reason__',
   'uploaddialog.enter_filename_manually': 'o introduce el nombre del archivo manualmente',
   'uploaddialog.row_upload_cta': 'Subir foto',
   'uploaddialog.row_manual_label': 'o pega un nombre de archivo existente',

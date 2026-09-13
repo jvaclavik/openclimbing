@@ -60,6 +60,35 @@ describe('useEditItems', () => {
     });
   });
 
+  it('should apply stale tag setters against the latest tags state', () => {
+    const { result } = renderHook(() => useEditItems());
+
+    act(() => {
+      result.current.addItem({
+        ...initialItem,
+        tagsEntries: [['wikimedia_commons', '']],
+      });
+    });
+
+    const staleSetTagsEntries = result.current.items[0].setTagsEntries;
+
+    act(() => {
+      result.current.items[0].setTag('wikimedia_commons', 'File:new.jpg');
+    });
+
+    act(() => {
+      staleSetTagsEntries((prev) => [
+        ...prev,
+        ['wikimedia_commons:2', 'File:old.jpg'],
+      ]);
+    });
+
+    expect(result.current.items[0].tags).toEqual({
+      wikimedia_commons: 'File:new.jpg',
+      'wikimedia_commons:2': 'File:old.jpg',
+    });
+  });
+
   it('should toggle toBeDeleted flag', () => {
     const { result } = renderHook(() => useEditItems());
 
