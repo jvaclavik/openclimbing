@@ -276,7 +276,11 @@ const performUpload = async (
 ) => {
   if (form.generationRef.current !== generation) return;
   const suggestedCategoriesPromise = form.suggestedCategoriesPromiseRef.current;
-  if (!suggestedCategoriesPromise) return;
+  if (!suggestedCategoriesPromise) {
+    form.setErrorMessage('Failed to prepare file for upload');
+    form.setStage('choose-file');
+    return;
+  }
   form.setStage('uploading');
   form.setProgress(null);
   form.setErrorMessage(null);
