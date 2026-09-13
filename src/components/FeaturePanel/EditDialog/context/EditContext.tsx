@@ -151,7 +151,7 @@ export const EditContextProvider: React.FC = ({ children }) => {
   useEffect(() => {
     if (!current) return;
     setSelectedIds((prev) => (prev.includes(current) ? prev : [current]));
-  }, [current]);
+  }, [current, setSelectedIds]);
 
   // Discard the whole edit session so the next time the dialog opens it starts
   // from freshly fetched data instead of the previous (e.g. cancelled) changes.
