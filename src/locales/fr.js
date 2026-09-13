@@ -492,10 +492,13 @@ export default {
   'uploaddialog.uploading': 'Téléversement vers Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Téléversement vers Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Photo téléversée ! Enregistrez les modifications pour la joindre à ce lieu.',
+  'uploaddialog.success_multiple':
+    '__count__ photos téléversées ! Enregistrez les modifications pour les joindre à ce lieu.',
   'uploaddialog.skipped_single':
     '1 photo sélectionnée a été ignorée : __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ photos sélectionnées ont été ignorées. Dernière erreur : __reason__',
+  'uploaddialog.photo_progress': 'Photo __current__ sur __total__',
   'uploaddialog.enter_filename_manually': 'ou saisissez le nom du fichier manuellement',
   'uploaddialog.row_upload_cta': 'Téléverser une photo',
   'uploaddialog.row_manual_label': 'ou collez un nom de fichier existant',

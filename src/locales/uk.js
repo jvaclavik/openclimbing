@@ -488,10 +488,13 @@ export default {
   'uploaddialog.uploading': 'Завантаження у Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Завантаження у Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Фото завантажено! Збережіть зміни, щоб прикріпити його до цього місця.',
+  'uploaddialog.success_multiple':
+    '__count__ фото завантажено! Збережіть зміни, щоб прикріпити їх до цього місця.',
   'uploaddialog.skipped_single':
     '1 вибране фото було пропущено: __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ вибраних фото було пропущено. Остання помилка: __reason__',
+  'uploaddialog.photo_progress': 'Фото __current__ з __total__',
   'uploaddialog.enter_filename_manually': 'або введіть назву файлу вручну',
   'uploaddialog.row_upload_cta': 'Завантажити фото',
   'uploaddialog.row_manual_label': 'або вставте наявну назву файлу',

@@ -489,10 +489,13 @@ export default {
   'uploaddialog.uploading': 'Wird zu Wikimedia Commons hochgeladen…',
   'uploaddialog.uploading_percent': 'Wird zu Wikimedia Commons hochgeladen… __percent__%',
   'uploaddialog.success': 'Foto hochgeladen! Speichere die Änderungen, um es diesem Ort zuzuordnen.',
+  'uploaddialog.success_multiple':
+    '__count__ Fotos hochgeladen! Speichere die Änderungen, um sie diesem Ort zuzuordnen.',
   'uploaddialog.skipped_single':
     '1 ausgewähltes Foto wurde übersprungen: __reason__',
   'uploaddialog.skipped_multiple':
     '__count__ ausgewählte Fotos wurden übersprungen. Letzter Fehler: __reason__',
+  'uploaddialog.photo_progress': 'Foto __current__ von __total__',
   'uploaddialog.enter_filename_manually': 'oder Dateinamen manuell eingeben',
   'uploaddialog.row_upload_cta': 'Foto hochladen',
   'uploaddialog.row_manual_label': 'oder einen vorhandenen Dateinamen einfügen',

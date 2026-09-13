@@ -486,10 +486,13 @@ export default {
   'uploaddialog.uploading': 'Przesyłanie do Wikimedia Commons…',
   'uploaddialog.uploading_percent': 'Przesyłanie do Wikimedia Commons… __percent__%',
   'uploaddialog.success': 'Zdjęcie przesłane! Zapisz zmiany, aby przypisać je do tego miejsca.',
+  'uploaddialog.success_multiple':
+    'Przesłano __count__ zdjęć! Zapisz zmiany, aby przypisać je do tego miejsca.',
   'uploaddialog.skipped_single':
     'Pominięto 1 wybrane zdjęcie: __reason__',
   'uploaddialog.skipped_multiple':
     'Pominięto __count__ wybranych zdjęć. Ostatni błąd: __reason__',
+  'uploaddialog.photo_progress': 'Zdjęcie __current__ z __total__',
   'uploaddialog.enter_filename_manually': 'lub wpisz nazwę pliku ręcznie',
   'uploaddialog.row_upload_cta': 'Prześlij zdjęcie',
   'uploaddialog.row_manual_label': 'lub wklej istniejącą nazwę pliku',
