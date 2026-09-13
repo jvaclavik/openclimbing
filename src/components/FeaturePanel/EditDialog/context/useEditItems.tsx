@@ -164,7 +164,11 @@ export const useEditItems = () => {
     setData((state) => state.filter((item) => item.shortId !== shortId));
   }, []);
 
+  const reset = useCallback(() => {
+    setData([]);
+  }, []);
+
   publishDbgObject('EditContext state', data);
 
-  return { items, addItem, removeItem };
+  return { items, addItem, removeItem, reset };
 };
