@@ -27,7 +27,7 @@ export const preparePhotoForUpload = async (
   rawFile: File,
   feature: Feature,
 ): Promise<PreparedUpload> => {
-  // Read EXIF from the raw file first; HEIC conversion drops EXIF in heic2any.
+  // Read EXIF from the raw file first; HEIC-to-JPG conversion drops EXIF.
   const exif = await extractExifData(rawFile);
   const file = isHeicFile(rawFile) ? await convertHeicToJpeg(rawFile) : rawFile;
   return {
