@@ -470,7 +470,7 @@ export default {
     'Увійдіть із обліковим записом Wikimedia Commons, щоб завантажувати фото. Потрібен окремий обліковий запис від вашого OSM.',
   'uploaddialog.logged_in_as': 'Вхід у Wikimedia Commons як <b>__user__</b>',
   'uploaddialog.choose_file': 'Виберіть фото…',
-  'uploaddialog.choose_file_hint': 'Виберіть зображення зі свого пристрою. Фото HEIC з iPhone буде автоматично перетворено на JPG.',
+  'uploaddialog.choose_file_hint': 'Виберіть одне або кілька зображень зі свого пристрою. Можна вибрати кілька одразу й завантажити їх за один раз. Фото HEIC з iPhone будуть автоматично перетворені на JPG.',
   'uploaddialog.preparing': 'Зчитування даних EXIF і підготовка фото до завантаження…',
   'uploaddialog.filename_label': 'Назва файлу у Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -504,7 +504,7 @@ export default {
   'uploaddialog.row_manual_label': 'або вставте наявну назву файлу',
   'uploaddialog.row_paste_existing': 'Вставити наявне фото',
   'uploaddialog.row_back_to_upload': 'Назад',
-  'uploaddialog.drop_to_upload': 'Перетягніть фото сюди, щоб завантажити його у Wikimedia Commons',
+  'uploaddialog.drop_to_upload': 'Перетягніть сюди фото, щоб завантажити їх у Wikimedia Commons',
   'uploaddialog.debug_mode_on': 'Завантаження фото (налагодження) увімкнено',
   'editdialog.location_checkbox': 'Нове розташування',
   'editdialog.location_placeholder': 'напр. через дорогу',

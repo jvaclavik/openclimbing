@@ -126,6 +126,7 @@ describe('useUploadDialogState multi-file batches', () => {
     expect(result.current.stage).toBe('success');
 
     expect(uploadPhotoToCommonsMock).toHaveBeenCalledTimes(3);
+    expect(suggestCommonsCategoriesMock).toHaveBeenCalledTimes(1);
     expect(onUploaded).toHaveBeenCalledTimes(3);
     expect(onUploaded.mock.calls.map((c) => c[0])).toEqual([
       'File:mock 1.jpg',
@@ -401,5 +402,8 @@ describe('useUploadDialogState multi-file batches', () => {
       resolveUpload({ fileTagValue: 'File:first.jpg' });
       await new Promise((r) => setTimeout(r, 0));
     });
+
+    expect(onUploaded).toHaveBeenCalledTimes(1);
+    expect(onUploaded).toHaveBeenCalledWith('File:first.jpg');
   });
 });

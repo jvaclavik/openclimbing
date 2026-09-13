@@ -85,6 +85,7 @@ type FormState = {
   successfulUploads: number;
   setSuccessfulUploads: (v: number | ((prev: number) => number)) => void;
   successfulUploadsRef: { current: number };
+  suggestedCategoriesPromiseRef: { current: Promise<string[]> | null };
   /**
    * Monotonic id of the active batch. Bumped when a batch starts or the form
    * resets, so async work (prepare/upload) started for an old batch can detect
@@ -112,6 +113,7 @@ const useFormState = (): FormState => {
   const [batchTotal, setBatchTotal] = useState(0);
   const [successfulUploads, setSuccessfulUploads] = useState(0);
   const successfulUploadsRef = useRef(0);
+  const suggestedCategoriesPromiseRef = useRef<Promise<string[]> | null>(null);
   const generationRef = useRef(0);
   return {
     stage,
@@ -143,6 +145,7 @@ const useFormState = (): FormState => {
     successfulUploads,
     setSuccessfulUploads,
     successfulUploadsRef,
+    suggestedCategoriesPromiseRef,
     generationRef,
   };
 };
@@ -153,12 +156,15 @@ const prepareAndPopulate = async (
   feature: Feature,
   form: FormState,
   generation: number,
+  suggestedCategoriesPromise: Promise<string[]>,
 ) => {
   form.setErrorMessage(null);
   form.setStage('preparing');
   try {
-    const preparedFile = await preparePhotoForUpload(rawFile, feature);
-    const suggestedCategories = await suggestCommonsCategories(feature);
+    const [preparedFile, suggestedCategories] = await Promise.all([
+      preparePhotoForUpload(rawFile, feature),
+      suggestedCategoriesPromise,
+    ]);
     // The dialog was closed or a new batch started while we were awaiting —
     // drop this result so it can't resurrect a canceled file (and don't create
     // an object URL we'd then have to revoke).
@@ -172,7 +178,7 @@ const prepareAndPopulate = async (
       return url;
     });
     form.setFilenameStem(preparedFile.filenameParts.stem);
-    form.setCategories(suggestedCategories);
+    form.setCategories([...suggestedCategories]);
     form.setDescription(getDefaultDescription(feature));
     form.setStage('review');
   } catch (e) {
@@ -188,7 +194,14 @@ const prepareAndPopulate = async (
     const [next, ...rest] = remainingQueue;
     if (next) {
       form.setQueue(rest);
-      await prepareAndPopulate(next, rest, feature, form, generation);
+      await prepareAndPopulate(
+        next,
+        rest,
+        feature,
+        form,
+        generation,
+        suggestedCategoriesPromise,
+      );
     } else {
       if (form.successfulUploadsRef.current > 0) {
         form.setStage('success');
@@ -218,7 +231,16 @@ const startBatch = (files: File[], feature: Feature, form: FormState) => {
   form.successfulUploadsRef.current = 0;
   form.setSuccessfulUploads(0);
   form.setQueue(rest);
-  return prepareAndPopulate(first, rest, feature, form, generation);
+  const suggestedCategoriesPromise = suggestCommonsCategories(feature);
+  form.suggestedCategoriesPromiseRef.current = suggestedCategoriesPromise;
+  return prepareAndPopulate(
+    first,
+    rest,
+    feature,
+    form,
+    generation,
+    suggestedCategoriesPromise,
+  );
 };
 
 const resetForm = (form: FormState) => {
@@ -242,6 +264,7 @@ const resetForm = (form: FormState) => {
   form.setBatchTotal(0);
   form.successfulUploadsRef.current = 0;
   form.setSuccessfulUploads(0);
+  form.suggestedCategoriesPromiseRef.current = null;
 };
 
 const performUpload = async (
@@ -283,7 +306,14 @@ const performUpload = async (
     const [next, ...rest] = form.queue;
     if (next) {
       form.setQueue(rest);
-      await prepareAndPopulate(next, rest, feature, form, generation);
+      await prepareAndPopulate(
+        next,
+        rest,
+        feature,
+        form,
+        generation,
+        form.suggestedCategoriesPromiseRef.current ?? Promise.resolve([]),
+      );
     } else {
       form.setStage('success');
     }

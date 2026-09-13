@@ -563,7 +563,7 @@ export default {
     'Pro nahrávání fotek se přihlas svým účtem na Wikimedia Commons. Je nezávislý na OSM účtu — pokud ho ještě nemáš, založ si ho na commons.wikimedia.org.',
   'uploaddialog.logged_in_as': 'Přihlášen na Wikimedia Commons jako <b>__user__</b>',
   'uploaddialog.choose_file': 'Vybrat fotku…',
-  'uploaddialog.choose_file_hint': 'Vyber obrázek ze svého zařízení. HEIC fotky z iPhonu se automaticky převedou na JPG.',
+  'uploaddialog.choose_file_hint': 'Vyber jeden nebo více obrázků ze svého zařízení. Vyber jich víc najednou a nahraj je v jednom kroku. HEIC fotky z iPhonu se automaticky převedou na JPG.',
   'uploaddialog.preparing': 'Čtení EXIF dat a příprava fotky…',
   'uploaddialog.filename_label': 'Název souboru na Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -594,7 +594,7 @@ export default {
   'uploaddialog.row_manual_label': 'nebo vložit název existujícího souboru',
   'uploaddialog.row_paste_existing': 'Vložit existující fotku',
   'uploaddialog.row_back_to_upload': 'Zpět',
-  'uploaddialog.drop_to_upload': 'Přetáhni fotku sem pro nahrání na Wikimedia Commons',
+  'uploaddialog.drop_to_upload': 'Přetáhni sem fotky pro nahrání na Wikimedia Commons',
   'uploaddialog.debug_mode_on': 'Nahrávání fotek (debug) je zapnuté',
   'editdialog.location_checkbox': 'Zadat novou polohu',
   'editdialog.location_placeholder': 'např. naproti přes ulici',

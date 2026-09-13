@@ -470,7 +470,7 @@ export default {
   'uploaddialog.login_hint': 'Inicia sesión con tu cuenta de Wikimedia Commons para subir fotos. Necesitas una cuenta separada de la de OSM.',
   'uploaddialog.logged_in_as': 'Sesión iniciada en Wikimedia Commons como <b>__user__</b>',
   'uploaddialog.choose_file': 'Elegir foto…',
-  'uploaddialog.choose_file_hint': 'Elige una imagen de tu dispositivo. Las fotos HEIC del iPhone se convertirán automáticamente a JPG.',
+  'uploaddialog.choose_file_hint': 'Elige una o varias imágenes de tu dispositivo. Puedes seleccionar varias a la vez para subirlas de una sola vez. Las fotos HEIC del iPhone se convertirán automáticamente a JPG.',
   'uploaddialog.preparing': 'Leyendo los datos EXIF y preparando la foto para subirla…',
   'uploaddialog.filename_label': 'Nombre de archivo en Wikimedia Commons',
   'uploaddialog.filename_help':
@@ -505,7 +505,7 @@ export default {
   'uploaddialog.row_manual_label': 'o pega un nombre de archivo existente',
   'uploaddialog.row_paste_existing': 'Pegar foto existente',
   'uploaddialog.row_back_to_upload': 'Atrás',
-  'uploaddialog.drop_to_upload': 'Suelta la foto aquí para subirla a Wikimedia Commons',
+  'uploaddialog.drop_to_upload': 'Suelta aquí las fotos para subirlas a Wikimedia Commons',
   'uploaddialog.debug_mode_on': 'La subida de fotos (depuración) está activada',
   'editdialog.location_checkbox': 'Cambiar ubicación',
   'editdialog.location_placeholder': 'ej. cruzando la calle',
