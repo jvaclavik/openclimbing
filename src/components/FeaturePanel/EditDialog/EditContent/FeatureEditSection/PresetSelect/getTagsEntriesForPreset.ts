@@ -12,7 +12,9 @@ export const getTagsEntriesForPreset = (
   oldPreset: Preset | undefined,
   newPreset: Preset | undefined,
 ): TagsEntries => {
-  const toRemove = oldPreset ? (oldPreset.addTags ?? oldPreset.tags ?? {}) : {};
+  const toRemove = oldPreset
+    ? (oldPreset.removeTags ?? oldPreset.addTags ?? oldPreset.tags ?? {})
+    : {};
 
   const toAdd = newPreset
     ? Object.entries(newPreset.addTags ?? newPreset.tags ?? {})

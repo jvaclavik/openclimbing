@@ -59,6 +59,28 @@ describe('getTagsEntriesForPreset', () => {
     ]);
   });
 
+  it('uses removeTags over addTags/tags for removal', () => {
+    const prev: [string, string][] = [
+      ['sport', 'climbing'],
+      ['foo', 'bar'],
+      ['name', 'Crag'],
+    ];
+    const oldPreset = preset({
+      tags: { sport: 'climbing' },
+      addTags: { sport: 'climbing' },
+      removeTags: { foo: 'bar' },
+    });
+    const newPreset = preset({ tags: { climbing: 'crag' } });
+
+    const result = getTagsEntriesForPreset(prev, oldPreset, newPreset);
+
+    expect(result).toEqual([
+      ['climbing', 'crag'],
+      ['sport', 'climbing'],
+      ['name', 'Crag'],
+    ]);
+  });
+
   it('keeps existing tags when there is no old or new preset', () => {
     const prev: [string, string][] = [['sport', 'climbing']];
 
