@@ -111,7 +111,7 @@ export const GRADE_SYSTEMS = [
     category: 'boulder',
     name: 'Fontainebleau',
     flags: '🇪🇺',
-    minor: true,
+    minor: false,
     description: 'Fontainebleau grading system for bouldering.',
   },
 ];
