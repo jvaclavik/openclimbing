@@ -6,6 +6,7 @@ import {
   getWikimediaCommonsKey,
 } from '../Climbing/utils/photo';
 import { UploadPhotoDialog } from './EditContent/FeatureEditSection/UploadPhotoDialog/UploadPhotoDialog';
+import { TagsEntries } from './context/types';
 
 /**
  * Mounted once inside EditDialog; lets any descendant request the upload flow
@@ -21,21 +22,35 @@ export const EditDialogUploadHost: React.FC<{
   // Some renders (skeleton/loading) may not have a current item yet.
   if (!currentItem) return null;
 
-  const { tags, setTag } = currentItem;
+  const { setTagsEntries } = currentItem;
 
   const handleUploaded = (fileTagValue: string) => {
     const targetKey = uploadRequest?.targetSlotKey;
-    // Use the explicitly requested slot only while it's still empty. In a
-    // multi-file batch the first photo fills it; the rest must land in new
-    // slots instead of overwriting it.
-    if (targetKey && !tags[targetKey]?.trim()) {
-      setTag(targetKey, fileTagValue);
-      return;
-    }
-    // Pick the next available wikimedia_commons slot key.
-    const nextIndex = getNextWikimediaCommonsIndex(tags);
-    const slotKey = getWikimediaCommonsKey(nextIndex);
-    setTag(slotKey, fileTagValue);
+    let slotKey = '';
+    setTagsEntries((prevEntries: TagsEntries) => {
+      const nextEntries = [...prevEntries];
+      const prevTags = Object.fromEntries(prevEntries);
+      // Use the explicitly requested slot only while it's still empty. In a
+      // multi-file batch the first photo fills it; the rest must land in new
+      // slots instead of overwriting it.
+      if (targetKey && !prevTags[targetKey]?.trim()) {
+        slotKey = targetKey;
+      } else {
+        // Pick the next available wikimedia_commons slot key.
+        const nextIndex = getNextWikimediaCommonsIndex(prevTags);
+        slotKey = getWikimediaCommonsKey(nextIndex);
+      }
+      const key = slotKey;
+      const position = nextEntries.findIndex(
+        ([existingKey]) => existingKey === key,
+      );
+      if (position === -1) {
+        nextEntries.push([key, fileTagValue]);
+      } else {
+        nextEntries[position] = [key, fileTagValue];
+      }
+      return nextEntries;
+    });
     // Make sure the new slot is visible in the editor.
     if (setActiveMajorKeys) {
       setActiveMajorKeys((prev) =>

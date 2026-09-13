@@ -172,6 +172,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     progress,
     errorMessage,
     batchTotal,
+    successfulUploads,
     batchPosition,
     handleFilesChosen,
     handleUpload,
@@ -240,8 +241,10 @@ export const UploadPhotoDialog: React.FC<Props> = ({
           )}
           {stage === 'success' && (
             <Alert severity="success">
-              {batchTotal > 1
-                ? t('uploaddialog.success_multiple', { count: batchTotal })
+              {successfulUploads > 1
+                ? t('uploaddialog.success_multiple', {
+                    count: successfulUploads,
+                  })
                 : t('uploaddialog.success')}
             </Alert>
           )}

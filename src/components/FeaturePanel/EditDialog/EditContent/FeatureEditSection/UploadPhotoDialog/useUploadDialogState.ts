@@ -77,6 +77,9 @@ type FormState = {
   /** Total number of files in the current batch (1 for a single upload). */
   batchTotal: number;
   setBatchTotal: (v: number) => void;
+  /** Number of files successfully uploaded in the active batch. */
+  successfulUploads: number;
+  setSuccessfulUploads: (v: number | ((prev: number) => number)) => void;
   /**
    * Monotonic id of the active batch. Bumped when a batch starts or the form
    * resets, so async work (prepare/upload) started for an old batch can detect
@@ -98,6 +101,7 @@ const useFormState = (): FormState => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [queue, setQueue] = useState<File[]>([]);
   const [batchTotal, setBatchTotal] = useState(0);
+  const [successfulUploads, setSuccessfulUploads] = useState(0);
   const generationRef = useRef(0);
   return {
     stage,
@@ -122,6 +126,8 @@ const useFormState = (): FormState => {
     setQueue,
     batchTotal,
     setBatchTotal,
+    successfulUploads,
+    setSuccessfulUploads,
     generationRef,
   };
 };
@@ -185,6 +191,7 @@ const startBatch = (files: File[], feature: Feature, form: FormState) => {
   const generation = form.generationRef.current + 1;
   form.generationRef.current = generation;
   form.setBatchTotal(files.length);
+  form.setSuccessfulUploads(0);
   form.setQueue(rest);
   return prepareAndPopulate(first, rest, feature, form, generation);
 };
@@ -206,6 +213,7 @@ const resetForm = (form: FormState) => {
   form.setErrorMessage(null);
   form.setQueue([]);
   form.setBatchTotal(0);
+  form.setSuccessfulUploads(0);
 };
 
 const performUpload = async (
@@ -233,6 +241,7 @@ const performUpload = async (
     onUploaded(result.fileTagValue);
     // If a new batch took over meanwhile, let it drive the UI from here.
     if (form.generationRef.current !== generation) return;
+    form.setSuccessfulUploads((prev) => prev + 1);
     // Move on to the next file in the batch (each gets its own review step),
     // or finish when the queue is empty. `form.queue` is fresh here because each
     // upload is a separate user action (its own render).
@@ -267,6 +276,12 @@ export const useUploadDialogState = ({
     lastConsumedInitialFiles.current = null;
   });
   useRevokeOnUnmount(form.previewUrl);
+  useEffect(
+    () => () => {
+      form.generationRef.current += 1;
+    },
+    [form.generationRef],
+  );
 
   const handleFilesChosen = (files: File[]) => {
     if (!feature) return undefined;
@@ -310,6 +325,7 @@ export const useUploadDialogState = ({
     progress: form.progress,
     errorMessage: form.errorMessage,
     batchTotal: form.batchTotal,
+    successfulUploads: form.successfulUploads,
     // 1-based index of the file currently being prepared/reviewed/uploaded.
     batchPosition: form.batchTotal - form.queue.length,
     handleFilesChosen,

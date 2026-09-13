@@ -191,6 +191,27 @@ describe('useUploadDialogState multi-file batches', () => {
     expect(preparePhotoForUploadMock).toHaveBeenCalledTimes(2);
   });
 
+  it('reports only successfully uploaded photos in a mixed batch', async () => {
+    const { result, onUploaded } = renderState();
+    preparePhotoForUploadMock.mockRejectedValueOnce(new Error('corrupt image'));
+
+    await act(async () => {
+      await result.current.handleFilesChosen([
+        imageFile('bad.jpg'),
+        imageFile('good.jpg'),
+      ]);
+    });
+
+    await act(async () => {
+      await result.current.handleUpload();
+    });
+
+    expect(result.current.stage).toBe('success');
+    expect(result.current.batchTotal).toBe(2);
+    expect(result.current.successfulUploads).toBe(1);
+    expect(onUploaded).toHaveBeenCalledTimes(1);
+  });
+
   it('does not resurrect a file whose preparation finishes after the dialog closed', async () => {
     let resolvePrepare: (value: unknown) => void = () => {};
     preparePhotoForUploadMock.mockImplementationOnce(
@@ -228,5 +249,44 @@ describe('useUploadDialogState multi-file batches', () => {
     // The stale preparation must not push the form back into the review stage.
     expect(result.current.stage).toBe('choose-file');
     expect(result.current.prepared).toBeNull();
+  });
+
+  it('invalidates generation when unmounted during preparation', async () => {
+    let resolvePrepare: (value: unknown) => void = () => {};
+    preparePhotoForUploadMock.mockImplementationOnce(
+      (file: File) =>
+        new Promise((resolve) => {
+          resolvePrepare = () =>
+            resolve({
+              file,
+              exifDate: null,
+              exifLocation: null,
+              filenameParts: { stem: 'late', ext: 'jpg' },
+            });
+        }),
+    );
+
+    const onUploaded = jest.fn();
+    const { result, unmount } = renderHook(() =>
+      useUploadDialogState({
+        open: true,
+        feature,
+        onUploaded,
+        initialFiles: null,
+      }),
+    );
+
+    act(() => {
+      result.current.handleFilesChosen([imageFile('late.jpg')]);
+    });
+    expect(result.current.stage).toBe('preparing');
+
+    unmount();
+    await act(async () => {
+      resolvePrepare(undefined);
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
 });
