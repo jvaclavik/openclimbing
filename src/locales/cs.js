@@ -827,6 +827,7 @@ export default {
   'climbingpanel.pdf_export_settings': 'Nastavení exportu',
   'climbingpanel.pdf_export_show_map': 'Zobrazovat mapu',
   'climbingpanel.pdf_export_show_protection': 'Vyznačit jištění (bolty, anchory…)',
+  'climbingpanel.pdf_export_show_ticks': 'Zobrazovat moje přelezy',
   'climbingpanel.pdf_export_show_grades': 'Zobrazovat obtížnost u cest',
   'climbingpanel.pdf_export_heading': 'Lezecký průvodce',
   'climbingpanel.pdf_export_type_area': 'Oblast',
