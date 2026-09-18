@@ -714,7 +714,7 @@ type RouteNumberBadgeProps = {
   isTicked: boolean;
 };
 
-const RouteNumberBadge = ({
+export const RouteNumberBadge = ({
   routeNumber,
   cx,
   cy,
@@ -784,12 +784,14 @@ const RouteNumberBadge = ({
 
 type RouteRow = { route: ClimbingRoute; displayNumber: number };
 
-const RoutesSummary = ({
+export const RoutesSummary = ({
   items,
   ticks,
+  showTicks,
 }: {
   items: RouteRow[];
   ticks: ClimbingTick[] | null;
+  showTicks: boolean;
 }) => {
   if (items.length === 0) return null;
 
@@ -808,9 +810,11 @@ const RoutesSummary = ({
         <tr>
           <th style={{ width: 36, textAlign: 'center' }}>#</th>
           <th>{t('climbingpanel.pdf_export_route_name')}</th>
-          <th style={{ width: 48, textAlign: 'center' }}>
-            {t('climbingpanel.pdf_export_tick_short')}
-          </th>
+          {showTicks && (
+            <th style={{ width: 48, textAlign: 'center' }}>
+              {t('climbingpanel.pdf_export_tick_short')}
+            </th>
+          )}
           <th style={{ width: 110 }}>{t('climbingpanel.pdf_export_grade')}</th>
         </tr>
       </thead>
@@ -874,9 +878,11 @@ const RoutesSummary = ({
                   <RouteLengthChip>{lengthDisplay}</RouteLengthChip>
                 ) : null}
               </td>
-              <TickCell>
-                {tickStyle != null ? <TickStyleBadge style={tickStyle} /> : ''}
-              </TickCell>
+              {showTicks && (
+                <TickCell>
+                  {tickStyle != null ? <TickStyleBadge style={tickStyle} /> : ''}
+                </TickCell>
+              )}
               <GradeCell>
                 <ConvertedRouteDifficultyBadge
                   routeDifficulties={difficulties}
@@ -899,6 +905,8 @@ type PhotoExportProps = {
   ticks: ClimbingTick[] | null;
   /** Draw protection markers (bolts, anchors…) on the photo. */
   showProtection: boolean;
+  /** Show user ticks in the export output. */
+  showTicks: boolean;
   /** Hide the per-photo route table (e.g. when the only crag photo already
    * covers every route — the bottom "All routes" table is enough). */
   hideRoutesSummary?: boolean;
@@ -912,6 +920,7 @@ const PhotoExport = ({
   isTicked,
   ticks,
   showProtection,
+  showTicks,
   hideRoutesSummary,
 }: PhotoExportProps) => {
   const { userSettings } = useUserSettingsContext();
@@ -1148,7 +1157,7 @@ const PhotoExport = ({
                 cy={cy}
                 unit={unit}
                 fill={strokeColor}
-                isTicked={shortId ? isTicked(shortId) : false}
+                isTicked={showTicks && shortId ? isTicked(shortId) : false}
               />
               {gradeText && (
                 <>
@@ -1188,7 +1197,7 @@ const PhotoExport = ({
       </svg>
 
       {!hideRoutesSummary && (
-        <RoutesSummary items={photoRoutes} ticks={ticks} />
+        <RoutesSummary items={photoRoutes} ticks={ticks} showTicks={showTicks} />
       )}
     </PhotoBlock>
   );
@@ -1322,6 +1331,8 @@ type CragPdfSectionProps = {
   showHeading: boolean;
   /** Draw protection markers (bolts, anchors…) on the photos. */
   showProtection: boolean;
+  /** Show user ticks in the export output. */
+  showTicks: boolean;
 };
 
 const CragPdfSection = ({
@@ -1331,6 +1342,7 @@ const CragPdfSection = ({
   ticks,
   showHeading,
   showProtection,
+  showTicks,
 }: CragPdfSectionProps) => {
   const routes = useMemo(() => osmToClimbingRoutes(feature), [feature]);
   const label = getLabel(feature);
@@ -1383,6 +1395,7 @@ const CragPdfSection = ({
             isTicked={isTicked}
             ticks={ticks}
             showProtection={showProtection}
+            showTicks={showTicks}
             hideRoutesSummary={singlePhotoCoversAllRoutes}
           />
         );
@@ -1400,6 +1413,7 @@ const CragPdfSection = ({
           displayNumber: idx + 1,
         }))}
         ticks={ticks}
+        showTicks={showTicks}
       />
     </>
   );
@@ -1445,6 +1459,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
   // Export options (next to the Print button).
   const [showMap, setShowMap] = useState(true);
   const [showProtection, setShowProtection] = useState(true);
+  const [showTicks, setShowTicks] = useState(false);
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -1539,6 +1554,12 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
               primary={t('climbingpanel.pdf_export_show_protection')}
             />
           </MenuItem>
+          <MenuItem onClick={() => setShowTicks((prev) => !prev)}>
+            <ListItemIcon>
+              <Checkbox edge="start" checked={showTicks} tabIndex={-1} />
+            </ListItemIcon>
+            <ListItemText primary={t('climbingpanel.pdf_export_show_ticks')} />
+          </MenuItem>
           <MenuItem
             onClick={() =>
               setUserSetting('climbing.isGradesOnPhotosVisible', !gradesVisible)
@@ -1621,6 +1642,7 @@ export const ClimbingPdfExportDialog = ({ isOpen, onClose }: Props) => {
                 ticks={ticks}
                 showHeading={isArea}
                 showProtection={showProtection}
+                showTicks={showTicks}
               />
             ))
           )}

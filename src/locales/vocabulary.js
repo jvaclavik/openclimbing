@@ -895,6 +895,7 @@ export default {
   'climbingpanel.pdf_export_settings': 'Export settings',
   'climbingpanel.pdf_export_show_map': 'Show map',
   'climbingpanel.pdf_export_show_protection': 'Mark protection (bolts, anchors…)',
+  'climbingpanel.pdf_export_show_ticks': 'Show my ticks',
   'climbingpanel.pdf_export_show_grades': 'Show grades on routes',
   'climbingpanel.pdf_export_heading': 'Climbing guide',
   'climbingpanel.pdf_export_type_area': 'Area',
