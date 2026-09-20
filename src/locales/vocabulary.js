@@ -400,9 +400,8 @@ export default {
   'about.support_feedback': 'Write to us',
   'about.support_donate': 'Contribute financially',
 
-  'export.heading': 'Download the whole database',
+  'export.heading': 'Download database export',
   'export.lead': 'Everything you see on the map is open data. You can export the data directly from OpenStreetMap and Wikipedia or use our extract.',
-  'export.download_heading': 'Database export',
   'export.download_format': 'A single SQLite file – open it in any SQL client.',
   'export.download_size': 'Approximate size __size__.',
   'export.download_freshness': 'Generated on demand, never older than 5 minutes.',

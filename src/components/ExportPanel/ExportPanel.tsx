@@ -100,19 +100,6 @@ const Download = () => {
       <Watermark>
         <StorageIcon sx={{ fontSize: 150 }} />
       </Watermark>
-      <Typography
-        variant="h6"
-        component="h2"
-        sx={{
-          fontWeight: 800,
-          letterSpacing: -0.3,
-          lineHeight: 1.2,
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        {t('export.download_heading')}
-      </Typography>
       <Fact icon={DataObjectIcon}>
         {t('export.download_format')}{' '}
         {isLoading && <Skeleton width={70} sx={{ display: 'inline-block' }} />}
