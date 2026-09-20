@@ -411,8 +411,7 @@ export default {
   'export.schema_title': 'Database schema',
   'export.schema_desc': 'All tables and columns in one SQL file – the same schema the downloaded file has.',
   'export.schema_cta': 'View schema.sql on GitHub',
-  'export.repo_desc':
-    'A repository where a GitHub Action stores this export every night – table schemas and CSV data are committed, so the history of the database is visible in git. The biggest tables are skipped there, download the SQLite file above for the full data.',
+  'export.repo_desc': 'GitHub repository with user data (ticks) as CSV.',
   'export.repo_cta': 'Open the repository',
 
   'searchbox.placeholder': 'Search',

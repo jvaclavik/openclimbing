@@ -398,8 +398,7 @@ export default {
   'export.schema_title': 'Schéma databáze',
   'export.schema_desc': 'Všechny tabulky a sloupce v jednom SQL souboru – stejné schéma má i stažený soubor.',
   'export.schema_cta': 'Zobrazit schema.sql na GitHubu',
-  'export.repo_desc':
-    'Repozitář, kam GitHub Action každou noc ukládá tenhle export – commituje schémata tabulek a data v CSV, takže je v gitu vidět historie databáze. Největší tabulky se tam vynechávají, pro kompletní data si stáhni SQLite výše.',
+  'export.repo_desc': 'GitHub repozitář s uživatelskými daty (ticky) v CSV.',
   'export.repo_cta': 'Otevřít repozitář',
 
   'searchbox.placeholder': 'Hledat',
