@@ -5,11 +5,13 @@ import {
   SITEMAP_CHUNK_SIZE,
 } from './getSitemapData';
 
+import { CLIMBING_LIST_PATHS } from '../../services/climbing-areas/climbingListTypes';
+
 // Public content pages worth indexing besides the OSM feature detail pages.
 const STATIC_PATHS = [
   '',
   '/about',
-  '/climbing-areas',
+  ...Object.values(CLIMBING_LIST_PATHS),
   '/climbing-grades',
   '/climbing-leaderboard',
   '/tick-scoring',

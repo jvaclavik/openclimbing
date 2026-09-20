@@ -16,6 +16,7 @@ import { SearchField } from '../SearchBox/SearchBox';
 import { convertHexToRgba } from '../utils/colorUtils';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { COMMUNITY_URL } from '../consts';
+import { CLIMBING_LIST_PATHS } from '../../services/climbing-areas/climbingListTypes';
 
 const Bar = styled.div<{ $transparent?: boolean }>`
   position: absolute;
@@ -206,7 +207,9 @@ const NavLinks = () => {
     persistShowHomepage();
   };
 
-  const areasActive = homepageShown || router.pathname === '/climbing-areas';
+  const areasActive =
+    homepageShown ||
+    Object.values(CLIMBING_LIST_PATHS).includes(router.pathname);
   const aboutActive = router.pathname === '/about';
 
   return (

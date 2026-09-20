@@ -2,12 +2,13 @@ import { LANGUAGES } from '../config.mjs';
 import React from 'react';
 import type { DocumentContext } from 'next/dist/shared/lib/utils';
 import { PROJECT_URL } from '../services/project';
+import { CLIMBING_LIST_PATHS } from '../services/climbing-areas/climbingListTypes';
 
 // Static content pages worth emitting hreflang links for (besides homepage and
 // OSM feature pages).
 const SEO_STATIC_PATHS = [
   '/about',
-  '/climbing-areas',
+  ...Object.values(CLIMBING_LIST_PATHS),
   '/climbing-grades',
   '/climbing-leaderboard',
   '/tick-scoring',
@@ -38,7 +39,7 @@ export const getUrlForLangLinks = (ctx: DocumentContext) => {
   }
 
   return false;
-  // Test cases: /, /node/6, /en, /en/node/6, /climbing-areas
+  // Test cases: /, /node/6, /en, /en/node/6, /climbing-areas, /via-ferratas
 };
 
 type Props = {

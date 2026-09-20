@@ -1,10 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { intl } from '../../../../services/intl';
-import {
-  RouteNumberBadge,
-  RoutesSummary,
-} from '../ClimbingPdfExportDialog';
+import { RouteNumberBadge, RoutesSummary } from '../ClimbingPdfExportDialog';
 
 jest.mock('../../../../services/my-ticks/TickStyleBadge', () => ({
   TickStyleBadge: ({ style }: { style: string }) => (

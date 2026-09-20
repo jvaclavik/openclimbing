@@ -6,16 +6,12 @@ import {
   AccordionSummary,
   Box,
   CircularProgress,
-  FormControlLabel,
-  MenuItem,
   Stack,
-  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -25,7 +21,17 @@ import {
   ClimbingArea,
   getClimbingAreas,
 } from '../../services/climbing-areas/getClimbingAreas';
+import type { ClimbingListType } from '../../services/climbing-areas/climbingListTypes';
 import { intl, t } from '../../services/intl';
+import { ClimbingListTypeTabs } from './ClimbingListTypeTabs';
+import { ClimbingAreasFilter } from './ClimbingAreasFilter';
+import {
+  ClimbingAreasSort,
+  ClimbingAreasSortBy,
+  POI_SORT_OPTIONS,
+  ROCK_SORT_OPTIONS,
+} from './ClimbingAreasSort';
+import { useClimbingListFilterSync } from './useClimbingListFilterSync';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import {
@@ -48,18 +54,58 @@ import { tint } from '../utils/panelUi';
 import styled from '@emotion/styled';
 
 type ClimbingAreasPanelProps = {
-  areas?: ClimbingArea[] | null;
+  items?: ClimbingArea[] | null;
+  listType: ClimbingListType;
 };
 
-type SortBy = 'photos' | 'routes' | 'sectors' | 'alphabetical' | 'added';
+type SortBy = ClimbingAreasSortBy;
 
-const SORT_OPTIONS: { value: SortBy; labelId: TranslationId }[] = [
-  { value: 'photos', labelId: 'climbingareas.sort_photos' },
-  { value: 'routes', labelId: 'climbingareas.sort_routes' },
-  { value: 'sectors', labelId: 'climbingareas.sort_sectors' },
-  { value: 'alphabetical', labelId: 'climbingareas.sort_alphabetical' },
-  { value: 'added', labelId: 'climbingareas.sort_added' },
-];
+// Survives remounts when switching lezení / ferraty / stěny.
+let sharedFilterViewport = false;
+let sharedSortBy: SortBy | null = null;
+
+const defaultSortFor = (listType: ClimbingListType): SortBy =>
+  listType === 'rock' ? 'photos' : 'alphabetical';
+
+const sortOptionsFor = (listType: ClimbingListType) =>
+  listType === 'rock' ? ROCK_SORT_OPTIONS : POI_SORT_OPTIONS;
+
+const resolveSortBy = (listType: ClimbingListType): SortBy => {
+  const options = sortOptionsFor(listType);
+  if (sharedSortBy && options.some((option) => option.value === sharedSortBy)) {
+    return sharedSortBy;
+  }
+  return defaultSortFor(listType);
+};
+
+const LIST_COPY: Record<
+  ClimbingListType,
+  {
+    title: TranslationId;
+    count: TranslationId;
+    empty: TranslationId;
+    emptyViewport: TranslationId;
+  }
+> = {
+  rock: {
+    title: 'climbingareas.title',
+    count: 'climbingareas.areas_count',
+    empty: 'climbingareas.no_areas',
+    emptyViewport: 'climbingareas.no_areas_in_viewport',
+  },
+  ferrata: {
+    title: 'climbingareas.title_ferrata',
+    count: 'climbingareas.ferratas_count',
+    empty: 'climbingareas.no_ferratas',
+    emptyViewport: 'climbingareas.no_ferratas_in_viewport',
+  },
+  gym: {
+    title: 'climbingareas.title_gym',
+    count: 'climbingareas.gyms_count',
+    empty: 'climbingareas.no_gyms',
+    emptyViewport: 'climbingareas.no_gyms_in_viewport',
+  },
+};
 
 type CountryGroup = {
   countryCode: string | null;
@@ -187,15 +233,19 @@ const CountryAccordion = ({
   group,
   defaultExpanded,
   backTarget,
+  listType,
 }: {
   group: CountryGroup;
   defaultExpanded: boolean;
   backTarget: string;
+  listType: ClimbingListType;
 }) => {
   const { countryCode, name: countryName, areas, cragCount } = group;
   const { setPreview } = useFeatureContext();
   const mobileMode = useMobileMode();
   const photos = useAreaPhotos();
+  const isRock = listType === 'rock';
+  const copy = LIST_COPY[listType];
 
   const handleHover = (area: ClimbingArea) => () => {
     setPreview({ center: [area.lon, area.lat] } as Feature);
@@ -249,16 +299,18 @@ const CountryAccordion = ({
                 fontWeight: 600,
               }}
             >
-              {t('climbingareas.areas_count', { count: areas.length })}
+              {t(copy.count, { count: areas.length })}
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
-              {t('climbingareas.crags_count', { count: cragCount })}
-            </Typography>
+            {isRock && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('climbingareas.crags_count', { count: cragCount })}
+              </Typography>
+            )}
           </Box>
         </Box>
       </AccordionSummary>
@@ -267,14 +319,18 @@ const CountryAccordion = ({
           <TableHead>
             <TableRow>
               <TableCell width={1} />
-              <TableCell width={1} />
+              {isRock && <TableCell width={1} />}
               <TableCell>{t('climbingareas.col_name')}</TableCell>
-              <TableCell align="right">
-                {t('climbingareas.col_routes')}
-              </TableCell>
-              <TableCell align="right">
-                {t('climbingareas.col_sectors')}
-              </TableCell>
+              {isRock && (
+                <>
+                  <TableCell align="right">
+                    {t('climbingareas.col_routes')}
+                  </TableCell>
+                  <TableCell align="right">
+                    {t('climbingareas.col_sectors')}
+                  </TableCell>
+                </>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -286,12 +342,14 @@ const CountryAccordion = ({
                 onMouseLeave={mobileMode ? undefined : () => setPreview(null)}
               >
                 <TableCell width={1}>{index + 1}.</TableCell>
-                <TableCell width={1} sx={{ pr: 0 }}>
-                  <AreaThumb
-                    photo={photos.get(area.osmId)}
-                    name={area.name ?? ''}
-                  />
-                </TableCell>
+                {isRock && (
+                  <TableCell width={1} sx={{ pr: 0 }}>
+                    <AreaThumb
+                      photo={photos.get(area.osmId)}
+                      name={area.name ?? ''}
+                    />
+                  </TableCell>
+                )}
                 <TableCell>
                   <Link
                     href={`/${area.osmType}/${area.osmId}?back=${backTarget}`}
@@ -300,25 +358,29 @@ const CountryAccordion = ({
                     {area.name || `N/A – ${area.osmType}/${area.osmId}`}
                   </Link>
                 </TableCell>
-                <TableCell align="right">
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      gap: 0.75,
-                    }}
-                  >
-                    {area.routeCount > 0 && (
-                      <PhotoCoverageRing
-                        total={area.routeCount}
-                        withPhoto={area.routesWithPhoto}
-                      />
-                    )}
-                    <span>{area.routeCount}</span>
-                  </Box>
-                </TableCell>
-                <TableCell align="right">{area.cragCount}</TableCell>
+                {isRock && (
+                  <>
+                    <TableCell align="right">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
+                          gap: 0.75,
+                        }}
+                      >
+                        {area.routeCount > 0 && (
+                          <PhotoCoverageRing
+                            total={area.routeCount}
+                            withPhoto={area.routesWithPhoto}
+                          />
+                        )}
+                        <span>{area.routeCount}</span>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">{area.cragCount}</TableCell>
+                  </>
+                )}
               </TableRow>
             ))}
           </TableBody>
@@ -328,22 +390,32 @@ const CountryAccordion = ({
   );
 };
 
-export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
+export const ClimbingAreasPanel = ({
+  items,
+  listType,
+}: ClimbingAreasPanelProps) => {
   const router = useRouter();
   const isMobileMode = useMobileMode();
   const { bbox } = useMapStateContext();
   const { setPreview } = useFeatureContext();
-  const [sortBy, setSortBy] = useState<SortBy>('photos');
-  const [filterViewport, setFilterViewport] = useState(false);
+  const copy = LIST_COPY[listType];
+  const sortOptions = sortOptionsFor(listType);
+  const [sortBy, setSortBy] = useState<SortBy>(() => resolveSortBy(listType));
+  const [filterViewport, setFilterViewport] = useState(sharedFilterViewport);
+  useClimbingListFilterSync(listType);
 
-  // `areas` is filled on SSR (direct visit / crawlers) and passed as initialData
-  // so the list is rendered straight into the HTML. On in-app navigation `areas`
+  useEffect(() => {
+    setSortBy(resolveSortBy(listType));
+  }, [listType]);
+
+  // `items` is filled on SSR (direct visit / crawlers) and passed as initialData
+  // so the list is rendered straight into the HTML. On in-app navigation `items`
   // is null and react-query fetches it on the client (and caches it).
   const { data, isLoading, isError } = useQuery(
-    ['climbingAreas'],
-    getClimbingAreas,
+    ['climbingAreas', listType],
+    () => getClimbingAreas(listType),
     {
-      initialData: areas ?? undefined,
+      initialData: items ?? undefined,
       staleTime: 1000 * 60 * 60, // 1h – the list changes rarely
     },
   );
@@ -371,45 +443,45 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
     <>
       <PanelSidePadding>
         <ClosePanelButton right onClick={handleClose} />
-        <h1>{t('climbingareas.title')}</h1>
-        {data && (
-          <>
-            <TextField
-              select
-              size="small"
-              fullWidth
-              label={t('climbingareas.sort_label')}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortBy)}
-              sx={{ mb: 1 }}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {t(option.labelId)}
-                </MenuItem>
-              ))}
-            </TextField>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={filterViewport}
-                  onChange={(e) => setFilterViewport(e.target.checked)}
-                />
-              }
-              label={t('climbingareas.filter_viewport')}
-              sx={{ mb: 1, display: 'block' }}
-            />
-            {groups.length === 0 && (
-              <Typography
-                sx={{
-                  color: 'text.secondary',
-                  mb: 2,
-                }}
-              >
-                {t('climbingareas.no_areas_in_viewport')}
-              </Typography>
-            )}
-          </>
+        <h1>{t(copy.title)}</h1>
+        <ClimbingListTypeTabs listType={listType} />
+        <Stack
+          direction="row"
+          spacing={0.5}
+          sx={{
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            mt: -0.5,
+            mb: 0.5,
+            mr: -1,
+          }}
+        >
+          <ClimbingAreasSort
+            sortBy={sortBy}
+            onSortByChange={(value) => {
+              sharedSortBy = value;
+              setSortBy(value);
+            }}
+            options={sortOptions}
+            isDefault={sortBy === defaultSortFor(listType)}
+          />
+          <ClimbingAreasFilter
+            filterViewport={filterViewport}
+            onFilterViewportChange={(checked) => {
+              sharedFilterViewport = checked;
+              setFilterViewport(checked);
+            }}
+          />
+        </Stack>
+        {data && groups.length === 0 && (
+          <Typography
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
+            {t(filterViewport ? copy.emptyViewport : copy.empty)}
+          </Typography>
         )}
       </PanelSidePadding>
 
@@ -420,6 +492,7 @@ export const ClimbingAreasPanel = ({ areas }: ClimbingAreasPanelProps) => {
             group={group}
             defaultExpanded={false}
             backTarget={backTarget}
+            listType={listType}
           />
         ))
       ) : isError ? (
