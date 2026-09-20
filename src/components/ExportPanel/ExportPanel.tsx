@@ -16,7 +16,6 @@ import {
   getDbExportInfo,
 } from '../../services/climbing-tiles/getDbExportInfo';
 import { t } from '../../services/intl';
-import { OpenPointsCard } from '../AboutPanel/OpenPointsCard';
 import { useMobileMode } from '../helpers';
 import { GITHUB_REPO_URL } from '../HomepagePanel/donationLinks';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
@@ -221,7 +220,6 @@ export const ExportPanel = () => {
         >
           {t('export.lead')}
         </Typography>
-        <OpenPointsCard />
         <Download />
       </Box>
       <Box sx={{ mt: 5, mb: 4 }}>
