@@ -1031,7 +1031,7 @@ export default {
   'climbing_rock.limestone': 'vápenec',
   'climbing_rock.sandstone': 'pískovec',
   'climbing_rock.granite': 'žula',
-  'climbing_rock.quartzite': 'křemenec',
+  'climbing_rock.quartzite': 'kvarcit',
   'climbing_rock.gneiss': 'rula', // legacy OSM value
   'climbing_rock.orthogneiss': 'ortorula',
   'climbing_rock.paragneiss': 'pararula',
