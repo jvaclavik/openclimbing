@@ -75,6 +75,18 @@ export type ClimbingSearchRecord = {
   routeCount?: number;
 };
 
+export type ClimbingNearbyRecord = {
+  type: 'area' | 'crag';
+  lon: number;
+  lat: number;
+  osmType: OsmType;
+  osmId: number;
+  name: string;
+  distanceMeters: number;
+  routeCount?: number;
+  parentName?: string;
+};
+
 export type ClimbingTilesFeature = GeojsonFeature<
   Geometry,
   ClimbingTilesProperties
