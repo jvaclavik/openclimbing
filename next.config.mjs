@@ -33,8 +33,9 @@ const nextConfig = {
       '@mui/system',
     ],
   },
-  // Keep native Skia binary out of the webpack bundle (OG / precip PNG APIs).
-  serverExternalPackages: ['@napi-rs/canvas'],
+  // Native addons must stay outside the webpack bundle, otherwise `bindings`
+  // looks next to the chunk and never finds the `.node` file.
+  serverExternalPackages: ['@napi-rs/canvas', 'better-sqlite3'],
   i18n: {
     locales: ['default', ...Object.keys(LANGUAGES)], // we let next only handle URL, but chosen locale is in getServerIntl()
     defaultLocale: 'default',

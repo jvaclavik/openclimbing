@@ -1,5 +1,9 @@
 import { getDb } from '../db/db';
 import { OsmType } from '../../services/types';
+import {
+  ClimbingListType,
+  isClimbingListType,
+} from '../../services/climbing-areas/climbingListTypes';
 
 export type ClimbingArea = {
   osmType: OsmType;
@@ -25,13 +29,22 @@ type Row = {
   lat: number;
 };
 
-export const getClimbingAreas = (): ClimbingArea[] => {
+const LIST_SQL: Record<ClimbingListType, string> = {
+  rock: `type = 'area' AND "osmType" = 'relation'`,
+  ferrata: `type = 'ferrata' AND "nameRaw" IS NOT NULL AND "nameRaw" != ''`,
+  gym: `type = 'gym' AND "nameRaw" IS NOT NULL AND "nameRaw" != ''`,
+};
+
+export const getClimbingAreas = (
+  listType: ClimbingListType = 'rock',
+): ClimbingArea[] => {
+  const where = LIST_SQL[isClimbingListType(listType) ? listType : 'rock'];
   const rows = getDb()
     .prepare<[], Row>(
       `SELECT "osmType", "osmId", COALESCE("name", "nameRaw") AS name, members,
         "countryCode", "routeCount", "routesWithPhoto", "lon", "lat"
        FROM climbing_features
-       WHERE type = 'area' AND "osmType" = 'relation'
+       WHERE ${where}
        ORDER BY "countryCode" IS NULL, "countryCode", name COLLATE NOCASE`,
     )
     .all();

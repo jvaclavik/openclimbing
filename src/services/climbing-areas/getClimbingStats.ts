@@ -15,7 +15,7 @@ const getFromSqlite = async (): Promise<ClimbingStatsResponse> => {
 
 // fetchJson caches by URL (sessionStorage in dev, forever) - bump when the
 // shape of the response changes, otherwise clients keep the old one
-const VERSION = 3; // bump: routesWithPhotoCount now sums crags, not nested areas
+const VERSION = 4; // bump: ferrata/gym counts for homepage stats
 
 export const CLIMBING_STATS_URL = `${CLIMBING_TILES_HOST}api/climbing-tiles/stats?v=${VERSION}`;
 

@@ -3,8 +3,10 @@ import { Skeleton, Theme, Typography } from '@mui/material';
 import React from 'react';
 import { useQuery } from 'react-query';
 import { getClimbingStats } from '../../services/climbing-areas/getClimbingStats';
+import type { ClimbingListType } from '../../services/climbing-areas/climbingListTypes';
 import { t } from '../../services/intl';
 import type { ClimbingStatsResponse } from '../../types';
+import { TranslationId } from '../../services/types';
 
 // panels sit on `background.default`, so surfaces stand out by a subtle tint
 export const tint = (theme: Theme, strength: number) =>
@@ -108,15 +110,49 @@ const Stat = ({ value, label }: { value?: number; label: string }) => (
   </TintedCard>
 );
 
+const STAT_ITEMS: Record<
+  ClimbingListType,
+  {
+    getValue: (stats?: ClimbingStatsResponse | null) => number | undefined;
+    label: TranslationId;
+  }[]
+> = {
+  rock: [
+    { getValue: (stats) => stats?.areasCount, label: 'stats.areas' },
+    { getValue: (stats) => stats?.routesCount, label: 'stats.routes' },
+    { getValue: (stats) => stats?.routesWithPhotoCount, label: 'stats.photos' },
+    { getValue: (stats) => stats?.countriesCount, label: 'stats.countries' },
+  ],
+  ferrata: [
+    { getValue: (stats) => stats?.ferratasCount, label: 'stats.ferratas' },
+    {
+      getValue: (stats) => stats?.ferratasCountriesCount,
+      label: 'stats.countries',
+    },
+  ],
+  gym: [
+    { getValue: (stats) => stats?.gymsCount, label: 'stats.gyms' },
+    {
+      getValue: (stats) => stats?.gymsCountriesCount,
+      label: 'stats.countries',
+    },
+  ],
+};
+
 export const ClimbingNumbers = ({
   stats,
+  listType = 'rock',
 }: {
   stats: ClimbingStatsResponse | null | undefined;
+  listType?: ClimbingListType;
 }) => (
   <StatsGrid>
-    <Stat value={stats?.areasCount} label={t('stats.areas')} />
-    <Stat value={stats?.routesCount} label={t('stats.routes')} />
-    <Stat value={stats?.routesWithPhotoCount} label={t('stats.photos')} />
-    <Stat value={stats?.countriesCount} label={t('stats.countries')} />
+    {STAT_ITEMS[listType].map(({ getValue, label }) => (
+      <Stat
+        key={`${listType}-${label}`}
+        value={getValue(stats)}
+        label={t(label)}
+      />
+    ))}
   </StatsGrid>
 );

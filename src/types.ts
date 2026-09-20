@@ -17,6 +17,10 @@ export type ClimbingStatsResponse = {
   areasCount: number;
   routesWithPhotoCount: number;
   countriesCount: number;
+  ferratasCount: number;
+  ferratasCountriesCount: number;
+  gymsCount: number;
+  gymsCountriesCount: number;
 };
 
 // @see climbingTilesSource#processFeature()

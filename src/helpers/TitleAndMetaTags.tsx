@@ -2,7 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { getUtfStrikethrough, join } from '../utils';
-import { Feature } from '../services/types';
+import { Feature, TranslationId } from '../services/types';
 import { useFeatureContext } from '../components/utils/FeatureContext';
 import { getFullOsmappLink, getShortId } from '../services/helpers';
 import { getLabel, getParentLabel, getDescription } from './featureLabel';
@@ -15,8 +15,27 @@ import {
   PROJECT_URL,
 } from '../services/project';
 import { t } from '../services/intl';
+import { CLIMBING_LIST_PATHS } from '../services/climbing-areas/climbingListTypes';
 
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
+
+const CLIMBING_LIST_META: Record<
+  string,
+  { title: TranslationId; description: TranslationId }
+> = {
+  [CLIMBING_LIST_PATHS.rock]: {
+    title: 'climbingareas.title',
+    description: 'climbingareas.serp',
+  },
+  [CLIMBING_LIST_PATHS.ferrata]: {
+    title: 'climbingareas.title_ferrata',
+    description: 'climbingareas.serp_ferrata',
+  },
+  [CLIMBING_LIST_PATHS.gym]: {
+    title: 'climbingareas.title_gym',
+    description: 'climbingareas.serp_gym',
+  },
+};
 
 const getCustomLabel = (feature: Feature) => {
   switch (feature.tags.climbing) {
@@ -115,16 +134,22 @@ export const TitleAndMetaTags = () => {
     );
   }
 
-  const title = PROJECT_NAME;
-  const url = PROJECT_URL;
+  const listMeta = CLIMBING_LIST_META[router.pathname];
+  const title = listMeta
+    ? `${t(listMeta.title)} | ${PROJECT_NAME}`
+    : PROJECT_NAME;
+  const pageTitle = listMeta
+    ? title
+    : `${PROJECT_NAME}${isOpenClimbing ? ` | ${t('project.openclimbing.climbing_guide')}` : ''}`;
+  const url = listMeta ? canonicalUrl : PROJECT_URL;
   const image = PROJECT_OG_IMAGE;
-  const description = t(PROJECT_SERP_DESCRIPTION);
+  const description = listMeta
+    ? t(listMeta.description)
+    : t(PROJECT_SERP_DESCRIPTION);
 
   return (
     <Head>
-      <title>
-        {`${PROJECT_NAME}${isOpenClimbing ? ` | ${t('project.openclimbing.climbing_guide')}` : ''}`}
-      </title>
+      <title>{pageTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
 

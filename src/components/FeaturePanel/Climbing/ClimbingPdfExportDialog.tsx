@@ -880,7 +880,11 @@ export const RoutesSummary = ({
               </td>
               {showTicks && (
                 <TickCell>
-                  {tickStyle != null ? <TickStyleBadge style={tickStyle} /> : ''}
+                  {tickStyle != null ? (
+                    <TickStyleBadge style={tickStyle} />
+                  ) : (
+                    ''
+                  )}
                 </TickCell>
               )}
               <GradeCell>
@@ -1197,7 +1201,11 @@ const PhotoExport = ({
       </svg>
 
       {!hideRoutesSummary && (
-        <RoutesSummary items={photoRoutes} ticks={ticks} showTicks={showTicks} />
+        <RoutesSummary
+          items={photoRoutes}
+          ticks={ticks}
+          showTicks={showTicks}
+        />
       )}
     </PhotoBlock>
   );

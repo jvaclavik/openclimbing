@@ -7,10 +7,10 @@ type Props = {
   items: ClimbingArea[] | null;
 };
 
-const ClimbingAreasPage: NextPage<Props> = ({ items }) => (
-  <ClimbingAreasPanel items={items} listType="rock" />
+const ClimbingGymsPage: NextPage<Props> = ({ items }) => (
+  <ClimbingAreasPanel items={items} listType="gym" />
 );
 
-ClimbingAreasPage.getInitialProps = getClimbingListInitialProps('rock');
+ClimbingGymsPage.getInitialProps = getClimbingListInitialProps('gym');
 
-export default ClimbingAreasPage;
+export default ClimbingGymsPage;

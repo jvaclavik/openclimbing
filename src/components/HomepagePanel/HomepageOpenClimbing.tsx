@@ -22,7 +22,15 @@ import {
   PanelContent,
   PanelScrollbars,
 } from '../utils/PanelHelpers';
+import { ClimbingListTypeTabs } from '../ClimbingAreasPanel/ClimbingListTypeTabs';
+import {
+  CLIMBING_LIST_PATHS,
+  ClimbingListType,
+  listTypeFromPoiTypes,
+} from '../../services/climbing-areas/climbingListTypes';
+import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
 import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
+import { HomepageNearbyPoiList } from './HomepageNearbyPoiList';
 
 const Content = styled.div`
   height: 100%;
@@ -133,33 +141,56 @@ const Buttons = ({ onClose }) => (
   </MobileOnly>
 );
 
-const Gallery = () => (
-  <Box
-    sx={{
-      mt: 4,
-    }}
-  >
-    <SectionHeading centered>{t('homepage.gallery.title')}</SectionHeading>
-    <HomepageOpenClimbingGallery />
-    <Stack
+const GALLERY_COPY = {
+  rock: {
+    title: 'homepage.gallery.title',
+    more: 'homepage.discover_more',
+  },
+  ferrata: {
+    title: 'homepage.gallery.title_ferrata',
+    more: 'homepage.discover_more_ferrata',
+  },
+  gym: {
+    title: 'homepage.gallery.title_gym',
+    more: 'homepage.discover_more_gym',
+  },
+} as const;
+
+const Gallery = ({ listType }: { listType: ClimbingListType }) => {
+  const copy = GALLERY_COPY[listType];
+
+  return (
+    <Box
       sx={{
-        alignItems: 'center',
-        mt: 1,
+        mt: 4,
       }}
     >
-      <Button
-        component={Link}
-        href="/climbing-areas"
-        locale={intl.lang}
-        variant="text"
-        size="small"
-        endIcon={<ArrowForwardIcon />}
+      <SectionHeading centered>{t(copy.title)}</SectionHeading>
+      {listType === 'rock' ? (
+        <HomepageOpenClimbingGallery />
+      ) : (
+        <HomepageNearbyPoiList listType={listType} />
+      )}
+      <Stack
+        sx={{
+          alignItems: 'center',
+          mt: 1,
+        }}
       >
-        {t('homepage.discover_more')}
-      </Button>
-    </Stack>
-  </Box>
-);
+        <Button
+          component={Link}
+          href={CLIMBING_LIST_PATHS[listType]}
+          locale={intl.lang}
+          variant="text"
+          size="small"
+          endIcon={<ArrowForwardIcon />}
+        >
+          {t(copy.more)}
+        </Button>
+      </Stack>
+    </Box>
+  );
+};
 
 const AboutTeaser = styled(Link)`
   display: flex;
@@ -232,6 +263,8 @@ const Footer = () => (
 
 export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
   const stats = useClimbingStats();
+  const { poiTypes } = useUserSettingsContext().climbingFilter;
+  const listType = listTypeFromPoiTypes(poiTypes);
   const isMobileMode = useMobileMode();
   // homepage drawer defaults to full – treat unknown (SSR / before mount) as expanded
   const { drawerSnap } = useMapChrome();
@@ -270,13 +303,20 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
               <Subtitle />
             </Stack>
             <Description />
-            <Gallery />
+            <Gallery listType={listType} />
             <Box
               sx={{
                 mt: 3,
               }}
             >
-              <ClimbingNumbers stats={stats} />
+              <ClimbingNumbers stats={stats} listType={listType} />
+            </Box>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
+              <ClimbingListTypeTabs listType={listType} navigate={false} />
             </Box>
             <Buttons onClose={onClose} />
           </Stack>
