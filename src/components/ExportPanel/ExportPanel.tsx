@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DataObjectIcon from '@mui/icons-material/DataObject';
+import BalanceIcon from '@mui/icons-material/Balance';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DownloadIcon from '@mui/icons-material/Download';
 import MapIcon from '@mui/icons-material/Map';
-import ScheduleIcon from '@mui/icons-material/Schedule';
 import StorageIcon from '@mui/icons-material/Storage';
-import { Box, Button, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Button, Link, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import type { SvgIconComponent } from '@mui/icons-material';
 import Router from 'next/router';
@@ -29,6 +29,10 @@ import {
 
 const SCHEMA_URL = `${GITHUB_REPO_URL}/blob/master/src/server/db/schema.sql`;
 const DB_EXPORT_REPO_URL = 'https://github.com/zbycz/openclimbing-db-export';
+const OSM_COPYRIGHT_URL = 'https://www.openstreetmap.org/copyright';
+
+// shown until the metadata arrive - the server may have no export on disk yet
+const SIZE_FALLBACK = '~60 MB';
 
 const formatSize = (bytes: number) =>
   bytes < 1024 * 1024 ? '< 1 MB' : `${Math.round(bytes / 1024 / 1024)} MB`;
@@ -85,28 +89,30 @@ const Fact = ({
 );
 
 const Download = () => {
-  const { data: info, isLoading } = useQuery(
-    ['dbExportInfo'],
-    getDbExportInfo,
-    {
-      staleTime: 1000 * 60 * 5,
-    },
-  );
+  const { data: info } = useQuery(['dbExportInfo'], getDbExportInfo, {
+    staleTime: 1000 * 60 * 5,
+  });
 
-  const size = info ? formatSize(info.size) : undefined;
+  const size = info ? formatSize(info.size) : SIZE_FALLBACK;
 
   return (
     <DownloadCard>
       <Watermark>
         <StorageIcon sx={{ fontSize: 150 }} />
       </Watermark>
-      <Fact icon={DataObjectIcon}>
-        {t('export.download_format')}{' '}
-        {isLoading && <Skeleton width={70} sx={{ display: 'inline-block' }} />}
-        {size && t('export.download_size', { size })}
+      <Fact icon={MapIcon}>{t('export.download_features')}</Fact>
+      <Fact icon={DoneAllIcon}>{t('export.download_ticks')}</Fact>
+      <Fact icon={BalanceIcon}>
+        {t('export.download_license')}{' '}
+        <Link
+          href={OSM_COPYRIGHT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          color="inherit"
+        >
+          openstreetmap.org/copyright
+        </Link>
       </Fact>
-      <Fact icon={ScheduleIcon}>{t('export.download_freshness')}</Fact>
-      <Fact icon={MapIcon}>{t('export.download_contents')}</Fact>
       <form method="post" action={DB_EXPORT_URL}>
         <Button
           type="submit"
@@ -139,7 +145,7 @@ const Download = () => {
           zIndex: 1,
         }}
       >
-        {t('export.download_note')}
+        {t('export.download_note', { size })}
       </Typography>
     </DownloadCard>
   );
@@ -236,17 +242,6 @@ export const ExportPanel = () => {
             href={DB_EXPORT_REPO_URL}
           />
         </Stack>
-        <Typography
-          variant="caption"
-          sx={{
-            color: 'text.secondary',
-            display: 'block',
-            mt: 2,
-            lineHeight: 1.6,
-          }}
-        >
-          {t('export.license')}
-        </Typography>
       </Box>
     </PanelSidePadding>
   );

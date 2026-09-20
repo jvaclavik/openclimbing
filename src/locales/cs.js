@@ -389,12 +389,11 @@ export default {
   'export.heading': 'Stáhnout export databáze',
   'export.lead':
     'Všechno, co vidíš na mapě, jsou otevřená data. Můžeš si je vyexportovat přímo z OpenStreetMap a Wikipedie, nebo použít náš extrakt.',
-  'export.download_format': 'Jeden soubor SQLite – otevřeš ho v jakémkoli SQL klientovi.',
-  'export.download_size': 'Přibližná velikost __size__.',
-  'export.download_freshness': 'Vytvoří se na počkání, nikdy není starší než 5 minut.',
-  'export.download_contents': 'Obsahuje všechna data, která vidíš na mapě, kromě uživatelských ticků.',
+  'export.download_features': 'Obsahuje všechny lezecké objekty a ferraty z OSM včetně geometrií',
+  'export.download_ticks': 'Obsahuje všechny uživatelské ticky',
+  'export.download_license': 'ODbL od OpenStreetMap – u odvozených dat musí být uvedená licence, viz',
   'export.download_button': 'Stáhnout databázi',
-  'export.download_note': 'Příprava souboru může pár vteřin trvat.',
+  'export.download_note': 'SQLite db, __size__',
   'export.dev_heading': 'Pro vývojáře',
   'export.schema_title': 'Schéma databáze',
   'export.schema_desc': 'Všechny tabulky a sloupce v jednom SQL souboru – stejné schéma má i stažený soubor.',
@@ -402,7 +401,6 @@ export default {
   'export.repo_desc':
     'Repozitář, kam GitHub Action každou noc ukládá tenhle export – commituje schémata tabulek a data v CSV, takže je v gitu vidět historie databáze. Největší tabulky se tam vynechávají, pro kompletní data si stáhni SQLite výše.',
   'export.repo_cta': 'Otevřít repozitář',
-  'export.license': 'Data pocházejí z OpenStreetMap a jsou pod licencí ODbL – použij je kdekoli, jen je nech otevřená.',
 
   'searchbox.placeholder': 'Hledat',
   'searchbox.category': 'kategorie',

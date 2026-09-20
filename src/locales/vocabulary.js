@@ -402,12 +402,11 @@ export default {
 
   'export.heading': 'Download database export',
   'export.lead': 'Everything you see on the map is open data. You can export the data directly from OpenStreetMap and Wikipedia or use our extract.',
-  'export.download_format': 'A single SQLite file – open it in any SQL client.',
-  'export.download_size': 'Approximate size __size__.',
-  'export.download_freshness': 'Generated on demand, never older than 5 minutes.',
-  'export.download_contents': 'Contains all the data you see on the map, except the user ticks.',
+  'export.download_features': 'Contains all climbing and via ferrata OSM features, including their geometries',
+  'export.download_ticks': 'Contains all user ticks',
+  'export.download_license': 'ODbL by OpenStreetMap – attribution needs to be shown for any derived data, consult',
   'export.download_button': 'Download database',
-  'export.download_note': 'Preparing the file may take a few seconds.',
+  'export.download_note': 'SQLite db, __size__',
   'export.dev_heading': 'For developers',
   'export.schema_title': 'Database schema',
   'export.schema_desc': 'All tables and columns in one SQL file – the same schema the downloaded file has.',
@@ -415,7 +414,6 @@ export default {
   'export.repo_desc':
     'A repository where a GitHub Action stores this export every night – table schemas and CSV data are committed, so the history of the database is visible in git. The biggest tables are skipped there, download the SQLite file above for the full data.',
   'export.repo_cta': 'Open the repository',
-  'export.license': 'The data comes from OpenStreetMap and is available under the ODbL licence – use it anywhere, just keep it open.',
 
   'searchbox.placeholder': 'Search',
   'searchbox.category': 'category',
