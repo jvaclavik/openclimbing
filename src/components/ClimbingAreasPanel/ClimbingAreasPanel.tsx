@@ -51,6 +51,7 @@ import {
   ProgressiveImageWrapper,
 } from '../utils/ProgressiveImage';
 import { tint } from '../utils/panelUi';
+import { ViaFerrataScaleChip } from '../utils/ViaFerrataScaleChip';
 import styled from '@emotion/styled';
 
 type ClimbingAreasPanelProps = {
@@ -351,12 +352,40 @@ const CountryAccordion = ({
                   </TableCell>
                 )}
                 <TableCell>
-                  <Link
-                    href={`/${area.osmType}/${area.osmId}?back=${backTarget}`}
-                    locale={intl.lang}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      minWidth: 0,
+                    }}
                   >
-                    {area.name || `N/A – ${area.osmType}/${area.osmId}`}
-                  </Link>
+                    <Link
+                      href={`/${area.osmType}/${area.osmId}?back=${backTarget}`}
+                      locale={intl.lang}
+                      style={{ flex: 1, minWidth: 0 }}
+                    >
+                      {area.name || `N/A – ${area.osmType}/${area.osmId}`}
+                    </Link>
+                    {area.viaFerrataScale && (
+                      <ViaFerrataScaleChip scale={area.viaFerrataScale} />
+                    )}
+                    {area.city && (
+                      <Typography
+                        noWrap
+                        component="span"
+                        title={area.city}
+                        sx={{
+                          flexShrink: 0,
+                          maxWidth: '40%',
+                          fontSize: '0.8rem',
+                          color: 'text.secondary',
+                        }}
+                      >
+                        {area.city}
+                      </Typography>
+                    )}
+                  </Box>
                 </TableCell>
                 {isRock && (
                   <>

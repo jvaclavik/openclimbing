@@ -1,6 +1,8 @@
 import {
   getViaFerrataScaleColor,
+  getViaFerrataScaleRangeColor,
   getViaFerrataGrades,
+  formatViaFerrataScaleRange,
   VIA_FERRATA_SCALE_COLORS,
 } from '../viaFerrataScale';
 
@@ -53,6 +55,15 @@ describe('getViaFerrataGrades', () => {
   });
 });
 
+describe('formatViaFerrataScaleRange', () => {
+  it('returns a single scale or a min–max range', () => {
+    expect(formatViaFerrataScaleRange(['2+'])).toBe('2+');
+    expect(formatViaFerrataScaleRange(['4', '2+', '3'])).toBe('2+–4');
+    expect(formatViaFerrataScaleRange(['3', '3', 'x'])).toBe('3');
+    expect(formatViaFerrataScaleRange(['nope'])).toBeNull();
+  });
+});
+
 describe('VIA_FERRATA_SCALE_COLORS', () => {
   it('has colors for all valid scale values', () => {
     expect(VIA_FERRATA_SCALE_COLORS['0']).toBeDefined();
@@ -69,5 +80,11 @@ describe('getViaFerrataScaleColor', () => {
   it('returns undefined for invalid values', () => {
     expect(getViaFerrataScaleColor('8')).toBeUndefined();
     expect(getViaFerrataScaleColor('x')).toBeUndefined();
+  });
+
+  it('colors a range by the harder grade', () => {
+    expect(getViaFerrataScaleRangeColor('2+–4')).toBe(
+      VIA_FERRATA_SCALE_COLORS['4'],
+    );
   });
 });

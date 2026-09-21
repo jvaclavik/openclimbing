@@ -1,6 +1,8 @@
 import { ClimbingStatsResponse } from '../../types';
 import { getDb } from '../db/db';
 import { ClimbingStatsRow } from '../db/types';
+import { OsmType } from '../../services/types';
+import { omitRelationMembers } from './getClimbingAreas';
 
 type FeatureAggregate = {
   areasCount: number;
@@ -12,36 +14,64 @@ type FeatureAggregate = {
   gymsCountriesCount: number;
 };
 
+type NamedPoiRow = {
+  osmType: OsmType;
+  osmId: number;
+  members: string | null;
+  countryCode: string | null;
+};
+
 const NAMED = `"nameRaw" IS NOT NULL AND "nameRaw" != ''`;
+
+const getListablePoiAggregate = (type: 'ferrata' | 'gym') => {
+  const rows = getDb()
+    .prepare<[string], NamedPoiRow>(
+      `SELECT "osmType", "osmId", members, "countryCode"
+       FROM climbing_features
+       WHERE type = ? AND ${NAMED}`,
+    )
+    .all(type);
+  const listable = omitRelationMembers(rows);
+  return {
+    count: listable.length,
+    countriesCount: new Set(
+      listable.map((row) => row.countryCode).filter(Boolean),
+    ).size,
+  };
+};
 
 // climbing_tiles_stats is written by /refresh and knows nothing about areas,
 // so these are aggregated live – one pass over climbing_features.
 const getFeatureAggregate = (): FeatureAggregate => {
   const row = getDb()
-    .prepare<[], FeatureAggregate>(
+    .prepare<
+      [],
+      Pick<
+        FeatureAggregate,
+        'areasCount' | 'countriesCount' | 'routesWithPhotoCount'
+      >
+    >(
       `SELECT
           COALESCE(SUM(CASE WHEN type = 'area' AND "osmType" = 'relation' THEN 1 ELSE 0 END), 0) AS "areasCount",
           COUNT(DISTINCT CASE WHEN type = 'area' AND "osmType" = 'relation' THEN "countryCode" END) AS "countriesCount",
-          COALESCE(SUM(CASE WHEN type = 'crag' THEN "routesWithPhoto" ELSE 0 END), 0) AS "routesWithPhotoCount",
-          COALESCE(SUM(CASE WHEN type = 'ferrata' AND ${NAMED} THEN 1 ELSE 0 END), 0) AS "ferratasCount",
-          COUNT(DISTINCT CASE WHEN type = 'ferrata' AND ${NAMED} THEN "countryCode" END) AS "ferratasCountriesCount",
-          COALESCE(SUM(CASE WHEN type = 'gym' AND ${NAMED} THEN 1 ELSE 0 END), 0) AS "gymsCount",
-          COUNT(DISTINCT CASE WHEN type = 'gym' AND ${NAMED} THEN "countryCode" END) AS "gymsCountriesCount"
+          COALESCE(SUM(CASE WHEN type = 'crag' THEN "routesWithPhoto" ELSE 0 END), 0) AS "routesWithPhotoCount"
        FROM climbing_features`,
     )
     .get();
 
-  return (
-    row ?? {
-      areasCount: 0,
-      countriesCount: 0,
-      routesWithPhotoCount: 0,
-      ferratasCount: 0,
-      ferratasCountriesCount: 0,
-      gymsCount: 0,
-      gymsCountriesCount: 0,
-    }
-  );
+  const ferratas = getListablePoiAggregate('ferrata');
+  const gyms = getListablePoiAggregate('gym');
+
+  return {
+    areasCount: 0,
+    countriesCount: 0,
+    routesWithPhotoCount: 0,
+    ...row,
+    ferratasCount: ferratas.count,
+    ferratasCountriesCount: ferratas.countriesCount,
+    gymsCount: gyms.count,
+    gymsCountriesCount: gyms.countriesCount,
+  };
 };
 
 export const getClimbingStats = (): ClimbingStatsResponse => {
