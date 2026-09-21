@@ -1,3 +1,4 @@
+import { gradeColors } from '../climbing/gradeData';
 import {
   getViaFerrataScaleColor,
   getViaFerrataScaleRangeColor,
@@ -69,12 +70,26 @@ describe('VIA_FERRATA_SCALE_COLORS', () => {
     expect(VIA_FERRATA_SCALE_COLORS['0']).toBeDefined();
     expect(VIA_FERRATA_SCALE_COLORS['6']).toBeDefined();
   });
+
+  it('uses the same color ramp as climbing grades', () => {
+    expect(VIA_FERRATA_SCALE_COLORS['0']).toEqual(gradeColors['1-']);
+    expect(VIA_FERRATA_SCALE_COLORS['1']).toEqual(gradeColors['1-']);
+    expect(VIA_FERRATA_SCALE_COLORS['2']).toEqual(gradeColors['4-']);
+    expect(VIA_FERRATA_SCALE_COLORS['3']).toEqual(gradeColors['6-']);
+    expect(VIA_FERRATA_SCALE_COLORS['4']).toEqual(gradeColors['8-']);
+    expect(VIA_FERRATA_SCALE_COLORS['5']).toEqual(gradeColors['10-']);
+    expect(VIA_FERRATA_SCALE_COLORS['6']).toEqual(gradeColors['10-']);
+  });
 });
 
 describe('getViaFerrataScaleColor', () => {
   it('uses base color for plus and minus grades', () => {
-    expect(getViaFerrataScaleColor('2+')).toBe(VIA_FERRATA_SCALE_COLORS['2']);
-    expect(getViaFerrataScaleColor('3-')).toBe(VIA_FERRATA_SCALE_COLORS['3']);
+    expect(getViaFerrataScaleColor('2+', 'light')).toBe(
+      VIA_FERRATA_SCALE_COLORS['2'].light,
+    );
+    expect(getViaFerrataScaleColor('3-', 'dark')).toBe(
+      VIA_FERRATA_SCALE_COLORS['3'].dark,
+    );
   });
 
   it('returns undefined for invalid values', () => {
@@ -83,8 +98,8 @@ describe('getViaFerrataScaleColor', () => {
   });
 
   it('colors a range by the harder grade', () => {
-    expect(getViaFerrataScaleRangeColor('2+–4')).toBe(
-      VIA_FERRATA_SCALE_COLORS['4'],
+    expect(getViaFerrataScaleRangeColor('2+–4', 'light')).toBe(
+      VIA_FERRATA_SCALE_COLORS['4'].light,
     );
   });
 });

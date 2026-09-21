@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { useTheme } from '@mui/material';
 import { t } from '../../../services/intl';
 import {
   getViaFerrataScaleColor,
@@ -30,6 +31,7 @@ const GradeDetail = styled.span`
 
 // TODO perhaps merge with ClimbingGradeRenderer in future
 export const ScaleRenderer = ({ k, v }) => {
+  const theme = useTheme();
   const label =
     k === 'via_ferrata_scale'
       ? t('climbing_renderer.via_ferrata_scale')
@@ -38,7 +40,9 @@ export const ScaleRenderer = ({ k, v }) => {
         : k;
 
   const color =
-    k === 'via_ferrata_scale' ? (getViaFerrataScaleColor(v) ?? '#555') : '#555';
+    k === 'via_ferrata_scale'
+      ? (getViaFerrataScaleColor(v, theme.palette.mode) ?? '#555')
+      : '#555';
 
   const grades = k === 'via_ferrata_scale' ? getViaFerrataGrades(v) : null;
 
