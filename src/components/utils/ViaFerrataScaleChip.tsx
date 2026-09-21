@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useTheme } from '@mui/material';
 import React from 'react';
 import { getViaFerrataScaleRangeColor } from '../../services/tagging/viaFerrataScale';
 
@@ -15,6 +16,8 @@ const Chip = styled.span<{ $color: string }>`
 `;
 
 export const ViaFerrataScaleChip = ({ scale }: { scale: string }) => {
-  const color = getViaFerrataScaleRangeColor(scale) ?? '#555';
+  const theme = useTheme();
+  const color =
+    getViaFerrataScaleRangeColor(scale, theme.palette.mode) ?? '#555';
   return <Chip $color={color}>{scale}</Chip>;
 };

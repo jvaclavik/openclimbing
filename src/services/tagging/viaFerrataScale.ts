@@ -7,6 +7,8 @@
  * @see https://wiki.openstreetmap.org/wiki/Key:via_ferrata_scale
  */
 
+import { gradeColors } from './climbing/gradeData';
+
 export interface ViaFerrataGrades {
   french: string;
   german?: string;
@@ -23,15 +25,17 @@ const GRADE_MAP: Record<string, ViaFerrataGrades> = {
   '6': { french: 'ABO', german: 'K6' },
 };
 
-// Colors for via ferrata difficulty levels
-export const VIA_FERRATA_SCALE_COLORS: Record<string, string> = {
-  '0': '#4caf50',
-  '1': '#2196f3',
-  '2': '#ff9800',
-  '3': '#f44336',
-  '4': '#9c27b0',
-  '5': '#4e342e',
-  '6': '#212121',
+type GradeColor = (typeof gradeColors)['1-'];
+
+// Same teal → lime → amber → orange → red ramp as climbing grades.
+export const VIA_FERRATA_SCALE_COLORS: Record<string, GradeColor> = {
+  '0': gradeColors['1-'],
+  '1': gradeColors['1-'],
+  '2': gradeColors['4-'],
+  '3': gradeColors['6-'],
+  '4': gradeColors['8-'],
+  '5': gradeColors['10-'],
+  '6': gradeColors['10-'],
 };
 
 const FERRATA_SCALE_REGEX = /^([0-6])([+-])?$/;
@@ -60,13 +64,16 @@ export const getViaFerrataGrades = (
   };
 };
 
-export const getViaFerrataScaleColor = (value: string): string | undefined => {
+export const getViaFerrataScaleColor = (
+  value: string,
+  mode: 'light' | 'dark' = 'light',
+): string | undefined => {
   const match = value.match(FERRATA_SCALE_REGEX);
   if (!match) {
     return undefined;
   }
   const [, baseScale] = match;
-  return VIA_FERRATA_SCALE_COLORS[baseScale];
+  return VIA_FERRATA_SCALE_COLORS[baseScale]?.[mode];
 };
 
 const getViaFerrataScaleRank = (value: string): number | undefined => {
@@ -94,7 +101,8 @@ export const formatViaFerrataScaleRange = (values: string[]): string | null => {
 
 export const getViaFerrataScaleRangeColor = (
   value: string,
+  mode: 'light' | 'dark' = 'light',
 ): string | undefined => {
   const max = value.includes('–') ? value.slice(value.indexOf('–') + 1) : value;
-  return getViaFerrataScaleColor(max);
+  return getViaFerrataScaleColor(max, mode);
 };
