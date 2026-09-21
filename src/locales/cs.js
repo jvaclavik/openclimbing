@@ -344,6 +344,7 @@ export default {
   'about.compare_us_1': 'Novou cestu zakreslí kdokoli',
   'about.compare_us_2': 'Data zdarma a pro všechny',
   'about.compare_us_3': 'Offline PDF průvodce ke stažení',
+  'about.export_cta': 'Stáhnout databázi',
 
   'about.features_heading': 'Funkce',
   'about.features_lead': 'Víc než mapa. Nástroje, které použiješ v den, kdy opravdu vyrazíš lézt.',
@@ -384,6 +385,22 @@ export default {
   'about.support_code': 'Pošlete PR',
   'about.support_feedback': 'Napište nám',
   'about.support_donate': 'Přispějte finančně',
+
+  'export.heading': 'Stáhnout export databáze',
+  'export.lead':
+    'Všechno, co vidíš na mapě, jsou otevřená data. Můžeš si je vyexportovat přímo z OpenStreetMap a Wikipedie, nebo použít náš extrakt.',
+  'export.download_features': 'Obsahuje všechny lezecké objekty a ferraty z OSM včetně geometrií',
+  'export.download_ticks': 'Obsahuje všechny uživatelské ticky',
+  'export.download_license': 'ODbL od OpenStreetMap – u odvozených dat musí být uvedená licence, viz',
+  'export.download_button': 'Stáhnout databázi',
+  'export.download_note': 'SQLite db, __size__',
+  'export.dev_heading': 'Pro vývojáře',
+  'export.schema_title': 'Schéma databáze',
+  'export.schema_desc': 'Všechny tabulky a sloupce v jednom SQL souboru – stejné schéma má i stažený soubor.',
+  'export.schema_cta': 'Zobrazit schema.sql na GitHubu',
+  'export.repo_desc': 'GitHub repozitář s uživatelskými daty (ticky) v CSV.',
+  'export.repo_cta': 'Otevřít repozitář',
+
   'searchbox.placeholder': 'Hledat',
   'searchbox.category': 'kategorie',
   'searchbox.overpass_success': 'Nalezeno výsledků: __count__',
