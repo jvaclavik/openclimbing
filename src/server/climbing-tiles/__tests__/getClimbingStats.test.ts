@@ -16,6 +16,7 @@ type SeedRow = {
   countryCode?: string | null;
   routesWithPhoto?: number;
   hasImages?: number;
+  members?: unknown[] | null;
 };
 
 const buildDummyDb = (rows: SeedRow[]): Database => {
@@ -29,10 +30,10 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
   const insert = db.prepare(`
     INSERT INTO climbing_features
       (type, lon, lat, "osmType", "osmId", "nameRaw", "countryCode",
-       "routesWithPhoto", "hasImages")
+       "routesWithPhoto", "hasImages", members)
     VALUES
       (@type, @lon, @lat, @osmType, @osmId, @nameRaw, @countryCode,
-       @routesWithPhoto, @hasImages)
+       @routesWithPhoto, @hasImages, @members)
   `);
   for (const row of rows) {
     insert.run({
@@ -45,6 +46,7 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
       countryCode: row.countryCode ?? null,
       routesWithPhoto: row.routesWithPhoto ?? null,
       hasImages: row.hasImages ?? 0,
+      members: row.members ? JSON.stringify(row.members) : null,
     });
   }
 
@@ -88,6 +90,19 @@ describe('getClimbingStats', () => {
       },
       {
         type: 'ferrata',
+        osmType: 'relation',
+        osmId: 8,
+        lon: 11,
+        lat: 47,
+        nameRaw: 'Nordwandsteig',
+        countryCode: 'at',
+        members: [
+          { type: 'way', ref: 3 },
+          { type: 'way', ref: 4 },
+        ],
+      },
+      {
+        type: 'ferrata',
         osmType: 'way',
         osmId: 3,
         lon: 11,
@@ -100,6 +115,16 @@ describe('getClimbingStats', () => {
         type: 'ferrata',
         osmType: 'way',
         osmId: 4,
+        lon: 11,
+        lat: 47,
+        nameRaw: 'Nordwandsteig section 2',
+        countryCode: 'at',
+        hasImages: 1,
+      },
+      {
+        type: 'ferrata',
+        osmType: 'way',
+        osmId: 9,
         lon: 11,
         lat: 47,
         nameRaw: null,
@@ -117,7 +142,17 @@ describe('getClimbingStats', () => {
       },
       {
         type: 'gym',
-        osmType: 'node',
+        osmType: 'relation',
+        osmId: 16,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'Smichoff',
+        countryCode: 'cz',
+        members: [{ type: 'way', ref: 6 }],
+      },
+      {
+        type: 'gym',
+        osmType: 'way',
         osmId: 6,
         lon: 14,
         lat: 50,

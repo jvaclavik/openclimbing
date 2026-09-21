@@ -14,14 +14,16 @@ import { Feature, TranslationId } from '../../services/types';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { Bbox } from '../utils/MapStateContext';
 import { tint } from '../utils/panelUi';
+import { ViaFerrataScaleChip } from '../utils/ViaFerrataScaleChip';
 import { useVisibleBbox } from '../utils/useVisibleBbox';
+import { fetchReverseCity } from '../../services/reverseGeocodeCity';
 import { GalleryWrapper } from './HomepageOpenClimbingGallery';
 
 const LIMIT = 24;
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
 `;
 
@@ -51,6 +53,17 @@ const Flag = styled.span`
   flex-shrink: 0;
   font-size: 1.2em;
   line-height: 1;
+`;
+
+const City = styled.span`
+  flex-shrink: 0;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
 const FallbackNote = styled.p`
@@ -88,6 +101,8 @@ const isInViewport = (item: ClimbingArea, bbox: Bbox) => {
   );
 };
 
+const poiKey = (item: ClimbingArea) => `${item.osmType}/${item.osmId}`;
+
 const useVisibleItems = (listType: Exclude<ClimbingListType, 'rock'>) => {
   const bbox = useVisibleBbox();
   const { data, isLoading } = useQuery(
@@ -110,6 +125,38 @@ const useVisibleItems = (listType: Exclude<ClimbingListType, 'rock'>) => {
   }, [data, bbox, isLoading]);
 };
 
+const useGymCities = (
+  listType: Exclude<ClimbingListType, 'rock'>,
+  items: ClimbingArea[],
+) => {
+  const missing = listType === 'gym' ? items.filter((item) => !item.city) : [];
+  const missingKey = missing.map(poiKey).join(',');
+  const { data: extraCities } = useQuery(
+    ['gym-reverse-city', missingKey],
+    async () => {
+      const entries = await Promise.all(
+        missing.map(async (item) => {
+          try {
+            return [
+              poiKey(item),
+              await fetchReverseCity(item.lon, item.lat),
+            ] as const;
+          } catch {
+            return [poiKey(item), null] as const;
+          }
+        }),
+      );
+      return Object.fromEntries(entries) as Record<string, string | null>;
+    },
+    { enabled: missing.length > 0, staleTime: Infinity },
+  );
+
+  if (!extraCities) return items;
+  return items.map((item) =>
+    item.city ? item : { ...item, city: extraCities[poiKey(item)] ?? null },
+  );
+};
+
 const PoiCard = ({ item }: { item: ClimbingArea }) => {
   const { setPreview } = useFeatureContext();
   const name = item.name || `N/A – ${item.osmType}/${item.osmId}`;
@@ -128,6 +175,8 @@ const PoiCard = ({ item }: { item: ClimbingArea }) => {
       <Typography
         noWrap
         sx={{
+          flex: 1,
+          minWidth: 0,
           fontSize: '0.85rem',
           fontWeight: 700,
           lineHeight: 1.3,
@@ -135,6 +184,10 @@ const PoiCard = ({ item }: { item: ClimbingArea }) => {
       >
         {name}
       </Typography>
+      {item.viaFerrataScale && (
+        <ViaFerrataScaleChip scale={item.viaFerrataScale} />
+      )}
+      {item.city && <City title={item.city}>{item.city}</City>}
     </Card>
   );
 };
@@ -145,6 +198,7 @@ export const HomepageNearbyPoiList = ({
   listType: Exclude<ClimbingListType, 'rock'>;
 }) => {
   const { items, isFallback, isLoading } = useVisibleItems(listType);
+  const itemsWithCity = useGymCities(listType, items);
   const copy = COPY[listType];
 
   return (
@@ -169,7 +223,7 @@ export const HomepageNearbyPoiList = ({
       )}
       {!isLoading && items.length > 0 && (
         <Grid>
-          {items.map((item) => (
+          {itemsWithCity.map((item) => (
             <PoiCard key={`${item.osmType}-${item.osmId}`} item={item} />
           ))}
         </Grid>
