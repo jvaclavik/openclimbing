@@ -23,6 +23,11 @@ const cragSizeBig = 0.7;
 // they still render when collision detection finds room.
 const AREA_HANDOVER_ZOOM = 13;
 
+// From here every crag/gym/ferrata icon is drawn even on top of another;
+// labels stay collision-aware (`text-optional`) and only appear when there is
+// room.
+const SHOW_ALL_ICONS_ZOOM = 14;
+
 // dominates routeCount / hasImages, so the type decides the collision first
 const TYPE_PRIORITY = 1000000;
 
@@ -57,7 +62,15 @@ const GROUPS_LAYOUT: SymbolLayerSpecification['layout'] = {
   'text-offset': [0, 0.6],
   'icon-optional': false,
   'icon-ignore-placement': false,
-  'icon-allow-overlap': ['step', ['zoom'], true, 4, false, 15, true],
+  'icon-allow-overlap': [
+    'step',
+    ['zoom'],
+    true,
+    4,
+    false,
+    SHOW_ALL_ICONS_ZOOM,
+    true,
+  ],
   'text-field': ['step', ['zoom'], '', 4, ['get', 'label']],
   'text-padding': 2,
   'text-font': ['Noto Sans Bold'],

@@ -21,6 +21,7 @@ import { useMoreMenu } from '../../../Climbing/useMoreMenu';
 import { useSnackbar } from '../../../../utils/SnackbarContext';
 import { parseOsmShortId } from './parseOsmShortId';
 import { useLinkEditItem } from './useLinkEditItem';
+import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
 
 type Scene = null | 'name' | 'url';
 
@@ -110,6 +111,49 @@ const AddParentMoreMenu = ({ onAddFromUrl }: { onAddFromUrl: () => void }) => {
   );
 };
 
+const getNearbyType = (tags: FeatureTags): 'area' | 'crag' | null => {
+  if (tags.climbing === 'crag') return 'area';
+  if (getIsClimbingRoute(tags)) return 'crag';
+  return null;
+};
+
+const ParentNameField = ({
+  label,
+  setLabel,
+  onSelectExisting,
+  onCreateNew,
+}: {
+  label: string;
+  setLabel: Setter<string>;
+  onSelectExisting: (shortId: string) => Promise<void>;
+  onCreateNew: (e: { preventDefault: () => void }) => void;
+}) => {
+  const current = useCurrentItem();
+  const nearbyType = getNearbyType(current.tags);
+
+  if (!nearbyType) {
+    return (
+      <TextField
+        value={label}
+        size="small"
+        label={t('editdialog.members.name')}
+        onChange={(e) => setLabel(e.target.value)}
+        autoFocus
+      />
+    );
+  }
+
+  return (
+    <NearbyClimbingAutocomplete
+      nearbyType={nearbyType}
+      label={label}
+      setLabel={setLabel}
+      onSelectExisting={onSelectExisting}
+      onCreateNew={onCreateNew}
+    />
+  );
+};
+
 export const AddParentForm = () => {
   const [scene, setScene] = useState<Scene>(null);
   const [label, setLabel] = useState('');
@@ -117,6 +161,11 @@ export const AddParentForm = () => {
   const current = useCurrentItem();
   const { addAsParent } = useLinkEditItem();
   const { showToast } = useSnackbar();
+
+  const reset = () => {
+    setScene(null);
+    setLabel('');
+  };
 
   const handleAddByName = (e: {
     preventDefault: () => void;
@@ -136,11 +185,15 @@ export const AddParentForm = () => {
       },
     ]);
     addItem(newParent);
-    setScene(null);
-    setLabel('');
+    reset();
     if (e.ctrlKey || e.metaKey) {
       setCurrent(newParent.shortId);
     }
+  };
+
+  const handleSelectExisting = async (shortId: string) => {
+    await addAsParent(shortId);
+    reset();
   };
 
   const handleAddFromUrl = async (e: { preventDefault: () => void }) => {
@@ -156,8 +209,7 @@ export const AddParentForm = () => {
     }
     try {
       await addAsParent(shortId);
-      setScene(null);
-      setLabel('');
+      reset();
     } catch {
       showToast(t('editdialog.members.url_invalid'), 'warning');
     }
@@ -165,13 +217,9 @@ export const AddParentForm = () => {
 
   useEffect(() => {
     const downHandler = (e: KeyboardEvent) => {
-      if (scene !== 'name' && scene !== 'url') return;
+      if (scene !== 'url') return;
       if (e.key === 'Enter') {
-        if (scene === 'url') {
-          void handleAddFromUrl(e);
-        } else {
-          handleAddByName(e);
-        }
+        void handleAddFromUrl(e);
       }
       if (e.key === 'Escape') {
         setScene(null);
@@ -185,12 +233,11 @@ export const AddParentForm = () => {
   if (scene === 'name') {
     return (
       <>
-        <TextField
-          value={label}
-          size="small"
-          label={t('editdialog.members.name')}
-          onChange={(e) => setLabel(e.target.value)}
-          autoFocus
+        <ParentNameField
+          label={label}
+          setLabel={setLabel}
+          onSelectExisting={handleSelectExisting}
+          onCreateNew={handleAddByName}
         />
         <Button onClick={handleAddByName} variant="text">
           {t('editdialog.members.confirm')}

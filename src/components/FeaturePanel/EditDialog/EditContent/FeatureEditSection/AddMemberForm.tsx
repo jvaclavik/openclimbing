@@ -31,6 +31,7 @@ import { useMoreMenu } from '../../../Climbing/useMoreMenu';
 import { useSnackbar } from '../../../../utils/SnackbarContext';
 import { parseOsmShortId } from './parseOsmShortId';
 import { useLinkEditItem } from './useLinkEditItem';
+import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
 
 export type Scene = null | 'single' | 'batch' | 'url';
 
@@ -250,22 +251,40 @@ const ConfirmButton = (props: { onClick: (e) => Promise<void> }) => (
 const MemberNameInput = (props: {
   label: string;
   setLabel: Setter<string>;
-}) => (
-  <TextField
-    value={props.label}
-    size="small"
-    label={t('editdialog.members.name')}
-    onChange={(e) => {
-      props.setLabel(e.target.value);
-    }}
-    autoFocus
-  />
-);
+  onSelectExisting: (shortId: string) => Promise<void>;
+  onCreateNew: (e: { preventDefault: () => void }) => void;
+}) => {
+  const relation = useCurrentItem();
+  if (relation.tags.climbing !== 'area') {
+    return (
+      <TextField
+        value={props.label}
+        size="small"
+        label={t('editdialog.members.name')}
+        onChange={(e) => {
+          props.setLabel(e.target.value);
+        }}
+        autoFocus
+      />
+    );
+  }
+
+  return (
+    <NearbyClimbingAutocomplete
+      nearbyType="crag"
+      label={props.label}
+      setLabel={props.setLabel}
+      onSelectExisting={props.onSelectExisting}
+      onCreateNew={props.onCreateNew}
+    />
+  );
+};
 
 const useKeyboardShortcuts = (
   handleAddMember: (e) => Promise<void>,
   scene: Scene,
   setScene: Setter<Scene>,
+  skipEnter: boolean,
 ) => {
   useEffect(() => {
     const downHandler = (e) => {
@@ -274,6 +293,7 @@ const useKeyboardShortcuts = (
       }
 
       if (e.key === 'Enter') {
+        if (skipEnter) return;
         handleAddMember(e);
       }
 
@@ -287,7 +307,7 @@ const useKeyboardShortcuts = (
     return () => {
       window.removeEventListener('keydown', downHandler);
     };
-  }, [handleAddMember, setScene, scene]);
+  }, [handleAddMember, setScene, scene, skipEnter]);
 };
 
 const StyledTextareaAutosize = styled(TextareaAutosize)`
@@ -323,6 +343,8 @@ export const AddMemberForm = () => {
   const handleAddMember = useHandleAddMember(scene, setScene, label, setLabel);
   const { addAsMember } = useLinkEditItem();
   const { showToast } = useSnackbar();
+  const relation = useCurrentItem();
+  const skipEnter = scene === 'single' && relation.tags.climbing === 'area';
 
   const handleAddFromUrl = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -340,17 +362,29 @@ export const AddMemberForm = () => {
     }
   };
 
+  const handleSelectExisting = async (shortId: string) => {
+    await addAsMember(shortId);
+    setScene(null);
+    setLabel('');
+  };
+
   useKeyboardShortcuts(
     scene === 'url' ? handleAddFromUrl : handleAddMember,
     scene,
     setScene,
+    skipEnter,
   );
 
   return (
     <>
       {scene === 'single' ? (
         <>
-          <MemberNameInput label={label} setLabel={setLabel} />
+          <MemberNameInput
+            label={label}
+            setLabel={setLabel}
+            onSelectExisting={handleSelectExisting}
+            onCreateNew={handleAddMember}
+          />
           <ConfirmButton onClick={handleAddMember} />
           <BatchButton onClick={() => setScene('batch')} />
           <AddMemberMoreMenu onAddFromUrl={() => setScene('url')} />
