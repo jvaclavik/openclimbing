@@ -49,6 +49,13 @@ export const AutocompleteSelect = ({
     isOptionEqualToValue={isEqual}
     value={value}
     onChange={onChange}
+    onInputChange={(event, inputValue, reason) => {
+      // freeSolo confirms the typed text only on Enter – without this, a value
+      // typed and left unconfirmed would be silently thrown away
+      if (freeSolo && reason === 'input') {
+        onChange(event, inputValue || null);
+      }
+    }}
     renderInput={(params) => (
       <TextField {...params} margin="dense" label={label} />
     )}

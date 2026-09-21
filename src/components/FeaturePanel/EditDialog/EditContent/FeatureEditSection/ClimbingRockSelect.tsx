@@ -18,10 +18,11 @@ export const ClimbingRockSelect = () => {
     value: opt.value,
   }));
 
-  const value = options.find((opt) => opt.value === tags[KEY]) ?? null;
+  const value =
+    options.find((opt) => opt.value === tags[KEY]) ?? tags[KEY] ?? null;
 
-  const onChange = (_e, option: Option | null) => {
-    setTag(KEY, option?.value ?? '');
+  const onChange = (_e, option: string | Option | null) => {
+    setTag(KEY, (typeof option === 'string' ? option : option?.value) ?? '');
   };
 
   return (
