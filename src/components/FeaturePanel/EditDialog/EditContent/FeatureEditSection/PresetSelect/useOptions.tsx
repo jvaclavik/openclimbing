@@ -51,12 +51,16 @@ export const useOptions = () => {
 const containsText = (text: string, searchText: string) =>
   text.toLowerCase().indexOf(searchText.toLowerCase()) > -1; // TODO maybe use more advanced matching like in SearchBox
 
-const getEmptyOptions = (options: TranslatedPreset[], osmType: OsmType) => {
+export const getEmptyOptions = (
+  options: TranslatedPreset[],
+  osmType: OsmType,
+) => {
   const EMPTY_OPTIONS =
     PROJECT_ID === 'openclimbing'
       ? [
           'type/site/climbing/area',
           'climbing/crag',
+          'leisure/sports_centre/climbing', // Climbing gym
           'climbing/route_bottom',
           ...(osmType === 'way' ? ['climbing/route'] : []), // this preset has both geometris (node,way) we need it offered only for `way`
         ]
