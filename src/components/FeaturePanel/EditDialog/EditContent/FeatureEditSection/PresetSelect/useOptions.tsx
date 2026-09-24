@@ -60,9 +60,11 @@ export const getEmptyOptions = (
       ? [
           'type/site/climbing/area',
           'climbing/crag',
-          'leisure/sports_centre/climbing', // Climbing gym
           'climbing/route_bottom',
           ...(osmType === 'way' ? ['climbing/route'] : []), // this preset has both geometris (node,way) we need it offered only for `way`
+          'climbing/via_ferrata', // way
+          'climbing/via_ferrata_start', // node
+          'leisure/sports_centre/climbing', // climbing gym
         ]
       : [
           'amenity/cafe',
