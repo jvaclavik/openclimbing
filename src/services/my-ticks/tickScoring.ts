@@ -32,6 +32,7 @@ export const TICK_STYLE_MULTIPLIERS: Record<
   AF: 0.95,
   TR: 0.45,
   FS: 1.1,
+  PF: 0.25,
   PJ: 0,
 };
 
@@ -73,7 +74,7 @@ function getStyleMultiplier(style: string | null): number {
 
 /**
  * Body za jeden tick: základ z řádku tabulky obtížností ve zvoleném systému × násobič stylu.
- * Projekt (PJ) = 0 bodů. Neznámá klasifikace = malý základ (4) × násobič.
+ * Rozlezený projekt (PF) = malé body, nedolezený projekt (PJ) = 0 bodů. Neznámá klasifikace = malý základ (4) × násobič.
  */
 export function computeTickScore(
   tags: FeatureTags | undefined,

@@ -17,9 +17,14 @@ export const TICK_STYLE_SEGMENT_ORDER: TickStyle[] = [
   'AF',
   'TR',
   'FS',
+  'PF',
   'PJ',
   null,
 ];
+
+/** Projektové styly (cesta nebyla vylezena v kuse) — nepočítají se mezi přelezy. */
+export const isProjectStyle = (style: TickStyle | string | null): boolean =>
+  style === 'PJ' || style === 'PF';
 
 /**
  * Centrální paleta pro tick styly. Hex barvy z Tailwind 600/700 shade —
@@ -37,6 +42,7 @@ const TICK_STYLE_COLORS = {
   AF: '#0e7490', // cyan-700: multipitch all free
   TR: '#2563eb', // blue-600: top rope
   FS: '#c2410c', // orange-700: free solo, intense
+  PF: '#9333ea', // purple-600: project finished in sections
   PJ: '#7c3aed', // violet-600: project / in progress
 } as const;
 
@@ -122,8 +128,14 @@ export const tickStyles: Array<{
     color: TICK_STYLE_COLORS.FS,
   },
   {
+    key: 'PF',
+    name: 'Project (finished)',
+    description: t('tick.style_description_PF'),
+    color: TICK_STYLE_COLORS.PF,
+  },
+  {
     key: 'PJ',
-    name: 'Project',
+    name: 'Project (WIP)',
     description: t('tick.style_description_PJ'),
     color: TICK_STYLE_COLORS.PJ,
   },

@@ -11,15 +11,34 @@ describe('resolveStyle', () => {
     );
   });
 
-  it('returns PJ when the route was not finished', () => {
-    expect(resolveStyle({ clean: 'no', noHandRest: 'no', aid: 'no' })).toBe(
-      'PJ',
-    );
+  it('returns PF when all moves were climbed in sections, but not in one push', () => {
+    expect(
+      resolveStyle({
+        clean: 'no',
+        noHandRest: 'no',
+        aid: 'no',
+        allMoves: 'yes',
+      }),
+    ).toBe('PF');
+  });
+
+  it('returns PJ when some moves are still unsolved', () => {
+    expect(
+      resolveStyle({
+        clean: 'no',
+        noHandRest: 'no',
+        aid: 'no',
+        allMoves: 'no',
+      }),
+    ).toBe('PJ');
   });
 
   it('waits for the follow-up answers before suggesting a style', () => {
     expect(resolveStyle({ clean: 'no' })).toBe(null);
     expect(resolveStyle({ clean: 'no', noHandRest: 'no' })).toBe(null);
+    expect(resolveStyle({ clean: 'no', noHandRest: 'no', aid: 'no' })).toBe(
+      null,
+    );
   });
 
   it('keeps resolving clean sends', () => {

@@ -64,7 +64,7 @@ export default {
 
   'tick_scoring.page_title': 'Tick scoring',
   'tick_scoring.intro':
-    'Each tick earns points from the route difficulty and your climbing style. The grade base for each row is shown in the climbing grades table (last column). Points = round(grade base × style multiplier). Projects (PJ) earn 0 points. If the grade cannot be resolved, a small default base is used.',
+    'Each tick earns points from the route difficulty and your climbing style. The grade base for each row is shown in the climbing grades table (last column). Points = round(grade base × style multiplier). Worked projects (PF) earn a few points, unfinished projects (PJ) earn 0 points. If the grade cannot be resolved, a small default base is used.',
   'tick_scoring.styles_heading': 'Style multipliers',
   'tick_scoring.style_code': 'Code',
   'tick_scoring.style_name': 'Style',
@@ -185,7 +185,8 @@ export default {
   'tick.style_description_AF': 'Climbing the route entirely free without using aid.',
   'tick.style_description_TR': 'Climbing the route with a rope already anchored at the top.',
   'tick.style_description_FS': 'Climbing the route without any protective gear or ropes.',
-  'tick.style_description_PJ': 'Working the route without a full send: attempts, hangdogging, figuring out moves, or an active project.',
+  'tick.style_description_PF': 'Project worked out: you climbed all the moves in sections, but not in one push yet.',
+  'tick.style_description_PJ': 'Work in progress: attempts, hangdogging, some moves still unsolved — the route is not climbed yet.',
 
   'tick.partners_label': 'Partners',
   'tick.partners_helper': 'Use @nickname for OpenStreetMap usernames. Suggestions come from nicknames you used before.',
@@ -223,6 +224,10 @@ export default {
   'tick.wizard.q_aid_helper': 'You finished the route, but used the rope or the gear to make progress (aid).',
   'tick.wizard.a_aid_yes': 'Yes, I topped out with help from the gear',
   'tick.wizard.a_aid_no': 'No, I did not top out',
+  'tick.wizard.q_all_moves': 'Did you climb all the moves of the route?',
+  'tick.wizard.q_all_moves_helper': 'Worked out in sections — every move done, just not in one push yet.',
+  'tick.wizard.a_all_moves_yes': 'Yes, all moves done in sections (worked project)',
+  'tick.wizard.a_all_moves_no': 'No, some moves are still unsolved',
   'tick.wizard.q_method': 'How did you climb it?',
   'tick.wizard.a_method_lead': 'Lead — I clipped the gear on the way up',
   'tick.wizard.a_method_tr': 'Top rope — rope was already anchored on top',
