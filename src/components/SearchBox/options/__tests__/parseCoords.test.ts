@@ -126,6 +126,10 @@ describe('parseCoords', () => {
     ['-49.8167208N, 15.7653808E'], // sign and hemisphere
     ["49°60.5', 15°45'"], // 60 minutes
     ["49.5°30', 15°45'"], // decimal degrees with minutes
+    ['14 N Ln'], // MGRS needs digits, otherwise any text could match
+    ['33UWR5506185'], // odd number of digits
+    ['1XMU00'], // mgrs decodes it out of range
+    ['0NAA00'], // zone must be 1-60
   ])('returns nothing for %s', (inputValue) => {
     expect(parseCoords(inputValue)).toEqual([]);
   });

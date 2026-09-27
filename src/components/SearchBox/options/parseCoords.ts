@@ -11,6 +11,9 @@ export type ParsedCoords = {
 
 const MAX_LENGTH = 64; // nothing longer can be a coordinate
 
+const isValidCoord = ([lon, lat]: LonLat) =>
+  lon < 180 && lon > -180 && lat < 90 && lat > -90;
+
 const olc = new OpenLocationCode();
 
 const parseOlc = (input: string): LonLat | null => {
@@ -22,8 +25,9 @@ const parseOlc = (input: string): LonLat | null => {
   }
 };
 
-// `33UWR55061853` – zone, band, 100km square and an even number of digits
-const mgrsRegex = /^\d{1,2}[C-HJ-NP-X][A-HJ-NP-Z][A-HJ-NP-V](?:\d{2}){0,5}$/i;
+// `33UWR55061853` – zone (1-60), band, 100km square and an even number of digits
+const mgrsRegex =
+  /^(?:[1-9]|[1-5]\d|60)[C-HJ-NP-X][A-HJ-NP-Z][A-HJ-NP-V](?:\d{2}){1,5}$/i;
 
 const parseMgrs = (input: string): LonLat | null => {
   const compact = input.replace(/\s/g, '').toUpperCase(); // often written as `33U WR 5506 1853`
@@ -31,7 +35,8 @@ const parseMgrs = (input: string): LonLat | null => {
     return null;
   }
   try {
-    return toPoint(compact); // center of the square
+    const center = toPoint(compact); // center of the square
+    return isValidCoord(center) ? center : null; // the letters are not validated by the library
   } catch {
     return null;
   }
@@ -103,9 +108,6 @@ const parsePart = (input: string): Part | null => {
     axis: getAxis(hemisphere),
   };
 };
-
-const isValidCoord = ([lon, lat]: LonLat) =>
-  lon < 180 && lon > -180 && lat < 90 && lat > -90;
 
 const getCenters = (first: Part, second: Part): LonLat[] => {
   if (first.axis && second.axis && first.axis === second.axis) {
