@@ -11,6 +11,8 @@ import { getGlobalMap } from '../../../services/mapStorage';
 
 const olc = new OpenLocationCode();
 
+const COORDS_ZOOM = 17; // same as geocoder results, see fitBounds()
+
 const olcDecoder = (inputValue: string): LonLat | null => {
   try {
     const { longitudeLo, latitudeLo } = olc.decode(inputValue);
@@ -20,8 +22,12 @@ const olcDecoder = (inputValue: string): LonLat | null => {
   }
 };
 
+// `47.32599, 15.38083` (used by theCrag or osm.org) as well as `47.32599° 15.38083°`
+// anchored on both ends, so that a regular text query is never taken for coordinates
 const regex =
-  /^(-?\d{1,3}(?:(?:\.|,)\d+)?)°(?:\s|,|;)+(-?\d{1,3}(?:(?:\.|,)\d+)?)°/;
+  /^\s*(-?\d{1,3}(?:(?:\.|,)\d+)?)°?(?:\s|,|;)+(-?\d{1,3}(?:(?:\.|,)\d+)?)°?\s*$/;
+
+const parseCoord = (value: string) => Number(value.replace(',', '.')); // decimal comma, eg. `47,32599`
 
 const isValidCoord = ([lon, lat]: LonLat) => {
   const validLon = lon < 180 && lon > -180;
@@ -49,8 +55,8 @@ export const getCoordsOption = (inputValue: string): CoordsOption[] => {
   }
 
   const [_, c1Str, c2Str] = matches;
-  const c1 = Number(c1Str);
-  const c2 = Number(c2Str);
+  const c1 = parseCoord(c1Str);
+  const c2 = parseCoord(c2Str);
   const coords = [[c2, c1] as LonLat, [c1, c2] as LonLat].filter((c) =>
     isValidCoord(c),
   );
@@ -73,6 +79,7 @@ export const coordsOptionsSelected = (
     `${coords.center[1]}`,
   ]);
   setFeature(newFeature);
+  getGlobalMap()?.flyTo({ center: coords.center, zoom: COORDS_ZOOM });
 };
 
 type Props = {
