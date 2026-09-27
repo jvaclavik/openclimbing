@@ -58,6 +58,7 @@
     "lodash": "^4.17.21",
     "maplibre-gl": "6.4.1",
     "maplibre-gl-indoorequal": "^1.3.0",
+    "mgrs": "2.2.0",
     "next": "15.3.8",
     "next-codegrid": "^1.0.3",
     "next-cookies": "^2.0.3",
