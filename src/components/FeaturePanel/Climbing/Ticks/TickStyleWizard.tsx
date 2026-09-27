@@ -9,23 +9,30 @@ import { TickStyle } from '../types';
 import { tickStyles } from '../../../../services/my-ticks/ticks';
 import { t } from '../../../../services/intl';
 
-type Method = 'lead' | 'tr' | 'solo' | 'aid';
+type Method = 'lead' | 'tr' | 'solo';
 type YesNo = 'yes' | 'no';
 
-type Answers = {
+export type Answers = {
   clean?: YesNo;
+  noHandRest?: YesNo;
+  aid?: YesNo;
   method?: Method;
   firstAttempt?: YesNo;
   beta?: YesNo;
   prePlaced?: YesNo;
 };
 
-const resolveStyle = (a: Answers): TickStyle | null => {
-  if (a.clean === 'no') return 'PJ';
+export const resolveStyle = (a: Answers): TickStyle | null => {
+  if (a.clean === 'no') {
+    if (a.noHandRest === 'yes') return 'RK';
+    if (a.noHandRest !== 'no') return null;
+    if (a.aid === 'yes') return 'RX';
+    if (a.aid === 'no') return 'PJ';
+    return null;
+  }
   if (a.clean !== 'yes') return null;
   if (a.method === 'tr') return 'TR';
   if (a.method === 'solo') return 'FS';
-  if (a.method === 'aid') return 'RK';
   if (a.method !== 'lead') return null;
   if (!a.prePlaced) return null;
   if (a.firstAttempt === 'yes') {
@@ -73,6 +80,14 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
       }
       if (next.method) {
         delete next.method;
+        return next;
+      }
+      if (next.aid) {
+        delete next.aid;
+        return next;
+      }
+      if (next.noHandRest) {
+        delete next.noHandRest;
         return next;
       }
       if (next.clean) {
@@ -168,6 +183,40 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
         ]}
       />
     );
+  } else if (answers.clean === 'no' && !answers.noHandRest) {
+    questionNode = (
+      <Question
+        title={t('tick.wizard.q_nohand')}
+        helper={t('tick.wizard.q_nohand_helper')}
+        options={[
+          {
+            label: t('tick.wizard.a_nohand_yes'),
+            onClick: () => setAnswers({ ...answers, noHandRest: 'yes' }),
+          },
+          {
+            label: t('tick.wizard.a_nohand_no'),
+            onClick: () => setAnswers({ ...answers, noHandRest: 'no' }),
+          },
+        ]}
+      />
+    );
+  } else if (answers.clean === 'no') {
+    questionNode = (
+      <Question
+        title={t('tick.wizard.q_aid')}
+        helper={t('tick.wizard.q_aid_helper')}
+        options={[
+          {
+            label: t('tick.wizard.a_aid_yes'),
+            onClick: () => setAnswers({ ...answers, aid: 'yes' }),
+          },
+          {
+            label: t('tick.wizard.a_aid_no'),
+            onClick: () => setAnswers({ ...answers, aid: 'no' }),
+          },
+        ]}
+      />
+    );
   } else if (!answers.method) {
     questionNode = (
       <Question
@@ -180,10 +229,6 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
           {
             label: t('tick.wizard.a_method_tr'),
             onClick: () => setAnswers({ ...answers, method: 'tr' }),
-          },
-          {
-            label: t('tick.wizard.a_method_aid'),
-            onClick: () => setAnswers({ ...answers, method: 'aid' }),
           },
           {
             label: t('tick.wizard.a_method_solo'),

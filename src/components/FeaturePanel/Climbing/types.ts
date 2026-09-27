@@ -56,6 +56,7 @@ export type TickStyle =
   | 'RP'
   | 'PP'
   | 'RK'
+  | 'RX'
   | 'AF'
   | 'TR'
   | 'FS'
