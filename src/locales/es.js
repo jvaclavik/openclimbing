@@ -182,6 +182,7 @@ export default {
   'tick.style_description_PP': 'Escalar la vía con éxito con protección colocada de antemano tras practicarla.',
   'tick.style_description_RK':
     'Rotkreis: tras una caída volviste a empezar desde un descanso sin manos (no desde el suelo) y terminaste la vía en libre.',
+  'tick.style_description_RX': 'Escalar la vía combinando escalada libre y escalada artificial.',
   'tick.style_description_AF': 'Escalar la vía completamente en libre sin usar ayudas.',
   'tick.style_description_TR': 'Escalar la vía con una cuerda ya anclada en la parte superior.',
   'tick.style_description_FS': 'Escalar la vía sin ningún equipo de protección ni cuerdas.',
@@ -214,7 +215,11 @@ export default {
   'tick.wizard.q_nohand_helper':
     'Tras la caída volviste a empezar en un punto de descanso sin manos (no desde el suelo) y llegaste arriba sin más caídas: cuenta como Rotkreis.',
   'tick.wizard.a_nohand_yes': 'Sí, reinicié en el descanso sin manos y llegué arriba',
-  'tick.wizard.a_nohand_no': 'No, no terminé la vía',
+  'tick.wizard.a_nohand_no': 'No, no continué desde un descanso sin manos',
+  'tick.wizard.q_aid': '¿Aun así llegaste arriba tirando del material?',
+  'tick.wizard.q_aid_helper': 'Terminaste la vía, pero te ayudaste de la cuerda o del material (artificial).',
+  'tick.wizard.a_aid_yes': 'Sí, llegué arriba con ayuda del material',
+  'tick.wizard.a_aid_no': 'No, no llegué arriba',
   'tick.wizard.q_method': '¿Cómo la escalaste?',
   'tick.wizard.a_method_lead': 'De primero — chapé el material durante la subida',
   'tick.wizard.a_method_tr': 'Top rope — la cuerda ya estaba anclada arriba',

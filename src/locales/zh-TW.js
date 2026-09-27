@@ -60,6 +60,7 @@ export default {
   'tick.style_description_RP': '在經過事先練習後，成功攀登路線（Redpoint）。',
   'tick.style_description_PP': '在事先架設好確保裝備的情況下，成功攀登路線（Pinkpoint）。',
   'tick.style_description_RK': 'Rotkreis——墜落後不從地面重新開始，而是從無手休息點繼續並自由完攀路線。',
+  'tick.style_description_RX': '混合使用自由攀登和人工攀登來完成路線。',
   'tick.style_description_AF': '完全以自由攀登、不使用任何人工輔助器材的方式完成路線（All Free）。',
   'tick.style_description_TR': '在繩索已預先架設於頂部確保點的情況下攀爬路線（Top-rope）。',
   'tick.style_description_FS': '在不使用任何確保裝備或繩索的情況下攀爬路線（Free-solo）。',

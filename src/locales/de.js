@@ -182,6 +182,7 @@ export default {
   'tick.style_description_PP': 'Die Route erfolgreich mit vorher platzierten Sicherungen nach Übung klettern.',
   'tick.style_description_RK':
     'Rotkreis – nach einem Sturz bist du wieder an einem No-Hands-Rastpunkt (nicht am Boden) gestartet und hast die Route frei beendet.',
+  'tick.style_description_RX': 'Die Route mit einer Mischung aus Freiklettern und technischer Hilfe klettern.',
   'tick.style_description_AF': 'Die Route vollständig frei ohne technische Hilfsmittel klettern.',
   'tick.style_description_TR': 'Die Route mit einem bereits oben verankerten Seil klettern.',
   'tick.style_description_FS': 'Die Route ohne jegliche Sicherung oder Seile klettern.',
@@ -213,7 +214,11 @@ export default {
   'tick.wizard.q_nohand_helper':
     'Nach dem Sturz bist du erneut an einem Rastpunkt ohne Hände gestartet (nicht am Boden) und ohne weiteren Sturz bis zum Ende geklettert – das gilt als Rotkreis.',
   'tick.wizard.a_nohand_yes': 'Ja, ich bin am No-Hands-Rastpunkt neu gestartet und oben angekommen',
-  'tick.wizard.a_nohand_no': 'Nein, ich habe die Route nicht beendet',
+  'tick.wizard.a_nohand_no': 'Nein, ich bin nicht von einem No-Hands-Rastpunkt weitergeklettert',
+  'tick.wizard.q_aid': 'Bist du trotzdem mit Hilfe des Materials oben angekommen?',
+  'tick.wizard.q_aid_helper': 'Du hast die Route beendet, aber Seil oder Material zum Vorankommen benutzt (technisch).',
+  'tick.wizard.a_aid_yes': 'Ja, ich bin mit Hilfe des Materials oben angekommen',
+  'tick.wizard.a_aid_no': 'Nein, ich bin nicht oben angekommen',
   'tick.wizard.q_method': 'Wie hast du sie geklettert?',
   'tick.wizard.a_method_lead': 'Vorstieg — ich habe das Material unterwegs eingehängt',
   'tick.wizard.a_method_tr': 'Toprope — das Seil war bereits oben verankert',

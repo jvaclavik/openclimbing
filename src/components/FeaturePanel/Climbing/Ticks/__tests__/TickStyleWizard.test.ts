@@ -5,12 +5,21 @@ describe('resolveStyle', () => {
     expect(resolveStyle({ clean: 'no', noHandRest: 'yes' })).toBe('RK');
   });
 
-  it('returns PJ when the route was not finished', () => {
-    expect(resolveStyle({ clean: 'no', noHandRest: 'no' })).toBe('PJ');
+  it('returns RX when the top was reached with help from the gear', () => {
+    expect(resolveStyle({ clean: 'no', noHandRest: 'no', aid: 'yes' })).toBe(
+      'RX',
+    );
   });
 
-  it('waits for the no-hands answer before suggesting a style', () => {
+  it('returns PJ when the route was not finished', () => {
+    expect(resolveStyle({ clean: 'no', noHandRest: 'no', aid: 'no' })).toBe(
+      'PJ',
+    );
+  });
+
+  it('waits for the follow-up answers before suggesting a style', () => {
     expect(resolveStyle({ clean: 'no' })).toBe(null);
+    expect(resolveStyle({ clean: 'no', noHandRest: 'no' })).toBe(null);
   });
 
   it('keeps resolving clean sends', () => {

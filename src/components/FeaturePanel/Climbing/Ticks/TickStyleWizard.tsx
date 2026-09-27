@@ -15,6 +15,7 @@ type YesNo = 'yes' | 'no';
 export type Answers = {
   clean?: YesNo;
   noHandRest?: YesNo;
+  aid?: YesNo;
   method?: Method;
   firstAttempt?: YesNo;
   beta?: YesNo;
@@ -24,7 +25,9 @@ export type Answers = {
 export const resolveStyle = (a: Answers): TickStyle | null => {
   if (a.clean === 'no') {
     if (a.noHandRest === 'yes') return 'RK';
-    if (a.noHandRest === 'no') return 'PJ';
+    if (a.noHandRest !== 'no') return null;
+    if (a.aid === 'yes') return 'RX';
+    if (a.aid === 'no') return 'PJ';
     return null;
   }
   if (a.clean !== 'yes') return null;
@@ -77,6 +80,10 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
       }
       if (next.method) {
         delete next.method;
+        return next;
+      }
+      if (next.aid) {
+        delete next.aid;
         return next;
       }
       if (next.noHandRest) {
@@ -176,7 +183,7 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
         ]}
       />
     );
-  } else if (answers.clean === 'no') {
+  } else if (answers.clean === 'no' && !answers.noHandRest) {
     questionNode = (
       <Question
         title={t('tick.wizard.q_nohand')}
@@ -189,6 +196,23 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
           {
             label: t('tick.wizard.a_nohand_no'),
             onClick: () => setAnswers({ ...answers, noHandRest: 'no' }),
+          },
+        ]}
+      />
+    );
+  } else if (answers.clean === 'no') {
+    questionNode = (
+      <Question
+        title={t('tick.wizard.q_aid')}
+        helper={t('tick.wizard.q_aid_helper')}
+        options={[
+          {
+            label: t('tick.wizard.a_aid_yes'),
+            onClick: () => setAnswers({ ...answers, aid: 'yes' }),
+          },
+          {
+            label: t('tick.wizard.a_aid_no'),
+            onClick: () => setAnswers({ ...answers, aid: 'no' }),
           },
         ]}
       />

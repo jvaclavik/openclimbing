@@ -13,6 +13,7 @@ export const TICK_STYLE_SEGMENT_ORDER: TickStyle[] = [
   'RP',
   'PP',
   'RK',
+  'RX',
   'AF',
   'TR',
   'FS',
@@ -31,7 +32,8 @@ const TICK_STYLE_COLORS = {
   FL: '#65a30d', // lime-600: second tier send
   RP: '#dc2626', // red-600: standard send
   PP: '#db2777', // pink-600: pinkpoint variant
-  RK: '#92400e', // amber-800: rotkreis (send started from a no-hands rest)
+  RK: '#a16207', // yellow-700: rotkreis (send restarted from a no-hands rest)
+  RX: '#92400e', // amber-800: aid involvement (rustic)
   AF: '#0e7490', // cyan-700: multipitch all free
   TR: '#2563eb', // blue-600: top rope
   FS: '#c2410c', // orange-700: free solo, intense
@@ -94,6 +96,12 @@ export const tickStyles: Array<{
     name: 'Rotkreis',
     description: t('tick.style_description_RK'),
     color: TICK_STYLE_COLORS.RK,
+  },
+  {
+    key: 'RX',
+    name: 'Red cross',
+    description: t('tick.style_description_RX'),
+    color: TICK_STYLE_COLORS.RX,
   },
   {
     key: 'AF',
