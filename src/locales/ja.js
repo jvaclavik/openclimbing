@@ -42,7 +42,7 @@ export default {
   'tick.style_description_FL': 'ある程度の予備知識またはムーブを使用して、最初の試行でルートを登ること。',
   'tick.style_description_RP': '事前に練習した結果、無事にルートを登ること。',
   'tick.style_description_PP': '練習後、事前に設置された保護具を使用してルートを登ることに成功すること。',
-  'tick.style_description_RK': 'フリークライミングとエイドクライミングを組み合わせてルートを登ること。',
+  'tick.style_description_RK': 'Rotkreis — 落ちた後、地面からではなくノーハンドレストから再開してルートをフリーで完登すること。',
   'tick.style_description_AF': 'エイドを使わずに完全にフリーでルートを登ること。',
   'tick.style_description_TR': 'すでに頂上に固定されているロープを使ってルートを登ること。',
   'tick.style_description_FS': '防具やロープを着用せずにルートを登ること。',
