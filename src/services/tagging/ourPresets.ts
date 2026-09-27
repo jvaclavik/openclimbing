@@ -64,6 +64,22 @@ export const modifyPresets = (presets: Presets) => {
   presets['climbing/route_top'].tags.climbing = 'route_top';
   presets['climbing/route_top'].addTags.climbing = 'route_top';
 
+  // iD schema has no via ferrata preset – the way is tagged highway=via_ferrata,
+  // the node (usually below the wall) sport=via_ferrata + via_ferrata=start
+  presets['climbing/via_ferrata'] = {
+    presetKey: 'climbing/via_ferrata',
+    geometry: ['line'],
+    tags: { highway: 'via_ferrata' },
+    fields: ['name'],
+  };
+  presets['climbing/via_ferrata_start'] = {
+    presetKey: 'climbing/via_ferrata_start',
+    geometry: ['point'],
+    tags: { sport: 'via_ferrata' },
+    addTags: { sport: 'via_ferrata', via_ferrata: 'start' },
+    fields: ['name'],
+  };
+
   return presets;
 };
 
@@ -74,6 +90,12 @@ export const getOurTranslations = (lang: string) => ({
       presets: {
         'climbing/route_top': {
           name: 'Climbing route (top)',
+        },
+        'climbing/via_ferrata': {
+          name: 'Via ferrata',
+        },
+        'climbing/via_ferrata_start': {
+          name: 'Via ferrata (start)',
         },
       },
       fields: {
