@@ -31,6 +31,33 @@ describe('tickScoring', () => {
     expect(s.points).toBe(0);
   });
 
+  test('PF yields a few points and matches the leaderboard score', () => {
+    const tick = {
+      id: 1,
+      osmUserId: 1,
+      shortId: 'w1',
+      timestamp: '2020-01-01',
+      style: 'PF',
+      myGrade: null,
+      note: null,
+      pairing: null,
+    } as ClimbingTick;
+    const s = computeTickScore(
+      { 'climbing:grade:french': '8a' },
+      tick,
+      'french',
+    );
+    expect(s.points).toBeGreaterThan(0);
+    expect(s.points).toBe(Math.round(s.gradeBase * s.multiplier));
+    expect(
+      computeTickPointsForLeaderboard({
+        style: 'PF',
+        routeGradeTxt: '8a',
+        myGrade: null,
+      }),
+    ).toBe(s.points);
+  });
+
   test('computeTickPointsForLeaderboard matches row-based score for French 6a RP', () => {
     const fromLeaderboard = computeTickPointsForLeaderboard({
       style: 'RP',

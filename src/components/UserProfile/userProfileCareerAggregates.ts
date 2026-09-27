@@ -4,6 +4,7 @@ import { monthKeyFromDate } from '../../services/my-ticks/climbingStatsDateRange
 import {
   TICK_STYLE_SEGMENT_ORDER,
   coerceTickStyleFromDb,
+  isProjectStyle,
 } from '../../services/my-ticks/ticks';
 
 /** Klíč segmentu pro tick bez vybraného stylu (stejný v datech i v grafech). */
@@ -22,7 +23,7 @@ function parseTickDate(raw: string): Date | null {
 }
 
 function isProject(tick: FetchedClimbingTick): boolean {
-  return (tick.style as TickStyle | null) === 'PJ';
+  return isProjectStyle(tick.style as TickStyle | null);
 }
 
 export type YearlyAscentsRow = { year: string; total: number } & Record<

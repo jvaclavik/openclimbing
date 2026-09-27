@@ -60,6 +60,7 @@ export type TickStyle =
   | 'AF'
   | 'TR'
   | 'FS'
+  | 'PF'
   | 'PJ'
   | null;
 

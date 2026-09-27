@@ -42,7 +42,8 @@ export default {
   'tick.style_description_AF': 'Přelez cesty volně bez použití technického postupu.',
   'tick.style_description_TR': 'Přelez cesty na laně ukotveném nahoře (top rope).',
   'tick.style_description_FS': 'Přelez cesty bez jakéhokoliv jištění (free solo).',
-  'tick.style_description_PJ': 'Práce na cestě bez čistého přelezu: pokusy, visení na laně, rozlezení nebo aktivní projekt.',
+  'tick.style_description_PF': 'Zkrokovaný projekt: všechny kroky máš vylezené po částech, ale zatím ne v kuse.',
+  'tick.style_description_PJ': 'Rozdělaný projekt: pokusy, visení na laně, některé kroky ještě nejsou vyřešené — cesta zatím není vylezená.',
 
   'tick.partners_label': 'Spolulezci',
   'tick.partners_helper': 'Za @ zadej uživatelské jméno z OpenStreetMap. Návrhy se berou z přezdívek, které už máš u jiných zápisů.',
@@ -80,6 +81,10 @@ export default {
   'tick.wizard.q_aid_helper': 'Cestu jsi dolezl, ale pomáhal sis lanem nebo jištěním (technicky).',
   'tick.wizard.a_aid_yes': 'Ano, nahoru jsem se dostal s pomocí jištění',
   'tick.wizard.a_aid_no': 'Ne, nahoru jsem se nedostal',
+  'tick.wizard.q_all_moves': 'Máš vylezené všechny kroky cesty?',
+  'tick.wizard.q_all_moves_helper': 'Zkrokováno po částech — každý krok máš vylezený, jen zatím ne v kuse.',
+  'tick.wizard.a_all_moves_yes': 'Ano, celé zkrokováno po částech (rozlezený projekt)',
+  'tick.wizard.a_all_moves_no': 'Ne, některé kroky ještě nemám',
   'tick.wizard.q_method': 'Jakým způsobem jsi to lezl?',
   'tick.wizard.a_method_lead': 'Od spodu — cvakal jsem si jištění během lezení',
   'tick.wizard.a_method_tr': 'Z vrchu (top rope) — lano už bylo nahoře',
@@ -219,7 +224,7 @@ export default {
 
   'tick_scoring.page_title': 'Bodování přelezů',
   'tick_scoring.intro':
-    'Každý přelez má body podle obtížnosti cesty a způsobu přelezu. Základ za obtížnost je u každého řádku v tabulce lezeckých stupňů (poslední sloupec). Body = zaokrouhlení (základ × násobič stylu). Projekt (PJ) = 0 bodů. Když nejde obtížnost určit, použije se malý výchozí základ.',
+    'Každý přelez má body podle obtížnosti cesty a způsobu přelezu. Základ za obtížnost je u každého řádku v tabulce lezeckých stupňů (poslední sloupec). Body = zaokrouhlení (základ × násobič stylu). Zkrokovaný projekt (PF) = malé body, nedolezený projekt (PJ) = 0 bodů. Když nejde obtížnost určit, použije se malý výchozí základ.',
   'tick_scoring.styles_heading': 'Násobiče podle stylu',
   'tick_scoring.style_code': 'Kód',
   'tick_scoring.style_name': 'Způsob',

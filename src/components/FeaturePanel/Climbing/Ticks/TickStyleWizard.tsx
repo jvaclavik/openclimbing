@@ -16,6 +16,7 @@ export type Answers = {
   clean?: YesNo;
   noHandRest?: YesNo;
   aid?: YesNo;
+  allMoves?: YesNo;
   method?: Method;
   firstAttempt?: YesNo;
   beta?: YesNo;
@@ -27,7 +28,9 @@ export const resolveStyle = (a: Answers): TickStyle | null => {
     if (a.noHandRest === 'yes') return 'RK';
     if (a.noHandRest !== 'no') return null;
     if (a.aid === 'yes') return 'RX';
-    if (a.aid === 'no') return 'PJ';
+    if (a.aid !== 'no') return null;
+    if (a.allMoves === 'yes') return 'PF';
+    if (a.allMoves === 'no') return 'PJ';
     return null;
   }
   if (a.clean !== 'yes') return null;
@@ -80,6 +83,10 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
       }
       if (next.method) {
         delete next.method;
+        return next;
+      }
+      if (next.allMoves) {
+        delete next.allMoves;
         return next;
       }
       if (next.aid) {
@@ -158,6 +165,14 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
           <Button
             size="small"
             color="inherit"
+            onClick={goBack}
+            startIcon={<ArrowBackIcon />}
+          >
+            {t('tick.wizard.back')}
+          </Button>
+          <Button
+            size="small"
+            color="inherit"
             onClick={reset}
             startIcon={<RestartAltIcon />}
           >
@@ -200,7 +215,7 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
         ]}
       />
     );
-  } else if (answers.clean === 'no') {
+  } else if (answers.clean === 'no' && !answers.aid) {
     questionNode = (
       <Question
         title={t('tick.wizard.q_aid')}
@@ -213,6 +228,23 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
           {
             label: t('tick.wizard.a_aid_no'),
             onClick: () => setAnswers({ ...answers, aid: 'no' }),
+          },
+        ]}
+      />
+    );
+  } else if (answers.clean === 'no' && answers.aid === 'no') {
+    questionNode = (
+      <Question
+        title={t('tick.wizard.q_all_moves')}
+        helper={t('tick.wizard.q_all_moves_helper')}
+        options={[
+          {
+            label: t('tick.wizard.a_all_moves_yes'),
+            onClick: () => setAnswers({ ...answers, allMoves: 'yes' }),
+          },
+          {
+            label: t('tick.wizard.a_all_moves_no'),
+            onClick: () => setAnswers({ ...answers, allMoves: 'no' }),
           },
         ]}
       />

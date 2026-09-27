@@ -4,6 +4,7 @@ import { monthKeyFromDate } from '../../services/my-ticks/climbingStatsDateRange
 import {
   TICK_STYLE_SEGMENT_ORDER,
   coerceTickStyleFromDb,
+  isProjectStyle,
   tickStyles,
   tickStyleToChartColor,
 } from '../../services/my-ticks/ticks';
@@ -30,7 +31,7 @@ export function bestSendByMonth(
 ): { key: string; gradeLabel: string; rowIndex: number }[] {
   return monthKeys.map((monthKey) => {
     const inMonth = ticks.filter((t) => {
-      if ((t.style as TickStyle | null) === 'PJ') return false;
+      if (isProjectStyle(t.style as TickStyle | null)) return false;
       const d = new Date(t.date);
       return !Number.isNaN(d.getTime()) && monthKeyFromDate(d) === monthKey;
     });
@@ -57,7 +58,7 @@ export function cragVisitDays(
 ): { crag: string; days: number }[] {
   const byCrag = new Map<string, Set<string>>();
   for (const t of ticks) {
-    if ((t.style as TickStyle | null) === 'PJ') continue;
+    if (isProjectStyle(t.style as TickStyle | null)) continue;
     const d = new Date(t.date);
     if (Number.isNaN(d.getTime())) continue;
     const dayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -146,7 +147,8 @@ export function gradeSendCountsByStyle(ticks: FetchedClimbingTick[]): {
 }
 
 export function sendCountExclProjects(ticks: FetchedClimbingTick[]): number {
-  return ticks.filter((r) => (r.style as TickStyle | null) !== 'PJ').length;
+  return ticks.filter((r) => !isProjectStyle(r.style as TickStyle | null))
+    .length;
 }
 
 export function totalTickPoints(ticks: FetchedClimbingTick[]): number {
