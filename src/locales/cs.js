@@ -658,6 +658,8 @@ export default {
   'editdialog.members.name': 'Název',
   'editdialog.members.add_member': 'Přidat člena',
   'editdialog.members.add_multiple': 'Hromadné přidání',
+  'editdialog.members.batch_tags_hint':
+    'Prázdný řádek odděluje cesty. Řádky klíč=hodnota se uloží jako vlastnosti. Pořád jde zadat i jeden název na řádek.',
   'editdialog.members.add_from_url': 'Přidat z URL',
   'editdialog.members.url_placeholder': 'https://openclimbing.org/relation/…',
   'editdialog.members.url_invalid': 'URL z OpenClimbing nebo OSM se nepodařilo rozpoznat.',
