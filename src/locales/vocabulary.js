@@ -724,6 +724,7 @@ export default {
   'editdialog.members.name': 'Name',
   'editdialog.members.add_member': 'Add member',
   'editdialog.members.add_multiple': 'Add multiple',
+  'editdialog.members.batch_tags_hint': 'A blank line separates routes. key=value lines are saved as tags. One name per line still works.',
   'editdialog.members.add_from_url': 'Add from URL',
   'editdialog.members.url_placeholder': 'https://openclimbing.org/relation/…',
   'editdialog.members.url_invalid': 'Could not parse an OpenClimbing or OSM URL.',

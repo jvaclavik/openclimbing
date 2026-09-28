@@ -6,9 +6,11 @@ import {
   IconButton,
   ListItemIcon,
   MenuItem,
+  Stack,
   TextareaAutosize,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import { FeatureTags } from '../../../../../services/types';
 import { t } from '../../../../../services/intl';
@@ -32,6 +34,7 @@ import { useSnackbar } from '../../../../utils/SnackbarContext';
 import { parseOsmShortId } from './parseOsmShortId';
 import { useLinkEditItem } from './useLinkEditItem';
 import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
+import { parseTagBatch } from './parseTagBatch';
 
 export type Scene = null | 'single' | 'batch' | 'url';
 
@@ -75,37 +78,48 @@ const parseGradeFromLine = (line: string, gradeSystem?: string) => {
   return { gradeTags: {}, name: line };
 };
 
+const applyMissingTags = (tags: FeatureTags, defaults: FeatureTags) => {
+  const merged = { ...tags };
+  for (const [key, value] of Object.entries(defaults)) {
+    if (!(key in merged)) merged[key] = value;
+  }
+  return merged;
+};
+
+const toMemberDraft = (newItem: DataItem) => {
+  // TODO this code could be removed, if we lookup the label in render among editItems
+  const presetKey = getPresetKey(newItem);
+  const presetLabel = getPresetTranslation(presetKey);
+  const tags = Object.fromEntries(newItem.tagsEntries);
+  return {
+    newItem,
+    newMember: {
+      shortId: newItem.shortId,
+      role: '',
+      originalLabel: tags.name ?? presetLabel,
+      originalTags: tags,
+    },
+  };
+};
+
 const convertLine = async (
   line: string,
   parentTags: FeatureTags,
   gradeSystem: string | undefined,
 ) => {
-  let newItem: DataItem;
   const shortId = parseOsmShortId(line);
   if (shortId) {
-    newItem = await fetchFreshItem(getApiId(shortId));
-  } else {
-    const { gradeTags, name } = parseGradeFromLine(line, gradeSystem);
-    newItem = getNewNodeItem(undefined, {
+    return toMemberDraft(await fetchFreshItem(getApiId(shortId)));
+  }
+
+  const { gradeTags, name } = parseGradeFromLine(line, gradeSystem);
+  return toMemberDraft(
+    getNewNodeItem(undefined, {
       name,
       ...getMemberTags(parentTags),
       ...gradeTags,
-    });
-  }
-
-  // TODO this code could be removed, if we lookup the label in render among editItems
-  const presetKey = getPresetKey(newItem);
-  const presetLabel = getPresetTranslation(presetKey);
-  const tags = Object.fromEntries(newItem.tagsEntries);
-  const newLabel = tags.name ?? presetLabel;
-  const newMember = {
-    shortId: newItem.shortId,
-    role: '',
-    originalLabel: newLabel,
-    originalTags: tags,
-  };
-
-  return { newItem, newMember };
+    }),
+  );
 };
 
 const useGetGradeSystemOrUndefined = (scene: string) => {
@@ -128,12 +142,25 @@ const useHandleAddMember = (
   const gradeSystem = useGetGradeSystemOrUndefined(scene);
 
   return async (e: React.MouseEvent) => {
-    const lines = label.split('\n').filter(Boolean);
-    const newMembers: Members = [];
+    const tagRoutes = parseTagBatch(label);
+    const drafts = tagRoutes
+      ? tagRoutes.map((routeTags) =>
+          toMemberDraft(
+            getNewNodeItem(
+              undefined,
+              applyMissingTags(routeTags, getMemberTags(relation.tags)),
+            ),
+          ),
+        )
+      : await Promise.all(
+          label
+            .split('\n')
+            .filter(Boolean)
+            .map((line) => convertLine(line, relation.tags, gradeSystem)),
+        );
 
-    for (const line of lines) {
-      const { tags } = relation;
-      const { newItem, newMember } = await convertLine(line, tags, gradeSystem);
+    const newMembers: Members = [];
+    for (const { newItem, newMember } of drafts) {
       if (
         relation.members?.some((member) => member.shortId === newMember.shortId)
       ) {
@@ -313,27 +340,41 @@ const useKeyboardShortcuts = (
 const StyledTextareaAutosize = styled(TextareaAutosize)`
   background-color: ${({ theme }) => theme.palette.background.paper};
   color: ${({ theme }) => theme.palette.text.primary};
-  width: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
 `;
 
 const BatchTextarea = (props: { label: string; setLabel: Setter<string> }) => {
   const gradeSystem = useGetGradeSystemOrUndefined('batch');
-  const placeholder = gradeSystem
-    ? `Cat in a Hat ${GRADE_TABLE[gradeSystem][24]}\n...`
+  const grade = gradeSystem ? GRADE_TABLE[gradeSystem][24] : undefined;
+  const placeholder = grade
+    ? `Cat in a Hat ${grade}
+
+climbing=route_bottom
+name=Tarzanweg
+${getOsmTagFromGradeSystem(gradeSystem)}=${grade}
+climbing:length=14m
+climbing:sport=yes`
     : 'name\n...';
 
   return (
-    <>
+    <Stack spacing={0.5} sx={{ flex: 1, minWidth: 280 }}>
       <StyledTextareaAutosize
-        minRows={3}
+        minRows={8}
         value={props.label}
         placeholder={placeholder}
         onChange={(e) => props.setLabel(e.target.value)}
       />
+      <Typography variant="caption" color="text.secondary">
+        {t('editdialog.members.batch_tags_hint')}
+      </Typography>
       {gradeSystem ? (
         <GradeSystemSelect orderByFeature showDefaultOnButton />
       ) : null}
-    </>
+    </Stack>
   );
 };
 
