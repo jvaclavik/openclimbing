@@ -50,7 +50,7 @@ export type EditDataItem = DataItem & {
   setSections: SetSections;
 };
 
-export type ConvertToRelation = () => Promise<string>;
+export type ConvertToRelation = (center?: LonLat) => Promise<string>;
 
 export type SetTagsEntries = (
   updateFn: (prev: TagsEntries) => TagsEntries,

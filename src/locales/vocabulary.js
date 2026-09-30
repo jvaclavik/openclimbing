@@ -732,6 +732,11 @@ export default {
   'editdialog.members.confirm': 'Confirm',
   'editdialog.members.convert_description': 'For adding members, you need to convert node to relation.',
   'editdialog.members.climbing_crag_convert_description': 'For adding climbing routes, you need to convert node to relation.',
+  'editdialog.members.climbing_crag_convert_way_description':
+    'For adding climbing routes, convert this line to a relation. The cliff stays in place with natural=cliff.',
+  'editdialog.members.climbing_crag_convert_peak_description':
+    'For adding climbing routes, convert this node to a relation. The peak stays beside it.',
+  'editdialog.members.convert_already_in_crag': 'This object is already a member of a climbing crag.',
   'editdialog.members.convert_button': 'Convert to relation',
   'editdialog.location_change_current_item': 'Edit',
   'editdialog.description_helper_text': 'Please enter your own description or with written approval of its author.',

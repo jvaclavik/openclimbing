@@ -681,6 +681,10 @@ export default {
   'editdialog.members.confirm': 'Potvrdit',
   'editdialog.members.convert_description': 'Pro přidání členů, prosím, změňte uzel na relaci.',
   'editdialog.members.climbing_crag_convert_description': 'Pro přidání lezeckých cest, prosím, změňte uzel na relaci.',
+  'editdialog.members.climbing_crag_convert_way_description':
+    'Pro přidání lezeckých cest změňte čáru na relaci. Skála zůstane na původním místě s natural=cliff.',
+  'editdialog.members.climbing_crag_convert_peak_description': 'Pro přidání lezeckých cest změňte uzel na relaci. Vrchol zůstane samostatně vedle.',
+  'editdialog.members.convert_already_in_crag': 'Tenhle objekt už je členem lezecké skály.',
   'editdialog.members.convert_button': 'Změnit na relaci',
   'editdialog.location_change_current_item': 'Upravit',
   'editdialog.description_helper_text': 'Zadávejte prosím vlastní popis nebo s písemným souhlasem autora.',
