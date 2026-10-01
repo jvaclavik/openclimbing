@@ -6,6 +6,7 @@ import { getPresetTranslation } from '../../../../../services/tagging/translatio
 import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
 import { toHumanDistance } from '../../../../Directions/helpers';
 import { nearbyShortId, useNearbyClimbing } from './useNearbyClimbing';
+import { parseOsmShortId } from './parseOsmShortId';
 
 const TYPE_LABELS: Record<'area' | 'crag', string> = {
   area: 'type/site/climbing/area',
@@ -148,9 +149,13 @@ export const NearbyClimbingAutocomplete = ({
           label={t('editdialog.members.name')}
           placeholder={t('editdialog.members.name')}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !open) {
-              onCreateNew(e);
-            }
+            if (e.key !== 'Enter') return;
+            const typed =
+              e.target instanceof HTMLInputElement ? e.target.value : label;
+            if (!parseOsmShortId(typed) && open) return;
+            e.preventDefault();
+            e.stopPropagation();
+            onCreateNew(e);
           }}
         />
       )}
