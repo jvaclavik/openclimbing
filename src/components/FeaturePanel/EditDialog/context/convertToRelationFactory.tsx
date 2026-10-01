@@ -1,4 +1,4 @@
-import { ConvertToRelation, DataItem } from './types';
+import { ConvertToRelation, DataItem, TagsEntries } from './types';
 import { fetchParentFeatures } from '../../../../services/osm/fetchParentFeatures';
 import { getApiId } from '../../../../services/helpers';
 import { addEmptyOriginalState, fetchFreshItem } from './itemsHelpers';
@@ -7,6 +7,14 @@ import { fetchWays } from '../../../../services/osm/fetchWays';
 import { getNewId } from '../../../../services/getCoordsFeature';
 import { not } from '../../../../utils';
 import { findInItems, isInItems } from './utils';
+import { Feature, FeatureTags, LonLat } from '../../../../services/types';
+import { isValidLonLat } from '../../Climbing/utils/cragCenter';
+
+export class AlreadyInCragError extends Error {
+  constructor(shortId: string) {
+    super(`Can't convert ${shortId} which already belongs to a climbing crag.`);
+  }
+}
 
 const updateMemberLinks = (
   item: DataItem,
@@ -17,7 +25,6 @@ const updateMemberLinks = (
     return item;
   }
 
-  // update member id in every parent
   return {
     ...item,
     members: item.members?.map((member) =>
@@ -30,8 +37,6 @@ const updateMemberLinks = (
     ),
   };
 };
-// TODO we may lose some custom tags, if converting new item (it is deleted afterwards)
-//  remove climbing=* and find if this still matches some other preset (only keep it in that scenario)  (?)
 
 const copiedClimbingTags = ([k, v]) =>
   k.startsWith('name') ||
@@ -46,11 +51,43 @@ const toBeRemovedTags = ([k, v]) =>
 
 const isNew = (item: DataItem) => item.shortId.includes('-');
 
-const getConversionTags = (node: DataItem) => {
+const tagValue = (entries: TagsEntries, key: string) =>
+  entries.find(([k]) => k === key)?.[1];
+
+const isPeak = (item: DataItem) =>
+  item.shortId.startsWith('n') &&
+  tagValue(item.tagsEntries, 'natural') === 'peak';
+
+const isWay = (item: DataItem) => item.shortId.startsWith('w');
+
+// Cliff line and summit stay separate features. The crag relation does not list them.
+const staysBeside = (item: DataItem) => isWay(item) || isPeak(item);
+
+const isCragTags = (tags: FeatureTags | undefined) => tags?.climbing === 'crag';
+
+const isClimbingContainerTags = (tags: FeatureTags | undefined) => {
+  if (tags?.climbing === 'crag') return false;
+  return tags?.climbing === 'area' || tags?.site === 'climbing';
+};
+
+const withCliffTag = (item: DataItem): DataItem => {
+  if (!isWay(item) || tagValue(item.tagsEntries, 'climbing') !== 'crag') {
+    return item;
+  }
+  if (item.tagsEntries.some(([key]) => key === 'natural')) {
+    return item;
+  }
+  return {
+    ...item,
+    tagsEntries: [...item.tagsEntries, ['natural', 'cliff']],
+  };
+};
+
+const getConversionTags = (node: DataItem, forceKeep: boolean) => {
   const tagsToCopy = node.tagsEntries.filter(copiedClimbingTags);
   const restTags = node.tagsEntries.filter(not(copiedClimbingTags));
 
-  const keepNode = !isNew(node) && restTags.length > 0;
+  const keepNode = forceKeep || (!isNew(node) && restTags.length > 0);
   const keptTags = keepNode
     ? node.tagsEntries.filter(not(toBeRemovedTags))
     : [];
@@ -58,33 +95,56 @@ const getConversionTags = (node: DataItem) => {
   return { tagsToCopy, keepNode, keptTags };
 };
 
-const fetchParentItems = async (shortId: string) => {
-  const parentFeatures = await fetchParentFeatures(getApiId(shortId)); // without memberFeatures
-  return await Promise.all(
-    parentFeatures.map((feature) => fetchFreshItem(feature.osmMeta)), // we need full item (with members)
+const relationCenter = (item: DataItem, center: LonLat | undefined) => {
+  if (isValidLonLat(item.nodeLonLat)) return item.nodeLonLat;
+  if (isValidLonLat(center)) return center;
+  return undefined;
+};
+
+const parentsToLoad = (features: Feature[], beside: boolean) => {
+  if (!beside) return features;
+  return features.filter(
+    (feature) =>
+      isCragTags(feature.tags) || isClimbingContainerTags(feature.tags),
   );
 };
 
 export const convertToRelationFactory = (
   setData: Setter<DataItem[]>,
   shortId: string,
+  getItem: () => DataItem | undefined = () => undefined,
 ): ConvertToRelation => {
-  // should work only for node - new or existing
+  return async (center) => {
+    const source = getItem();
+    const beside = source ? staysBeside(source) : false;
+    const parentFeatures = await fetchParentFeatures(getApiId(shortId));
 
-  return async () => {
+    if (beside && parentFeatures.some((feature) => isCragTags(feature.tags))) {
+      throw new AlreadyInCragError(shortId);
+    }
+
     const [parentItems, waysFeatures] = await Promise.all([
-      fetchParentItems(shortId),
+      Promise.all(
+        parentsToLoad(parentFeatures, beside).map((feature) =>
+          fetchFreshItem(feature.osmMeta),
+        ),
+      ),
       fetchWays(getApiId(shortId)),
     ]);
 
-    if (waysFeatures.length > 0) {
-      throw new Error(`Can't convert node ${shortId} which is part of a way.`); // TODO duplicate the node ?
+    if (!beside && shortId.startsWith('n') && waysFeatures.length > 0) {
+      throw new Error(`Can't convert node ${shortId} which is part of a way.`);
     }
 
     const newShortId = `r${getNewId()}`;
     setData((prevData) => {
-      const node = findInItems(prevData, shortId);
-      const { tagsToCopy, keepNode, keptTags } = getConversionTags(node);
+      const current = findInItems(prevData, shortId);
+      const prepared = withCliffTag(current);
+      const besideItem = staysBeside(prepared);
+      const { tagsToCopy, keepNode, keptTags } = getConversionTags(
+        prepared,
+        besideItem && !isNew(prepared),
+      );
 
       const newRelation: DataItem = addEmptyOriginalState({
         shortId: newShortId,
@@ -97,8 +157,8 @@ export const convertToRelationFactory = (
           ]),
         ),
         toBeDeleted: false,
-        relationClickedLonLat: node.nodeLonLat,
-        members: keepNode ? [{ shortId, role: '' }] : [],
+        relationClickedLonLat: relationCenter(prepared, center),
+        members: besideItem || !keepNode ? [] : [{ shortId, role: '' }],
         sections: ['members'],
       });
 
@@ -110,15 +170,22 @@ export const convertToRelationFactory = (
           : item,
       );
       newData.push(newRelation);
-
-      // add all parent relations which are not already there
       newData.push(
         ...parentItems.filter((parent) => !isInItems(newData, parent.shortId)),
       );
 
-      return newData.map((item) =>
-        updateMemberLinks(item, shortId, newRelation),
-      );
+      return newData.map((item) => {
+        if (!item.members?.some((member) => member.shortId === shortId)) {
+          return item;
+        }
+        if (
+          besideItem &&
+          !isClimbingContainerTags(Object.fromEntries(item.tagsEntries))
+        ) {
+          return item;
+        }
+        return updateMemberLinks(item, shortId, newRelation);
+      });
     });
 
     return newShortId;

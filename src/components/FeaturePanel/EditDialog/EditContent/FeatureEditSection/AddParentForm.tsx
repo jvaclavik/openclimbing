@@ -167,12 +167,30 @@ export const AddParentForm = () => {
     setLabel('');
   };
 
+  const linkExistingParent = async (shortId: string) => {
+    if (!shortId.startsWith('r')) {
+      showToast(t('editdialog.parents.not_a_relation'), 'warning');
+      return;
+    }
+    try {
+      await addAsParent(shortId);
+      reset();
+    } catch {
+      showToast(t('editdialog.members.url_invalid'), 'warning');
+    }
+  };
+
   const handleAddByName = (e: {
     preventDefault: () => void;
     ctrlKey?: boolean;
     metaKey?: boolean;
   }) => {
     e.preventDefault();
+    const shortId = parseOsmShortId(label);
+    if (shortId) {
+      void linkExistingParent(shortId);
+      return;
+    }
     const tags = {
       ...getNewParentTags(current.tags),
       ...(label.trim() ? { name: label.trim() } : {}),
@@ -203,16 +221,7 @@ export const AddParentForm = () => {
       showToast(t('editdialog.members.url_invalid'), 'warning');
       return;
     }
-    if (!shortId.startsWith('r')) {
-      showToast(t('editdialog.parents.not_a_relation'), 'warning');
-      return;
-    }
-    try {
-      await addAsParent(shortId);
-      reset();
-    } catch {
-      showToast(t('editdialog.members.url_invalid'), 'warning');
-    }
+    await linkExistingParent(shortId);
   };
 
   useEffect(() => {

@@ -4,20 +4,46 @@ import { t } from '../../../../../services/intl';
 import React from 'react';
 import { FeatureTags } from '../../../../../services/types';
 import { getApiId } from '../../../../../services/helpers';
+import { useFeatureContext } from '../../../../utils/FeatureContext';
+import { useSnackbar } from '../../../../utils/SnackbarContext';
+import { AlreadyInCragError } from '../../context/convertToRelationFactory';
 
-// TODO maybe add sport=climbing as well? but this need more testing
-export const isConvertible = (shortId: string, tags: FeatureTags) =>
-  shortId.startsWith('n') && ['crag', 'area'].includes(tags.climbing);
+export const isConvertible = (shortId: string, tags: FeatureTags) => {
+  if (shortId.startsWith('w')) return tags.climbing === 'crag';
+  return shortId.startsWith('n') && ['crag', 'area'].includes(tags.climbing);
+};
+
+const convertDescription = (shortId: string, tags: FeatureTags) => {
+  if (shortId.startsWith('w') && tags.climbing === 'crag') {
+    return t('editdialog.members.climbing_crag_convert_way_description');
+  }
+  if (tags.natural === 'peak') {
+    return t('editdialog.members.climbing_crag_convert_peak_description');
+  }
+  return tags.climbing === 'crag'
+    ? t('editdialog.members.climbing_crag_convert_description')
+    : t('editdialog.members.convert_description');
+};
 
 export const ConvertNodeToRelation = () => {
   const { setCurrent, removeItem } = useEditContext();
   const { shortId, tags, convertToRelation } = useCurrentItem();
+  const { feature } = useFeatureContext();
+  const { showToast } = useSnackbar();
 
   const handleConvertToRelation = async () => {
-    const newShortId = await convertToRelation();
-    setCurrent(newShortId);
-    if (getApiId(shortId).id < 0) {
-      removeItem(shortId);
+    try {
+      const newShortId = await convertToRelation(feature?.center);
+      setCurrent(newShortId);
+      if (getApiId(shortId).id < 0) {
+        removeItem(shortId);
+      }
+    } catch (error) {
+      if (error instanceof AlreadyInCragError) {
+        showToast(t('editdialog.members.convert_already_in_crag'), 'warning');
+        return;
+      }
+      throw error;
     }
   };
 
@@ -36,9 +62,7 @@ export const ConvertNodeToRelation = () => {
         </Button>
       }
     >
-      {tags.climbing === 'crag'
-        ? t('editdialog.members.climbing_crag_convert_description')
-        : t('editdialog.members.convert_description')}
+      {convertDescription(shortId, tags)}
     </Alert>
   );
 };

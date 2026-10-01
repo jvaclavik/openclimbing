@@ -154,7 +154,9 @@ export const useEditItems = () => {
           setNodeLonLat: setNodeLonLatFactory(setDataItem),
           presetKey,
           presetLabel: getPresetTranslation(presetKey),
-          convertToRelation: convertToRelationFactory(setData, shortId),
+          convertToRelation: convertToRelationFactory(setData, shortId, () =>
+            data.find((item) => item.shortId === shortId),
+          ),
           modified: getModifiedFlag(dataItem),
           revertChanges: revertChangesFactory(setDataItem),
           setSections: setSectionsFactory(setDataItem),
