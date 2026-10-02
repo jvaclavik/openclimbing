@@ -31,12 +31,16 @@ import { findPreset } from '../../../../services/tagging/presets';
 import { getPresetTranslation } from '../../../../services/tagging/translations';
 import { isClimbingRoute } from '../../../../utils';
 
-const StyledListItem = styled(ListItem)`
+const StyledListItem = styled(ListItem, {
+  shouldForwardProp: (prop) => prop !== '$selected',
+})<{ $selected?: boolean }>`
   margin: 2px 4px;
   padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  ${({ $selected, theme }) =>
+    $selected && `background-color: ${theme.palette.action.selected};`}
 
   @media (hover: hover) {
     &:hover {
@@ -165,6 +169,7 @@ type Props = {
   previewTags?: FeatureTags;
   role?: string;
   onRemove?: () => void | Promise<void>;
+  selected?: boolean;
 };
 
 export const FeatureRow = ({
@@ -174,6 +179,7 @@ export const FeatureRow = ({
   previewTags,
   role,
   onRemove,
+  selected,
 }: Props) => {
   const { isLoading, startLoading, stopLoading } = useLoadingState();
   const { items } = useEditContext();
@@ -195,7 +201,7 @@ export const FeatureRow = ({
   };
 
   return (
-    <StyledListItem onClick={handleClick}>
+    <StyledListItem onClick={handleClick} $selected={selected}>
       <Stack
         direction="row"
         sx={{

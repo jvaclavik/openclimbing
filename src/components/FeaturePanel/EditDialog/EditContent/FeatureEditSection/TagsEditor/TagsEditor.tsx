@@ -26,6 +26,8 @@ import {
   useCurrentItem,
   useExpandedSections,
 } from '../../../context/EditContext';
+import { useMultiEdit } from '../../../context/useMultiEdit';
+import { CombinedTagsEditor } from './CombinedTagsEditor';
 
 const Table = styled.table`
   width: calc(100% - 8px);
@@ -89,20 +91,25 @@ const AddButton = () => {
 
 const TagsEditorInner = () => {
   const { tagsEntries } = useCurrentItem();
+  const { isMulti } = useMultiEdit();
   return (
     <Table>
       <tbody>
-        {tagsEntries.map((_, index) => (
-          <tr key={index}>
-            <th>
-              <KeyInput index={index} />
-            </th>
-            <td>
-              <ValueInput index={index} />
-            </td>
-          </tr>
-        ))}
-        <AddButton />
+        {isMulti ? (
+          <CombinedTagsEditor />
+        ) : (
+          tagsEntries.map((_, index) => (
+            <tr key={index}>
+              <th>
+                <KeyInput index={index} />
+              </th>
+              <td>
+                <ValueInput index={index} />
+              </td>
+            </tr>
+          ))
+        )}
+        {isMulti ? null : <AddButton />}
         <TagsEditorInfo />
       </tbody>
     </Table>
@@ -114,6 +121,8 @@ export const TagsEditor = () => {
   const focusThisEditor = isString(focusTag) && !majorKeys.includes(focusTag);
   const { expanded, expand, toggleExpanded } = useExpandedSections('tags');
   const { tagsEntries } = useCurrentItem();
+  const { isMulti, keys } = useMultiEdit();
+  const tagCount = isMulti ? keys.length : tagsEntries.length;
 
   useEffect(() => {
     if (focusThisEditor) expand();
@@ -151,12 +160,8 @@ export const TagsEditor = () => {
             <Typography variant="button">
               {t('editdialog.tags_editor')}
             </Typography>
-            {tagsEntries.length ? (
-              <Chip
-                size="small"
-                label={tagsEntries.length}
-                variant="outlined"
-              />
+            {tagCount ? (
+              <Chip size="small" label={tagCount} variant="outlined" />
             ) : null}
           </Stack>
         </AccordionSummary>

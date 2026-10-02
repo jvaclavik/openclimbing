@@ -19,6 +19,7 @@ type AutocompleteSelectProps = {
     value: string | Option | null,
   ) => void;
   freeSolo?: boolean;
+  placeholder?: string;
 };
 
 const getLabel = (option: string | Option): string =>
@@ -41,6 +42,7 @@ export const AutocompleteSelect = ({
   renderOption,
   onChange,
   freeSolo,
+  placeholder,
 }: AutocompleteSelectProps) => (
   <Autocomplete
     freeSolo={freeSolo}
@@ -57,7 +59,17 @@ export const AutocompleteSelect = ({
       }
     }}
     renderInput={(params) => (
-      <TextField {...params} margin="dense" label={label} />
+      <TextField
+        {...params}
+        margin="dense"
+        label={label}
+        placeholder={placeholder}
+        sx={
+          placeholder
+            ? { '& input::placeholder': { fontStyle: 'italic' } }
+            : undefined
+        }
+      />
     )}
     renderOption={renderOption}
   />

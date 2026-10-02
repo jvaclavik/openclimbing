@@ -12,6 +12,7 @@ import {
   isClimbingRoute as isClimbingRouteFn,
 } from '../../../../../utils';
 import { useCurrentItem } from '../../context/EditContext';
+import { useMultiEdit } from '../../context/useMultiEdit';
 import { MajorKeysFieldList } from './MajorKeysFieldList';
 import { MajorKeysInactivePicker } from './MajorKeysInactivePicker';
 import { isDescriptionKey, isNameKey } from './DescriptionEditor';
@@ -84,11 +85,16 @@ const hasTagForMajorKey = (k: string, tags: FeatureTags) => {
 
 export const MajorKeysEditor: React.FC = () => {
   const { focusTag } = useEditDialogContext();
-  const { tags, setTag } = useCurrentItem();
+  const { tags: currentTags } = useCurrentItem();
+  const { isMulti, tags: sharedTags, mixed, setTag } = useMultiEdit();
+  const tags = isMulti ? sharedTags : currentTags;
 
-  const nextWikimediaCommonsIndex = getNextWikimediaCommonsIndex(tags);
+  const nextWikimediaCommonsIndex = getNextWikimediaCommonsIndex(currentTags);
 
-  const data = getData(nextWikimediaCommonsIndex + 1, tags);
+  const data = getData(nextWikimediaCommonsIndex + 1, currentTags);
+  if (isMulti) {
+    data.keys = data.keys.filter((k) => !isWikimediaCommonsFileSlotKey(k));
+  }
 
   const [activeMajorKeys, setActiveMajorKeys] = useState(() =>
     data.keys.filter((k) => hasTagForMajorKey(k, tags)),
@@ -113,6 +119,30 @@ export const MajorKeysEditor: React.FC = () => {
     }
   }, [activeMajorKeys, focusTag]);
 
+  const mixedSignature = Object.keys(mixed).join('\0');
+  const dataKeySignature = data.keys.join('\0');
+  useEffect(() => {
+    if (!isMulti) return;
+    const relevant = data.keys.filter(
+      (k) =>
+        sharedTags[k] !== undefined ||
+        Object.prototype.hasOwnProperty.call(mixed, k),
+    );
+    setActiveMajorKeys((prev) => {
+      const next = [...new Set([...prev, ...relevant])];
+      if (
+        next.length === prev.length &&
+        next.every((key, index) => key === prev[index])
+      ) {
+        return prev;
+      }
+      return next;
+    });
+    // Signatures stand in for `data.keys` / `mixed`, which are new objects
+    // on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMulti, mixedSignature, dataKeySignature]);
+
   return (
     <Box
       sx={{
@@ -127,6 +157,8 @@ export const MajorKeysEditor: React.FC = () => {
         focusTag={focusTag}
         setTag={setTag}
         getHelperText={getMajorKeyHelperText}
+        isMulti={isMulti}
+        mixed={mixed}
       />
 
       <MajorKeysInactivePicker
@@ -134,10 +166,12 @@ export const MajorKeysEditor: React.FC = () => {
         names={data.names}
         onAdd={(k) => setActiveMajorKeys((arr) => [...arr, k])}
       />
-      <EditDialogUploadHost
-        activeMajorKeys={activeMajorKeys}
-        setActiveMajorKeys={setActiveMajorKeys}
-      />
+      {isMulti ? null : (
+        <EditDialogUploadHost
+          activeMajorKeys={activeMajorKeys}
+          setActiveMajorKeys={setActiveMajorKeys}
+        />
+      )}
     </Box>
   );
 };

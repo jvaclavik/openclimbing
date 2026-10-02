@@ -1,24 +1,71 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useCurrentItem, useEditContext } from '../context/EditContext';
 import { getApiId, getShortId } from '../../../../services/helpers';
 import { fetchFreshItem } from '../context/itemsHelpers';
 import { Feature } from '../../../../services/types';
 import { DataItem, EditDataItem } from '../context/types';
-
 import { isInItems } from '../context/utils';
+import { getRangeSelection, toggleSelectedId } from '../context/selection';
+import { useEnsureEditItems } from '../context/useEnsureEditItems';
 
-export const useHandleItemClick = () => {
-  const { addItem, items, setCurrent } = useEditContext();
+// Opens an item, and participates in the multi-selection. Shift+click selects
+// the range in `orderedIds` (route list, parents, …). Ctrl/Cmd+click loads the
+// item into the dialog and toggles it in the selection, but leaves the open
+// item in place so the member/parent list stays usable.
+export const useHandleItemClick = (orderedIds?: string[]) => {
+  const { setCurrent, setSelectedIds, current, selectedIds } = useEditContext();
+  const ensureItems = useEnsureEditItems();
+  const orderedRef = useRef(orderedIds);
+  orderedRef.current = orderedIds;
+  const currentRef = useRef(current);
+  currentRef.current = current;
+  const selectedRef = useRef(selectedIds);
+  selectedRef.current = selectedIds;
 
-  return async (e: React.MouseEvent, shortId: string) => {
-    if (!isInItems(items, shortId)) {
-      const newItem = await fetchFreshItem(getApiId(shortId));
-      addItem(newItem);
-    }
+  return async (event: React.MouseEvent, shortId: string) => {
+    const ordered = orderedRef.current;
+    const idsAtClick = selectedRef.current;
+    const currentAtClick = currentRef.current;
 
-    const switchToNewTab = !e.ctrlKey && !e.metaKey;
-    if (switchToNewTab) {
+    try {
+      if (event.shiftKey && ordered?.length) {
+        event.preventDefault();
+        const anchor = ordered.includes(currentAtClick)
+          ? currentAtClick
+          : [...idsAtClick].reverse().find((id) => ordered.includes(id));
+        const range = getRangeSelection(ordered, anchor, shortId);
+        await ensureItems(range);
+        setSelectedIds(range);
+        setCurrent(shortId);
+        return;
+      }
+
+      if (event.metaKey || event.ctrlKey) {
+        event.preventDefault();
+        await ensureItems([shortId]);
+        setSelectedIds((prev) => toggleSelectedId(prev, shortId));
+        return;
+      }
+
+      if (event.shiftKey) {
+        event.preventDefault();
+        await ensureItems([shortId]);
+        const wasSelected = idsAtClick.includes(shortId);
+        const next = toggleSelectedId(idsAtClick, shortId);
+        setSelectedIds(next);
+        if (!wasSelected) {
+          setCurrent(shortId);
+        } else if (shortId === currentAtClick && next.length > 0) {
+          setCurrent(next[next.length - 1]);
+        }
+        return;
+      }
+
+      await ensureItems([shortId]);
+      setSelectedIds([shortId]);
       setCurrent(shortId);
+    } catch {
+      // A failed fetch leaves the previous selection in place.
     }
   };
 };

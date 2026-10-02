@@ -3,25 +3,21 @@ import React from 'react';
 import { GRADE_TABLE } from '../../../../../services/tagging/climbing/gradeData';
 import { RouteDifficultyBadge } from '../../../Climbing/RouteDifficultyBadge';
 import { AutocompleteSelect } from './AutocompleteSelect';
-import { FeatureTags } from '../../../../../services/types';
-import { useCurrentItem } from '../../context/EditContext';
+import { useMultiEdit } from '../../context/useMultiEdit';
 import { getGradeSystemName } from '../../../../../services/tagging/climbing/gradeSystems';
+import { t } from '../../../../../services/intl';
 
 type GradeSelectProps = {
   k: string;
   climbingGradeSystem: string;
-  tags: FeatureTags;
 };
 
-export const GradeSelect = ({
-  k,
-  climbingGradeSystem,
-  tags,
-}: GradeSelectProps) => {
+export const GradeSelect = ({ k, climbingGradeSystem }: GradeSelectProps) => {
   const values = GRADE_TABLE[climbingGradeSystem];
   const uniqueValues = [...new Set(values)];
-  const currentValue = tags[k] ?? '';
-  const { setTag } = useCurrentItem();
+  const { tags, mixed, setTag } = useMultiEdit();
+  const isMixed = Object.prototype.hasOwnProperty.call(mixed, k);
+  const currentValue = isMixed ? '' : (tags[k] ?? '');
 
   const onChange = (_e: React.SyntheticEvent, option: string | null) => {
     setTag(k, option ?? '');
@@ -34,6 +30,7 @@ export const GradeSelect = ({
       value={currentValue || null}
       onChange={onChange}
       freeSolo
+      placeholder={isMixed ? t('editdialog.multiple_values') : undefined}
       renderOption={(props, option) => (
         <Box component="li" {...props}>
           <RouteDifficultyBadge

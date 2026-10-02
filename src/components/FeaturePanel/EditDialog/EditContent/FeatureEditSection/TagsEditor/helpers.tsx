@@ -27,6 +27,10 @@ export const FastInput = styled.input<{ error?: boolean }>`
     border-color: ${theme.palette.error.main};
     background: ${WarningSvgDataUrl} no-repeat right 8px center;`}
 
+  &::placeholder {
+    font-style: italic;
+  }
+
   &:hover {
     border-color: ${({ theme }) => theme.palette.secondary.main};
   }

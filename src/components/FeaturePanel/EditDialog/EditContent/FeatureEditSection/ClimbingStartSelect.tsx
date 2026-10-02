@@ -1,6 +1,7 @@
 import React from 'react';
 import { AutocompleteSelect, Option } from './AutocompleteSelect';
 import { useCurrentItem } from '../../context/EditContext';
+import { useMultiEdit } from '../../context/useMultiEdit';
 import { t } from '../../../../../services/intl';
 import {
   CLIMBING_START_OPTIONS,
@@ -11,7 +12,8 @@ import { isClimbingRoute } from '../../../../../utils';
 const KEY = 'climbing:start';
 
 export const ClimbingStartSelect = () => {
-  const { tags, setTag } = useCurrentItem();
+  const { tags } = useCurrentItem();
+  const { tags: shared, mixed, setTag } = useMultiEdit();
 
   const isBoulder =
     isClimbingRoute(tags) && isClimbingTagSet(tags['climbing:boulder']);
@@ -22,8 +24,11 @@ export const ClimbingStartSelect = () => {
     value: opt.value,
   }));
 
-  const value =
-    options.find((opt) => opt.value === tags[KEY]) ?? tags[KEY] ?? null;
+  const isMixed = Object.prototype.hasOwnProperty.call(mixed, KEY);
+  const raw = isMixed ? undefined : shared[KEY];
+  const value = isMixed
+    ? null
+    : (options.find((opt) => opt.value === raw) ?? raw ?? null);
 
   const onChange = (_e, option: string | Option | null) => {
     setTag(KEY, (typeof option === 'string' ? option : option?.value) ?? '');
@@ -36,6 +41,7 @@ export const ClimbingStartSelect = () => {
       value={value}
       onChange={onChange}
       freeSolo
+      placeholder={isMixed ? t('editdialog.multiple_values') : undefined}
     />
   );
 };

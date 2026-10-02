@@ -3,6 +3,7 @@ import { GradeSelect } from '../GradeSelect';
 import React from 'react';
 import { useUserSettingsContext } from '../../../../../utils/userSettings/UserSettingsContext';
 import { useCurrentItem } from '../../../context/EditContext';
+import { useMultiEdit } from '../../../context/useMultiEdit';
 import { GradeSystemSelect } from '../../../../Climbing/GradeSystemSelect';
 import { Box, Stack, Typography } from '@mui/material';
 import { t } from '../../../../../../services/intl';
@@ -10,11 +11,14 @@ import { isClimbingRoute } from '../../../../../../utils';
 
 export const ClimbingGradesEditor = () => {
   const { tags } = useCurrentItem();
+  const { isMulti, targets } = useMultiEdit();
   const { gradeSystem } = useUserSettingsContext();
 
   const key = `climbing:grade:${gradeSystem}`;
   const climbingGradeSystem = extractClimbingGradeFromTagName(key);
-  const isRoute = isClimbingRoute(tags);
+  const isRoute =
+    isClimbingRoute(tags) ||
+    (isMulti && targets.some((item) => isClimbingRoute(item.tags)));
 
   if (!isRoute) {
     return null;
@@ -45,11 +49,7 @@ export const ClimbingGradesEditor = () => {
             flex: '1',
           }}
         >
-          <GradeSelect
-            k={key}
-            climbingGradeSystem={climbingGradeSystem}
-            tags={tags}
-          />
+          <GradeSelect k={key} climbingGradeSystem={climbingGradeSystem} />
         </Box>
         <GradeSystemSelect orderByFeature showDefaultOnButton />
       </Stack>

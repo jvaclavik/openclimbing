@@ -5,6 +5,7 @@ import { TextFieldWithCharacterCount } from './helpers';
 import { WikimediaCommonsGallery } from './WikimediaCommonsGallery';
 import { DescriptionEditor, NameEditor } from './DescriptionEditor';
 import { FeatureTags } from '../../../../../services/types';
+import { t } from '../../../../../services/intl';
 import { isWikimediaCommonsFileSlotKey } from '../../../Climbing/utils/photo';
 import { mergeActiveMajorKeysAfterRemap } from './wikimediaCommonsGalleryModel';
 
@@ -21,6 +22,8 @@ type Props = {
   focusTag: boolean | string;
   setTag: (k: string, v: string) => void;
   getHelperText: (k: string) => string | undefined;
+  isMulti?: boolean;
+  mixed?: Record<string, string[]>;
 };
 
 export const MajorKeysFieldList: React.FC<Props> = ({
@@ -31,15 +34,29 @@ export const MajorKeysFieldList: React.FC<Props> = ({
   focusTag,
   setTag,
   getHelperText,
+  isMulti,
+  mixed,
 }) => {
   const getInputElement = (k: string) => {
     if (!data.keys?.includes(k)) return null;
 
-    if (k === 'opening_hours') {
+    const mixedValues =
+      mixed && Object.prototype.hasOwnProperty.call(mixed, k)
+        ? mixed[k]
+        : undefined;
+    const isMixed = !!isMulti && mixedValues !== undefined;
+    const helperText =
+      isMixed && mixedValues.length
+        ? t('editdialog.multiple_values_list', {
+            values: mixedValues.join(', '),
+          })
+        : getHelperText(k);
+
+    if (!isMulti && k === 'opening_hours') {
       return <OpeningHoursEditor />;
     }
 
-    if (k === 'name') {
+    if (!isMulti && k === 'name') {
       return (
         <NameEditor
           autoFocus={focusTag === k}
@@ -51,7 +68,7 @@ export const MajorKeysFieldList: React.FC<Props> = ({
       );
     }
 
-    if (k === 'description') {
+    if (!isMulti && k === 'description') {
       return (
         <DescriptionEditor
           autoFocus={focusTag === k}
@@ -71,8 +88,10 @@ export const MajorKeysFieldList: React.FC<Props> = ({
         onChange={(e) => {
           setTag(e.target.name, e.target.value);
         }}
-        value={tags[k] ?? ''}
-        helperText={getHelperText(k)}
+        value={isMixed ? '' : (tags[k] ?? '')}
+        placeholder={isMixed ? t('editdialog.multiple_values') : undefined}
+        helperText={helperText}
+        multiline={k === 'name' ? false : undefined}
       />
     );
   };
@@ -85,6 +104,7 @@ export const MajorKeysFieldList: React.FC<Props> = ({
   return (
     <>
       {activeMajorKeys.flatMap((k) => {
+        if (isMulti && isWikimediaCommonsFileSlotKey(k)) return [];
         if (isWikimediaCommonsFileSlotKey(k)) {
           if (!wikimediaGalleryInserted && wikimediaFileKeys.length) {
             wikimediaGalleryInserted = true;
