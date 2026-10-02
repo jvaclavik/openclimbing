@@ -11,8 +11,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
-import { useCurrentItem } from '../../../context/EditContext';
-import { Setter } from '../../../../../../types';
+import { useMultiEdit } from '../../../context/useMultiEdit';
 
 const getTranslationKey = (key: string) => {
   return key.replaceAll(':', '_').replace(/^climbing_/, '');
@@ -36,10 +35,12 @@ type CustomValueInputProps = {
 };
 
 const CustomValueInput = ({ k }: CustomValueInputProps) => {
-  const { tags, setTag } = useCurrentItem();
+  const { tags, mixed, setTag, removeTag } = useMultiEdit();
+  const isMixed = Object.prototype.hasOwnProperty.call(mixed, k);
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setTag(k, value.trim() === '' ? undefined : value);
+    if (value.trim() === '') removeTag(k);
+    else setTag(k, value);
   };
 
   return (
@@ -61,9 +62,13 @@ const CustomValueInput = ({ k }: CustomValueInputProps) => {
       </Typography>
       <TextField
         size="small"
-        value={tags[k] ?? ''}
+        value={isMixed ? '' : (tags[k] ?? '')}
+        placeholder={isMixed ? t('editdialog.multiple_values') : undefined}
         onChange={onChange}
-        sx={{ minWidth: 160 }}
+        sx={{
+          minWidth: 160,
+          '& input::placeholder': { fontStyle: 'italic' },
+        }}
       />
     </Box>
   );
@@ -82,12 +87,20 @@ const CloseButton = (props: { onClick: () => void }) => (
 );
 
 const ToggleTagButton = ({ k }: { k: string }) => {
-  const { tags, setTag } = useCurrentItem();
-  const value = tags[k];
+  const { tags, mixed, setTag } = useMultiEdit();
+  const isMixed = Object.prototype.hasOwnProperty.call(mixed, k);
+  const value = isMixed ? undefined : tags[k];
   const onSwitch = (checked: boolean) => setTag(k, checked ? 'yes' : 'no');
 
   return (
     <Box
+      title={
+        isMixed && mixed[k]?.length
+          ? t('editdialog.multiple_values_list', {
+              values: mixed[k].join(', '),
+            })
+          : undefined
+      }
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -99,7 +112,12 @@ const ToggleTagButton = ({ k }: { k: string }) => {
         checked={value === 'yes' || (value && value !== 'no')}
         onChange={(e) => onSwitch(e.target.checked)}
       />
-      <Typography variant="caption">{getValue(value)}</Typography>
+      <Typography
+        variant="caption"
+        sx={{ fontStyle: isMixed ? 'italic' : undefined }}
+      >
+        {isMixed ? t('editdialog.multiple_values') : getValue(value)}
+      </Typography>
     </Box>
   );
 };
@@ -133,17 +151,14 @@ const TagLabel = ({ k }: { k: string }) => {
 type Props = {
   k: string;
   customValue: boolean;
-  setVisible: Setter<string[]>;
 };
 
-export const EditorItem = ({ k, customValue, setVisible }: Props) => {
+export const EditorItem = ({ k, customValue }: Props) => {
   const [showCustom, setShowCustom] = useState(false);
-  const { tagsEntries, setTagsEntries } = useCurrentItem();
+  const { removeTag } = useMultiEdit();
 
   const onRemove = () => {
-    const index = tagsEntries.findIndex(([key]) => k === key);
-    if (index !== -1) setTagsEntries((prev) => prev.toSpliced(index, 1));
-    setVisible((prev) => prev.filter((key) => k !== key));
+    removeTag(k);
   };
 
   const toggleCustom = () => setShowCustom((prev) => !prev);

@@ -2,7 +2,9 @@ import { Stack, Typography } from '@mui/material';
 import React from 'react';
 import styled from '@emotion/styled';
 import { useCurrentItem } from '../../context/EditContext';
+import { useMultiEdit } from '../../context/useMultiEdit';
 import { OsmTypeLabel } from '../../../OsmTypeLabel';
+import { SelectionList } from './SelectionList';
 
 const StyledTypography = styled(Typography, {
   shouldForwardProp: (prop) => !prop.startsWith('$'),
@@ -11,7 +13,12 @@ const StyledTypography = styled(Typography, {
 `;
 
 export const ItemHeading = () => {
-  const { shortId, tags, presetLabel, toBeDeleted } = useCurrentItem();
+  const { isMulti } = useMultiEdit();
+  const item = useCurrentItem();
+
+  if (isMulti) return <SelectionList />;
+  if (!item) return null;
+  const { shortId, tags, presetLabel, toBeDeleted } = item;
 
   return (
     <Stack

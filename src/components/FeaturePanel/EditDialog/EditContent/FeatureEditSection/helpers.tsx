@@ -64,6 +64,11 @@ export const TextFieldWithCharacterCount = ({
         fullWidth
         autoFocus={autoFocus}
         placeholder={placeholder}
+        sx={
+          placeholder
+            ? { '& .MuiInputBase-input::placeholder': { fontStyle: 'italic' } }
+            : undefined
+        }
         onFocus={() => setIsFocused(true)}
         onBlur={() => {
           setIsValidationReadyToCheck(true);

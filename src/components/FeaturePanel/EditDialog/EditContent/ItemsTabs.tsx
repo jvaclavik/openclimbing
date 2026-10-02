@@ -31,6 +31,16 @@ const StyledTabs = styled(Tabs)`
     text-align: left;
   }
 
+  && .MuiTab-root.tab-multi-selected {
+    color: ${({ theme }) => theme.palette.primary.main};
+  }
+
+  .MuiTab-root.tab-multi-selected::after {
+    content: '';
+    position: absolute;
+    background-color: ${({ theme }) => theme.palette.primary.main};
+  }
+
   ${({ theme }) => theme.breakpoints.up('sm')} {
     border-right: 1px solid ${({ theme }) => theme.palette.divider};
     resize: horizontal;
@@ -42,6 +52,13 @@ const StyledTabs = styled(Tabs)`
       align-items: baseline;
       border-bottom: solid 1px ${({ theme }) => theme.palette.divider};
     }
+
+    .MuiTab-root.tab-multi-selected::after {
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 2px;
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down('sm')} {
@@ -49,6 +66,13 @@ const StyledTabs = styled(Tabs)`
 
     .MuiTab-root {
       align-items: center;
+    }
+
+    .MuiTab-root.tab-multi-selected::after {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
     }
   }
 `;
@@ -295,15 +319,13 @@ export const ItemsTabs = () => {
                   }, 0);
                 }}
                 onClick={(event) => handleTabClick(event, item.shortId)}
+                className={isMultiSelected ? 'tab-multi-selected' : undefined}
                 sx={{
                   maxWidth: '100%',
                   cursor: 'grab',
                   ...(isSmallScreen
                     ? {}
                     : { borderBottom: `solid 1px ${theme.palette.divider}` }),
-                  ...(isMultiSelected
-                    ? { backgroundColor: theme.palette.action.selected }
-                    : {}),
                 }}
               />
             );

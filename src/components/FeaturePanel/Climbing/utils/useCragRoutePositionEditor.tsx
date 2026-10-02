@@ -18,6 +18,8 @@ import {
 import { RouteDifficulty } from '../types';
 import { t } from '../../../../services/intl';
 import { useEditContext } from '../../EditDialog/context/EditContext';
+import { useEnsureEditItems } from '../../EditDialog/context/useEnsureEditItems';
+import { getRangeSelection } from '../../EditDialog/context/selection';
 import { fetchFreshItem } from '../../EditDialog/context/itemsHelpers';
 import { EditDataItem } from '../../EditDialog/context/types';
 import { findInItems, isInItems } from '../../EditDialog/context/utils';
@@ -332,6 +334,7 @@ export const useCragRoutePositionEditor = (
   const crag = useCragFeatureForRoutes();
   const { items, addItem, setCurrent, current, selectedIds, setSelectedIds } =
     useEditContext();
+  const ensureItems = useEnsureEditItems();
   const { highlightedPhoto } = usePhotoHighlightContext();
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
@@ -430,9 +433,10 @@ export const useCragRoutePositionEditor = (
   const currentRef = useRef(current);
   currentRef.current = current;
 
-  // Cmd/Ctrl(+Shift)+click a route marker toggles it in the multi-selection.
+  // Cmd/Ctrl+click toggles one route. The route is loaded into the dialog
+  // first so its tags can be edited together with the rest of the selection.
   const toggleRouteSelection = useCallback(
-    (routeId: string) => {
+    async (routeId: string) => {
       const ids = selectedIdsRef.current;
       const wasSelected = ids.includes(routeId);
       const next = wasSelected
@@ -440,15 +444,47 @@ export const useCragRoutePositionEditor = (
           ? ids
           : ids.filter((id) => id !== routeId)
         : [...ids, routeId];
-      setSelectedIds(next);
-      if (!wasSelected) {
-        setCurrent(routeId);
-      } else if (routeId === currentRef.current && next.length > 0) {
-        setCurrent(next[next.length - 1]);
+      try {
+        if (!wasSelected) await ensureItems([routeId]);
+        setSelectedIds(next);
+        if (!wasSelected) {
+          setCurrent(routeId);
+        } else if (routeId === currentRef.current && next.length > 0) {
+          setCurrent(next[next.length - 1]);
+        }
+      } catch {
+        // A failed fetch leaves the previous selection in place.
       }
     },
-    [setSelectedIds, setCurrent],
+    [ensureItems, setSelectedIds, setCurrent],
   );
+
+  // Shift+click selects every route between the anchor and the clicked one,
+  // in crag order — the same range gesture as the route list.
+  const selectRouteRange = useCallback(
+    async (routeId: string) => {
+      const ordered = editableRoutesRef.current.map((route) => route.id);
+      const anchor = ordered.includes(currentRef.current)
+        ? currentRef.current
+        : [...selectedIdsRef.current]
+            .reverse()
+            .find((id) => ordered.includes(id));
+      const range = getRangeSelection(ordered, anchor, routeId);
+      try {
+        await ensureItems(range);
+        setSelectedIds(range);
+        setCurrent(routeId);
+      } catch {
+        // A failed fetch leaves the previous selection in place.
+      }
+    },
+    [ensureItems, setSelectedIds, setCurrent],
+  );
+
+  const toggleRouteSelectionRef = useRef(toggleRouteSelection);
+  toggleRouteSelectionRef.current = toggleRouteSelection;
+  const selectRouteRangeRef = useRef(selectRouteRange);
+  selectRouteRangeRef.current = selectRouteRange;
 
   // When switching to another crag/sector in the dialog, drop the in-progress
   // guide-line state so a line drawn for one sector isn't applied to the next
@@ -834,16 +870,24 @@ export const useCragRoutePositionEditor = (
       });
       marker.setPopup(popup);
 
-      // Cmd/Ctrl(+Shift)+click toggles this route in the multi-selection
-      // instead of opening the popup. Capture phase + stopImmediatePropagation
-      // so it runs before MapLibre's own marker click (popup toggle).
+      // Shift+click selects the range of routes up to this one. Cmd/Ctrl+click
+      // toggles just this route. Both skip the popup. Capture phase +
+      // stopImmediatePropagation so this runs before MapLibre's marker click.
       element.addEventListener(
         'click',
         (event) => {
+          if (event.shiftKey) {
+            event.stopImmediatePropagation();
+            event.stopPropagation();
+            event.preventDefault();
+            void selectRouteRangeRef.current(route.id);
+            return;
+          }
           if (!(event.metaKey || event.ctrlKey)) return;
           event.stopImmediatePropagation();
+          event.stopPropagation();
           event.preventDefault();
-          toggleRouteSelection(route.id);
+          void toggleRouteSelectionRef.current(route.id);
         },
         true,
       );

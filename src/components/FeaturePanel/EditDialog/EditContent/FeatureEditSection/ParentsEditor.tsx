@@ -171,10 +171,14 @@ const useVisibleParents = () => {
 };
 
 export const ParentsEditor = () => {
-  const handleClick = useHandleItemClick();
   const { visibleOsmParents, sessionParents } = useVisibleParents();
+  const orderedIds = [
+    ...visibleOsmParents.map((parent) => getShortId(parent.osmMeta)),
+    ...sessionParents.map((parent) => parent.shortId),
+  ];
+  const handleClick = useHandleItemClick(orderedIds);
   const handleOpenAll = useHandleOpenAllParents(visibleOsmParents);
-  const { items, addItem, current } = useEditContext();
+  const { items, addItem, current, selectedIds } = useEditContext();
   const { addAsParent } = useLinkEditItem();
   const { expand } = useExpandedSections('parents');
 
@@ -215,6 +219,7 @@ export const ParentsEditor = () => {
                 shortId={shortId}
                 originalLabel={getLabel(parent)}
                 previewTags={parent.tags}
+                selected={selectedIds.includes(shortId)}
                 onClick={(e) => handleClick(e, shortId)}
                 onRemove={
                   canRemove ? () => unlinkFromParent(shortId) : undefined
@@ -228,6 +233,7 @@ export const ParentsEditor = () => {
               shortId={parent.shortId}
               originalLabel={parent.tags.name || parent.presetLabel}
               previewTags={parent.tags}
+              selected={selectedIds.includes(parent.shortId)}
               onClick={(e) => handleClick(e, parent.shortId)}
               onRemove={() => unlinkFromParent(parent.shortId)}
             />

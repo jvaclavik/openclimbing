@@ -2,6 +2,7 @@ import React from 'react';
 import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { useEditDialogFeature } from '../../utils';
 import { useCurrentItem, useEditContext } from '../../context/EditContext';
+import { useMultiEdit } from '../../context/useMultiEdit';
 import { t, Translation } from '../../../../../services/intl';
 import { useOsmAuthContext } from '../../../../utils/OsmAuthContext';
 import { useToggleState } from '../../../../helpers';
@@ -71,12 +72,13 @@ export const ChangeLocationEditor = () => {
 export const OptionsEditor = () => {
   const { isAddPlace, isUndelete } = useEditDialogFeature();
   const { items } = useEditContext();
+  const { isMulti } = useMultiEdit();
 
   return (
     !isAddPlace &&
     !isUndelete && (
       <>
-        <PlaceCancelledToggle />
+        {isMulti ? null : <PlaceCancelledToggle />}
         {items.length >= 2 ? null : <ChangeLocationEditor />}
       </>
     )

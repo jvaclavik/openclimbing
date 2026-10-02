@@ -14,6 +14,7 @@ import {
   useCurrentItem,
   useExpandedSections,
 } from '../../../context/EditContext';
+import { useMultiEdit } from '../../../context/useMultiEdit';
 import { Maki } from '../../../../../utils/icons/Maki';
 import styled from '@emotion/styled';
 import { ClimbingGradesEditor } from './ClimbingGradesEditor';
@@ -95,9 +96,12 @@ const ClimbingMultiValuesInner = () => {
 
 export const ClimbingEditor = () => {
   const { tags } = useCurrentItem();
+  const { isMulti, targets } = useMultiEdit();
   const { expanded, toggleExpanded } = useExpandedSections('climbing');
+  const showClimbing =
+    !!tags.climbing || (isMulti && targets.some((item) => item.tags.climbing));
 
-  if (!tags.climbing) {
+  if (!showClimbing) {
     return null;
   }
 

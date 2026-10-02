@@ -2,24 +2,19 @@ import React, { useState } from 'react';
 import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
 import { t } from '../../../../../../services/intl';
 import { getLabel } from './EditorItem';
-import { Setter } from '../../../../../../types';
-import { useCurrentItem } from '../../../context/EditContext';
+import { useMultiEdit } from '../../../context/useMultiEdit';
 
 export const EditorHeader: React.FC<{
   label: string;
   inactive: string[];
-  setVisible: Setter<string[]>;
-}> = ({ label, inactive, setVisible }) => {
-  const { tags, setTag } = useCurrentItem();
+}> = ({ label, inactive }) => {
+  const { setTag } = useMultiEdit();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const onClick = (e) => setAnchorEl(e.currentTarget);
 
   const handleAdd = (k: string) => {
-    setVisible((prev) => [...prev, k]);
-    if (tags[k] === undefined) {
-      setTag(k, 'yes');
-    }
+    setTag(k, 'yes');
     setAnchorEl(null);
   };
 

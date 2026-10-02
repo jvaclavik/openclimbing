@@ -179,7 +179,9 @@ type DraggableMemberItemProps = {
   member: Member;
   index: number;
   canReorder: boolean;
+  selected: boolean;
   onRemove: () => void;
+  handleClick: (event: React.MouseEvent, shortId: string) => Promise<void>;
   dragHandlers: {
     handleDragStart: (
       e: React.DragEvent<HTMLDivElement>,
@@ -194,16 +196,18 @@ const DraggableMemberItem = ({
   member,
   index,
   canReorder,
+  selected,
   onRemove,
+  handleClick,
   dragHandlers,
 }: DraggableMemberItemProps) => {
-  const handleClick = useHandleItemClick();
   const row = (
     <FeatureRow
       shortId={member.shortId}
       originalLabel={member.originalLabel}
       previewTags={member.originalTags}
       role={member.role}
+      selected={selected}
       onClick={(e: React.MouseEvent) => handleClick(e, member.shortId)}
       onRemove={onRemove}
     />
@@ -229,6 +233,9 @@ const DraggableMemberItem = ({
 
 export const MembersEditor = () => {
   const { shortId, members, tags, setMembers } = useCurrentItem();
+  const { selectedIds } = useEditContext();
+  const orderedIds = members?.map((member) => member.shortId);
+  const handleClick = useHandleItemClick(orderedIds);
   const convertible = isConvertible(shortId, tags);
   const handleOpenAll = useHandleOpenAllMembers();
   const { addAsMember } = useLinkEditItem();
@@ -276,6 +283,8 @@ export const MembersEditor = () => {
                   member={member}
                   index={index}
                   canReorder={canReorder}
+                  selected={selectedIds.includes(member.shortId)}
+                  handleClick={handleClick}
                   onRemove={() =>
                     setMembers((prev) =>
                       (prev ?? []).filter((m) => m.shortId !== member.shortId),

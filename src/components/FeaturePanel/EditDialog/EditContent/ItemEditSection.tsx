@@ -1,4 +1,5 @@
 import { useCurrentItem } from '../context/EditContext';
+import { useMultiEdit } from '../context/useMultiEdit';
 import { ItemHeading } from './FeatureEditSection/ItemHeading';
 import { PlaceCancelledToggle } from './FeatureEditSection/OptionsEditor';
 import { PresetSelect } from './FeatureEditSection/PresetSelect/PresetSelect';
@@ -16,8 +17,11 @@ import { Box } from '@mui/material';
 import { EditSectionCard } from './EditSectionCard';
 
 export const ItemEditSection = () => {
-  const { toBeDeleted } = useCurrentItem();
-  if (toBeDeleted) {
+  const item = useCurrentItem();
+  const { isMulti } = useMultiEdit();
+  if (!item) return null;
+  const { toBeDeleted } = item;
+  if (toBeDeleted && !isMulti) {
     return (
       <>
         <ItemHeading />
@@ -29,15 +33,15 @@ export const ItemEditSection = () => {
   return (
     <>
       <ItemHeading />
-      <MissingLocationBanner />
-      <PresetSelect />
+      {!isMulti && <MissingLocationBanner />}
+      {!isMulti && <PresetSelect />}
       <MajorKeysEditor />
       <ClimbingEditor />
       <EditSectionCard>
         <ParentsEditor />
         <MembersEditor />
       </EditSectionCard>
-      <LocationEditor />
+      {!isMulti && <LocationEditor />}
       <TagsEditor />
       <Box
         sx={{
