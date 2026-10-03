@@ -191,9 +191,10 @@ export const AddParentForm = () => {
       void linkExistingParent(shortId);
       return;
     }
+    const name = label.trim();
     const tags = {
       ...getNewParentTags(current.tags),
-      ...(label.trim() ? { name: label.trim() } : {}),
+      ...(name ? { name } : {}),
     };
     const newParent = getNewRelationItem(tags, [
       {
