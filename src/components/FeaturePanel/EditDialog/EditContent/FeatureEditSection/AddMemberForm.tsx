@@ -141,8 +141,16 @@ const useHandleAddMember = (
   const relation = useCurrentItem();
   const gradeSystem = useGetGradeSystemOrUndefined(scene);
 
-  return async (e: React.MouseEvent) => {
+  return async (e: {
+    preventDefault: () => void;
+    ctrlKey?: boolean;
+    metaKey?: boolean;
+  }) => {
     const tagRoutes = parseTagBatch(label);
+    const lines = label
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
     const drafts = tagRoutes
       ? tagRoutes.map((routeTags) =>
           toMemberDraft(
@@ -152,12 +160,17 @@ const useHandleAddMember = (
             ),
           ),
         )
-      : await Promise.all(
-          label
-            .split('\n')
-            .filter(Boolean)
-            .map((line) => convertLine(line, relation.tags, gradeSystem)),
-        );
+      : lines.length
+        ? await Promise.all(
+            lines.map((line) => convertLine(line, relation.tags, gradeSystem)),
+          )
+        : scene === 'single'
+          ? [
+              toMemberDraft(
+                getNewNodeItem(undefined, getMemberTags(relation.tags)),
+              ),
+            ]
+          : [];
 
     const newMembers: Members = [];
     for (const { newItem, newMember } of drafts) {
