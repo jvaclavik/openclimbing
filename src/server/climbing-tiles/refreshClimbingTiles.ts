@@ -123,7 +123,7 @@ export const getNewRecords = (
 
     //
     else if (
-      (node.tags.leisure || node.tags.building) &&
+      (node.tags.leisure || (node.tags.building && !node.tags.shop)) &&
       isClimbingRelated(node)
     ) {
       addRecord('gym', node);
@@ -139,10 +139,18 @@ export const getNewRecords = (
       addRecord('ferrata', node);
     }
 
-    // careful, this has to omit `shop=sports` etc.
+    // an untagged sport=climbing node is ambiguous - it is either a climbing
+    // spot, a gym or a shop/office (shop=*, opening_hours, phone, addr:street)
     else if (node.tags.sport === 'climbing') {
       if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
         addRecord('gym', node);
+      } else if (
+        node.tags.shop ||
+        node.tags.opening_hours ||
+        node.tags.phone ||
+        node.tags['addr:street']
+      ) {
+        // shops are ignored
       } else {
         addRecord('crag', node); //this needs tweaking
       }
@@ -169,7 +177,7 @@ export const getNewRecords = (
 
     //
     else if (
-      (way.tags.leisure || way.tags.building) &&
+      (way.tags.leisure || (way.tags.building && !way.tags.shop)) &&
       isClimbingRelated(way)
     ) {
       addRecord('gym', centerGeometry(way));
@@ -183,6 +191,12 @@ export const getNewRecords = (
     // omit playground=climbingwall with sport=climbing
     else if (way.tags.playground) {
       continue;
+    }
+
+    // shop=* (eg. shop=sports) is allowed to carry sport=climbing, but it is a
+    // store, not a climbing spot - see #212
+    else if (way.tags.shop) {
+      // shops are ignored
     }
 
     //
@@ -212,7 +226,8 @@ export const getNewRecords = (
 
     // usually a type=multipolygon relation
     else if (
-      (relation.tags.leisure || relation.tags.building) &&
+      (relation.tags.leisure ||
+        (relation.tags.building && !relation.tags.shop)) &&
       isClimbingRelated(relation)
     ) {
       addRecord('gym', centerGeometry(relation));
@@ -221,6 +236,12 @@ export const getNewRecords = (
     // omit playground=climbingwall with sport=climbing
     else if (relation.tags.playground) {
       continue;
+    }
+
+    // shop=* (eg. shop=sports) is allowed to carry sport=climbing, but it is a
+    // store, not a climbing spot - see #212
+    else if (relation.tags.shop) {
+      // shops are ignored
     }
 
     //
