@@ -120,7 +120,7 @@ export const GRADE_SYSTEMS: GradeSystemDefinition[] = [
     description: 'Polish grading system.',
   },
   {
-    key: 'fb',
+    key: 'font',
     category: 'boulder',
     name: 'Fontainebleau',
     flags: '🇪🇺',
@@ -130,6 +130,14 @@ export const GRADE_SYSTEMS: GradeSystemDefinition[] = [
 ];
 
 export type GradeSystem = (typeof GRADE_SYSTEMS)[number]['key'];
+
+// OSM renamed climbing:grade:fb to climbing:grade:font.
+export const LEGACY_GRADE_SYSTEM_KEYS: Record<string, GradeSystem> = {
+  fb: 'font',
+};
+
+export const normalizeGradeSystemKey = (key: string): string =>
+  LEGACY_GRADE_SYSTEM_KEYS[key] ?? key;
 
 export const getGradeSystemName = (gradeSystemKey: GradeSystem) =>
   GRADE_SYSTEMS.find((item) => item.key === gradeSystemKey)?.name;

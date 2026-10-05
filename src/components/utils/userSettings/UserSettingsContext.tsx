@@ -12,7 +12,7 @@ import {
   ClimbingFilterSettings,
   getClimbingFilter,
 } from './getClimbingFilter';
-import { getGradeSystem } from './getGradeSystem';
+import { getGradeSystem, migrateUserSettings } from './getGradeSystem';
 
 type CragViewLayout = 'vertical' | 'horizontal' | 'auto';
 
@@ -92,6 +92,7 @@ export const UserSettingsProvider: React.FC = ({ children }) => {
   const [userSettings, setUserSettings] = usePersistedState<UserSettingsType>(
     'userSettings',
     initialUserSettings,
+    migrateUserSettings,
   );
 
   const setUserSetting = <T extends keyof UserSettingsType>(

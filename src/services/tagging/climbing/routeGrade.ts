@@ -5,7 +5,12 @@ import {
   gradeColors,
   gradeTableString,
 } from './gradeData';
-import { DEFAULT_GRADE_SYSTEM, GradeSystem } from './gradeSystems';
+import {
+  DEFAULT_GRADE_SYSTEM,
+  GradeSystem,
+  LEGACY_GRADE_SYSTEM_KEYS,
+  normalizeGradeSystemKey,
+} from './gradeSystems';
 import { FeatureTags } from '../../types';
 
 export const exportGradeDataToWikiTable = () => {
@@ -46,10 +51,10 @@ export const getDifficulty = (
 
   if (gradeKeys.length) {
     const key = gradeKeys[0]; // @TODO store all found grades
-    const system = key.split(':', 3)[2];
+    const system = getGradeSystemFromOsmTag(key);
 
     return {
-      gradeSystem: (system ?? DEFAULT_GRADE_SYSTEM) as GradeSystem, // @TODO `gradeSystem` type should be `string`
+      gradeSystem: (system || DEFAULT_GRADE_SYSTEM) as GradeSystem, // @TODO `gradeSystem` type should be `string`
       grade: tags[key],
     };
   }
@@ -59,8 +64,15 @@ export const getDifficulty = (
 export const getOsmTagFromGradeSystem = (gradeSystemKey: GradeSystem) =>
   `climbing:grade:${gradeSystemKey}`;
 
+export const getLegacyOsmTagFromGradeSystem = (gradeSystemKey: string) => {
+  const legacy = Object.keys(LEGACY_GRADE_SYSTEM_KEYS).find(
+    (key) => LEGACY_GRADE_SYSTEM_KEYS[key] === gradeSystemKey,
+  );
+  return legacy ? `climbing:grade:${legacy}` : undefined;
+};
+
 export const getGradeSystemFromOsmTag = (osmTagKey: string) =>
-  osmTagKey.split(':', 3)[2];
+  normalizeGradeSystemKey(osmTagKey.split(':', 3)[2] ?? '');
 
 export const getDifficulties = (tags: FeatureTags): RouteDifficulty[] => {
   if (!tags) {
@@ -172,7 +184,7 @@ export const extractClimbingGradeFromTagName = (
   value: string,
 ): string | null => {
   const match = value.match(/^climbing:grade:([^:]+)/);
-  return match ? match[1] : null;
+  return match ? normalizeGradeSystemKey(match[1]) : null;
 };
 
 export const getGradeIndexFromTags = (

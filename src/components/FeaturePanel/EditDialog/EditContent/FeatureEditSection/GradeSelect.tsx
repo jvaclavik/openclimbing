@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import React from 'react';
 import { GRADE_TABLE } from '../../../../../services/tagging/climbing/gradeData';
+import { getLegacyOsmTagFromGradeSystem } from '../../../../../services/tagging/climbing/routeGrade';
 import { RouteDifficultyBadge } from '../../../Climbing/RouteDifficultyBadge';
 import { AutocompleteSelect } from './AutocompleteSelect';
 import { useMultiEdit } from '../../context/useMultiEdit';
@@ -15,12 +16,22 @@ type GradeSelectProps = {
 export const GradeSelect = ({ k, climbingGradeSystem }: GradeSelectProps) => {
   const values = GRADE_TABLE[climbingGradeSystem];
   const uniqueValues = [...new Set(values)];
-  const { tags, mixed, setTag } = useMultiEdit();
-  const isMixed = Object.prototype.hasOwnProperty.call(mixed, k);
-  const currentValue = isMixed ? '' : (tags[k] ?? '');
+  const { tags, mixed, setTag, removeTag } = useMultiEdit();
+  const legacyKey = getLegacyOsmTagFromGradeSystem(climbingGradeSystem);
+  const isMixed =
+    Object.prototype.hasOwnProperty.call(mixed, k) ||
+    (!tags[k] &&
+      !!legacyKey &&
+      Object.prototype.hasOwnProperty.call(mixed, legacyKey));
+  const currentValue = isMixed
+    ? ''
+    : tags[k] || (legacyKey ? tags[legacyKey] : '') || '';
 
   const onChange = (_e: React.SyntheticEvent, option: string | null) => {
     setTag(k, option ?? '');
+    if (legacyKey) {
+      removeTag(legacyKey);
+    }
   };
 
   return (
