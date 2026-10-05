@@ -7,9 +7,9 @@ type GradeTable = Record<GradeSystem, Array<string>>;
 
 // Source of this table is: https://wiki.openstreetmap.org/wiki/Climbing#Grading
 // UIAA                        YDS                     UK ADJ                    WI                       Fontainebleau
-//       French                        V Grade                 FB                       Mixed
+//       French                        V Grade                 font                     Mixed
 //               Saxon                          UK Tech                 Norwegian               Polish
-export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_class, V Grade, UK Tech, UK ADJ, FB|French British, Norwegian|Scandinavian, WI,   Mixed, Polish,  Fontainebleau
+export const gradeTableString = `UIAA|Germany, French, Saxon|Swiss, YDS|YDS_class, V Grade, UK Tech, UK ADJ, font|French British, Norwegian|Scandinavian, WI,   Mixed, Polish,  Fontainebleau
 1-,           1,      I,           4,             VB-,     1,       M,      1,                 1-,                     WI2,  M2,    I-,      2-
 1,            1,      I,           5.0,           VB-,     1,       M,      1,                 1,                      WI2,  M2,    I,       2-
 1+,           1,      I,           5.0,           VB-,     1,       M,      1,                 1+,                     WI2,  M2,    I+,      2-
