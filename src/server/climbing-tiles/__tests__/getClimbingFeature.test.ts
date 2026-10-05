@@ -209,6 +209,73 @@ describe('getClimbingFeature (dummy SQLite DB)', () => {
   // `parentFeatures` as an array (empty), like the OSM path does. The
   // FeaturePanel calls `filterCrags(feature.parentFeatures)` for route_bottom
   // photos, which would throw `.filter of undefined` if it were left unset.
+  it('keeps every parent branch, nearest first (A > B > C and E both contain D)', async () => {
+    const previous = mockDb;
+    mockDb = buildDummyDb([
+      {
+        type: 'area',
+        osmType: 'relation',
+        osmId: 1,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'A',
+        tags: { climbing: 'area', name: 'A' },
+        members: [{ type: 'relation', ref: 2, role: '' }],
+      },
+      {
+        type: 'area',
+        osmType: 'relation',
+        osmId: 2,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'B',
+        parentId: 1,
+        tags: { climbing: 'area', name: 'B' },
+        members: [{ type: 'relation', ref: 3, role: '' }],
+      },
+      {
+        type: 'area',
+        osmType: 'relation',
+        osmId: 3,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'C',
+        parentId: 2,
+        tags: { climbing: 'area', name: 'C' },
+        members: [{ type: 'relation', ref: 4, role: '' }],
+      },
+      {
+        type: 'area',
+        osmType: 'relation',
+        osmId: 5,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'E',
+        tags: { climbing: 'area', name: 'E' },
+        members: [{ type: 'relation', ref: 4, role: '' }],
+      },
+      {
+        type: 'area',
+        osmType: 'relation',
+        osmId: 4,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'D',
+        parentId: 3,
+        tags: { climbing: 'area', name: 'D' },
+      },
+    ]);
+    previous.close();
+
+    const feature = await getClimbingFeature('relation', 4);
+    expect(feature.parentFeatures?.map((parent) => parent.tags.name)).toEqual([
+      'C',
+      'E',
+      'B',
+      'A',
+    ]);
+  });
+
   it('returns an empty parentFeatures array when the feature has no parent', async () => {
     const boulder = await getClimbingFeature('node', 500);
 

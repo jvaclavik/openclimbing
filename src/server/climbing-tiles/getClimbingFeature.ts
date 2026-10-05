@@ -12,6 +12,7 @@ import {
 } from '../../services/images/getImageDefs';
 import { getCountryCode } from '../../services/osm/getCountryCode';
 import { getPoiClass } from '../../services/getPoiClass';
+import { getDirectParentRelationIds } from './parentRelations';
 
 const OSM_TYPES: OsmType[] = ['node', 'way', 'relation'];
 
@@ -188,24 +189,44 @@ const buildMemberTree = (
   return result;
 };
 
-// Walks the parentId chain upwards (parentId is always a relation osmId).
-const buildParentChain = (
+// Every area/crag that contains this feature, then their parents. Nearest first.
+// A single parentId chain would drop a second branch (C and E both contain D).
+const buildParentFeatures = (
+  osmType: OsmType,
+  osmId: number,
   parentId: number | undefined,
   visited: Set<string>,
 ): ClimbingFeatureFull[] => {
   const result: ClimbingFeatureFull[] = [];
-  let pid = parentId;
-  while (pid) {
-    const key = `relation/${pid}`;
-    if (visited.has(key)) break;
-    visited.add(key);
+  let frontier = getDirectParentRelationIds(osmType, osmId, parentId);
 
-    const row = getRow('relation', pid);
-    if (!row) break;
+  while (frontier.length) {
+    const rows = getRows(
+      frontier.map((id) => ({ type: 'relation' as const, ref: id, role: '' })),
+    );
+    const next: number[] = [];
 
-    result.push(buildBaseFeature(row));
-    pid = row.parentId ?? undefined;
+    for (const id of frontier) {
+      const key = `relation/${id}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      const row = rows.get(key);
+      if (!row) continue;
+
+      result.push(buildBaseFeature(row));
+      next.push(
+        ...getDirectParentRelationIds(
+          'relation',
+          id,
+          row.parentId ?? undefined,
+        ),
+      );
+    }
+
+    frontier = [...new Set(next)];
   }
+
   return result;
 };
 
@@ -234,9 +255,12 @@ export const getClimbingFeature = async (
   // even when the feature has no parent. The FeaturePanel calls
   // filterCrags(feature.parentFeatures) for route_bottom photos and would throw
   // `.filter of undefined` otherwise.
-  feature.parentFeatures = row.parentId
-    ? buildParentChain(row.parentId, visited)
-    : [];
+  feature.parentFeatures = buildParentFeatures(
+    osmType,
+    osmId,
+    row.parentId ?? undefined,
+    visited,
+  );
 
   const countryCode = await getCountryCode({
     center: feature.center,

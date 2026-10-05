@@ -85,4 +85,5 @@ export const CONTENT_GAP = `var(--content-gap, ${PANEL_GAP})`;
 
 export const PanelSidePadding = styled.div`
   padding: 0 ${CONTENT_GAP};
+  min-width: 0;
 `;
