@@ -40,6 +40,8 @@ const Flex = styled.div`
 const HeadingStack = styled.div`
   display: flex;
   flex-direction: column-reverse;
+  min-width: 0;
+  max-width: 100%;
 `;
 
 type FeaturePanelProps = {

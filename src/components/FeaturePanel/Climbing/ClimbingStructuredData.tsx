@@ -16,6 +16,7 @@ import {
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { getGradeSystemName } from '../../../services/tagging/climbing/gradeSystems';
 import Head from 'next/head';
+import { groupParentFeatures } from '../parentHierarchy';
 
 const generateScriptContent = (feature, userSettings) => {
   const isClimbingArea = feature.tags.climbing === 'area';
@@ -95,12 +96,12 @@ const generateScriptContent = (feature, userSettings) => {
   return null;
 };
 
-// Breadcrumb trail from the climbing hierarchy (area > crag > route). parentFeatures
-// is ordered nearest-first, so we reverse it to put the root area first.
+// Breadcrumb trail from the climbing hierarchy (area > crag > route).
+// Levels run root-first; siblings on one level stay next to each other.
 const generateBreadcrumbList = (feature: Feature) => {
-  const parents = (feature.parentFeatures ?? [])
-    .filter((parent) => parent.tags?.climbing)
-    .reverse();
+  const parents = groupParentFeatures(feature, feature.parentFeatures)
+    .flat()
+    .filter((parent) => parent.tags?.climbing);
   const chain = [...parents, feature];
 
   if (chain.length < 2) {

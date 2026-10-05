@@ -15,7 +15,7 @@ import {
 } from '../../utils';
 import { getOsmHistoryUrl, getOsmUrl } from './urls';
 import { getOsmElement } from './quickFetchFeature';
-import { fetchParentFeatures } from './fetchParentFeatures';
+import { fetchAncestorFeatures } from './fetchParentFeatures';
 import { featureCenterCache } from './featureCenterToCache';
 import { getCountryCode } from './getCountryCode';
 import { getItemsMap, getMemberFeatures } from './helpers';
@@ -227,7 +227,7 @@ const addMembersAndParents = async (feature: Feature): Promise<Feature> => {
     isRouteMaster(feature)
   ) {
     const [parentFeatures, featureWithMemberFeatures] = await Promise.all([
-      fetchParentFeatures(feature.osmMeta),
+      fetchAncestorFeatures(feature.osmMeta),
       addMemberFeatures(feature),
     ]);
 
@@ -240,7 +240,7 @@ const addMembersAndParents = async (feature: Feature): Promise<Feature> => {
 
   // fallback for climbing=route and climbing=boulder and non-relation crags/areas
   if (feature.tags.climbing || feature.tags.sport === 'climbing') {
-    const parentFeatures = await fetchParentFeatures(feature.osmMeta);
+    const parentFeatures = await fetchAncestorFeatures(feature.osmMeta);
     return { ...feature, parentFeatures };
   }
 
