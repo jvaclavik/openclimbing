@@ -9,7 +9,8 @@ const getTypes = (response: OsmResponse) =>
     ({ osmType, osmId, type }) => `${osmType}/${osmId}:${type}`,
   );
 
-// shop=* is allowed to carry sport=climbing, but a store is not a climbing spot
+// shop=*/office=*/club=* is allowed to carry sport=climbing, but a business or
+// venue is not a climbing spot
 describe('getNewRecords - shops', () => {
   it('skips the bolting.eu shop (shop=sports + sport=climbing)', () => {
     const response: OsmResponse = {
@@ -205,5 +206,95 @@ describe('getNewRecords - shops', () => {
     };
 
     expect(getTypes(response)).toEqual(['way/3:crag']);
+  });
+});
+
+// office=* / club=* are venues/businesses too - they must not become crags either
+describe('getNewRecords - office and club', () => {
+  it('skips a sport=climbing node tagged with office or club', () => {
+    const response: OsmResponse = {
+      osm3s: { timestamp_osm_base: '' },
+      elements: [
+        {
+          type: 'node',
+          id: 1,
+          lat: 49.1,
+          lon: 11.9,
+          tags: {
+            name: 'Climbing Federation',
+            office: 'association',
+            sport: 'climbing',
+          },
+        },
+        {
+          type: 'node',
+          id: 2,
+          lat: 49.2,
+          lon: 11.8,
+          tags: {
+            name: 'Climbing Club',
+            club: 'sport',
+            sport: 'climbing',
+          },
+        },
+      ],
+    };
+
+    expect(getTypes(response)).toEqual([]);
+  });
+
+  it('skips way and relation tagged with office/club + sport=climbing', () => {
+    const response: OsmResponse = {
+      osm3s: { timestamp_osm_base: '' },
+      elements: [
+        { type: 'node', id: 1, lat: 49.1, lon: 11.9 },
+        { type: 'node', id: 2, lat: 49.2, lon: 11.8 },
+        {
+          type: 'way',
+          id: 3,
+          nodes: [1, 2],
+          tags: { office: 'company', sport: 'climbing' },
+        },
+        { type: 'node', id: 4, lat: 49.3, lon: 11.7 },
+        { type: 'node', id: 5, lat: 49.4, lon: 11.6 },
+        {
+          type: 'way',
+          id: 6,
+          nodes: [4, 5],
+          tags: { club: 'sport', sport: 'climbing' },
+        },
+        {
+          type: 'relation',
+          id: 7,
+          members: [{ type: 'way', ref: 6, role: '' }],
+          tags: { office: 'association', sport: 'climbing', name: 'Club' },
+        },
+      ],
+    };
+
+    expect(getTypes(response)).toEqual([]);
+  });
+
+  it('still keeps a climbing gym tagged with leisure when it also has office/club', () => {
+    const response: OsmResponse = {
+      osm3s: { timestamp_osm_base: '' },
+      elements: [
+        {
+          type: 'node',
+          id: 1,
+          lat: 49.1,
+          lon: 11.9,
+          tags: {
+            leisure: 'sports_centre',
+            club: 'sport',
+            office: 'company',
+            sport: 'climbing',
+            name: 'Climbing Hall',
+          },
+        },
+      ],
+    };
+
+    expect(getTypes(response)).toEqual(['node/1:gym']);
   });
 });

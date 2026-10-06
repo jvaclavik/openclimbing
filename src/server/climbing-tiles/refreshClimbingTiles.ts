@@ -140,17 +140,20 @@ export const getNewRecords = (
     }
 
     // an untagged sport=climbing node is ambiguous - it is either a climbing
-    // spot, a gym or a shop/office (shop=*, opening_hours, phone, addr:street)
+    // spot, a gym or a business/venue (shop=*, office=*, club=*, opening_hours,
+    // phone, addr:street)
     else if (node.tags.sport === 'climbing') {
       if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
         addRecord('gym', node);
       } else if (
         node.tags.shop ||
+        node.tags.office ||
+        node.tags.club ||
         node.tags.opening_hours ||
         node.tags.phone ||
         node.tags['addr:street']
       ) {
-        // shops are ignored
+        // shops, offices and clubs are ignored
       } else {
         addRecord('crag', node); //this needs tweaking
       }
@@ -193,10 +196,10 @@ export const getNewRecords = (
       continue;
     }
 
-    // shop=* (eg. shop=sports) is allowed to carry sport=climbing, but it is a
-    // store, not a climbing spot - see #212
-    else if (way.tags.shop) {
-      // shops are ignored
+    // shop=*/office=*/club=* is allowed to carry sport=climbing, but it is a
+    // business/venue, not a climbing spot - see #212
+    else if (way.tags.shop || way.tags.office || way.tags.club) {
+      // shops, offices and clubs are ignored
     }
 
     //
@@ -238,10 +241,10 @@ export const getNewRecords = (
       continue;
     }
 
-    // shop=* (eg. shop=sports) is allowed to carry sport=climbing, but it is a
-    // store, not a climbing spot - see #212
-    else if (relation.tags.shop) {
-      // shops are ignored
+    // shop=*/office=*/club=* is allowed to carry sport=climbing, but it is a
+    // business/venue, not a climbing spot - see #212
+    else if (relation.tags.shop || relation.tags.office || relation.tags.club) {
+      // shops, offices and clubs are ignored
     }
 
     //
