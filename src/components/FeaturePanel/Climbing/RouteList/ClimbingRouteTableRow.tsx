@@ -71,6 +71,7 @@ const RouteNameContainer = styled.div`
   gap: 8px;
   position: relative;
   align-items: baseline;
+  cursor: text;
   user-select: text;
   -webkit-user-select: text;
 `;
@@ -123,6 +124,7 @@ const Row = styled('a', {
   color: ${({ theme }) => theme.palette.text.primary};
   cursor: pointer;
   padding: 8px;
+  -webkit-user-drag: none;
   transition: all 0.1s;
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0.2)};
 
@@ -411,7 +413,13 @@ export const ClimbingRouteTableRow = forwardRef<HTMLDivElement, Props>(
         <Container ref={ref}>
           <Row
             $isVisible={isVisible}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
             onClick={(e) => {
+              if (window.getSelection()?.toString()) {
+                e.preventDefault();
+                return;
+              }
               if (isModifiedClick(e)) return;
               onClick(e);
               e.preventDefault();

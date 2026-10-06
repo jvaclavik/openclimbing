@@ -1,15 +1,16 @@
-import React from 'react';
-import * as maplibregl from 'maplibre-gl';
 import styled from '@emotion/styled';
-import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
-import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import * as maplibregl from 'maplibre-gl';
+import React from 'react';
 import { t } from '../../../services/intl';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { formatGuideSpacingM } from './utils/routeMapDistribution';
 import { useCragRoutePositionEditor } from './utils/useCragRoutePositionEditor';
 
 const ToolbarContainer = styled.div`
@@ -50,6 +51,15 @@ const ButtonRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const SpacingHint = styled.span`
+  font-size: 12px;
+  line-height: 1.2;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  opacity: 0.75;
+  padding-left: 2px;
+  pointer-events: none;
 `;
 
 const GlassPillButton = styled.button`
@@ -140,11 +150,17 @@ export const RoutePositionToolbar = ({
   const isHelpOpen = !(userSettings['editdialog.lineHelpDismissed'] ?? false);
   const setHelpDismissed = (dismissed: boolean) =>
     setUserSetting('editdialog.lineHelpDismissed', dismissed);
-  const { isGuideMode, setIsGuideMode, clearGuide, controlPoints, hasRoutes } =
-    useCragRoutePositionEditor(mapRef, isMapLoaded, styleEpoch, {
-      showNames,
-      showGrades,
-    });
+  const {
+    isGuideMode,
+    setIsGuideMode,
+    clearGuide,
+    controlPoints,
+    hasRoutes,
+    guideSpacingM,
+  } = useCragRoutePositionEditor(mapRef, isMapLoaded, styleEpoch, {
+    showNames,
+    showGrades,
+  });
 
   if (!hasRoutes) return null;
 
@@ -221,6 +237,13 @@ export const RoutePositionToolbar = ({
               <HelpOutlinedIcon fontSize="small" />
             </GlassCircleButton>
           </Tooltip>
+        )}
+        {guideSpacingM != null && (
+          <SpacingHint>
+            {t('editdialog.route_spacing', {
+              meters: formatGuideSpacingM(guideSpacingM),
+            })}
+          </SpacingHint>
         )}
       </ButtonRow>
     </ToolbarContainer>

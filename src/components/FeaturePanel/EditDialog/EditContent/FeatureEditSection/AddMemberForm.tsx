@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { getApiId } from '../../../../../services/helpers';
-import { useCurrentItem, useEditContext } from '../../context/EditContext';
+import styled from '@emotion/styled';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import LinkIcon from '@mui/icons-material/Link';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {
   Button,
   IconButton,
@@ -12,29 +15,26 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { FeatureTags } from '../../../../../services/types';
+import React, { useEffect, useRef, useState } from 'react';
+import { getApiId } from '../../../../../services/helpers';
 import { t } from '../../../../../services/intl';
-import AddIcon from '@mui/icons-material/Add';
+import { GRADE_TABLE } from '../../../../../services/tagging/climbing/gradeData';
+import { getOsmTagFromGradeSystem } from '../../../../../services/tagging/climbing/routeGrade';
 import { getPresetTranslation } from '../../../../../services/tagging/translations';
+import { FeatureTags } from '../../../../../services/types';
+import { Setter } from '../../../../../types';
+import { useSnackbar } from '../../../../utils/SnackbarContext';
+import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
+import { GradeSystemSelect } from '../../../Climbing/GradeSystemSelect';
+import { useMoreMenu } from '../../../Climbing/useMoreMenu';
+import { useCurrentItem, useEditContext } from '../../context/EditContext';
 import { fetchFreshItem, getNewNodeItem } from '../../context/itemsHelpers';
 import { DataItem, Members } from '../../context/types';
 import { findInItems, getPresetKey } from '../../context/utils';
-import { Setter } from '../../../../../types';
-import styled from '@emotion/styled';
-import { GradeSystemSelect } from '../../../Climbing/GradeSystemSelect';
-import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
-import { GRADE_TABLE } from '../../../../../services/tagging/climbing/gradeData';
-import { getOsmTagFromGradeSystem } from '../../../../../services/tagging/climbing/routeGrade';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import CloseIcon from '@mui/icons-material/Close';
-import LinkIcon from '@mui/icons-material/Link';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useMoreMenu } from '../../../Climbing/useMoreMenu';
-import { useSnackbar } from '../../../../utils/SnackbarContext';
-import { parseOsmShortId } from './parseOsmShortId';
-import { useLinkEditItem } from './useLinkEditItem';
 import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
+import { parseOsmShortId } from './parseOsmShortId';
 import { parseTagBatch } from './parseTagBatch';
+import { useLinkEditItem } from './useLinkEditItem';
 
 export type Scene = null | 'single' | 'batch' | 'url';
 
@@ -350,18 +350,48 @@ const useKeyboardShortcuts = (
   }, [handleAddMember, setScene, scene, skipEnter]);
 };
 
-const StyledTextareaAutosize = styled(TextareaAutosize)`
-  background-color: ${({ theme }) => theme.palette.background.paper};
-  color: ${({ theme }) => theme.palette.text.primary};
-  width: 100%;
-  box-sizing: border-box;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
-  line-height: 1.45;
+const BatchPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 280px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+  background-color: ${({ theme }) => theme.palette.action.hover};
 `;
 
-const BatchTextarea = (props: { label: string; setLabel: Setter<string> }) => {
-  const gradeSystem = useGetGradeSystemOrUndefined('batch');
+const StyledTextareaAutosize = styled(TextareaAutosize)`
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  resize: vertical;
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+  background-color: ${({ theme }) => theme.palette.background.paper};
+  color: ${({ theme }) => theme.palette.text.primary};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
+
+  &::placeholder {
+    color: ${({ theme }) => theme.palette.text.disabled};
+  }
+
+  &:focus {
+    border-color: ${({ theme }) => theme.palette.primary.main};
+  }
+`;
+
+const BatchTextarea = (props: {
+  label: string;
+  setLabel: Setter<string>;
+  gradeSystem: string | undefined;
+}) => {
+  const { gradeSystem } = props;
   const grade = gradeSystem ? GRADE_TABLE[gradeSystem][24] : undefined;
   const placeholder = grade
     ? `Cat in a Hat ${grade}
@@ -374,7 +404,7 @@ climbing:sport=yes`
     : 'name\n...';
 
   return (
-    <Stack spacing={0.5} sx={{ flex: 1, minWidth: 280 }}>
+    <Stack spacing={0.75} sx={{ width: '100%' }}>
       <StyledTextareaAutosize
         minRows={8}
         value={props.label}
@@ -384,9 +414,6 @@ climbing:sport=yes`
       <Typography variant="caption" color="text.secondary">
         {t('editdialog.members.batch_tags_hint')}
       </Typography>
-      {gradeSystem ? (
-        <GradeSystemSelect orderByFeature showDefaultOnButton />
-      ) : null}
     </Stack>
   );
 };
@@ -398,7 +425,34 @@ export const AddMemberForm = () => {
   const { addAsMember } = useLinkEditItem();
   const { showToast } = useSnackbar();
   const relation = useCurrentItem();
+  const gradeSystem = useGetGradeSystemOrUndefined(scene ?? '');
   const skipEnter = scene === 'single' && relation.tags.climbing === 'area';
+  const batchPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scene !== 'batch') return undefined;
+    const panel = batchPanelRef.current;
+    if (!panel) return undefined;
+
+    const scroller = panel.closest('.MuiDialogContent-root');
+    const revealFooter = () => {
+      if (!(scroller instanceof HTMLElement)) return;
+      const overflow =
+        panel.getBoundingClientRect().bottom -
+        scroller.getBoundingClientRect().bottom;
+      if (overflow > 1) scroller.scrollTop += overflow + 8;
+    };
+
+    revealFooter();
+    panel.querySelector('textarea')?.focus({ preventScroll: true });
+    const observer = new ResizeObserver(revealFooter);
+    observer.observe(panel);
+    const stop = window.setTimeout(() => observer.disconnect(), 1000);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(stop);
+    };
+  }, [scene]);
 
   const handleAddFromUrl = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -444,11 +498,47 @@ export const AddMemberForm = () => {
           <AddMemberMoreMenu onAddFromUrl={() => setScene('url')} />
         </>
       ) : scene === 'batch' ? (
-        <>
-          <BatchTextarea label={label} setLabel={setLabel} />
-          <ConfirmButton onClick={handleAddMember} />
-          <CancelButton setLabel={setLabel} setScene={setScene} />
-        </>
+        <BatchPanel ref={batchPanelRef}>
+          <BatchTextarea
+            label={label}
+            setLabel={setLabel}
+            gradeSystem={gradeSystem}
+          />
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+          >
+            {gradeSystem ? (
+              <GradeSystemSelect orderByFeature showDefaultOnButton />
+            ) : (
+              <span />
+            )}
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: 'center', ml: 'auto' }}
+            >
+              <Button
+                variant="text"
+                color="inherit"
+                onClick={() => {
+                  setLabel('');
+                  setScene(null);
+                }}
+              >
+                {t('editdialog.cancel_button')}
+              </Button>
+              <Button
+                variant="contained"
+                disableElevation
+                onClick={handleAddMember}
+              >
+                {t('editdialog.members.confirm')}
+              </Button>
+            </Stack>
+          </Stack>
+        </BatchPanel>
       ) : scene === 'url' ? (
         <>
           <UrlInput label={label} setLabel={setLabel} />

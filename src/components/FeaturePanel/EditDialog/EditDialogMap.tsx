@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
-import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import MapIcon from '@mui/icons-material/Map';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {
@@ -17,16 +17,17 @@ import {
   MenuItem,
   Radio,
   Tooltip,
+  Typography,
 } from '@mui/material';
-import * as maplibregl from 'maplibre-gl';
 import type { StyleSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import '../../Map/maplibreSetup';
-import { t } from '../../../services/intl';
 import { getApiId, getShortId } from '../../../services/helpers';
-import { Feature, LonLat, TranslationId } from '../../../services/types';
+import { t } from '../../../services/intl';
 import { fetchWays } from '../../../services/osm/fetchWays';
+import { Feature, LonLat, TranslationId } from '../../../services/types';
 import { usePersistedScaleControl } from '../../Map/behaviour/PersistedScaleControl';
+import '../../Map/maplibreSetup';
 import { touristStyle } from '../../Map/styles/touristStyle';
 import { COMPASS_TOOLTIP } from '../../Map/useAddTopRightControls';
 import { convertHexToRgba } from '../../utils/colorUtils';
@@ -35,24 +36,30 @@ import {
   EditMapPosition,
   useUserSettingsContext,
 } from '../../utils/userSettings/UserSettingsContext';
-import { RoutePositionToolbar } from '../Climbing/RoutePositionToolbar';
 import { usePhotoHighlightContext } from '../Climbing/contexts/PhotoHighlightContext';
+import { RoutePositionToolbar } from '../Climbing/RoutePositionToolbar';
 import {
   getValidCragCenter,
   isValidLonLat,
 } from '../Climbing/utils/cragCenter';
 import { isRouteTags } from '../Climbing/utils/cragRoutesItems';
-import { useCragFeatureForRoutes } from '../Climbing/utils/useCragFeatureForRoutes';
-import { useGetPhotoExifs } from '../Climbing/utils/usePhotoExifGps';
-import { usePhotoMarkers } from '../Climbing/utils/usePhotoMarkers';
 import {
   getWikimediaCommonsPhotoValues,
   removeFilePrefix,
 } from '../Climbing/utils/photo';
-import { useHasCragRoutesMap } from './EditContent/FeatureEditSection/CragRoutesLocationEditor';
+import { PitchRotationControl } from '../Climbing/utils/pitchRotationControl';
+import {
+  clampPitchSpacingM,
+  DIRECTED_PITCH_SPACING_M,
+  dispatchMultipitchLayout,
+} from '../Climbing/utils/routeMapDistribution';
+import { useCragFeatureForRoutes } from '../Climbing/utils/useCragFeatureForRoutes';
+import { useGetPhotoExifs } from '../Climbing/utils/usePhotoExifGps';
+import { usePhotoMarkers } from '../Climbing/utils/usePhotoMarkers';
 import { useCurrentItem, useEditContext } from './context/EditContext';
-import { useDraggableFeatureMarker } from './EditContent/FeatureEditSection/LocationEditor/useDraggableMarker';
+import { useHasCragRoutesMap } from './EditContent/FeatureEditSection/CragRoutesLocationEditor';
 import { useNeedsNodeLocation } from './EditContent/FeatureEditSection/LocationEditor/LocationEditor';
+import { useDraggableFeatureMarker } from './EditContent/FeatureEditSection/LocationEditor/useDraggableMarker';
 
 // BFS the (recursively loaded) member tree for the feature with this shortId and
 // return its map position — used to centre the map on the active route even when
@@ -353,7 +360,51 @@ type ControlsProps = {
   onToggleNames: () => void;
   showGrades: boolean;
   onToggleGrades: () => void;
+  showMultipitchSettings: boolean;
 };
+
+const OptionRow = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 2px 16px 2px 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.palette.action.hover};
+  }
+`;
+
+const CompassWrap = styled.div`
+  padding: 4px 16px 12px;
+`;
+
+const SpacingRow = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  cursor: default;
+`;
+
+const SpacingInput = styled.input`
+  width: 64px;
+  height: 28px;
+  margin: 0;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.palette.divider};
+  background: ${({ theme }) => theme.palette.background.paper};
+  color: ${({ theme }) => theme.palette.text.primary};
+  font: inherit;
+  font-size: 13px;
+  text-align: right;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.palette.primary.main};
+  }
+`;
 
 const MAP_POSITION_OPTIONS: {
   value: EditMapPosition;
@@ -364,6 +415,114 @@ const MAP_POSITION_OPTIONS: {
   { value: 'bottom', label: 'editdialog.map_position_bottom' },
 ];
 
+const MultipitchMenuSection = () => {
+  const { userSettings, setUserSetting } = useUserSettingsContext();
+  const groupMultipitch = userSettings['editdialog.groupMultipitch'] ?? false;
+  const multipitchBearing =
+    userSettings['editdialog.multipitchBearing'] ?? null;
+  const multipitchSpacing =
+    userSettings['editdialog.multipitchSpacing'] ?? DIRECTED_PITCH_SPACING_M;
+  const [spacingDraft, setSpacingDraft] = useState(String(multipitchSpacing));
+
+  useEffect(() => {
+    setSpacingDraft(String(multipitchSpacing));
+  }, [multipitchSpacing]);
+
+  const applySpacing = (raw: string, commitDraft: boolean) => {
+    if (raw.trim() === '') {
+      if (commitDraft) setSpacingDraft(String(multipitchSpacing));
+      return;
+    }
+    const value = Number(raw);
+    if (!Number.isFinite(value)) {
+      if (commitDraft) setSpacingDraft(String(multipitchSpacing));
+      return;
+    }
+    const spacingM = clampPitchSpacingM(value);
+    if (spacingM !== value && !commitDraft) return;
+    setSpacingDraft(String(spacingM));
+    if (spacingM === multipitchSpacing) return;
+    setUserSetting('editdialog.multipitchSpacing', spacingM);
+    if (!groupMultipitch || multipitchBearing == null) return;
+    dispatchMultipitchLayout({
+      group: true,
+      bearing: multipitchBearing,
+      spacingM,
+    });
+  };
+
+  return (
+    <>
+      <Divider />
+      <OptionRow
+        role="menuitemcheckbox"
+        aria-checked={groupMultipitch}
+        aria-label={t('editdialog.group_multipitch')}
+        onClick={() => {
+          const next = !groupMultipitch;
+          setUserSetting('editdialog.groupMultipitch', next);
+          dispatchMultipitchLayout({
+            group: next,
+            bearing: multipitchBearing,
+            spacingM: multipitchSpacing,
+          });
+        }}
+      >
+        <ListItemIcon>
+          <Checkbox edge="start" checked={groupMultipitch} tabIndex={-1} />
+        </ListItemIcon>
+        <ListItemText primary={t('editdialog.group_multipitch')} />
+      </OptionRow>
+      {groupMultipitch && (
+        <CompassWrap>
+          <Typography variant="caption" color="text.secondary">
+            {t('editdialog.multipitch_direction')}
+          </Typography>
+          <PitchRotationControl
+            bearing={multipitchBearing}
+            onChange={(bearing) => {
+              setUserSetting('editdialog.multipitchBearing', bearing);
+              dispatchMultipitchLayout({
+                group: true,
+                bearing,
+                spacingM: multipitchSpacing,
+              });
+            }}
+          />
+          <SpacingRow
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' || event.key === 'Tab') return;
+              event.stopPropagation();
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              {t('editdialog.multipitch_spacing')}
+            </Typography>
+            <SpacingInput
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={80}
+              step={1}
+              value={spacingDraft}
+              aria-label={t('editdialog.multipitch_spacing')}
+              onChange={(event) => {
+                setSpacingDraft(event.target.value);
+                applySpacing(event.target.value, false);
+              }}
+              onBlur={() => applySpacing(spacingDraft, true)}
+            />
+            <Typography variant="caption" color="text.secondary">
+              m
+            </Typography>
+          </SpacingRow>
+        </CompassWrap>
+      )}
+    </>
+  );
+};
+
 const MapControls: React.FC<ControlsProps> = ({
   mapStyle,
   onSwitchStyle,
@@ -373,12 +532,14 @@ const MapControls: React.FC<ControlsProps> = ({
   onToggleNames,
   showGrades,
   onToggleGrades,
+  showMultipitchSettings,
 }) => {
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(
     null,
   );
   const { userSettings, setUserSetting } = useUserSettingsContext();
   const mapPosition = userSettings['editdialog.mapPosition'] ?? 'auto';
+
   return (
     <>
       <ControlsRow>
@@ -439,6 +600,7 @@ const MapControls: React.FC<ControlsProps> = ({
               <ListItemText primary={t(label)} />
             </MenuItem>
           ))}
+          {showMultipitchSettings && <MultipitchMenuSection />}
         </Menu>
         <Tooltip
           title={
@@ -526,6 +688,7 @@ const EditDialogMap = () => {
         onToggleGrades={() =>
           setUserSetting('editdialog.showRouteGrades', !showGrades)
         }
+        showMultipitchSettings={hasCragRoutesMap}
       />
       {isMapLoaded && hasCragRoutesMap && (
         <RoutePositionToolbar
