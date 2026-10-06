@@ -5,6 +5,7 @@ import {
 } from '../../../services/tagging/climbing/gradeSystems';
 import { Setter } from '../../../types';
 import { TickStyle } from '../../FeaturePanel/Climbing/types';
+import { DIRECTED_PITCH_SPACING_M } from '../../FeaturePanel/Climbing/utils/routeMapDistribution';
 import { isMobileDevice } from '../../helpers';
 import { usePersistedState } from '../usePersistedState';
 import {
@@ -47,6 +48,11 @@ export type UserSettingsType = Partial<{
   'editdialog.showRouteNames': boolean;
   'editdialog.showRouteGrades': boolean;
   'editdialog.lineHelpDismissed': boolean;
+  'editdialog.groupMultipitch': boolean;
+  /** Degrees clockwise from north. null stacks pitches almost on top of each other. */
+  'editdialog.multipitchBearing': number | null;
+  /** Metres between pitches of one route when a direction is set. */
+  'editdialog.multipitchSpacing': number;
   'debug.enabled': boolean;
 }>;
 
@@ -83,6 +89,9 @@ const initialUserSettings: UserSettingsType = {
   'editdialog.showRouteNames': true,
   'editdialog.showRouteGrades': true,
   'editdialog.lineHelpDismissed': false,
+  'editdialog.groupMultipitch': false,
+  'editdialog.multipitchBearing': null,
+  'editdialog.multipitchSpacing': DIRECTED_PITCH_SPACING_M,
 };
 
 export const UserSettingsContext =

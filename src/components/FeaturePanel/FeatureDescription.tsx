@@ -4,7 +4,8 @@ import React from 'react';
 import { OSM_WEBSITE } from '../../services/osm/consts';
 import { t, Translation } from '../../services/intl';
 import { Feature, OsmType, TranslationId } from '../../services/types';
-import { getOsmappLink, prod } from '../../services/helpers';
+import { getOsmappLink, getShortId, prod } from '../../services/helpers';
+import { useSnackbar } from '../utils/SnackbarContext';
 import { tint } from '../utils/panelUi';
 import { useFeatureContext } from '../utils/FeatureContext';
 
@@ -142,7 +143,21 @@ export const FromOsm = () => (
 
 export const FeatureDescription = () => {
   const { osmMeta, nonOsmObject, point } = useFeatureContext().feature;
+  const { showToast } = useSnackbar();
   const { type, id } = osmMeta;
+
+  const copyShortId = async (event: React.MouseEvent) => {
+    if (!event.metaKey && !event.ctrlKey) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const shortId = getShortId(osmMeta);
+    try {
+      await navigator.clipboard.writeText(shortId);
+      showToast(`${t('sharedialog.copied')} ${shortId}`, 'success');
+    } catch {
+      // clipboard can be blocked outside a secure context
+    }
+  };
 
   if (point) {
     return <>{t('featurepanel.feature_description_point')}</>;
@@ -191,17 +206,21 @@ export const FeatureDescription = () => {
         >
           OpenStreetMap
         </Typography>
-        <Typography
-          variant="caption"
-          noWrap
-          sx={{
-            color: 'text.secondary',
-            display: 'block',
-            lineHeight: 1.35,
-          }}
-        >
-          {typeLabel} · {id}
-        </Typography>
+        <Tooltip title={t('featurepanel.copy_short_id')}>
+          <Typography
+            variant="caption"
+            noWrap
+            onClick={copyShortId}
+            sx={{
+              color: 'text.secondary',
+              display: 'block',
+              lineHeight: 1.35,
+              width: 'fit-content',
+            }}
+          >
+            {typeLabel} · {id}
+          </Typography>
+        </Tooltip>
       </Box>
     </Stack>
   );

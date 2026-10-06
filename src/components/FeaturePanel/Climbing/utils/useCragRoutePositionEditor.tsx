@@ -1,6 +1,6 @@
-import * as maplibregl from 'maplibre-gl';
-import { lineString, nearestPointOnLine } from '@turf/turf';
 import { useTheme } from '@emotion/react';
+import { lineString, nearestPointOnLine } from '@turf/turf';
+import * as maplibregl from 'maplibre-gl';
 import React, {
   useCallback,
   useEffect,
@@ -8,26 +8,42 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useCragFeatureForRoutes } from './useCragFeatureForRoutes';
 import { getApiId, getShortId } from '../../../../services/helpers';
-import { Feature, LonLat } from '../../../../services/types';
+import { t } from '../../../../services/intl';
 import {
   getDifficulty,
   getDifficultyColor,
 } from '../../../../services/tagging/climbing/routeGrade';
-import { RouteDifficulty } from '../types';
-import { t } from '../../../../services/intl';
+import { Feature, LonLat } from '../../../../services/types';
+import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 import { useEditContext } from '../../EditDialog/context/EditContext';
-import { useEnsureEditItems } from '../../EditDialog/context/useEnsureEditItems';
-import { getRangeSelection } from '../../EditDialog/context/selection';
 import { fetchFreshItem } from '../../EditDialog/context/itemsHelpers';
+import { getRangeSelection } from '../../EditDialog/context/selection';
 import { EditDataItem } from '../../EditDialog/context/types';
+import { useEnsureEditItems } from '../../EditDialog/context/useEnsureEditItems';
 import { findInItems, isInItems } from '../../EditDialog/context/utils';
-import { distributeAlongControlPoints } from './routeMapDistribution';
-import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
-import { getValidCragCenter, isValidLonLat } from './cragCenter';
-import { isRouteDrawnOnPhoto } from './photo';
 import { usePhotoHighlightContext } from '../contexts/PhotoHighlightContext';
+import { RouteDifficulty } from '../types';
+import { getValidCragCenter, isValidLonLat } from './cragCenter';
+import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
+import { isRouteDrawnOnPhoto } from './photo';
+import { createPitchRotationControl } from './pitchRotationControl';
+import {
+  clusterGroupedRoutes,
+  DIRECTED_PITCH_SPACING_M,
+  distributeGroupedRoutes,
+  distributionSlotCount,
+  guideLineSpacingM,
+  hasFollowingPitch,
+  hasPositionChanged,
+  layoutMultipitchGroup,
+  MULTIPITCH_LAYOUT_EVENT,
+  multipitchGroupKey,
+  MultipitchLayout,
+  parseMultipitchName,
+  PitchBearings,
+} from './routeMapDistribution';
+import { useCragFeatureForRoutes } from './useCragFeatureForRoutes';
 
 const LINE_SOURCE_ID = 'route-edit-line';
 const LINE_LAYER_ID = 'route-edit-line-layer';
@@ -277,6 +293,10 @@ const buildRoutePopupContent = (
   onEdit: () => void,
   onReturnToLine: (() => void) | null,
   onReturnToOriginal: (() => void) | null,
+  pitchDirection: {
+    bearing: number | null | undefined;
+    onChange: (bearing: number | null) => void;
+  } | null,
 ) => {
   const container = document.createElement('div');
   container.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
@@ -306,6 +326,15 @@ const buildRoutePopupContent = (
         '#6b6b6b',
         onReturnToOriginal,
       ),
+    );
+  }
+  if (pitchDirection) {
+    container.appendChild(
+      createPitchRotationControl(
+        pitchDirection.bearing,
+        pitchDirection.onChange,
+        t('editdialog.multipitch_following_direction'),
+      ).element,
     );
   }
   return container;
@@ -338,6 +367,28 @@ export const useCragRoutePositionEditor = (
   const { highlightedPhoto } = usePhotoHighlightContext();
   const theme = useTheme();
   const themeMode = (theme as any)?.palette?.mode === 'dark' ? 'dark' : 'light';
+  const { userSettings } = useUserSettingsContext();
+  const groupMultipitch = userSettings['editdialog.groupMultipitch'] ?? false;
+  const multipitchBearing =
+    userSettings['editdialog.multipitchBearing'] ?? null;
+  const multipitchSpacing =
+    userSettings['editdialog.multipitchSpacing'] ?? DIRECTED_PITCH_SPACING_M;
+  const [groupBearings, setGroupBearings] = useState<
+    Record<string, PitchBearings>
+  >({});
+  const groupBearingsRef = useRef(groupBearings);
+  groupBearingsRef.current = groupBearings;
+  const multipitchLayout = useMemo<MultipitchLayout>(
+    () => ({
+      group: groupMultipitch,
+      bearing: multipitchBearing,
+      spacingM: multipitchSpacing,
+      groupBearings,
+    }),
+    [groupMultipitch, multipitchBearing, multipitchSpacing, groupBearings],
+  );
+  const multipitchLayoutRef = useRef(multipitchLayout);
+  multipitchLayoutRef.current = multipitchLayout;
 
   // The crag whose routes we draw — resolved from the EditContext so it works
   // for freshly created sectors too (where the FeatureContext still points at
@@ -532,9 +583,11 @@ export const useCragRoutePositionEditor = (
       const livePoints = controlPointsRef.current;
       const distributed =
         livePoints.length >= 2
-          ? distributeAlongControlPoints(livePoints, editableRoutes.length)[
-              index
-            ]
+          ? distributeGroupedRoutes(
+              livePoints,
+              editableRoutesRef.current,
+              multipitchLayoutRef.current,
+            )[index]
           : route.originalLonLat;
       setManualRoutePositions((prev) => {
         if (!prev[route.id]) return prev;
@@ -544,7 +597,7 @@ export const useCragRoutePositionEditor = (
       });
       if (distributed) persistRoutePosition(route, distributed);
     },
-    [editableRoutes, persistRoutePosition],
+    [persistRoutePosition],
   );
 
   // Revert a route to its original (OSM) position. Pin it as a manual override
@@ -563,23 +616,28 @@ export const useCragRoutePositionEditor = (
   const distributedPositions = useMemo(
     () =>
       controlPoints.length >= 2
-        ? distributeAlongControlPoints(controlPoints, editableRoutes.length)
+        ? distributeGroupedRoutes(
+            controlPoints,
+            editableRoutes,
+            multipitchLayout,
+          )
         : null,
-    [controlPoints, editableRoutes.length],
+    [controlPoints, editableRoutes, multipitchLayout],
   );
 
   // Writes the distributed positions of *all* routes into the EditContext.
   const persistDistribution = useCallback(
-    async (points: LonLat[]) => {
+    async (
+      points: LonLat[],
+      layout: MultipitchLayout = multipitchLayoutRef.current,
+    ) => {
       if (points.length < 2) return;
-      const positions = distributeAlongControlPoints(
-        points,
-        editableRoutes.length,
-      );
+      const routes = editableRoutesRef.current;
+      const positions = distributeGroupedRoutes(points, routes, layout);
 
       const isManual = (id: string) => !!manualRoutePositionsRef.current[id];
 
-      const missing = editableRoutes.filter(
+      const missing = routes.filter(
         (route) =>
           route.isNode &&
           !isManual(route.id) &&
@@ -589,18 +647,136 @@ export const useCragRoutePositionEditor = (
         missing.map((route) => fetchFreshItem(getApiId(route.id))),
       );
       missing.forEach((route, k) => {
-        const index = editableRoutes.indexOf(route);
+        const index = routes.indexOf(route);
         addItem({ ...freshItems[k], nodeLonLat: positions[index] });
       });
 
-      editableRoutes.forEach((route, index) => {
+      routes.forEach((route, index) => {
         if (!route.isNode || isManual(route.id)) return;
         const existing = findInItems(itemsRef.current, route.id);
         if (existing) existing.setNodeLonLat(positions[index]);
       });
     },
-    [editableRoutes, addItem],
+    [addItem],
   );
+
+  // A newly added pitch is drawn at the crag center before it has nodeLonLat.
+  // Direction changes have to start from that visible point.
+  const displayedRoutePosition = (route: EditableRoute): LonLat | undefined => {
+    const item = findInItems(itemsRef.current, route.id);
+    const stored =
+      (item?.nodeLonLat as LonLat | undefined) ?? route.originalLonLat;
+    if (isValidLonLat(stored)) return stored;
+    const marker = routeMarkersRef.current[route.id];
+    if (!marker) return undefined;
+    const { lng, lat } = marker.getLngLat();
+    return isValidLonLat([lng, lat]) ? [lng, lat] : undefined;
+  };
+
+  const applyGroupBearingRef = useRef<
+    (groupKey: string, fromPitch: number, bearing: number | null) => void
+  >(() => {});
+  applyGroupBearingRef.current = (groupKey, fromPitch, bearing) => {
+    const nextForGroup: PitchBearings = {};
+    Object.entries(groupBearingsRef.current[groupKey] ?? {}).forEach(
+      ([pitch, value]) => {
+        if (Number(pitch) < fromPitch) nextForGroup[Number(pitch)] = value;
+      },
+    );
+    nextForGroup[fromPitch] = bearing;
+    const nextBearings = {
+      ...groupBearingsRef.current,
+      [groupKey]: nextForGroup,
+    };
+    groupBearingsRef.current = nextBearings;
+    setGroupBearings(nextBearings);
+
+    const routes = editableRoutesRef.current;
+    const memberIds = routes
+      .filter((route) => {
+        const parsed = parseMultipitchName(route.name);
+        return (
+          !!parsed &&
+          multipitchGroupKey(route.name) === groupKey &&
+          parsed.pitch > fromPitch
+        );
+      })
+      .map((route) => route.id);
+    const manuals = { ...manualRoutePositionsRef.current };
+    memberIds.forEach((id) => delete manuals[id]);
+    manualRoutePositionsRef.current = manuals;
+    setManualRoutePositions(manuals);
+
+    const layout: MultipitchLayout = {
+      ...multipitchLayoutRef.current,
+      groupBearings: nextBearings,
+    };
+    const points = controlPointsRef.current;
+    if (points.length >= 2) {
+      persistDistribution(points, layout);
+      return;
+    }
+
+    const currentPositions = routes.map(displayedRoutePosition);
+    const next = layoutMultipitchGroup(
+      routes,
+      currentPositions,
+      groupKey,
+      fromPitch,
+      bearing,
+      layout.spacingM,
+      nextForGroup,
+    );
+    routes.forEach((route, index) => {
+      const lonLat = next[index];
+      if (!isValidLonLat(lonLat) || !route.isNode) return;
+      if (!hasPositionChanged(lonLat, currentPositions[index])) return;
+      persistRoutePosition(route, lonLat);
+    });
+  };
+
+  // Grouping and direction are changed from the map settings menu. Applying
+  // them here (instead of on mount) keeps an already-open edit from being
+  // marked dirty just because the preference is on.
+  useEffect(() => {
+    const applyLayout = (event: Event) => {
+      const detail = (event as CustomEvent<MultipitchLayout>).detail;
+      if (!detail) return;
+      const layout: MultipitchLayout = {
+        ...detail,
+        groupBearings: groupBearingsRef.current,
+      };
+      manualRoutePositionsRef.current = {};
+      setManualRoutePositions({});
+
+      const points = controlPointsRef.current;
+      if (points.length >= 2) {
+        persistDistribution(points, layout);
+        return;
+      }
+      if (!layout.group) return;
+
+      const routes = editableRoutesRef.current;
+      const currentPositions = routes.map(displayedRoutePosition);
+      const next = clusterGroupedRoutes(
+        routes,
+        currentPositions,
+        layout.bearing,
+        layout.spacingM,
+        layout.groupBearings,
+      );
+      routes.forEach((route, index) => {
+        const lonLat = next[index];
+        if (!isValidLonLat(lonLat) || !route.isNode) return;
+        if (!hasPositionChanged(lonLat, currentPositions[index])) return;
+        persistRoutePosition(route, lonLat);
+      });
+    };
+
+    window.addEventListener(MULTIPITCH_LAYOUT_EVENT, applyLayout);
+    return () =>
+      window.removeEventListener(MULTIPITCH_LAYOUT_EVENT, applyLayout);
+  }, [persistDistribution, persistRoutePosition]);
 
   // Toggle guide mode. Entering it starts a fresh guide line, so we drop the
   // manual pins left over from moving routes beforehand (dragging a single
@@ -846,6 +1022,15 @@ export const useCragRoutePositionEditor = (
         const movedFromOriginal =
           !!route.originalLonLat &&
           !isSamePosition(getEffectivePosition(route), route.originalLonLat);
+        const groupKey = multipitchGroupKey(route.name);
+        const pitch = parseMultipitchName(route.name)?.pitch;
+        const routesNow = editableRoutesRef.current;
+        const showPitchDirection =
+          pitch != null && hasFollowingPitch(routesNow, index);
+        const ownBearing =
+          groupKey != null && pitch != null
+            ? groupBearingsRef.current[groupKey]?.[pitch]
+            : undefined;
         popup.setDOMContent(
           buildRoutePopupContent(
             route,
@@ -863,6 +1048,13 @@ export const useCragRoutePositionEditor = (
               ? () => {
                   popup.remove();
                   resetRouteToOriginal(route);
+                }
+              : null,
+            showPitchDirection && groupKey && pitch != null
+              ? {
+                  bearing: ownBearing,
+                  onChange: (bearing) =>
+                    applyGroupBearingRef.current(groupKey, pitch, bearing),
                 }
               : null,
           ),
@@ -1217,6 +1409,7 @@ export const useCragRoutePositionEditor = (
             },
             null,
             null,
+            null,
           ),
         );
       });
@@ -1256,11 +1449,30 @@ export const useCragRoutePositionEditor = (
     });
   }, [otherOpenRoutes, items, getEffectivePosition]);
 
+  const guideSpacingM = useMemo(
+    () =>
+      guideLineSpacingM(
+        controlPoints,
+        distributionSlotCount(
+          editableRoutes,
+          multipitchLayout.group,
+          multipitchLayout.groupBearings,
+        ),
+      ),
+    [
+      controlPoints,
+      editableRoutes,
+      multipitchLayout.group,
+      multipitchLayout.groupBearings,
+    ],
+  );
+
   return {
     isGuideMode,
     setIsGuideMode: setGuideMode,
     controlPoints,
     clearGuide,
     hasRoutes: editableRoutes.length > 0,
+    guideSpacingM,
   };
 };

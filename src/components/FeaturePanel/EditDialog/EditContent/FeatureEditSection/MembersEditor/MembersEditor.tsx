@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import {
   Accordion,
   AccordionDetails,
@@ -13,30 +15,28 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { FeatureRow } from '../../FeatureRow';
+import React, { useEffect } from 'react';
 import { t } from '../../../../../../services/intl';
-import { AddMemberForm } from '../AddMemberForm';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
+import { useMobileMode } from '../../../../../helpers';
+import { DragHandler } from '../../../../../utils/DragHandler';
+import { useDragItems } from '../../../../../utils/useDragItems';
 import { CragIcon } from '../../../../Climbing/CragIcon';
-import {
-  useHandleItemClick,
-  useHandleOpenAllMembers,
-} from '../../useHandleItemClick';
-import { ConvertNodeToRelation, isConvertible } from '../ConvertNodeToRelation';
+import { moveElementToIndex } from '../../../../Climbing/utils/array';
 import {
   useCurrentItem,
   useEditContext,
   useExpandedSections,
 } from '../../../context/EditContext';
-import { OpenAllButton } from '../helpers';
 import { Member } from '../../../context/types';
-import { useDragItems } from '../../../../../utils/useDragItems';
-import { DragHandler } from '../../../../../utils/DragHandler';
-import { moveElementToIndex } from '../../../../Climbing/utils/array';
-import { useMobileMode } from '../../../../../helpers';
+import { FeatureRow } from '../../FeatureRow';
+import {
+  useHandleItemClick,
+  useHandleOpenAllMembers,
+} from '../../useHandleItemClick';
+import { AddMemberForm } from '../AddMemberForm';
+import { ConvertNodeToRelation, isConvertible } from '../ConvertNodeToRelation';
 import { EditTabDropZone } from '../EditTabDropZone';
+import { OpenAllButton } from '../helpers';
 import { useLinkEditItem } from '../useLinkEditItem';
 
 const MemberRow = styled.div`
@@ -308,16 +308,16 @@ export const MembersEditor = () => {
 
         <Stack
           direction="row"
-          spacing={2}
+          spacing={1}
           sx={{
-            alignItems: 'center',
+            alignItems: 'flex-start',
             mt: 1,
             ml: 1,
           }}
         >
           {convertible ? <ConvertNodeToRelation /> : <AddMemberForm />}
 
-          <Box sx={{ flex: '1' }} />
+          <Box sx={{ ml: 'auto' }} />
 
           {handleOpenAll && <OpenAllButton onClick={handleOpenAll} />}
         </Stack>

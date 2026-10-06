@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -55,6 +55,17 @@ export const SuccessContent = () => {
   const { close } = useEditDialogContext();
   const { successInfo } = useEditContext();
   const texts = getTexts(successInfo);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [close]);
 
   return (
     <>
