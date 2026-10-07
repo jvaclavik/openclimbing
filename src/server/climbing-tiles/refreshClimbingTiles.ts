@@ -137,22 +137,17 @@ export const getNewRecords = (
     }
 
     // an untagged sport=climbing node is ambiguous - it is either a climbing
-    // spot, a gym or a business/venue (shop=*, office=*, club=*, opening_hours,
-    // phone, addr:street)
+    // spot, a gym or a business/venue (shop=*, office=*, club=*)
     else if (node.tags.sport === 'climbing') {
-      if (
-        node.tags.shop ||
-        node.tags.office ||
-        node.tags.club ||
-        node.tags.opening_hours ||
-        node.tags.phone ||
-        node.tags['addr:street']
-      ) {
+      if (node.tags.shop || node.tags.office || node.tags.club) {
         // shops, offices and clubs are ignored
       } else if (
         node.tags.man_made ||
         node.tags.building ||
-        node.tags.name?.match(/gym/i)
+        node.tags.name?.match(/gym/i) ||
+        node.tags.opening_hours ||
+        node.tags.phone ||
+        node.tags['addr:street']
       ) {
         addRecord('gym', node);
       } else {

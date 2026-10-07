@@ -103,7 +103,7 @@ describe('getNewRecords - shops', () => {
     expect(getTypes(response)).toEqual([]);
   });
 
-  it('skips a sport=climbing node carrying business tags (opening_hours/phone/addr:street)', () => {
+  it('treats opening_hours/phone/addr:street as gym hints, not as business tags', () => {
     const response: OsmResponse = {
       osm3s: { timestamp_osm_base: '' },
       elements: [
@@ -143,7 +143,11 @@ describe('getNewRecords - shops', () => {
       ],
     };
 
-    expect(getTypes(response)).toEqual([]);
+    expect(getTypes(response).sort()).toEqual([
+      'node/1:gym',
+      'node/2:gym',
+      'node/3:gym',
+    ]);
   });
 
   it('keeps a crag with sport=climbing and no business tags', () => {
