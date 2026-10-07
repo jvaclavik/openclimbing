@@ -141,12 +141,6 @@ export const getNewRecords = (
     // phone, addr:street)
     else if (node.tags.sport === 'climbing') {
       if (
-        node.tags.man_made ||
-        (node.tags.building && !node.tags.shop) ||
-        node.tags.name?.match(/gym/i)
-      ) {
-        addRecord('gym', node);
-      } else if (
         node.tags.shop ||
         node.tags.office ||
         node.tags.club ||
@@ -155,6 +149,12 @@ export const getNewRecords = (
         node.tags['addr:street']
       ) {
         // shops, offices and clubs are ignored
+      } else if (
+        node.tags.man_made ||
+        node.tags.building ||
+        node.tags.name?.match(/gym/i)
+      ) {
+        addRecord('gym', node);
       } else {
         addRecord('crag', node); //this needs tweaking
       }
