@@ -207,6 +207,35 @@ describe('getNewRecords - shops', () => {
 
     expect(getTypes(response)).toEqual(['way/3:crag']);
   });
+
+  it('treats a building node as a gym in the sport=climbing fallback, but not a building+shop', () => {
+    const response: OsmResponse = {
+      osm3s: { timestamp_osm_base: '' },
+      elements: [
+        {
+          type: 'node',
+          id: 1,
+          lat: 49.1,
+          lon: 11.9,
+          tags: { building: 'yes', sport: 'climbing', name: 'Kletterhalle' },
+        },
+        {
+          type: 'node',
+          id: 2,
+          lat: 49.2,
+          lon: 11.8,
+          tags: {
+            building: 'yes',
+            shop: 'sports',
+            sport: 'climbing',
+            name: 'Shop',
+          },
+        },
+      ],
+    };
+
+    expect(getTypes(response)).toEqual(['node/1:gym']);
+  });
 });
 
 // office=* / club=* are venues/businesses too - they must not become crags either

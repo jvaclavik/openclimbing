@@ -122,10 +122,7 @@ export const getNewRecords = (
     }
 
     //
-    else if (
-      (node.tags.leisure || (node.tags.building && !node.tags.shop)) &&
-      isClimbingRelated(node)
-    ) {
+    else if (node.tags.leisure && isClimbingRelated(node)) {
       addRecord('gym', node);
     }
 
@@ -143,7 +140,11 @@ export const getNewRecords = (
     // spot, a gym or a business/venue (shop=*, office=*, club=*, opening_hours,
     // phone, addr:street)
     else if (node.tags.sport === 'climbing') {
-      if (node.tags.man_made || node.tags.name?.match(/gym/i)) {
+      if (
+        node.tags.man_made ||
+        (node.tags.building && !node.tags.shop) ||
+        node.tags.name?.match(/gym/i)
+      ) {
         addRecord('gym', node);
       } else if (
         node.tags.shop ||
