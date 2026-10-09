@@ -76,6 +76,41 @@ const LONELY: SeedRow = {
   nameRaw: 'Osamela skala',
 };
 
+// All match "Konstein" (#292), each row farther from the map center than the
+// previous one - so sorting by distance alone would reverse the expected order.
+const addGrowingDistance = (rows: Omit<SeedRow, 'lon' | 'lat'>[]): SeedRow[] =>
+  rows.map((row, index) => ({ ...row, lon: 14 + index / 100, lat: 50 }));
+
+const ORDERING_ROWS = addGrowingDistance([
+  { type: 'route', osmType: 'node', osmId: 107, nameRaw: 'Konsteinova cesta' },
+  {
+    type: 'gym',
+    osmType: 'way',
+    osmId: 105,
+    nameRaw: 'Naturfreundehaus Konstein',
+  },
+  {
+    type: 'ferrata',
+    osmType: 'way',
+    osmId: 106,
+    nameRaw: 'Konsteiner Klettersteig',
+  },
+  {
+    type: 'crag',
+    osmType: 'relation',
+    osmId: 103,
+    nameRaw: 'Hintere Konsteiner Wand',
+  },
+  { type: 'crag', osmType: 'relation', osmId: 104, nameRaw: 'Konsteiner Wand' },
+  {
+    type: 'area',
+    osmType: 'relation',
+    osmId: 101,
+    nameRaw: 'Konsteiner Gebiet',
+  },
+  { type: 'area', osmType: 'relation', osmId: 102, nameRaw: 'Konstein' },
+]);
+
 const buildDummyDb = (rows: SeedRow[]): Database => {
   const db = new BetterSqlite3(':memory:');
   const schema = readFileSync(
@@ -137,5 +172,43 @@ describe('getClimbingSearch parent chain', () => {
 
     expect(crag.osmId).toBe(4);
     expect(crag.routeCount).toBe(12);
+  });
+});
+
+describe('getClimbingSearch order', () => {
+  beforeEach(() => {
+    mockDb = buildDummyDb(ORDERING_ROWS);
+  });
+
+  afterEach(() => {
+    mockDb.close();
+  });
+
+  it('sorts areas first, then crags, gyms and ferratas, routes last', () => {
+    const records = getClimbingSearch('Konstein', 14, 50);
+
+    expect(records.map((record) => record.type)).toEqual([
+      'area',
+      'area',
+      'crag',
+      'crag',
+      'gym',
+      'ferrata',
+      'route',
+    ]);
+  });
+
+  it('sorts features of the same type by distance', () => {
+    const records = getClimbingSearch('Konstein', 14, 50);
+
+    expect(records.map((record) => record.name)).toEqual([
+      'Konsteiner Gebiet',
+      'Konstein',
+      'Hintere Konsteiner Wand',
+      'Konsteiner Wand',
+      'Naturfreundehaus Konstein',
+      'Konsteiner Klettersteig',
+      'Konsteinova cesta',
+    ]);
   });
 });
