@@ -16,6 +16,7 @@ import { SetFeature } from '../../utils/FeatureContext';
 import * as maplibregl from 'maplibre-gl';
 import type { Map, MapGeoJSONFeature } from 'maplibre-gl';
 import type { MapClickOverrideRef } from '../../utils/MapStateContext';
+import { USER_GEOJSON_LAYER_ID } from '../userGeojson/consts';
 
 const isSameOsmId = (feature: Feature, skeleton: Feature) =>
   feature && skeleton && getOsmappLink(feature) === getOsmappLink(skeleton);
@@ -113,6 +114,11 @@ export const useOnMapClicked = createMapEventHook<
     if (mapClickOverrideRef.current) {
       const label = getOnlyLabel(features, coords, map);
       mapClickOverrideRef.current(coords, label);
+      return;
+    }
+
+    // user GeoJSON points open their own popup (UserGeojsonLayers)
+    if (features.some((f) => f.layer.id === USER_GEOJSON_LAYER_ID)) {
       return;
     }
 

@@ -84,6 +84,13 @@ const globalStyle = (theme: Theme) => css`
     -webkit-tap-highlight-color: transparent;
     -webkit-user-drag: none;
   }
+  // user GeoJSON popups: the rule above disables selection, so re-enable it for text
+  .maplibregl-map .user-geojson-popup,
+  .maplibregl-map .user-geojson-popup * {
+    user-select: text;
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+  }
   .maplibregl-ctrl-bottom-right {
     bottom: 50px !important;
   }

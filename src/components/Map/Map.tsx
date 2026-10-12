@@ -38,6 +38,11 @@ const CragPhotoMarkers = dynamic(
   () => import('./CragPhotoMarkers').then((m) => m.CragPhotoMarkers),
   { ssr: false },
 );
+const UserGeojsonLayers = dynamic(
+  () =>
+    import('./userGeojson/UserGeojsonLayers').then((m) => m.UserGeojsonLayers),
+  { ssr: false },
+);
 
 const LayerSwitcherDynamic = dynamic(
   () => import('../LayerSwitcher/LayerSwitcher'),
@@ -93,6 +98,7 @@ const Map = () => {
       <BrowserMapDynamic />
       {mapLoaded && <MyListsLayer />}
       {mapLoaded && <CragPhotoMarkers />}
+      {mapLoaded && <UserGeojsonLayers />}
       {!mapLoaded && <Spinner color="secondary" />}
       <NoscriptMessage />
       <MapAttributionChrome>

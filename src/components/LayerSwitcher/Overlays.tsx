@@ -7,6 +7,7 @@ import {
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
+  Stack,
   Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -21,6 +22,7 @@ import { fetchJson } from '../../services/fetch';
 import type { ClimbingStatsResponse } from '../../types';
 import { nl2br } from '../utils/nl2br';
 import { AddUserLayerButton } from './AddLayerButton';
+import { AddGeojsonButton, UserGeojsonItem } from './UserGeojsonOverlays';
 
 const getLocalTime = (lastRefresh: string) =>
   lastRefresh ? new Date(lastRefresh).toLocaleString(intl.lang) : null;
@@ -112,7 +114,7 @@ type Props = {
 };
 
 export const Overlays = ({ overlayLayers }: Props) => {
-  const { activeLayers } = useMapStateContext();
+  const { activeLayers, userGeojsonLayers } = useMapStateContext();
   const { climbing, other } = useMemo(() => {
     const items = overlayLayers.filter((l) => l.type !== 'spacer');
     return {
@@ -130,19 +132,32 @@ export const Overlays = ({ overlayLayers }: Props) => {
 
   return (
     <>
-      <Typography
-        variant="overline"
-        color="textSecondary"
-        style={{ padding: '1em 0 0 1em' }}
+      <Stack
+        direction="row"
         sx={{
-          display: 'block',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pr: 1,
         }}
       >
-        {t('layerswitcher.overlays')}
-      </Typography>
+        <Typography
+          variant="overline"
+          color="textSecondary"
+          style={{ padding: '1em 0 0 1em' }}
+          sx={{
+            display: 'block',
+          }}
+        >
+          {t('layerswitcher.overlays')}
+        </Typography>
+        <AddGeojsonButton />
+      </Stack>
 
       <StyledList dense suppressHydrationWarning>
         {climbing && <OverlayItem layer={climbing} />}
+        {userGeojsonLayers.map((layer) => (
+          <UserGeojsonItem key={layer.id} layer={layer} />
+        ))}
       </StyledList>
 
       <Accordion
