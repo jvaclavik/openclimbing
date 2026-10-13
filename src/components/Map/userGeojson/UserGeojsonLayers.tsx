@@ -97,7 +97,8 @@ const createPopupContent = (properties: UserGeojsonProperties) => {
 };
 
 export const UserGeojsonLayers = () => {
-  const { userGeojsonLayers, activeLayers } = useMapStateContext();
+  const { userGeojsonLayers, activeLayers, mapClickOverrideRef } =
+    useMapStateContext();
   const data = useMemo(
     () => buildCollection(userGeojsonLayers, activeLayers),
     [userGeojsonLayers, activeLayers],
@@ -109,6 +110,8 @@ export const UserGeojsonLayers = () => {
     if (!map) return undefined;
 
     const ensureLayer = () => {
+      // during setStyle() the style is not loaded yet; the next styledata event re-adds the layer
+      if (!map.isStyleLoaded()) return;
       const source = map.getSource(USER_GEOJSON_SOURCE_ID) as
         | GeoJSONSource
         | undefined;
@@ -140,6 +143,8 @@ export const UserGeojsonLayers = () => {
     let popup: Popup | undefined;
 
     const onPointClick = (e: MapLayerMouseEvent) => {
+      // the map click override (e.g. picking route points) takes precedence
+      if (mapClickOverrideRef.current) return;
       const feature = e.features?.[0];
       if (!feature) return;
 
@@ -175,7 +180,7 @@ export const UserGeojsonLayers = () => {
         map.removeSource(USER_GEOJSON_SOURCE_ID);
       }
     };
-  }, []);
+  }, [mapClickOverrideRef]);
 
   return null;
 };

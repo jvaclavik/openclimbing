@@ -22,6 +22,8 @@ import {
   UserGeojsonLayer,
 } from '../../services/userGeojson';
 
+export const ACTIVE_LAYERS_STORAGE_KEY = 'activeLayers';
+
 export type LayerIcon = React.ComponentType<{ fontSize: 'small' }>;
 
 // [b.getWest(), b.getNorth(), b.getEast(), b.getSouth()]
@@ -103,7 +105,7 @@ const useActiveLayersState = () => {
   const initLayers = isClimbing
     ? ['tourist', 'climbing']
     : [DEFAULT_MAP, 'indoor'];
-  return usePersistedState('activeLayers', initLayers);
+  return usePersistedState(ACTIVE_LAYERS_STORAGE_KEY, initLayers);
 };
 
 export const MapStateProvider: React.FC<{ initialMapView: View }> = ({

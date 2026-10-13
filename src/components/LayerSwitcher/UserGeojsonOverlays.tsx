@@ -12,13 +12,17 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import { useMapStateContext } from '../utils/MapStateContext';
+import {
+  ACTIVE_LAYERS_STORAGE_KEY,
+  useMapStateContext,
+} from '../utils/MapStateContext';
 import { useSnackbar } from '../utils/SnackbarContext';
 import { t } from '../../services/intl';
 import {
   GeojsonParseError,
-  parseGeojsonPoints,
   getUserGeojsonColor,
+  parseGeojsonPoints,
+  USER_GEOJSON_MAX_FILE_BYTES,
   USER_GEOJSON_STORAGE_KEY,
   UserGeojsonLayer,
 } from '../../services/userGeojson';
@@ -32,10 +36,41 @@ const getErrorMessage = (error: unknown) => {
   return t('layerswitcher.geojson_storage_error');
 };
 
+const restoreItem = (key: string, value: string | null) => {
+  if (value === null) {
+    window.localStorage.removeItem(key);
+  } else {
+    window.localStorage.setItem(key, value);
+  }
+};
+
+// Writes the new layer and its activation together. Both values are read from
+// storage (the latest state) and rolled back if either write exceeds the quota.
+const persistNewLayer = (layer: UserGeojsonLayer) => {
+  const storedLayers = window.localStorage.getItem(USER_GEOJSON_STORAGE_KEY);
+  const storedActive = window.localStorage.getItem(ACTIVE_LAYERS_STORAGE_KEY);
+  const layers = [...JSON.parse(storedLayers ?? '[]'), layer];
+  const active = [...JSON.parse(storedActive ?? '[]'), layer.id];
+
+  try {
+    window.localStorage.setItem(
+      USER_GEOJSON_STORAGE_KEY,
+      JSON.stringify(layers),
+    );
+    window.localStorage.setItem(
+      ACTIVE_LAYERS_STORAGE_KEY,
+      JSON.stringify(active),
+    );
+  } catch (error) {
+    restoreItem(USER_GEOJSON_STORAGE_KEY, storedLayers);
+    restoreItem(ACTIVE_LAYERS_STORAGE_KEY, storedActive);
+    throw error;
+  }
+};
+
 export const AddGeojsonButton = () => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { userGeojsonLayers, setUserGeojsonLayers, setActiveLayers } =
-    useMapStateContext();
+  const { setUserGeojsonLayers, setActiveLayers } = useMapStateContext();
   const { showToast } = useSnackbar();
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,20 +78,20 @@ export const AddGeojsonButton = () => {
     e.target.value = ''; // allow selecting the same file again
     if (!file) return;
 
+    if (file.size > USER_GEOJSON_MAX_FILE_BYTES) {
+      showToast(t('layerswitcher.geojson_too_large'), 'error');
+      return;
+    }
+
     try {
       const layer: UserGeojsonLayer = {
         id: `geojson-${Date.now()}`,
         name: file.name.replace(/\.(geo)?json$/i, ''),
         data: parseGeojsonPoints(await file.text()),
       };
-      const next = [...userGeojsonLayers, layer];
-      // usePersistedState writes inside a state updater, so check the quota first
-      window.localStorage.setItem(
-        USER_GEOJSON_STORAGE_KEY,
-        JSON.stringify(next),
-      );
+      persistNewLayer(layer);
 
-      setUserGeojsonLayers(next);
+      setUserGeojsonLayers((prev) => [...prev, layer]);
       setActiveLayers((prev) => [...prev, layer.id]);
     } catch (error) {
       showToast(getErrorMessage(error), 'error');
@@ -149,6 +184,7 @@ export const UserGeojsonItem = ({ layer }: { layer: UserGeojsonLayer }) => {
           <Checkbox
             edge="end"
             checked={selected}
+            slotProps={{ input: { 'aria-label': layer.name } }}
             onClick={(e) => {
               e.stopPropagation();
               toggle();

@@ -811,6 +811,7 @@ export default {
   'layerswitcher.geojson_invalid': 'The file is not valid GeoJSON.',
   'layerswitcher.geojson_no_points': 'The file contains no points.',
   'layerswitcher.geojson_storage_error': 'The file is too large to be stored in this browser.',
+  'layerswitcher.geojson_too_large': 'The file is larger than 2 MB.',
   'layerswitcher.more_maps': 'More maps',
   'layerswitcher.more_overlays': 'More overlays',
   'layerswitcher.extras': 'Map tools',

@@ -1,6 +1,8 @@
 import type { FeatureCollection, Point } from 'geojson';
 
 export const USER_GEOJSON_STORAGE_KEY = 'userGeojsonLayers';
+// localStorage is ~5 MB per site; keep room for the rest of the app
+export const USER_GEOJSON_MAX_FILE_BYTES = 2 * 1024 * 1024;
 export const GEOJSON_NAME_PROPERTY = 'name';
 export const GEOJSON_LINK_PROPERTY = 'link';
 // set on every point from its layer color; hidden from the popup
