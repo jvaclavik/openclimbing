@@ -151,7 +151,7 @@ export const UserGeojsonItem = ({ layer }: { layer: UserGeojsonLayer }) => {
         <Box
           component="input"
           type="color"
-          aria-label={t('layerswitcher.geojson_color')}
+          aria-label={t('layerswitcher.geojson_color', { name: layer.name })}
           value={getUserGeojsonColor(layer)}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -176,7 +176,7 @@ export const UserGeojsonItem = ({ layer }: { layer: UserGeojsonLayer }) => {
         <Stack direction="row" sx={{ alignItems: 'center' }}>
           <IconButton
             size="small"
-            aria-label={t('layerswitcher.remove_geojson')}
+            aria-label={t('layerswitcher.remove_geojson', { name: layer.name })}
             onClick={remove}
           >
             <CloseIcon fontSize="small" />
