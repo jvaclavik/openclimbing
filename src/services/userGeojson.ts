@@ -7,6 +7,8 @@ export const GEOJSON_NAME_PROPERTY = 'name';
 export const GEOJSON_LINK_PROPERTY = 'link';
 // set on every point from its layer color; hidden from the popup
 export const USER_GEOJSON_COLOR_PROPERTY = '__color';
+// set on every point to the id of its layer; used to close its popup
+export const USER_GEOJSON_LAYER_PROPERTY = '__layerId';
 
 export type UserGeojsonProperties = Record<
   string,

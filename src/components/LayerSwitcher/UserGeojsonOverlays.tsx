@@ -123,6 +123,8 @@ export const AddGeojsonButton = () => {
 export const UserGeojsonItem = ({ layer }: { layer: UserGeojsonLayer }) => {
   const { activeLayers, setActiveLayers, setUserGeojsonLayers } =
     useMapStateContext();
+  const { showToast } = useSnackbar();
+  const colorErrorShown = useRef(false);
   const selected = activeLayers.includes(layer.id);
 
   const toggle = () => {
@@ -140,9 +142,28 @@ export const UserGeojsonItem = ({ layer }: { layer: UserGeojsonLayer }) => {
   };
 
   const changeColor = (color: string) => {
-    setUserGeojsonLayers((prev) =>
-      prev.map((item) => (item.id === layer.id ? { ...item, color } : item)),
+    // write storage first: a quota error must not leave React state ahead of it
+    const stored: UserGeojsonLayer[] = JSON.parse(
+      window.localStorage.getItem(USER_GEOJSON_STORAGE_KEY) ?? '[]',
     );
+    const next = stored.map((item) =>
+      item.id === layer.id ? { ...item, color } : item,
+    );
+    try {
+      window.localStorage.setItem(
+        USER_GEOJSON_STORAGE_KEY,
+        JSON.stringify(next),
+      );
+    } catch {
+      // the color input fires on every drag step, so report a failure only once
+      if (!colorErrorShown.current) {
+        colorErrorShown.current = true;
+        showToast(t('layerswitcher.geojson_storage_error'), 'error');
+      }
+      return;
+    }
+    colorErrorShown.current = false;
+    setUserGeojsonLayers(next);
   };
 
   return (

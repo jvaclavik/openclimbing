@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, MapLayerMouseEvent, Popup } from 'maplibre-gl';
 import type { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
@@ -12,6 +12,7 @@ import {
   getSafeHttpUrl,
   getUserGeojsonColor,
   USER_GEOJSON_COLOR_PROPERTY,
+  USER_GEOJSON_LAYER_PROPERTY,
   UserGeojsonLayer,
   UserGeojsonPoints,
   UserGeojsonProperties,
@@ -43,6 +44,7 @@ const buildCollection = (
         properties: {
           ...feature.properties,
           [USER_GEOJSON_COLOR_PROPERTY]: getUserGeojsonColor(layer),
+          [USER_GEOJSON_LAYER_PROPERTY]: layer.id,
         },
       })),
     ),
@@ -69,6 +71,7 @@ const createPopupContent = (properties: UserGeojsonProperties) => {
         key !== GEOJSON_NAME_PROPERTY &&
         key !== GEOJSON_LINK_PROPERTY &&
         key !== USER_GEOJSON_COLOR_PROPERTY &&
+        key !== USER_GEOJSON_LAYER_PROPERTY &&
         value !== null &&
         value !== '',
     )
@@ -103,6 +106,16 @@ export const UserGeojsonLayers = () => {
     () => buildCollection(userGeojsonLayers, activeLayers),
     [userGeojsonLayers, activeLayers],
   );
+  const openPopupRef = useRef<{ popup: Popup; layerId: string } | null>(null);
+
+  // close the popup when its layer is turned off or removed
+  useEffect(() => {
+    const open = openPopupRef.current;
+    if (open && !activeLayers.includes(open.layerId)) {
+      open.popup.remove();
+      openPopupRef.current = null;
+    }
+  }, [activeLayers, userGeojsonLayers]);
 
   // setStyle() removes custom sources and layers, so they are re-added on styledata
   useEffect(() => {
@@ -142,21 +155,22 @@ export const UserGeojsonLayers = () => {
     const map = getGlobalMap();
     if (!map) return undefined;
 
-    let popup: Popup | undefined;
-
     const onPointClick = (e: MapLayerMouseEvent) => {
       // the map click override (e.g. picking route points) takes precedence
       if (mapClickOverrideRef.current) return;
       const feature = e.features?.[0];
       if (!feature) return;
 
-      popup?.remove();
-      popup = new maplibregl.Popup({ maxWidth: '300px' })
+      const properties = feature.properties as UserGeojsonProperties;
+      openPopupRef.current?.popup.remove();
+      const popup = new maplibregl.Popup({ maxWidth: '300px' })
         .setLngLat((feature.geometry as Point).coordinates as [number, number])
-        .setDOMContent(
-          createPopupContent(feature.properties as UserGeojsonProperties),
-        )
+        .setDOMContent(createPopupContent(properties))
         .addTo(map);
+      openPopupRef.current = {
+        popup,
+        layerId: String(properties[USER_GEOJSON_LAYER_PROPERTY]),
+      };
     };
     const onPointEnter = () => {
       map.getCanvas().style.cursor = 'pointer';
@@ -170,7 +184,8 @@ export const UserGeojsonLayers = () => {
     map.on('mouseleave', USER_GEOJSON_LAYER_ID, onPointLeave);
 
     return () => {
-      popup?.remove();
+      openPopupRef.current?.popup.remove();
+      openPopupRef.current = null;
       map.off('click', USER_GEOJSON_LAYER_ID, onPointClick);
       map.off('mouseenter', USER_GEOJSON_LAYER_ID, onPointEnter);
       map.off('mouseleave', USER_GEOJSON_LAYER_ID, onPointLeave);
