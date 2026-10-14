@@ -110,18 +110,20 @@ export const UserGeojsonLayers = () => {
     if (!map) return undefined;
 
     const ensureLayer = () => {
-      // during setStyle() the style is not loaded yet; the next styledata event re-adds the layer
-      if (!map.isStyleLoaded()) return;
       const source = map.getSource(USER_GEOJSON_SOURCE_ID) as
         | GeoJSONSource
         | undefined;
       if (source) {
         source.setData(data);
-      } else {
+      } else if (map.isStyleLoaded()) {
+        // during setStyle() the style is not loaded yet; the next styledata event creates it
         map.addSource(USER_GEOJSON_SOURCE_ID, { type: 'geojson', data });
       }
 
-      if (!map.getLayer(USER_GEOJSON_LAYER_ID)) {
+      if (
+        map.getSource(USER_GEOJSON_SOURCE_ID) &&
+        !map.getLayer(USER_GEOJSON_LAYER_ID)
+      ) {
         map.addLayer(LAYER);
       }
     };
