@@ -24,6 +24,7 @@ import { getFullOsmappLink, getShortId } from '../../../services/helpers';
 import { getCommonsImageUrl } from '../../../services/images/getCommonsImageUrl';
 import { t } from '../../../services/intl';
 import { TickStyleBadge } from '../../../services/my-ticks/TickStyleBadge';
+import { isClimbingTagSet } from '../../../services/tagging/climbing/climbingAttributes';
 import {
   findOrConvertRouteGrade,
   getDifficulties,
@@ -434,8 +435,8 @@ const FeatureExtras = ({ feature }: { feature: Feature }) => {
   // Bail out cheaply when nothing to show. ClimbingBadges renders an empty
   // wrapper for features with no relevant tags, but it still mounts MUI Stack,
   // which we'd rather avoid in the printed tree.
-  const hasBadges = Object.keys(feature.tags ?? {}).some(
-    (k) => k.startsWith('climbing:') && feature.tags?.[k] === 'yes',
+  const hasBadges = Object.entries(feature.tags ?? {}).some(
+    ([key, value]) => key.startsWith('climbing:') && isClimbingTagSet(value),
   );
   return (
     <>

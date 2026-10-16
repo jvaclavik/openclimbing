@@ -6,7 +6,10 @@ import { Chip, Stack, Tooltip } from '@mui/material';
 import React from 'react';
 import { t } from '../../../services/intl';
 import { getClimbingRockTranslationKey } from '../../../services/tagging/climbing/climbingRockData';
-import { CLIMBING_START_OPTIONS } from '../../../services/tagging/climbing/climbingAttributes';
+import {
+  CLIMBING_START_OPTIONS,
+  isClimbingTagSet,
+} from '../../../services/tagging/climbing/climbingAttributes';
 import { Feature, TranslationId } from '../../../services/types';
 import { useFeatureContext } from '../../utils/FeatureContext';
 
@@ -298,8 +301,9 @@ export const ClimbingBadges = ({
       ]}
     >
       {Object.entries(climbingTypes).map(
-        ([_key, { value, label, description }]) =>
-          feature.tags?.[value] === 'yes' ? (
+        ([_key, { value, label, description }]) => {
+          const tagValue = feature.tags?.[value];
+          return isClimbingTagSet(tagValue) ? (
             <Tooltip key={value} title={hasTooltip ? t(description) : ''} arrow>
               <StyledChip
                 label={t(label)}
@@ -308,7 +312,8 @@ export const ClimbingBadges = ({
                 variant="filled"
               />
             </Tooltip>
-          ) : null,
+          ) : null;
+        },
       )}
 
       {Object.entries(climbingHazards).map(
