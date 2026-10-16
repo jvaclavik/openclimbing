@@ -1,7 +1,8 @@
-import { Button, CircularProgress, DialogActions } from '@mui/material';
+import { Alert, Button, CircularProgress, DialogActions } from '@mui/material';
 import React from 'react';
 import { t } from '../../../../services/intl';
 import { useEditContext } from '../context/EditContext';
+import { getMovedExistingItems } from './getMovedExistingItems';
 import { useGetHandleSave } from '../useGetHandleSave';
 import { useEditDialogClose } from '../utils';
 
@@ -32,16 +33,36 @@ const CancelButton = () => {
   );
 };
 
+const MovedExistingItemsWarning = () => {
+  const { items } = useEditContext();
+  const moved = getMovedExistingItems(items).map(
+    ({ item, meters }) => `${item.tags.name || item.presetLabel} (${meters} m)`,
+  );
+
+  if (!moved.length) return null;
+
+  return (
+    <Alert severity="info" sx={{ mx: 2, mb: 1 }}>
+      {t('editdialog.moved_existing_items', {
+        names: moved.slice(0, 5).join(', ') + (moved.length > 5 ? ', …' : ''),
+      })}
+    </Alert>
+  );
+};
+
 export const EditDialogActions = () => {
   const { isSaving } = useEditContext();
 
   return (
-    <DialogActions>
-      <div style={{ flex: '1 1' }}></div>
-      {isSaving && <CircularProgress size={20} />}
-      <CancelButton />
+    <>
+      <MovedExistingItemsWarning />
+      <DialogActions>
+        <div style={{ flex: '1 1' }}></div>
+        {isSaving && <CircularProgress size={20} />}
+        <CancelButton />
 
-      <SaveButton />
-    </DialogActions>
+        <SaveButton />
+      </DialogActions>
+    </>
   );
 };

@@ -38,10 +38,10 @@ const hasRouteMembers = (feature: Feature | undefined) =>
   (feature?.memberFeatures ?? []).some((member) => isRouteTags(member.tags));
 
 // Module-level cache shared across all hook instances, so the several places
-// that resolve the crag-for-routes (the map, `useHasCragRoutesMap`, the
-// location editor…) don't each fire their own Overpass/OSM member fetch for
-// the same crag. Keyed by the crag's shortId; the in-flight promise is cached
-// too, to dedupe concurrent requests.
+// that resolve the crag-for-routes (the map, `useHasCragRoutesMap`…) don't
+// each fire their own Overpass/OSM member fetch for the same crag. Keyed by
+// the crag's shortId; the in-flight promise is cached too, to dedupe
+// concurrent requests.
 const cragMembersCache = new Map<string, Feature>();
 const cragMembersPromises = new Map<string, Promise<Feature>>();
 
