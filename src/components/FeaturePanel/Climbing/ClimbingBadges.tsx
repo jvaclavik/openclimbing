@@ -66,6 +66,16 @@ const climbingTypes = {
     label: 'climbing_badges.toprope_label',
     description: 'climbing_badges.toprope_description',
   },
+  aid: {
+    value: 'climbing:aid',
+    label: 'climbing_badges.aid_label',
+    description: 'climbing_badges.aid_description',
+  },
+  dry: {
+    value: 'climbing:dry',
+    label: 'climbing_badges.dry_label',
+    description: 'climbing_badges.dry_description',
+  },
 } as const;
 
 const climbingHazards = {

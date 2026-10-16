@@ -52,6 +52,8 @@ const ClimbingMultiValuesInner = () => {
           'climbing:ice',
           'climbing:mixed',
           'climbing:deepwater',
+          'climbing:aid',
+          'climbing:dry',
         ]}
       />
       <MultiValueKeyEditor
