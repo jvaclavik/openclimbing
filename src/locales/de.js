@@ -822,7 +822,8 @@ export default {
   'climbing_badges.inclination_vertical_description': 'Eine senkrechte Wand (90° oder nahezu).',
   'climbing_badges.inclination_vertical_label': 'senkrecht',
   'climbing_badges.type_label': 'Kletterart',
-  'climbing_badges.aid_description': 'Klettern unter Verwendung von Vorrichtungen und Ausrüstung wie Leitern und Haken, im Gegensatz zum Sport- bzw. Freiklettern.',
+  'climbing_badges.aid_description':
+    'Klettern unter Verwendung von Vorrichtungen und Ausrüstung wie Leitern und Haken, im Gegensatz zum Sport- bzw. Freiklettern.',
   'climbing_badges.aid_label': 'Technisch',
   'climbing_badges.boulder_description': 'Kurze Kletterprobleme nahe am Boden, meist ohne Seil.',
   'climbing_badges.boulder_label': 'Bouldern',

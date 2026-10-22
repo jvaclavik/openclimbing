@@ -1,16 +1,12 @@
 import styled from '@emotion/styled';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { CircularProgress, IconButton, Tooltip } from '@mui/material';
-import { t } from '../../../services/intl';
 import { getDescription } from '../../../helpers/featureLabel';
+import { t } from '../../../services/intl';
+import { useFeatureContext } from '../../utils/FeatureContext';
 import { tint } from '../../utils/panelUi';
 import { EditQuickAction } from '../EditButton';
-import {
-  FeaturedLinkChips,
-  isFeaturedLinkRenderer,
-} from '../FeaturedLinkChips';
-import { getFeaturedTagKeys } from '../getFeaturedTagKeys';
-import { useFeatureContext } from '../../utils/FeatureContext';
+import { FeaturedLinkChips, hasVisibleLinkChips } from '../FeaturedLinkChips';
 import { useReloadClimbingDialog } from './utils/useReloadClimbingDialog';
 
 const HideOnNarrowPanel = styled.div`
@@ -83,9 +79,7 @@ const ReloadButton = () => {
 export const ClimbingViewDetails = () => {
   const { feature } = useFeatureContext();
   const description = getDescription(feature);
-  const hasLinks = getFeaturedTagKeys(feature).some(({ featuredKey }) =>
-    isFeaturedLinkRenderer(featuredKey.renderer),
-  );
+  const hasLinks = hasVisibleLinkChips(feature);
   const hasContent = Boolean(description || hasLinks);
 
   return (
