@@ -514,6 +514,7 @@ export default {
   'mylists.back_to_map': 'Back to map',
   'mylists.not_found': 'List not found.',
   'featurepanel.directions_button': 'Directions',
+  'featurepanel.search_on_google': 'Search on Google',
   'featurepanel.error': 'Error __code__ while fetching feature from OpenStreetMap',
   'featurepanel.error_unknown': 'Unknown error while fetching feature from OpenStreetMap.',
   'featurepanel.error_network': "Can't get the feature, check your network cable.",

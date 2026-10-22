@@ -469,6 +469,7 @@ export default {
   'mylists.back_to_map': 'Zpět na mapu',
   'mylists.not_found': 'Seznam nenalezen.',
   'featurepanel.directions_button': 'Trasa',
+  'featurepanel.search_on_google': 'Hledat na Google',
   'featurepanel.error': 'Chyba __code__ při stahování prvku z OpenStreetMap.',
   'featurepanel.error_unknown': 'Při stahování prvku z OpenStreetMap se stala neznámá chyba.',
   'featurepanel.error_network': 'Nelze stáhnout prvek, zkontrolujte připojení k internetu.',

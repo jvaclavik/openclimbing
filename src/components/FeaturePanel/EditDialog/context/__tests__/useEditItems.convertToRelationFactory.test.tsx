@@ -1,14 +1,14 @@
+import { getNewId } from '../../../../../services/getCoordsFeature';
 import { fetchParentFeatures } from '../../../../../services/osm/fetchParentFeatures';
 import { fetchWays } from '../../../../../services/osm/fetchWays';
 import { addEmptyOriginalState, fetchFreshItem } from '../itemsHelpers';
-import { getNewId } from '../../../../../services/getCoordsFeature';
 
-import { DataItem } from '../types';
+import { FeatureTags } from '../../../../../services/types';
 import {
   AlreadyInCragError,
   convertToRelationFactory,
 } from '../convertToRelationFactory';
-import { FeatureTags } from '../../../../../services/types';
+import { DataItem } from '../types';
 
 jest.mock('../../../../../services/osm/fetchParentFeatures', () => ({
   fetchParentFeatures: jest.fn(),
@@ -148,7 +148,7 @@ describe('convertToRelationFactory', () => {
     );
   });
 
-  it('keeps a non-peak node as a member of the relation', async () => {
+  it('keeps a non-peak node beside the relation', async () => {
     (fetchParentFeatures as jest.Mock).mockResolvedValue([
       parentFeature(99, { type: 'site' }),
     ]);
@@ -177,7 +177,7 @@ describe('convertToRelationFactory', () => {
       ['natural', 'stone'],
       ['name', 'boulder'],
     ]);
-    expect(data[1].members).toEqual([{ shortId: 'n123', role: '' }]);
+    expect(data[1].members).toEqual([]);
     expect(data[2].members).toEqual([{ shortId: 'r-1', role: 'summit' }]);
   });
 

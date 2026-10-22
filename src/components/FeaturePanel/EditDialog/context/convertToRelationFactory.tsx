@@ -1,14 +1,14 @@
-import { ConvertToRelation, DataItem, TagsEntries } from './types';
-import { fetchParentFeatures } from '../../../../services/osm/fetchParentFeatures';
-import { getApiId } from '../../../../services/helpers';
-import { addEmptyOriginalState, fetchFreshItem } from './itemsHelpers';
-import { Setter } from '../../../../types';
-import { fetchWays } from '../../../../services/osm/fetchWays';
 import { getNewId } from '../../../../services/getCoordsFeature';
-import { not } from '../../../../utils';
-import { findInItems, isInItems } from './utils';
+import { getApiId } from '../../../../services/helpers';
+import { fetchParentFeatures } from '../../../../services/osm/fetchParentFeatures';
+import { fetchWays } from '../../../../services/osm/fetchWays';
 import { Feature, FeatureTags, LonLat } from '../../../../services/types';
+import { Setter } from '../../../../types';
+import { not } from '../../../../utils';
 import { isValidLonLat } from '../../Climbing/utils/cragCenter';
+import { addEmptyOriginalState, fetchFreshItem } from './itemsHelpers';
+import { ConvertToRelation, DataItem, TagsEntries } from './types';
+import { findInItems, isInItems } from './utils';
 
 export class AlreadyInCragError extends Error {
   constructor(shortId: string) {
@@ -158,7 +158,7 @@ export const convertToRelationFactory = (
         ),
         toBeDeleted: false,
         relationClickedLonLat: relationCenter(prepared, center),
-        members: besideItem || !keepNode ? [] : [{ shortId, role: '' }],
+        members: [],
         sections: ['members'],
       });
 
