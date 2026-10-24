@@ -14,6 +14,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import AppsIcon from '@mui/icons-material/Apps';
 import { majorKeys } from '../MajorKeysEditor';
+import { START_PHOTO_KEY } from '../../../../Climbing/utils/photo';
 import { isString } from '../../../../../helpers';
 import { t, Translation } from '../../../../../../services/intl';
 import { useEditDialogContext } from '../../../../helpers/EditDialogContext';
@@ -118,7 +119,10 @@ const TagsEditorInner = () => {
 
 export const TagsEditor = () => {
   const { focusTag } = useEditDialogContext();
-  const focusThisEditor = isString(focusTag) && !majorKeys.includes(focusTag);
+  const focusThisEditor =
+    isString(focusTag) &&
+    !majorKeys.includes(focusTag) &&
+    focusTag !== START_PHOTO_KEY; // has its own field, see StartPhotoEditor
   const { expanded, expand, toggleExpanded } = useExpandedSections('tags');
   const { tagsEntries } = useCurrentItem();
   const { isMulti, keys } = useMultiEdit();

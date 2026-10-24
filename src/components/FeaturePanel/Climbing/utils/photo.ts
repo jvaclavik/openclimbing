@@ -51,6 +51,21 @@ export const isWikimediaCommons = (tag: string) =>
 export const hasWikimediaCommons = (tags: FeatureTags) =>
   Object.keys(tags).some((tag) => isWikimediaCommons(tag));
 
+// Only the numbered slots hold photos which routes can be drawn on – unlike
+// eg. the route start photo below.
+export const hasWikimediaCommonsSlot = (tags: FeatureTags) =>
+  Object.keys(tags).some(isWikimediaCommonsFileSlotKey);
+
+// Close-up of where a route starts – the first bolt and the rock around it –
+// so climbers can find the route, and later to recognise it from a photo.
+export const START_PHOTO_KEY = 'wikimedia_commons:start';
+
+export const hasStartPhoto = (tags: FeatureTags | undefined) =>
+  Boolean(tags?.[START_PHOTO_KEY]?.trim());
+
+export const canHaveStartPhoto = (tags: FeatureTags) =>
+  tags.climbing === 'route_bottom' || tags.climbing === 'route';
+
 export const isWikimediaCommonsPhoto = ([key, value]: [string, string]) => {
   // regexp to match wikimedia_commons, wikimedia_commons:2, etc. but not  wikimedia_commons:path, wikimedia_commons:whatever
   const re = /^wikimedia_commons(:\d+)?$/;

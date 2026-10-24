@@ -15,7 +15,7 @@ import {
 import { WikimediaCommonsGalleryRow } from './WikimediaCommonsGalleryRow';
 import { useWikimediaCommonsPhotoPaths } from './useWikimediaCommonsPhotoPaths';
 
-const normalizeWikimediaCommonsInput = (raw: string) =>
+export const normalizeWikimediaCommonsInput = (raw: string) =>
   decodeURI(
     raw
       .replace(/^https:\/\/commons\.wikimedia\.org\/wiki\//, '')

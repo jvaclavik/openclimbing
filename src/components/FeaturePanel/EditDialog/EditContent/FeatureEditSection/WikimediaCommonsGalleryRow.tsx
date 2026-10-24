@@ -40,6 +40,8 @@ type Props = {
   rowRef?: React.Ref<HTMLDivElement>;
   /** Route lines drawn on this photo, from this item and its loaded members. */
   paths?: PathWithTags[];
+  /** Overrides the default "Wikimedia Commons photo (n)" caption */
+  label?: string;
 };
 
 type EmptyRowCtaProps = {
@@ -101,6 +103,7 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   highlighted,
   rowRef,
   paths,
+  label: labelProp,
 }) => {
   const uploadCtx = useOptionalEditDialogUploadContext();
   const canUpload = Boolean(uploadCtx);
@@ -115,9 +118,9 @@ export const WikimediaCommonsGalleryRow: React.FC<Props> = ({
   const showCta = canUpload && isEmpty && !pasteMode;
   const showInput = !showCta;
 
-  const label = `${t('tags.wikimedia_commons_photo')}${
-    index > 0 ? ` (${index + 1})` : ''
-  }`;
+  const label =
+    labelProp ??
+    `${t('tags.wikimedia_commons_photo')}${index > 0 ? ` (${index + 1})` : ''}`;
   const invalidFile = isWikimediaCommonsFileNameInvalid(value);
 
   return (

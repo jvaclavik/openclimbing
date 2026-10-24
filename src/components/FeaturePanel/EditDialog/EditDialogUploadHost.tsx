@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useEditDialogUploadContext } from './EditDialogUploadContext';
 import { useCurrentItem } from './context/EditContext';
 import {
   getNextWikimediaCommonsIndex,
   getWikimediaCommonsKey,
   isWikimediaCommonsFileSlotKey,
+  START_PHOTO_KEY,
 } from '../Climbing/utils/photo';
 import { UploadPhotoDialog } from './EditContent/FeatureEditSection/UploadPhotoDialog/UploadPhotoDialog';
 import { TagsEntries } from './context/types';
@@ -19,6 +20,9 @@ export const EditDialogUploadHost: React.FC<{
 }> = ({ setActiveMajorKeys }) => {
   const { uploadRequest, closeUpload } = useEditDialogUploadContext();
   const currentItem = useCurrentItem();
+  // keep the variant while the dialog animates out, so its title doesn't flip
+  const lastTargetSlotKey = useRef<string | null>(null);
+  if (uploadRequest) lastTargetSlotKey.current = uploadRequest.targetSlotKey;
   const uploadedSlotKeys = Object.entries(currentItem?.tags ?? {})
     .filter(
       ([key, value]) => isWikimediaCommonsFileSlotKey(key) && value.trim(),
@@ -72,6 +76,9 @@ export const EditDialogUploadHost: React.FC<{
       initialFiles={uploadRequest?.initialFiles ?? null}
       onClose={closeUpload}
       onUploaded={handleUploaded}
+      variant={
+        lastTargetSlotKey.current === START_PHOTO_KEY ? 'start' : 'photo'
+      }
     />
   );
 };
