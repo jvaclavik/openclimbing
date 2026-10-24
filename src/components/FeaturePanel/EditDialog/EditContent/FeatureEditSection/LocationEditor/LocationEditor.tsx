@@ -20,7 +20,6 @@ import {
   useExpandedSections,
 } from '../../../context/EditContext';
 import { OSM_WEBSITE } from '../../../../../../services/osm/consts';
-import { useHasCragRoutesMap } from '../CragRoutesLocationEditor';
 import { LocationInputs } from './LocationInputs';
 import { useUserSettingsContext } from '../../../../../utils/userSettings/UserSettingsContext';
 
@@ -105,10 +104,8 @@ const Content = () => {
 
 export const LocationEditor = () => {
   const { expanded, toggleExpanded, expand } = useExpandedSections('location');
-  const { shortId, tags } = useCurrentItem();
+  const { shortId } = useCurrentItem();
   const osmId = getApiId(shortId);
-  const hasCragRoutesMap = useHasCragRoutesMap();
-  const isRoute = tags.climbing === 'route' || tags.climbing === 'route_bottom';
   const needsLocation = useNeedsNodeLocation();
 
   useEffect(() => {
@@ -117,12 +114,6 @@ export const LocationEditor = () => {
   }, [shortId, needsLocation]);
 
   if (osmId.type === 'relation') {
-    return null;
-  }
-
-  // Climbing routes inside a crag are positioned in the shared crag map
-  // (CragRoutesLocationEditor), so skip the single-marker location editor.
-  if (isRoute && hasCragRoutesMap) {
     return null;
   }
 

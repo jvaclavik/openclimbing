@@ -31,6 +31,7 @@ import { useCurrentItem, useEditContext } from '../../context/EditContext';
 import { fetchFreshItem, getNewNodeItem } from '../../context/itemsHelpers';
 import { DataItem, Members } from '../../context/types';
 import { findInItems, getPresetKey } from '../../context/utils';
+import { findDuplicateNames } from './findDuplicateNames';
 import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
 import { parseOsmShortId } from './parseOsmShortId';
 import { parseTagBatch } from './parseTagBatch';
@@ -139,6 +140,7 @@ const useHandleAddMember = (
 ) => {
   const { addItem, items, setCurrent } = useEditContext();
   const relation = useCurrentItem();
+  const { showToast } = useSnackbar();
   const gradeSystem = useGetGradeSystemOrUndefined(scene);
 
   return async (e: {
@@ -171,6 +173,22 @@ const useHandleAddMember = (
               ),
             ]
           : [];
+
+    const duplicateNames = findDuplicateNames(
+      relation.members ?? [],
+      drafts.map(({ newMember }) => newMember),
+      items,
+    );
+    if (duplicateNames.length) {
+      showToast(
+        t('editdialog.members.duplicate_names', {
+          names:
+            duplicateNames.slice(0, 5).join(', ') +
+            (duplicateNames.length > 5 ? ', …' : ''),
+        }),
+        'warning',
+      );
+    }
 
     const newMembers: Members = [];
     for (const { newItem, newMember } of drafts) {

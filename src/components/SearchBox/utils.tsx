@@ -8,6 +8,7 @@ import { useMapStateContext } from '../utils/MapStateContext';
 import { t } from '../../services/intl';
 import { getGlobalMap } from '../../services/mapStorage';
 import { LonLat } from '../../services/types';
+import { getDistance } from '../../services/getDistance';
 import { DotLoader } from '../helpers';
 import { GeocoderOption } from './types';
 import { diceCoefficient } from 'dice-coefficient';
@@ -74,30 +75,6 @@ export const OptionMeta = styled.div`
   gap: 4px;
   margin-left: 8px;
 `;
-
-const EARTH_RADIUS = 6372795;
-
-const degreesToRadians = (degrees: number) => (degrees * Math.PI) / 180;
-
-/** Returns the distance between two points in meters */
-export const getDistance = (point1: LonLat, point2: LonLat) => {
-  const latdiff = degreesToRadians(point2[1]) - degreesToRadians(point1[1]);
-  const lngdiff = degreesToRadians(point2[0]) - degreesToRadians(point1[0]);
-
-  // harvesine formula
-  return (
-    EARTH_RADIUS *
-    2 *
-    Math.asin(
-      Math.sqrt(
-        Math.sin(latdiff / 2) ** 2 +
-          Math.cos(degreesToRadians(point1[1])) *
-            Math.cos(degreesToRadians(point2[1])) *
-            Math.sin(lngdiff / 2) ** 2,
-      ),
-    )
-  );
-};
 
 export const getHumanDistance = (
   isImperial: boolean,
