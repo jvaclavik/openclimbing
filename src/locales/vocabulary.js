@@ -576,6 +576,17 @@ export default {
   'featurepanel.error.description': 'The rest of the map still works. Try going back or opening another place.',
   'featurepanel.error.back': 'Go back',
   'photo_coverage.tooltip': '__withPhoto__ of __total__ routes (__percent__\u00A0%) are drawn on a photo',
+  'start_photo.label': 'Route start photo',
+  'start_photo.add_button': 'Add route start photo',
+  'start_photo.hint':
+    'Stand about 2 m back and take the first bolt (or the first holds) together with about a metre of rock around it – the rock is what tells neighbouring routes apart.',
+  'start_photo.has_start_photo': 'Has a route start photo',
+  'start_photo.coverage_tooltip': '__withPhoto__ of __total__ routes have a start photo – click to add more',
+  'start_photo.crag_progress': '__withPhoto__ of __total__ routes have a start photo',
+  'start_photo.start': 'Add start photos',
+  'start_photo.continue': 'Continue',
+  'start_photo.next_route': 'Next: __name__',
+  'start_photo.unnamed_route': 'unnamed route',
 
   'opening_hours.all_day': '24 hours',
   'opening_hours.open': 'Open: __todayTime__',
@@ -660,6 +671,7 @@ export default {
   'editdialog.upload_photo_filename_error': 'Invalid Wikimedia Commons filename. It should look like this: File:Photo example.jpg',
   'uploaddialog.open_button': 'Upload photo',
   'uploaddialog.title': 'Upload photo to Wikimedia Commons',
+  'uploaddialog.title_start_photo': 'Upload route start photo',
   'uploaddialog.close': 'Close',
   'uploaddialog.cancel': 'Cancel',
   'uploaddialog.upload': 'Upload',
@@ -670,6 +682,7 @@ export default {
   'uploaddialog.login_hint': 'Sign in with your Wikimedia Commons account to upload photos. You need a separate account from your OSM one.',
   'uploaddialog.logged_in_as': 'Signed in to Wikimedia Commons as <b>__user__</b>',
   'uploaddialog.choose_file': 'Choose photos…',
+  'uploaddialog.choose_start_photo': 'Take or choose a photo…',
   'uploaddialog.choose_file_hint':
     'Pick one or more images from your device — select several at once to upload them in one go. HEIC photos from iPhone will be converted to JPG automatically.',
   'uploaddialog.preparing': 'Reading EXIF data and preparing the photo for upload…',

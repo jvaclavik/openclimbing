@@ -8,7 +8,7 @@ import {
 } from '../../../../FeatureImages/Image/helpers';
 import Router from 'next/router';
 import { getApiId, getUrlOsmId } from '../../../../../../services/helpers';
-import { hasWikimediaCommons } from '../../../../Climbing/utils/photo';
+import { hasWikimediaCommonsSlot } from '../../../../Climbing/utils/photo';
 import { Alert, Button } from '@mui/material';
 import DrawIcon from '@mui/icons-material/Draw';
 import { t } from '../../../../../../services/intl';
@@ -40,13 +40,14 @@ export const DrawClimbingRoutesBanner = () => {
     }
   };
 
-  const cragHasPhotos = tags.climbing === 'crag' && hasWikimediaCommons(tags);
+  const cragHasPhotos =
+    tags.climbing === 'crag' && hasWikimediaCommonsSlot(tags);
   const routeHasPhotos =
-    tags.climbing === 'route_bottom' && hasWikimediaCommons(tags);
+    tags.climbing === 'route_bottom' && hasWikimediaCommonsSlot(tags);
   const routeParentHasPhotos =
     tags.climbing === 'route_bottom' &&
     parentCrags.length > 0 &&
-    hasWikimediaCommons(parentCrags[0]?.tags);
+    hasWikimediaCommonsSlot(parentCrags[0]?.tags);
 
   if (!cragHasPhotos && !routeHasPhotos && !routeParentHasPhotos) return null;
 

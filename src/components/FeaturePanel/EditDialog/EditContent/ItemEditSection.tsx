@@ -35,7 +35,7 @@ export const ItemEditSection = () => {
       <ItemHeading />
       {!isMulti && <MissingLocationBanner />}
       {!isMulti && <PresetSelect />}
-      <MajorKeysEditor />
+      <MajorKeysEditor key={item.shortId} />
       <ClimbingEditor />
       <EditSectionCard>
         <ParentsEditor />

@@ -18,6 +18,7 @@ import { MajorKeysInactivePicker } from './MajorKeysInactivePicker';
 import { isDescriptionKey, isNameKey } from './DescriptionEditor';
 import { FeatureTags } from '../../../../../services/types';
 import { EditDialogUploadHost } from '../../EditDialogUploadHost';
+import { StartPhotoEditor } from './StartPhotoEditor/StartPhotoEditor';
 
 const basicMajorKeys = ['name', 'description', 'website'];
 const nonClimbingMajorKeys = ['phone', 'opening_hours'];
@@ -85,7 +86,7 @@ const hasTagForMajorKey = (k: string, tags: FeatureTags) => {
 
 export const MajorKeysEditor: React.FC = () => {
   const { focusTag } = useEditDialogContext();
-  const { tags: currentTags } = useCurrentItem();
+  const { shortId, tags: currentTags } = useCurrentItem();
   const { isMulti, tags: sharedTags, mixed, setTag } = useMultiEdit();
   const tags = isMulti ? sharedTags : currentTags;
 
@@ -160,6 +161,7 @@ export const MajorKeysEditor: React.FC = () => {
         isMulti={isMulti}
         mixed={mixed}
       />
+      {isMulti ? null : <StartPhotoEditor key={shortId} />}
 
       <MajorKeysInactivePicker
         inactiveMajorKeys={inactiveMajorKeys}

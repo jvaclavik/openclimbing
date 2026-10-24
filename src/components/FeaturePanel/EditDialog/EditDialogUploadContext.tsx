@@ -1,5 +1,13 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
 import { useDebugMode } from '../../utils/debug';
+import { useEditDialogContext } from '../helpers/EditDialogContext';
+import { START_PHOTO_KEY } from '../Climbing/utils/photo';
 
 type UploadRequest = {
   initialFiles: File[];
@@ -12,6 +20,8 @@ type EditDialogUploadContextType = {
   uploadRequest: UploadRequest | null;
   openUpload: (req?: Partial<UploadRequest>) => void;
   closeUpload: () => void;
+  /** True once per edit session opened via "Add start photo" – the upload should follow right away. */
+  consumeStartPhotoRequest: () => boolean;
   maximized: boolean;
   toggleMaximized: () => void;
 };
@@ -26,6 +36,14 @@ export const EditDialogUploadProvider: React.FC = ({ children }) => {
     null,
   );
   const [maximized, setMaximized] = useState<boolean>(false);
+  const editDialog = useEditDialogContext();
+  // the provider lives only while the edit dialog is open, so this is per session
+  const startPhotoRequestRef = useRef(editDialog?.focusTag === START_PHOTO_KEY);
+  const consumeStartPhotoRequest = useCallback(() => {
+    const requested = startPhotoRequestRef.current;
+    startPhotoRequestRef.current = false;
+    return requested;
+  }, []);
 
   const toggleMaximized = useCallback(() => setMaximized((m) => !m), []);
 
@@ -45,6 +63,7 @@ export const EditDialogUploadProvider: React.FC = ({ children }) => {
         uploadRequest,
         openUpload,
         closeUpload,
+        consumeStartPhotoRequest,
         maximized,
         toggleMaximized,
       }}

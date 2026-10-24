@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import Router from 'next/router';
 import { getOsmappLink } from '../../../../services/helpers';
-import { removeFilePrefix } from '../../Climbing/utils/photo';
+import { removeFilePrefix, START_PHOTO_KEY } from '../../Climbing/utils/photo';
 import { Feature, ImageDef, isTag } from '../../../../services/types';
 import { isModifiedClick } from '../../../helpers';
 
@@ -47,6 +47,10 @@ export const getUrlToParentCrag = (
 
 const getTopoDialogUrl = (feature: Feature, def: ImageDef): string | null => {
   if (!isTag(def) || !def.v.startsWith('File:')) {
+    return null;
+  }
+  // the start photo is a close-up of the route, it has no lines drawn on it
+  if (def.k === START_PHOTO_KEY) {
     return null;
   }
 

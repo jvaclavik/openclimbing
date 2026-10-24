@@ -1,7 +1,7 @@
 import { Feature } from '../../types';
 import { isTitleAvailable } from '../api';
 
-const sanitizeForCommons = (raw: string): string =>
+export const sanitizeForCommons = (raw: string): string =>
   raw
     .replace(/[#<>[\]|{}/\\:]/g, '')
     .replace(/\s+/g, ' ')

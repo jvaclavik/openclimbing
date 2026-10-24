@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Alert,
   Button,
@@ -20,18 +20,24 @@ import { useFeatureContext } from '../../../../../utils/FeatureContext';
 import { useWikimediaCommonsAuthContext } from '../../../../../utils/WikimediaCommonsAuthContext';
 import { UploadDialogAuthBar } from './UploadDialogAuthBar';
 import { UploadDialogForm } from './UploadDialogForm';
-import { useUploadDialogState } from './useUploadDialogState';
+import { UploadVariant, useUploadDialogState } from './useUploadDialogState';
+import { FeatureTags } from '../../../../../../services/types';
+import { getStartPhotoFeature } from './getStartPhotoFeature';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onUploaded: (fileTagValue: string) => void;
   initialFiles?: File[] | null;
+  variant?: UploadVariant;
+  /** The edited item – a start photo is named after it, even if it is a route of the opened crag. */
+  item?: { shortId: string; tags: FeatureTags };
 };
 
 const ChooseFileStage: React.FC<{
   onFilesChosen: (files: File[]) => void;
-}> = ({ onFilesChosen }) => (
+  variant: UploadVariant;
+}> = ({ onFilesChosen, variant }) => (
   <Stack
     spacing={1}
     sx={{
@@ -44,7 +50,9 @@ const ChooseFileStage: React.FC<{
         color: 'text.secondary',
       }}
     >
-      {t('uploaddialog.choose_file_hint')}
+      {variant === 'start'
+        ? t('start_photo.hint')
+        : t('uploaddialog.choose_file_hint')}
     </Typography>
     <Button
       component="label"
@@ -53,11 +61,13 @@ const ChooseFileStage: React.FC<{
       fullWidth
       onClick={() => markEditDialogForResume()}
     >
-      {t('uploaddialog.choose_file')}
+      {variant === 'start'
+        ? t('uploaddialog.choose_start_photo')
+        : t('uploaddialog.choose_file')}
       <input
         type="file"
         hidden
-        multiple
+        multiple={variant !== 'start'}
         accept="image/*,.heic,.heif"
         onChange={(e) => {
           const files = Array.from(e.target.files ?? []);
@@ -222,10 +232,19 @@ export const UploadPhotoDialog: React.FC<Props> = ({
   onClose,
   onUploaded,
   initialFiles,
+  variant = 'photo',
+  item,
 }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const { feature } = useFeatureContext();
+  const { feature: contextFeature } = useFeatureContext();
+  const feature = useMemo(
+    () =>
+      variant === 'start' && item && contextFeature
+        ? getStartPhotoFeature(contextFeature, item)
+        : contextFeature,
+    [contextFeature, item, variant],
+  );
   const { loading: authLoading } = useWikimediaCommonsAuthContext();
 
   const state = useUploadDialogState({
@@ -233,6 +252,7 @@ export const UploadPhotoDialog: React.FC<Props> = ({
     feature,
     onUploaded,
     initialFiles,
+    variant,
   });
   const {
     stage,
@@ -275,7 +295,19 @@ export const UploadPhotoDialog: React.FC<Props> = ({
       maxWidth="sm"
     >
       <DialogTitle sx={{ pr: 6 }}>
-        {t('uploaddialog.title')}
+        {variant === 'start'
+          ? t('uploaddialog.title_start_photo')
+          : t('uploaddialog.title')}
+        {/* when walking along the crag, this says which route to photograph */}
+        {variant === 'start' && feature?.tags?.name && (
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{ display: 'block', color: 'text.secondary' }}
+          >
+            {feature.tags.name}
+          </Typography>
+        )}
         <IconButton
           onClick={onClose}
           disabled={uploading}
@@ -339,7 +371,10 @@ export const UploadPhotoDialog: React.FC<Props> = ({
               </Alert>
             )}
           {stage === 'choose-file' && (
-            <ChooseFileStage onFilesChosen={handleFilesChosen} />
+            <ChooseFileStage
+              onFilesChosen={handleFilesChosen}
+              variant={variant}
+            />
           )}
           {stage === 'preparing' && <PreparingStage />}
           {(stage === 'review' || stage === 'uploading') && previewUrl && (

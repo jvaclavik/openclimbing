@@ -10,6 +10,7 @@ import { BackChip } from './BackChip';
 import { PanelClimbingBadges } from './Climbing/ClimbingBadges';
 import { ClimbingRestriction } from './Climbing/ClimbingRestriction';
 import { ClimbingStructuredData } from './Climbing/ClimbingStructuredData';
+import { AddStartPhotoButton } from './Climbing/StartPhotoButtons';
 import { RouteDistributionInFeaturePanel } from './Climbing/RouteDistribution';
 import { ClimbingRouteGrade } from './ClimbingRouteGrade';
 import { CragsInArea } from './CragsInArea';
@@ -131,6 +132,7 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
                 }}
               >
                 <FeatureImages />
+                <AddStartPhotoButton />
               </Box>
 
               <PanelSidePadding>

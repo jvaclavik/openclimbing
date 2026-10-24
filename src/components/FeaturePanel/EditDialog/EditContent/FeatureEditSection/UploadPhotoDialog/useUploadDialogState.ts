@@ -13,6 +13,14 @@ import {
   LicenseId,
 } from '../../../../../../services/wikimedia/upload/wikitext';
 import { UploadProgressEvent } from '../../../../../../services/wikimedia/api';
+import {
+  getStartPhotoDescription,
+  getStartPhotoFilenameStem,
+} from '../../../../../../services/wikimedia/upload/startPhoto';
+
+// `start` = the route start photo (wikimedia_commons:start), named and
+// described after the route
+export type UploadVariant = 'photo' | 'start';
 
 export type Stage =
   | 'choose-file'
@@ -26,6 +34,7 @@ type Args = {
   feature: Feature | null;
   onUploaded: (fileTagValue: string) => void;
   initialFiles?: File[] | null;
+  variant?: UploadVariant;
 };
 
 type ReviewPhoto = {
@@ -146,7 +155,12 @@ const resetForm = (form: FormState) => {
   form.setSuccessfulUploads(0);
 };
 
-const startBatch = async (files: File[], feature: Feature, form: FormState) => {
+const startBatch = async (
+  files: File[],
+  feature: Feature,
+  form: FormState,
+  variant: UploadVariant,
+) => {
   if (files.length === 0) return;
 
   const generation = form.generationRef.current + 1;
@@ -176,10 +190,15 @@ const startBatch = async (files: File[], feature: Feature, form: FormState) => {
         suggestedCategoriesPromise,
       ]);
       if (form.generationRef.current !== generation) return;
+      const isStart = variant === 'start';
       nextBatchItems.push({
         prepared,
-        filenameStem: prepared.filenameParts.stem,
-        description: getDefaultDescription(feature),
+        filenameStem: isStart
+          ? getStartPhotoFilenameStem(feature)
+          : prepared.filenameParts.stem,
+        description: isStart
+          ? getStartPhotoDescription(feature)
+          : getDefaultDescription(feature),
         categories: [...suggestedCategories],
         license: DEFAULT_LICENSE,
       });
@@ -280,6 +299,7 @@ export const useUploadDialogState = ({
   feature,
   onUploaded,
   initialFiles,
+  variant = 'photo',
 }: Args) => {
   const { user, handleLogin } = useWikimediaCommonsAuthContext();
   const lastConsumedInitialFiles = useRef<File[] | null>(null);
@@ -322,14 +342,14 @@ export const useUploadDialogState = ({
 
   const handleFilesChosen = (files: File[]) => {
     if (!feature) return undefined;
-    return startBatch(files, feature, form);
+    return startBatch(files, feature, form, variant);
   };
 
   useEffect(() => {
     if (!open || !initialFiles || initialFiles.length === 0 || !feature) return;
     if (lastConsumedInitialFiles.current === initialFiles) return;
     lastConsumedInitialFiles.current = initialFiles;
-    void startBatch(initialFiles, feature, form);
+    void startBatch(initialFiles, feature, form, variant);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialFiles, feature]);
 

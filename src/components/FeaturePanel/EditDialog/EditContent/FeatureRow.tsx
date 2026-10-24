@@ -6,12 +6,14 @@ import {
   ListItemText,
   MenuItem,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import styled from '@emotion/styled';
 import React from 'react';
 import { useEditContext } from '../context/EditContext';
@@ -22,7 +24,7 @@ import { findInItems } from '../context/utils';
 import { getDifficulties } from '../../../../services/tagging/climbing/routeGrade';
 import { ConvertedRouteDifficultyBadge } from '../../Climbing/ConvertedRouteDifficultyBadge';
 import { usePhotoHighlightContext } from '../../Climbing/contexts/PhotoHighlightContext';
-import { isRouteDrawnOnPhoto } from '../../Climbing/utils/photo';
+import { hasStartPhoto, isRouteDrawnOnPhoto } from '../../Climbing/utils/photo';
 import { t } from '../../../../services/intl';
 import { useMoreMenu } from '../../Climbing/useMoreMenu';
 import { FeatureTags } from '../../../../services/types';
@@ -89,6 +91,9 @@ const RowLabel = ({
       ? tags.author?.trim() || undefined
       : undefined;
   const title = name || presetLabel || fallback;
+  // the start photo field lives in the route itself, this helps to see which
+  // routes are done when walking along the crag
+  const startPhoto = hasStartPhoto(tags);
 
   return (
     <Stack
@@ -120,9 +125,22 @@ const RowLabel = ({
           </StyledPresetLabel>
         ) : null}
       </Stack>
-      {hasGrade && (
-        <ConvertedRouteDifficultyBadge routeDifficulties={routeDifficulties} />
-      )}
+      <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
+        {startPhoto && (
+          <Tooltip title={t('start_photo.has_start_photo')}>
+            <PhotoCameraOutlinedIcon
+              fontSize="small"
+              color="secondary"
+              aria-label={t('start_photo.has_start_photo')}
+            />
+          </Tooltip>
+        )}
+        {hasGrade && (
+          <ConvertedRouteDifficultyBadge
+            routeDifficulties={routeDifficulties}
+          />
+        )}
+      </Stack>
     </Stack>
   );
 };

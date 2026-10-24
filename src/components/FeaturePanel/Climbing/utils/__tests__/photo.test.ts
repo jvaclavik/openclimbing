@@ -1,4 +1,11 @@
-import { getNextWikimediaCommonsIndex } from '../photo';
+import {
+  canHaveStartPhoto,
+  getNextWikimediaCommonsIndex,
+  getWikimediaCommonsPhotoTags,
+  hasStartPhoto,
+  hasWikimediaCommonsSlot,
+  START_PHOTO_KEY,
+} from '../photo';
 import { FeatureTags } from '../../../../../services/types';
 
 describe('getNextWikimediaCommonsIndex', () => {
@@ -34,5 +41,48 @@ describe('getNextWikimediaCommonsIndex', () => {
       'wikimedia_commons:3': 'File:example3.jpg',
     };
     expect(getNextWikimediaCommonsIndex(tags)).toBe(3);
+  });
+});
+
+describe('start photo', () => {
+  const route: FeatureTags = {
+    climbing: 'route_bottom',
+    wikimedia_commons: 'File:Crag.jpg',
+    'wikimedia_commons:path': '0.1,0.9|0.2,0.1',
+  };
+
+  it('is recognised only when filled in', () => {
+    expect(hasStartPhoto(route)).toBe(false);
+    expect(
+      hasStartPhoto({ ...route, [START_PHOTO_KEY]: 'File:Start.jpg' }),
+    ).toBe(true);
+    expect(hasStartPhoto({ ...route, [START_PHOTO_KEY]: '  ' })).toBe(false);
+    expect(hasStartPhoto(undefined)).toBe(false);
+  });
+
+  it('is not a photo slot which routes are drawn on', () => {
+    const onlyStart = {
+      climbing: 'route_bottom',
+      [START_PHOTO_KEY]: 'File:S.jpg',
+    };
+    expect(hasWikimediaCommonsSlot(onlyStart)).toBe(false);
+    expect(hasWikimediaCommonsSlot(route)).toBe(true);
+    expect(getWikimediaCommonsPhotoTags(onlyStart)).toEqual([]);
+  });
+
+  it('does not take a numbered slot', () => {
+    expect(
+      getNextWikimediaCommonsIndex({
+        ...route,
+        [START_PHOTO_KEY]: 'File:Start.jpg',
+      }),
+    ).toBe(1);
+  });
+
+  it('belongs to routes only', () => {
+    expect(canHaveStartPhoto({ climbing: 'route_bottom' })).toBe(true);
+    expect(canHaveStartPhoto({ climbing: 'route' })).toBe(true);
+    expect(canHaveStartPhoto({ climbing: 'route_top' })).toBe(false);
+    expect(canHaveStartPhoto({ climbing: 'crag' })).toBe(false);
   });
 });

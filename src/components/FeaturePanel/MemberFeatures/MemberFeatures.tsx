@@ -12,6 +12,7 @@ import { t } from '../../../services/intl';
 import { getDividedFeaturesBySections } from '../Climbing/utils/getDividedFeaturesBySections';
 import { PhotoCoverageRing } from '../Climbing/PhotoCoverageRing';
 import { hasPathOnPhoto } from '../Climbing/utils/photo';
+import { StartPhotoCoverageChip } from '../Climbing/StartPhotoButtons';
 
 const getHeading = (feature: Feature) => {
   if (feature.tags.climbing === 'crag') {
@@ -62,7 +63,13 @@ export const MemberFeatures = () => {
           mr: -2,
         }}
       >
-        <PanelLabel>
+        <PanelLabel
+          addition={
+            tags.climbing === 'crag' ? (
+              <StartPhotoCoverageChip routes={climbingRoutesFeatures} />
+            ) : null
+          }
+        >
           <Stack
             direction="row"
             sx={{
