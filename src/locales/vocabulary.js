@@ -735,7 +735,6 @@ export default {
   'editdialog.climbing_crags': 'Climbing crags',
   'editdialog.climbing_routes': 'Climbing routes',
   'editdialog.open_all': 'Open all',
-  'editdialog.moved_existing_items': 'Existing OSM items will be moved: __names__',
   'editdialog.members': 'Members',
   'editdialog.members.name': 'Name',
   'editdialog.members.add_member': 'Add member',
@@ -897,7 +896,7 @@ export default {
   'climbing.distribute_along_line_tooltip': 'Distribute routes along a line',
   'climbing.done_drawing_line': 'Done',
   'climbing.route_positions_help':
-    'Click on the map to add guide points — routes spread evenly along the line between them. Drag a guide point to redistribute, or drag a route to fine-tune its position. Right-click a route to snap it back onto the line, or right-click a guide point to remove it.',
+    'Click on the map to add guide points — routes spread evenly along the line between them. When you add new routes, only they are spread; routes already in OSM stay where they are. Drag a guide point to redistribute, or drag a route to fine-tune its position. Right-click a route to snap it back onto the line, or right-click a guide point to remove it.',
   'climbing.clear_guide_points': 'Clear line',
   'climbing.edit_this_route': 'Edit this route',
   'climbing.map_style_tourist': 'Tourist',

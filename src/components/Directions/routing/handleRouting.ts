@@ -1,4 +1,4 @@
-import { getDistance } from '../../../services/getDistance';
+import { getDistance } from '../../SearchBox/utils';
 import { getGlobalMap, mapIdlePromise } from '../../../services/mapStorage';
 import * as maplibregl from 'maplibre-gl';
 import { LonLat } from '../../../services/types';

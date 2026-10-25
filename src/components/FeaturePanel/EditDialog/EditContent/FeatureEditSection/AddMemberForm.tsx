@@ -187,6 +187,8 @@ const useHandleAddMember = (
             (duplicateNames.length > 5 ? ', …' : ''),
         }),
         'warning',
+        undefined,
+        { persist: true },
       );
     }
 

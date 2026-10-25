@@ -683,7 +683,6 @@ export default {
   'editdialog.climbing_crags': 'Lezecké sektory',
   'editdialog.climbing_routes': 'Lezecké cesty',
   'editdialog.open_all': 'Otevřít vše',
-  'editdialog.moved_existing_items': 'Existující prvky v OSM budou přesunuty: __names__',
   'editdialog.members': 'Členové',
   'editdialog.members.name': 'Název',
   'editdialog.members.add_member': 'Přidat člena',
@@ -832,7 +831,7 @@ export default {
   'climbing.distribute_along_line_tooltip': 'Rozmístit cesty podél linie',
   'climbing.done_drawing_line': 'Hotovo',
   'climbing.route_positions_help':
-    'Klikáním do mapy přidávejte řídící body — cesty se rovnoměrně rozloží podél linie mezi nimi. Tažením řídícího bodu cesty přerozdělíte, tažením cesty doladíte její pozici. Pravým kliknutím na cestu ji vrátíte zpět na linii, pravým kliknutím na řídící bod ho odeberete.',
+    'Klikáním do mapy přidávejte řídící body — cesty se rovnoměrně rozloží podél linie mezi nimi. Pokud přidáváte nové cesty, rozloží se jen ty; cesty, které už jsou v OSM, zůstanou na svém místě. Tažením řídícího bodu cesty přerozdělíte, tažením cesty doladíte její pozici. Pravým kliknutím na cestu ji vrátíte zpět na linii, pravým kliknutím na řídící bod ho odeberete.',
   'climbing.clear_guide_points': 'Vymazat linii',
   'climbing.edit_this_route': 'Upravit cestu',
   'climbing.map_style_tourist': 'Turistická',

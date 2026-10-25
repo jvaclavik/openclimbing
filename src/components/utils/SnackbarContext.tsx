@@ -12,6 +12,7 @@ export type ShowToast = (
   message: string | React.ReactNode,
   severity?: Severity,
   action?: AlertProps['action'],
+  options?: { persist?: boolean },
 ) => void;
 export type SnackbarContextType = {
   showToast: ShowToast;
@@ -45,6 +46,7 @@ export const SnackbarProvider: React.FC<Props> = ({
   const [action, setAction] = useState<AlertProps['action'] | undefined>(
     initialToast?.action,
   );
+  const [persist, setPersist] = useState(false);
 
   useEffect(() => {
     if (initialToast) {
@@ -67,11 +69,13 @@ export const SnackbarProvider: React.FC<Props> = ({
         message: React.ReactNode,
         severity?: Severity,
         action?: AlertProps['action'],
+        options?: { persist?: boolean },
       ) => {
         setMessage(message);
         setSeverity(severity);
         setOpen(true);
         setAction(action);
+        setPersist(!!options?.persist);
       },
     }),
     [],
@@ -82,7 +86,7 @@ export const SnackbarProvider: React.FC<Props> = ({
       {children}
       <Snackbar
         open={open}
-        autoHideDuration={10000}
+        autoHideDuration={persist ? null : 10000}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         onClose={handleClose}
       >
