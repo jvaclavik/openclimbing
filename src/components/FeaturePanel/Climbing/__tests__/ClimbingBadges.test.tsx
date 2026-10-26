@@ -20,6 +20,7 @@ describe('ClimbingBadges', () => {
       'climbing_badges.boulder_description': 'Bouldering',
       'climbing_badges.sport_label': 'Sport',
       'climbing_badges.sport_description': 'Sport climbing',
+      'climbing_rock.sandstone': 'Sandstone',
     };
   });
 
@@ -47,6 +48,12 @@ describe('ClimbingBadges', () => {
 
     expect(screen.getByText('Sport')).toBeTruthy();
     expect(screen.getByText('Boulder')).toBeTruthy();
+  });
+
+  it('renders material from the material tag', () => {
+    render(<ClimbingBadges feature={feature({ material: 'sandstone' })} />);
+
+    expect(screen.getByText('Sandstone')).toBeTruthy();
   });
 
   it.each(['no', '0'])(

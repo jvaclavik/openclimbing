@@ -190,7 +190,7 @@ type Props = {
 const collectRockMaterials = (feature: Feature): string[] => {
   const rocks = new Set<string>();
   const walk = (f: Feature) => {
-    const rock = f.tags?.['climbing:rock']?.trim();
+    const rock = f.tags?.material?.trim();
     if (rock) {
       rocks.add(rock);
     }

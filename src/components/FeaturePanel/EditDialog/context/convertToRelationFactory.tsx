@@ -41,13 +41,16 @@ const updateMemberLinks = (
 const copiedClimbingTags = ([k, v]) =>
   k.startsWith('name') ||
   k.startsWith('climbing') ||
+  k === 'material' ||
   k.startsWith('description') ||
   k.startsWith('wikimedia_commons') ||
   k.startsWith('website') ||
   (k === 'sport' && v === 'climbing');
 
 const toBeRemovedTags = ([k, v]) =>
-  k.startsWith('climbing') || (k === 'sport' && v === 'climbing');
+  k.startsWith('climbing') ||
+  k === 'material' ||
+  (k === 'sport' && v === 'climbing');
 
 const isNew = (item: DataItem) => item.shortId.includes('-');
 

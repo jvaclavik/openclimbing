@@ -196,7 +196,7 @@ describe('convertToRelationFactory', () => {
       'w55',
       {
         climbing: 'crag',
-        'climbing:rock': 'limestone',
+        material: 'limestone',
         name: 'Hühnersteinwand',
         natural: 'cliff',
         sport: 'climbing',
@@ -220,7 +220,7 @@ describe('convertToRelationFactory', () => {
       ['type', 'site'],
       ['site', 'climbing'],
       ['climbing', 'crag'],
-      ['climbing:rock', 'limestone'],
+      ['material', 'limestone'],
       ['name', 'Hühnersteinwand'],
       ['sport', 'climbing'],
       ['website', 'https://www.thecrag.com/example'],

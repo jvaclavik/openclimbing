@@ -62,7 +62,7 @@ export const getClimbingAttributes = (
 ): ClimbingAttributes => {
   const length = lengthFromFeatureTags(tags);
   return {
-    materials: tags['climbing:rock'] ? [tags['climbing:rock']] : [],
+    materials: tags.material ? [tags.material] : [],
     climbingTypes: CLIMBING_TYPE_KEYS.filter((key) =>
       isClimbingTagSet(tags[`climbing:${key}`]),
     ),

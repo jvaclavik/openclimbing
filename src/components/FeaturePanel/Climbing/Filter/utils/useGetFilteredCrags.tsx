@@ -82,7 +82,7 @@ export const useGetFilteredCrags = (crags: Feature[]): Feature[] => {
 
   const matchesMaterials = (crag: Feature) =>
     materials.length === 0 ||
-    someFeatureTags(crag, (tags) => materials.includes(tags['climbing:rock']));
+    someFeatureTags(crag, (tags) => materials.includes(tags.material));
 
   const matchesFamilyFriendly = (crag: Feature) =>
     !familyFriendly ||

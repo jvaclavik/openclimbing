@@ -12,7 +12,7 @@ const feature: Feature = {
     climbing: 'crag',
     'climbing:grade:yds_class:max': '5.9+',
     'climbing:grade:yds_class:min': '5.7',
-    'climbing:rock': 'quartzite',
+    material: 'quartzite',
     'climbing:routes': '7',
     'climbing:url:thecrag': 'https://www.thecrag.com/395435010',
     name: 'The North Overhangs',

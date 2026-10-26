@@ -12,7 +12,7 @@ export const ourFields: RawFields = {
     minValue: 0,
   },
   'climbing/rock': {
-    key: 'climbing:rock',
+    key: 'material',
     type: 'combo',
     options: ['limestone', 'sandstone', 'granite', 'basalt'],
   },

@@ -5,7 +5,7 @@ import { useMultiEdit } from '../../context/useMultiEdit';
 import { t } from '../../../../../services/intl';
 import { CLIMBING_ROCK_OPTIONS } from '../../../../../services/tagging/climbing/climbingRockData';
 import { isClimbingRoute } from '../../../../../utils';
-const KEY = 'climbing:rock';
+const KEY = 'material';
 
 export const ClimbingRockSelect = () => {
   const { tags } = useCurrentItem();
