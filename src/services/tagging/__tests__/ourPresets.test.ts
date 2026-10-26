@@ -1,4 +1,5 @@
 import { findPreset } from '../presets';
+import { ourFields } from '../ourPresets';
 
 // the iD tagging schema has no via ferrata preset, we add our own in modifyPresets()
 describe('via ferrata presets', () => {
@@ -19,5 +20,11 @@ describe('via ferrata presets', () => {
       sport: 'via_ferrata',
       via_ferrata: 'start',
     });
+  });
+});
+
+describe('climbing material field', () => {
+  it('writes material rather than the deprecated climbing:rock tag', () => {
+    expect(ourFields['climbing/rock'].key).toBe('material');
   });
 });

@@ -18,7 +18,7 @@ CREATE TABLE climbing_features
   "gradeId"       INTEGER,
   "histogramCode" TEXT,
   "parentId"      INTEGER,
-  materials       TEXT, -- comma-joined climbing:rock values
+  materials       TEXT, -- comma-joined material values
   "climbingTypes" TEXT, -- comma-joined climbing types (sport, trad, ...)
   inclinations    TEXT, -- comma-joined inclinations (slab, vertical, ...)
   "familyFriendly" INTEGER, -- bool

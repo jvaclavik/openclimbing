@@ -56,7 +56,6 @@
     { "key": "climbing:mixed" },
     { "key": "climbing:multipitch" },
     { "key": "climbing:pitches" },
-    { "key": "climbing:rock" },
     { "key": "climbing:sport" },
     { "key": "climbing:trad" },
     { "key": "contact:mobile" },
@@ -70,6 +69,7 @@
     },
     { "key": "leisure", "value": "sports_centre" },
     { "key": "leisure", "value": "sports_hall" },
+    { "key": "material" },
     {
       "key": "name",
       "description": "Shows a detail of any feature. Displays its name and all other tags. It lets the user edit it. See eg.: https://openclimbing.org/relation/6706848"

@@ -3,7 +3,7 @@ import { isClimbingCragLike, isFeatureClimbingRoute } from '../utils';
 const hexe = {
   climbing: 'crag',
   'climbing:grade:saxon:min': 'III',
-  'climbing:rock': 'sandstone',
+  material: 'sandstone',
   'climbing:summit_log': 'yes',
   'climbing:trad': 'yes',
   name: 'Hexe',
@@ -13,7 +13,7 @@ const hexe = {
 
 const winkelturm = {
   'climbing:grade:saxon:min': 'II',
-  'climbing:rock': 'sandstone',
+  material: 'sandstone',
   'climbing:summit_log': 'yes',
   'climbing:trad': 'yes',
   name: 'Winkelturm',
@@ -39,7 +39,7 @@ describe('isClimbingCragLike', () => {
       isClimbingCragLike({
         climbing: 'route_bottom',
         'climbing:grade:saxon:min': 'IV*',
-        'climbing:rock': 'sandstone',
+        material: 'sandstone',
         'climbing:summit_log': 'yes',
         'climbing:trad': 'yes',
         name: 'Großer Zschirnstein Südwand',
