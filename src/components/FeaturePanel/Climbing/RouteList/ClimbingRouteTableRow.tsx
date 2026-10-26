@@ -45,6 +45,7 @@ import {
   isRouteDrawnOnPhoto,
 } from '../utils/photo';
 import { formatClimbingLength } from '../utils/formatClimbingLength';
+import { BoltCount } from '../BoltCount';
 import { getClimbingAttributes } from '../../../../services/tagging/climbing/climbingAttributes';
 import { lengthOverlapsFilter } from '../../../../services/tagging/climbing/parseClimbingLength';
 import { usePhotoHighlightContext } from '../contexts/PhotoHighlightContext';
@@ -332,6 +333,7 @@ const RouteName = (props: {
         {props.feature.tags?.name}
       </Typography>
       <RouteLength feature={props.feature} />
+      <BoltCount tags={props.feature.tags} />
     </RouteNameContainer>
   );
 };
