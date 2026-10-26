@@ -18,12 +18,23 @@ export const parseBoltCount = (tags: FeatureTags = {}): number | null => {
   return Number.isSafeInteger(count) ? count : null;
 };
 
-// Bolt hanger – the plate with a hole climbers clip their quickdraws into.
-const BoltHangerIcon = (props: SvgIconProps) => (
+// Carabiner – D shaped frame (thick) with the straight gate on its right side.
+const CarabinerIcon = (props: SvgIconProps) => (
   <SvgIcon viewBox="0 0 24 24" {...props}>
     <path
-      d="M12 2.5a5 5 0 0 0-2.2 9.5l-3.3 6.3A1.6 1.6 0 0 0 7.9 21h8.2a1.6 1.6 0 0 0 1.4-2.7l-3.3-6.3A5 5 0 0 0 12 2.5zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"
-      fillRule="evenodd"
+      d="M16.3 6.4C15.6 4.6 13.9 3.4 11.9 3.4 9.6 3.4 7.7 5.5 7.7 8.2v7.6c0 2.8 1.9 4.9 4.2 4.9 1.2 0 2.4-.4 3.2-1.2"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M16 8 15.1 19.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
   </SvgIcon>
 );
@@ -50,7 +61,7 @@ export const BoltCount = ({ tags }: Props) => {
     <Tooltip title={label} arrow>
       <Container role="img" aria-label={`${label}: ${count}`}>
         {/* inline icon – `vertical-align` keeps it optically centered on the digits */}
-        <BoltHangerIcon
+        <CarabinerIcon
           sx={{ fontSize: '1.15em', verticalAlign: '-0.2em', mr: '2px' }}
         />
         {count}
