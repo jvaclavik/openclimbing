@@ -18,6 +18,10 @@ describe('parseBoltCount', () => {
     expect(parseBoltCount({ 'climbing:bolts': 'yes' })).toBe(null);
     expect(parseBoltCount({ 'climbing:bolts': '5-6' })).toBe(null);
   });
+
+  it('returns null for values which can not be represented exactly', () => {
+    expect(parseBoltCount({ 'climbing:bolts': '9007199254740993' })).toBe(null);
+  });
 });
 
 describe('BoltCount', () => {
@@ -34,7 +38,9 @@ describe('BoltCount', () => {
   it('renders the number of bolts', () => {
     renderWithTheme(<BoltCount tags={{ 'climbing:bolts': '7' }} />);
 
-    expect(screen.getByLabelText('Number of bolts: 7').textContent).toBe('7');
+    expect(
+      screen.getByRole('img', { name: 'Number of bolts: 7' }).textContent,
+    ).toBe('7');
   });
 
   it('renders nothing without a parsable climbing:bolts tag', () => {

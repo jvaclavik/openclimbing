@@ -11,7 +11,11 @@ import { FeatureTags } from '../../../services/types';
  */
 export const parseBoltCount = (tags: FeatureTags = {}): number | null => {
   const raw = tags['climbing:bolts']?.trim();
-  return raw && /^\d+$/.test(raw) ? parseInt(raw, 10) : null;
+  if (!raw || !/^\d+$/.test(raw)) {
+    return null;
+  }
+  const count = parseInt(raw, 10);
+  return Number.isSafeInteger(count) ? count : null;
 };
 
 // Bolt hanger – the plate with a hole climbers clip their quickdraws into.
@@ -44,7 +48,7 @@ export const BoltCount = ({ tags }: Props) => {
   const label = t('climbing_bolts.label');
   return (
     <Tooltip title={label} arrow>
-      <Container aria-label={`${label}: ${count}`}>
+      <Container role="img" aria-label={`${label}: ${count}`}>
         {/* inline icon – `vertical-align` keeps it optically centered on the digits */}
         <BoltHangerIcon
           sx={{ fontSize: '1.15em', verticalAlign: '-0.2em', mr: '2px' }}
