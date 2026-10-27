@@ -1125,6 +1125,8 @@ export default {
   'climbing_start.crouch': 'z podřepu',
   'climbing_start.jump': 'ze skoku',
 
+  'climbing_bolts.label': 'Počet borháků (pevné jištění)',
+
   'editdialog.add_value': 'Přidat',
   'editdialog.all_values_added': 'Všechny hodnoty byly přidány',
   'editdialog.custom_value': 'Vlastní hodnota',

@@ -1205,6 +1205,8 @@ export default {
   'climbing_start.crouch': 'crouch start',
   'climbing_start.jump': 'jump start',
 
+  'climbing_bolts.label': 'Number of bolts (fixed protection)',
+
   'editdialog.add_value': 'Add',
   'editdialog.all_values_added': 'All values added',
   'editdialog.custom_value': 'Custom value',

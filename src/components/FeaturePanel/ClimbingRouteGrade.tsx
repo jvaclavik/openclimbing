@@ -2,6 +2,7 @@ import { Stack } from '@mui/material';
 import { getDifficulties } from '../../services/tagging/climbing/routeGrade';
 import { isFeatureClimbingRoute } from '../../utils';
 import { useFeatureContext } from '../utils/FeatureContext';
+import { BoltCount } from './Climbing/BoltCount';
 import { ConvertedRouteDifficultyBadge } from './Climbing/ConvertedRouteDifficultyBadge';
 import { GradeSystemSelect } from './Climbing/GradeSystemSelect';
 
@@ -23,6 +24,7 @@ export const ClimbingRouteGrade = () => {
       }}
     >
       <ConvertedRouteDifficultyBadge routeDifficulties={routeDifficulties} />
+      <BoltCount tags={feature?.tags} />
       <GradeSystemSelect orderByFeature />
     </Stack>
   );
