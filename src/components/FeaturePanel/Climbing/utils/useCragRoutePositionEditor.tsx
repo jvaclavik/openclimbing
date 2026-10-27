@@ -116,6 +116,25 @@ const getEditableRoutes = (
     .filter((route): route is EditableRoute => !!route);
 };
 
+// Routes already in OSM keep their position while new routes are spread along
+// the guide line, so adding routes to a crag doesn't move the ones mapped
+// before. Without new routes, the line lays out all of them.
+const getLineRoutes = (routes: EditableRoute[]) => {
+  const newRoutes = routes.filter((route) => getApiId(route.id).id < 0);
+  return newRoutes.length ? newRoutes : routes;
+};
+
+// Line positions indexed like `routes`, undefined for routes kept in place.
+const distributeLineRoutes = (
+  controlPoints: LonLat[],
+  routes: EditableRoute[],
+  layout: MultipitchLayout,
+): Array<LonLat | undefined> => {
+  const lineRoutes = getLineRoutes(routes);
+  const positions = distributeGroupedRoutes(controlPoints, lineRoutes, layout);
+  return routes.map((route) => positions[lineRoutes.indexOf(route)]);
+};
+
 // Handle for moving the whole crag (all its routes together).
 const buildCragMoveHandleElement = () => {
   const el = document.createElement('div');
@@ -582,13 +601,13 @@ export const useCragRoutePositionEditor = (
     (route: EditableRoute, index: number) => {
       const livePoints = controlPointsRef.current;
       const distributed =
-        livePoints.length >= 2
-          ? distributeGroupedRoutes(
+        (livePoints.length >= 2
+          ? distributeLineRoutes(
               livePoints,
               editableRoutesRef.current,
               multipitchLayoutRef.current,
             )[index]
-          : route.originalLonLat;
+          : undefined) ?? route.originalLonLat;
       setManualRoutePositions((prev) => {
         if (!prev[route.id]) return prev;
         const next = { ...prev };
@@ -616,16 +635,12 @@ export const useCragRoutePositionEditor = (
   const distributedPositions = useMemo(
     () =>
       controlPoints.length >= 2
-        ? distributeGroupedRoutes(
-            controlPoints,
-            editableRoutes,
-            multipitchLayout,
-          )
+        ? distributeLineRoutes(controlPoints, editableRoutes, multipitchLayout)
         : null,
     [controlPoints, editableRoutes, multipitchLayout],
   );
 
-  // Writes the distributed positions of *all* routes into the EditContext.
+  // Writes the distributed positions of the line routes into the EditContext.
   const persistDistribution = useCallback(
     async (
       points: LonLat[],
@@ -633,13 +648,14 @@ export const useCragRoutePositionEditor = (
     ) => {
       if (points.length < 2) return;
       const routes = editableRoutesRef.current;
-      const positions = distributeGroupedRoutes(points, routes, layout);
+      const positions = distributeLineRoutes(points, routes, layout);
 
       const isManual = (id: string) => !!manualRoutePositionsRef.current[id];
 
       const missing = routes.filter(
-        (route) =>
+        (route, index) =>
           route.isNode &&
+          positions[index] &&
           !isManual(route.id) &&
           !isInItems(itemsRef.current, route.id),
       );
@@ -652,7 +668,7 @@ export const useCragRoutePositionEditor = (
       });
 
       routes.forEach((route, index) => {
-        if (!route.isNode || isManual(route.id)) return;
+        if (!route.isNode || !positions[index] || isManual(route.id)) return;
         const existing = findInItems(itemsRef.current, route.id);
         if (existing) existing.setNodeLonLat(positions[index]);
       });
@@ -1018,7 +1034,10 @@ export const useCragRoutePositionEditor = (
       popup.on('open', () => {
         const isOffLine =
           controlPointsRef.current.length >= 2 &&
-          !!manualRoutePositionsRef.current[route.id];
+          !!manualRoutePositionsRef.current[route.id] &&
+          getLineRoutes(editableRoutesRef.current).some(
+            (lineRoute) => lineRoute.id === route.id,
+          );
         const movedFromOriginal =
           !!route.originalLonLat &&
           !isSamePosition(getEffectivePosition(route), route.originalLonLat);
@@ -1188,11 +1207,13 @@ export const useCragRoutePositionEditor = (
       const marker = routeMarkersRef.current[route.id];
       if (!marker) return;
       const isOffLine =
-        !!distributedPositions && !!manualRoutePositions[route.id];
+        !!distributedPositions?.[index] && !!manualRoutePositions[route.id];
       const useDistribution =
-        isGuideMode && distributedPositions && !manualRoutePositions[route.id];
+        isGuideMode &&
+        !!distributedPositions?.[index] &&
+        !manualRoutePositions[route.id];
       const position = useDistribution
-        ? distributedPositions[index]
+        ? distributedPositions?.[index]
         : getEffectivePosition(route);
       if (isValidLonLat(position)) marker.setLngLat(position);
 
@@ -1454,7 +1475,7 @@ export const useCragRoutePositionEditor = (
       guideLineSpacingM(
         controlPoints,
         distributionSlotCount(
-          editableRoutes,
+          getLineRoutes(editableRoutes),
           multipitchLayout.group,
           multipitchLayout.groupBearings,
         ),

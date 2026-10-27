@@ -57,7 +57,7 @@ import { useCragFeatureForRoutes } from '../Climbing/utils/useCragFeatureForRout
 import { useGetPhotoExifs } from '../Climbing/utils/usePhotoExifGps';
 import { usePhotoMarkers } from '../Climbing/utils/usePhotoMarkers';
 import { useCurrentItem, useEditContext } from './context/EditContext';
-import { useHasCragRoutesMap } from './EditContent/FeatureEditSection/CragRoutesLocationEditor';
+import { useHasCragRoutesMap } from '../Climbing/utils/useHasCragRoutesMap';
 import { useNeedsNodeLocation } from './EditContent/FeatureEditSection/LocationEditor/LocationEditor';
 import { useDraggableFeatureMarker } from './EditContent/FeatureEditSection/LocationEditor/useDraggableMarker';
 
