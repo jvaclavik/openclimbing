@@ -18,11 +18,12 @@ export const parseBoltCount = (tags: FeatureTags = {}): number | null => {
   return Number.isSafeInteger(count) ? count : null;
 };
 
-// Carabiner – D shaped frame (thick) with the straight gate on its right side.
+// Carabiner with an open gate – the body keeps a nose hook (top right) and a
+// hinge stub (bottom right), so the gate swinging inwards leaves a clear gap.
 const CarabinerIcon = (props: SvgIconProps) => (
   <SvgIcon viewBox="0 0 24 24" {...props}>
     <path
-      d="M16.3 6.4C15.6 4.6 13.9 3.4 11.9 3.4 9.6 3.4 7.7 5.5 7.7 8.2v7.6c0 2.8 1.9 4.9 4.2 4.9 1.2 0 2.4-.4 3.2-1.2"
+      d="M15.7 9.8C16.5 8.6 16.6 7.4 16.3 6.4 15.6 4.6 13.9 3.4 11.9 3.4 9.6 3.4 7.7 5.5 7.7 8.2v7.6c0 2.8 1.9 4.9 4.2 4.9 1.2 0 2.4-.4 3.2-1.2.5-.6.8-1.3.9-2.1"
       fill="none"
       stroke="currentColor"
       strokeWidth="2.2"
@@ -30,7 +31,7 @@ const CarabinerIcon = (props: SvgIconProps) => (
       strokeLinejoin="round"
     />
     <path
-      d="M16 8 15.1 19.5"
+      d="M12.2 10.8 16 17.4"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
