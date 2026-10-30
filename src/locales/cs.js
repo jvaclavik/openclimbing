@@ -682,6 +682,7 @@ export default {
   'editdialog.nearby.in_parent': 'v __name__',
   'editdialog.nearby.no_areas': 'V okolí nejsou žádné oblasti',
   'editdialog.nearby.no_crags': 'V okolí nejsou žádné sektory',
+  'editdialog.nearby.recent': 'Naposledy použité',
   'editdialog.climbing_areas': 'Lezecké oblasti',
   'editdialog.climbing_crags': 'Lezecké sektory',
   'editdialog.climbing_routes': 'Lezecké cesty',

@@ -145,6 +145,7 @@ const ParentNameField = ({
 
   return (
     <NearbyClimbingAutocomplete
+      showRecent
       nearbyType={nearbyType}
       label={label}
       setLabel={setLabel}

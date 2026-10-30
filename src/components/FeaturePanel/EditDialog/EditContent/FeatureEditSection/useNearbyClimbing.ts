@@ -164,5 +164,6 @@ export const useNearbyClimbing = (
       (record) => !excludedIds.has(nearbyShortId(record)),
     ),
     loading,
+    excludedIds,
   };
 };

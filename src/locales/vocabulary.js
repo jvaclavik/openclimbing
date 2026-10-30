@@ -735,6 +735,7 @@ export default {
   'editdialog.nearby.in_parent': 'in __name__',
   'editdialog.nearby.no_areas': 'No nearby areas',
   'editdialog.nearby.no_crags': 'No nearby crags',
+  'editdialog.nearby.recent': 'Recently used',
   'editdialog.climbing_areas': 'Climbing areas',
   'editdialog.climbing_crags': 'Climbing crags',
   'editdialog.climbing_routes': 'Climbing routes',

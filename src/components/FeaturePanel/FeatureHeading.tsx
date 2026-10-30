@@ -10,6 +10,7 @@ import {
 import { PROJECT_ID } from '../../services/project';
 import { useMobileMode } from '../helpers';
 import { PANEL_GAP } from '../utils/PanelHelpers';
+import { scaleWithPanelWidth } from '../utils/featurePanelWidth';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { PoiDescription } from './helpers/PoiDescription';
 import { QuickActions } from './QuickActions/QuickActions';
@@ -55,10 +56,9 @@ const TitleRow = () => {
         alignItems: 'flex-start',
         minWidth: 0,
         textDecoration: feature?.deleted ? 'line-through' : 'none',
-        ...(isMobileMode && {
-          fontSize: 32,
-          lineHeight: 1.15,
-        }),
+        ...(isMobileMode
+          ? { fontSize: 32, lineHeight: 1.15 }
+          : { fontSize: scaleWithPanelWidth(55, 32) }),
       }}
     >
       <span

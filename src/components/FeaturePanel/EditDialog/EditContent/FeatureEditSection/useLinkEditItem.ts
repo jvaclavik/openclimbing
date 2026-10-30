@@ -5,6 +5,7 @@ import { fetchFreshItem } from '../../context/itemsHelpers';
 import { FeatureTags } from '../../../../../services/types';
 import { Member } from '../../context/types';
 import { findInItems, getPresetKey, isInItems } from '../../context/utils';
+import { rememberParent } from './recentParents';
 
 const memberFromItem = (
   shortId: string,
@@ -64,6 +65,7 @@ export const useLinkEditItem = () => {
         ...(prev ?? []),
         memberFromItem(current.shortId, current.tags, current.presetLabel),
       ]);
+      rememberParent(parentShortId, existing.tags);
       return true;
     }
 
@@ -87,6 +89,7 @@ export const useLinkEditItem = () => {
             ],
       });
     }
+    rememberParent(parentShortId, Object.fromEntries(newItem.tagsEntries));
     return true;
   };
 

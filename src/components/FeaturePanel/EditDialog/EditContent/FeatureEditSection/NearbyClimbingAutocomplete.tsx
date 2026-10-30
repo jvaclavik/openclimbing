@@ -6,6 +6,8 @@ import { getPresetTranslation } from '../../../../../services/tagging/translatio
 import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
 import { toHumanDistance } from '../../../../Directions/helpers';
 import { nearbyShortId, useNearbyClimbing } from './useNearbyClimbing';
+import { getRecentParents, RecentParent } from './recentParents';
+import { ClimbingNearbyRecord } from '../../../../../types';
 
 const TYPE_LABELS: Record<'area' | 'crag', string> = {
   area: 'type/site/climbing/area',
@@ -16,6 +18,7 @@ type NearbyOption = {
   shortId: string;
   label: string;
   secondary: string;
+  group: string;
 };
 
 const toSearchText = (text: string) =>
@@ -38,6 +41,8 @@ type Props = {
   setLabel: Setter<string>;
   onSelectExisting: (shortId: string) => Promise<void>;
   onCreateNew: (e: { preventDefault: () => void }) => void;
+  /** offer the recently linked parents above the nearby ones */
+  showRecent?: boolean;
 };
 
 export const NearbyClimbingAutocomplete = ({
@@ -46,9 +51,11 @@ export const NearbyClimbingAutocomplete = ({
   setLabel,
   onSelectExisting,
   onCreateNew,
+  showRecent,
 }: Props) => {
   const [open, setOpen] = useState(false);
-  const { records, loading } = useNearbyClimbing(
+  const [recents, setRecents] = useState<RecentParent[]>([]);
+  const { records, loading, excludedIds } = useNearbyClimbing(
     open ? nearbyType : null,
     label,
   );
@@ -57,8 +64,9 @@ export const NearbyClimbingAutocomplete = ({
     nearbyType === 'area'
       ? t('editdialog.nearby.areas')
       : t('editdialog.nearby.crags');
+  const recentHeading = t('editdialog.nearby.recent');
 
-  const options: NearbyOption[] = records.map((record) => {
+  const toOption = (record: ClimbingNearbyRecord, group: string) => {
     const shortId = nearbyShortId(record);
     const typeKey = TYPE_LABELS[record.type];
     return {
@@ -73,8 +81,34 @@ export const NearbyClimbingAutocomplete = ({
       ]
         .filter(Boolean)
         .join(' · '),
+      group,
     };
-  });
+  };
+
+  // A recent parent that is also nearby is listed once, with its distance.
+  const nearbyById = new Map(
+    records.map((record) => [nearbyShortId(record), record]),
+  );
+  const recentOptions: NearbyOption[] = recents
+    .filter((recent) => !excludedIds.has(recent.shortId))
+    .map((recent) => {
+      const nearby = nearbyById.get(recent.shortId);
+      return nearby
+        ? toOption(nearby, recentHeading)
+        : {
+            shortId: recent.shortId,
+            label: recent.name,
+            secondary: getPresetTranslation(TYPE_LABELS[recent.type]),
+            group: recentHeading,
+          };
+    });
+  const recentIds = new Set(recentOptions.map(({ shortId }) => shortId));
+  const options: NearbyOption[] = [
+    ...recentOptions,
+    ...records
+      .filter((record) => !recentIds.has(nearbyShortId(record)))
+      .map((record) => toOption(record, heading)),
+  ];
 
   return (
     <Autocomplete
@@ -88,7 +122,7 @@ export const NearbyClimbingAutocomplete = ({
         },
       }}
       options={options}
-      groupBy={() => heading}
+      groupBy={(option) => option.group}
       renderGroup={(params) => (
         <li key={params.key}>
           <Box
@@ -109,7 +143,10 @@ export const NearbyClimbingAutocomplete = ({
       )}
       loading={loading}
       open={open}
-      onOpen={() => setOpen(true)}
+      onOpen={() => {
+        setOpen(true);
+        if (showRecent) setRecents(getRecentParents(nearbyType));
+      }}
       onClose={() => setOpen(false)}
       inputValue={label}
       value={null}

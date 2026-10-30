@@ -31,6 +31,7 @@ import {
 import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
 import { HomepageOpenClimbingGallery } from './HomepageOpenClimbingGallery';
 import { HomepageNearbyPoiList } from './HomepageNearbyPoiList';
+import { scaleWithPanelWidth } from '../utils/featurePanelWidth';
 
 const Content = styled.div`
   height: 100%;
@@ -55,7 +56,7 @@ const Brand = styled(GradientHeading, {
   shouldForwardProp: (prop) => prop !== '$peek',
 })<{ $peek?: boolean }>`
   text-align: center;
-  font-size: ${({ $peek }) => ($peek ? '32px' : '46px')};
+  font-size: ${({ $peek }) => ($peek ? '32px' : scaleWithPanelWidth(46, 28))};
   line-height: ${({ $peek }) => ($peek ? 1.15 : 1.2)};
   transition:
     font-size ${DRAWER_MOTION},

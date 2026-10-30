@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import { useMobileMode } from '../helpers';
 
 export const FEATURE_PANEL_WIDTH = 480; // default
-export const FEATURE_PANEL_MIN_WIDTH = 320; // homepage gallery fits one column
+export const FEATURE_PANEL_MIN_WIDTH = 290; // homepage gallery fits one column
 export const FEATURE_PANEL_MAX_WIDTH = 900;
 const MIN_MAP_WIDTH = 240; // keep some map visible next to the panel
 
@@ -11,6 +11,13 @@ const STORAGE_KEY = 'featurePanelWidth';
 
 // For styled components – falls back to the default before the first sync (SSR).
 export const FEATURE_PANEL_WIDTH_CSS = `var(${CSS_VARIABLE}, ${FEATURE_PANEL_WIDTH}px)`;
+
+// Font size for headings in the panel: `maxPx` at the default width and wider,
+// shrinking proportionally in a narrower panel, but not below `minPx`.
+export const scaleWithPanelWidth = (maxPx: number, minPx: number) =>
+  `clamp(${minPx}px, calc(${FEATURE_PANEL_WIDTH_CSS} * ${
+    maxPx / FEATURE_PANEL_WIDTH
+  }), ${maxPx}px)`;
 
 export const getFeaturePanelMaxWidth = (viewportWidth: number) =>
   Math.max(
