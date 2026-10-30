@@ -5,7 +5,7 @@ import Router from 'next/router';
 import { LinearProgress } from '@mui/material';
 import { isDesktop, useBoolState } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
-import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
+import { FEATURE_PANEL_WIDTH_CSS } from '../utils/featurePanelWidth';
 
 const Wrapper = styled.div`
   position: absolute;
@@ -14,7 +14,7 @@ const Wrapper = styled.div`
 
   width: 100%;
   @media ${isDesktop} {
-    width: ${FEATURE_PANEL_WIDTH}px;
+    width: ${FEATURE_PANEL_WIDTH_CSS};
   }
 `;
 

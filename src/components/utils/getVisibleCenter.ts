@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { FEATURE_PANEL_WIDTH } from './PanelHelpers';
+import { getFeaturePanelWidth } from './featurePanelWidth';
 
 /**
  * map.getCenter() returns the center of the whole canvas, which on desktop sits
@@ -10,8 +10,9 @@ export const getVisibleCenter = (
   panelShown: boolean,
 ): maplibregl.LngLat => {
   const { clientWidth, clientHeight } = map.getCanvas();
+  const featurePanelWidth = getFeaturePanelWidth();
   const panelWidth =
-    panelShown && clientWidth > FEATURE_PANEL_WIDTH ? FEATURE_PANEL_WIDTH : 0;
+    panelShown && clientWidth > featurePanelWidth ? featurePanelWidth : 0;
 
   return map.unproject([
     panelWidth + (clientWidth - panelWidth) / 2,

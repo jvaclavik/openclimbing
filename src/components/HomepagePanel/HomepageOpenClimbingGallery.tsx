@@ -20,7 +20,8 @@ import {
 import { useVisibleBbox } from '../utils/useVisibleBbox';
 
 const GAP = 8;
-const COLUMNS = 2;
+const MIN_COLUMNS = 2;
+const MIN_COLUMN_WIDTH = 200; // a wider (resized) panel gets more columns
 const ROW_HEIGHT = 6; // grid row unit – the finer, the tighter the masonry fits
 
 const GALLERY_LIMIT = 24;
@@ -33,9 +34,17 @@ export const GalleryWrapper = styled.div`
   padding: 0 12px;
 `;
 
-const Grid = styled.div`
+const getColumns = (width: number) =>
+  Math.max(MIN_COLUMNS, Math.floor((width + GAP) / (MIN_COLUMN_WIDTH + GAP)));
+
+const getColumnWidth = (width: number) => {
+  const columns = getColumns(width);
+  return (width - GAP * (columns - 1)) / columns;
+};
+
+const Grid = styled.div<{ $columns: number }>`
   display: grid;
-  grid-template-columns: repeat(${COLUMNS}, 1fr);
+  grid-template-columns: repeat(${({ $columns }) => $columns}, 1fr);
   grid-auto-rows: ${ROW_HEIGHT}px;
   grid-auto-flow: row dense;
   gap: ${GAP}px;
@@ -217,7 +226,7 @@ const getRowSpan = (ratio: number, columnWidth: number) =>
   Math.max(1, Math.round((columnWidth / ratio + GAP) / (ROW_HEIGHT + GAP)));
 
 const buildTiles = (items: ClimbingGalleryItem[], width: number): Tile[] => {
-  const columnWidth = (width - GAP * (COLUMNS - 1)) / COLUMNS;
+  const columnWidth = getColumnWidth(width);
 
   return items.map((item) => ({
     item,
@@ -269,11 +278,11 @@ const SkeletonTile = styled(Skeleton)`
 `;
 
 const GallerySkeleton = ({ width }: { width: number }) => {
-  const columnWidth = (width - GAP * (COLUMNS - 1)) / COLUMNS;
+  const columnWidth = getColumnWidth(width);
   const ratios = [4 / 3, 3 / 4, 3 / 4, 1, 4 / 3, 3 / 4, 1, 3 / 4];
 
   return (
-    <Grid>
+    <Grid $columns={getColumns(width)}>
       {ratios.map((ratio, index) => (
         <SkeletonTile
           // eslint-disable-next-line react/no-array-index-key
@@ -303,7 +312,7 @@ export const HomepageOpenClimbingGallery = () => {
         <FallbackNote>{t('homepage.gallery.nothing_in_viewport')}</FallbackNote>
       )}
       {!isLoading && !!width && (
-        <Grid>
+        <Grid $columns={getColumns(width)}>
           {tiles.map((tile) => (
             <GalleryItem key={tile.item.osmId} tile={tile} />
           ))}

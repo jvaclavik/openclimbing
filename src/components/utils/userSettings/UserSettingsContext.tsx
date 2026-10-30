@@ -53,6 +53,8 @@ export type UserSettingsType = Partial<{
   'editdialog.multipitchBearing': number | null;
   /** Metres between pitches of one route when a direction is set. */
   'editdialog.multipitchSpacing': number;
+  /** Preferred width of the left panel (px), shrunk on narrower windows. */
+  'panel.width': null | number;
   'debug.enabled': boolean;
 }>;
 
