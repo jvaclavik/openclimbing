@@ -42,7 +42,11 @@ import {
   getValidCragCenter,
   isValidLonLat,
 } from '../Climbing/utils/cragCenter';
-import { isRouteTags } from '../Climbing/utils/cragRoutesItems';
+import {
+  findCragItemForRoutes,
+  getDraftCragCenter,
+  isRouteTags,
+} from '../Climbing/utils/cragRoutesItems';
 import {
   getWikimediaCommonsPhotoValues,
   removeFilePrefix,
@@ -225,7 +229,7 @@ const useMapCentering = (
 const useEditDialogMapInstance = () => {
   const feature = useCragFeatureForRoutes();
   const currentItem = useCurrentItem();
-  const { current } = useEditContext();
+  const { current, items } = useEditContext();
   const { feature: panelFeature } = useFeatureContext();
   const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
 
@@ -244,6 +248,11 @@ const useEditDialogMapInstance = () => {
     if (isValidLonLat(currentItem?.nodeLonLat)) return currentItem.nodeLonLat;
     const byMember = findMemberCenterById(feature, current);
     if (byMember) return byMember;
+    const draftCragCenter = getDraftCragCenter(
+      items,
+      findCragItemForRoutes(items, current, feature),
+    );
+    if (draftCragCenter) return draftCragCenter;
     if (isValidLonLat(cragCenter)) return cragCenter;
     return isValidLonLat(panelFeature?.center)
       ? panelFeature.center
@@ -253,6 +262,7 @@ const useEditDialogMapInstance = () => {
     currentItem?.nodeLonLat,
     feature,
     current,
+    items,
     panelFeature,
     cragLon,
     cragLat,

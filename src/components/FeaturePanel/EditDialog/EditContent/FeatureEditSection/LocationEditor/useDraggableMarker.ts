@@ -42,30 +42,43 @@ export function useDraggableFeatureMarker(
   const map = mapRef.current;
   const { items } = useEditContext();
   const { nodeLonLat, setNodeLonLat, shortId } = useCurrentItem();
-  const markerRef = useRef<maplibregl.Marker>();
+
+  // Both change identity on every edit; keeping them out of the deps stops the
+  // marker being rebuilt (and the map re-centred) on unrelated edits.
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const setNodeLonLatRef = useRef(setNodeLonLat);
+  setNodeLonLatRef.current = setNodeLonLat;
 
   useEffect(() => {
+    if (!map) {
+      return undefined;
+    }
+
+    // Each run owns its marker: a slow getTmpNodePosition from a previous item
+    // must not add a stray marker that would write into the wrong item on drag.
+    let cancelled = false;
+    let marker: maplibregl.Marker | undefined;
+
     (async () => {
-      if (!map) {
+      const tmpPos =
+        nodeLonLat ?? (await getTmpNodePosition(itemsRef.current, shortId));
+      if (cancelled || !tmpPos) {
         return;
       }
+      marker = new maplibregl.Marker(MAIN_MARKER).setLngLat(tmpPos).addTo(map);
+      map.easeTo({ center: tmpPos });
 
-      markerRef.current?.remove();
-      markerRef.current = undefined;
-
-      const tmpPos = nodeLonLat ?? (await getTmpNodePosition(items, shortId));
-      if (tmpPos) {
-        markerRef.current = new maplibregl.Marker(MAIN_MARKER)
-          .setLngLat(tmpPos)
-          .addTo(map);
-        map.easeTo({ center: tmpPos });
-
-        markerRef.current.on('dragend', () => {
-          setNodeLonLat(markerRef.current?.getLngLat().toArray());
-        });
-      }
+      marker.on('dragend', () => {
+        setNodeLonLatRef.current(marker.getLngLat().toArray());
+      });
     })();
-  }, [items, map, nodeLonLat, setNodeLonLat, shortId]);
+
+    return () => {
+      cancelled = true;
+      marker?.remove();
+    };
+  }, [map, nodeLonLat, shortId]);
 
   const onMarkerChange = ({ lng, lat }: LngLat) => {
     setNodeLonLat([lng, lat]);

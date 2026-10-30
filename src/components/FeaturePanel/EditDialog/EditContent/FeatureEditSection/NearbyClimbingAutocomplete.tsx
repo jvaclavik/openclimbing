@@ -6,7 +6,6 @@ import { getPresetTranslation } from '../../../../../services/tagging/translatio
 import { useUserSettingsContext } from '../../../../utils/userSettings/UserSettingsContext';
 import { toHumanDistance } from '../../../../Directions/helpers';
 import { nearbyShortId, useNearbyClimbing } from './useNearbyClimbing';
-import { parseOsmShortId } from './parseOsmShortId';
 
 const TYPE_LABELS: Record<'area' | 'crag', string> = {
   area: 'type/site/climbing/area',
@@ -17,6 +16,20 @@ type NearbyOption = {
   shortId: string;
   label: string;
   secondary: string;
+};
+
+const toSearchText = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const matchesQuery = (label: string, query: string) => {
+  const text = toSearchText(label);
+  return toSearchText(query)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => text.includes(word));
 };
 
 type Props = {
@@ -35,7 +48,10 @@ export const NearbyClimbingAutocomplete = ({
   onCreateNew,
 }: Props) => {
   const [open, setOpen] = useState(false);
-  const { records, loading } = useNearbyClimbing(open ? nearbyType : null);
+  const { records, loading } = useNearbyClimbing(
+    open ? nearbyType : null,
+    label,
+  );
   const { isImperial } = useUserSettingsContext().userSettings;
   const heading =
     nearbyType === 'area'
@@ -100,10 +116,23 @@ export const NearbyClimbingAutocomplete = ({
       onInputChange={(_e, value, reason) => {
         if (reason !== 'reset') setLabel(value);
       }}
-      onChange={(_e, value) => {
-        if (value && typeof value !== 'string') {
-          void onSelectExisting(value.shortId);
+      onChange={(e, value) => {
+        if (!value) return;
+        // Enter on typed text (freeSolo "createOption") creates a new item –
+        // or links an OSM url/id, which onCreateNew parses from the label.
+        if (typeof value === 'string') {
+          const exact = options.find(
+            (option) =>
+              toSearchText(option.label) === toSearchText(value.trim()),
+          );
+          if (exact) {
+            void onSelectExisting(exact.shortId);
+            return;
+          }
+          onCreateNew(e);
+          return;
         }
+        void onSelectExisting(value.shortId);
       }}
       getOptionLabel={(option) =>
         typeof option === 'string' ? option : option.label
@@ -113,13 +142,9 @@ export const NearbyClimbingAutocomplete = ({
         typeof value !== 'string' &&
         option.shortId === value.shortId
       }
-      filterOptions={(opts, state) => {
-        const query = state.inputValue.trim().toLowerCase();
-        if (!query) return opts;
-        return opts.filter((option) =>
-          option.label.toLowerCase().includes(query),
-        );
-      }}
+      filterOptions={(opts, state) =>
+        opts.filter((option) => matchesQuery(option.label, state.inputValue))
+      }
       noOptionsText={
         nearbyType === 'area'
           ? t('editdialog.nearby.no_areas')
@@ -148,15 +173,6 @@ export const NearbyClimbingAutocomplete = ({
           autoFocus
           label={t('editdialog.members.name')}
           placeholder={t('editdialog.members.name')}
-          onKeyDown={(e) => {
-            if (e.key !== 'Enter') return;
-            const typed =
-              e.target instanceof HTMLInputElement ? e.target.value : label;
-            if (!parseOsmShortId(typed) && open) return;
-            e.preventDefault();
-            e.stopPropagation();
-            onCreateNew(e);
-          }}
         />
       )}
     />

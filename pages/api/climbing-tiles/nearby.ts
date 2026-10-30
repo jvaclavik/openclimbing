@@ -20,6 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const lat = asSingle(req.query.lat);
     const osmType = asSingle(req.query.osmType);
     const osmId = asSingle(req.query.osmId);
+    const q = asSingle(req.query.q);
 
     if (type !== 'crag' && type !== 'area') {
       throw new Error('type must be crag or area');
@@ -34,6 +35,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       lat: lat != null ? Number(lat) : undefined,
       excludeOsmType: osmType as OsmType | undefined,
       excludeOsmId: osmId != null ? Number(osmId) : undefined,
+      q,
     });
 
     res.status(200).setHeader('Content-Type', 'application/json').send(json);

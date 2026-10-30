@@ -155,3 +155,26 @@ test('should convert relations', () => {
     getDiffXml([relationNew, relationChange, relationToDelete], '123'),
   ).toEqual(relationsXml);
 });
+
+const relationCrag = {
+  shortId: 'r-3',
+  version: undefined,
+  tagsEntries: [['climbing', 'crag']],
+  toBeDeleted: false,
+  members: [{ shortId: 'n-1', role: '' }],
+} as DataItem;
+
+const relationAreaAddedLater = {
+  shortId: 'r-5',
+  version: undefined,
+  tagsEntries: [['climbing', 'area']],
+  toBeDeleted: false,
+  members: [{ shortId: 'r-3', role: '' }],
+} as DataItem;
+
+test('should create member relation before the new parent added after it', () => {
+  const xml = getDiffXml([relationCrag, relationAreaAddedLater], '123');
+  expect(xml.indexOf('<relation id="-3"')).toBeLessThan(
+    xml.indexOf('<relation id="-5"'),
+  );
+});

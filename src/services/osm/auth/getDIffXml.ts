@@ -68,19 +68,41 @@ const condition = {
   modify: (item: DataItem) => !isNew(item) && !isDeleted(item),
 };
 
+// OSM resolves a placeholder (negative) id only when that element was created
+// earlier in the same osmChange, so member relations must precede their parents
+// (e.g. a new area added after its new crag in the edit dialog).
+const membersFirst = (relations: DataItem[]) => {
+  const byId = new Map(
+    relations.map((relation) => [relation.shortId, relation]),
+  );
+  const sorted: DataItem[] = [];
+  const visited = new Set<string>();
+  const visit = (relation: DataItem) => {
+    if (visited.has(relation.shortId)) return;
+    visited.add(relation.shortId);
+    relation.members?.forEach(({ shortId }) => {
+      const member = byId.get(shortId);
+      if (member) visit(member);
+    });
+    sorted.push(relation);
+  };
+  relations.forEach(visit);
+  return sorted;
+};
+
 const getXmlByAction = (
   changes: DataItem[],
   action: 'create' | 'modify' | 'delete',
   changeset: Changeset,
 ) => {
   const items = changes.filter(condition[action]);
+  const relations = items.filter(isRelation).toReversed(); // usually a new relation is referenced only by one added before it
   return {
     node: items.filter(isNode).map((node) => nodeItemToXml(node, changeset)),
     way: items.filter(isWay).map((way) => wayItemToXml(way, changeset)),
-    relation: items
-      .filter(isRelation)
-      .toReversed() // new relation can be referenced by another only above, but OSM needs the reference beforehand
-      .map((relation) => relationItemToXml(relation, changeset)),
+    relation: (action === 'create' ? membersFirst(relations) : relations).map(
+      (relation) => relationItemToXml(relation, changeset),
+    ),
   };
 };
 
