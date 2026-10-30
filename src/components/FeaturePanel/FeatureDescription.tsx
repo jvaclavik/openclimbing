@@ -8,6 +8,7 @@ import { getOsmappLink, getShortId, prod } from '../../services/helpers';
 import { useSnackbar } from '../utils/SnackbarContext';
 import { tint } from '../utils/panelUi';
 import { useFeatureContext } from '../utils/FeatureContext';
+import { getIdEditorLink } from './helpers/externalLinks';
 
 const OSM_TYPE_KEY: Record<OsmType, TranslationId> = {
   node: 'osmtype.node',
@@ -41,12 +42,38 @@ const A = ({ href, children }) =>
     children
   );
 
-const getUrls = ({ type, id, changeset, user }: Feature['osmMeta']) => ({
-  itemUrl: `${OSM_WEBSITE}/${type}/${id}`,
-  changesetUrl: changeset && `${OSM_WEBSITE}/changeset/${changeset}`,
-  userUrl: user && `${OSM_WEBSITE}/user/${user}`,
-  idUrl: `${OSM_WEBSITE}/edit?${type}=${id}`,
-});
+const getUrls = (feature: Feature) => {
+  const { type, id, changeset, user } = feature.osmMeta;
+  return {
+    itemUrl: `${OSM_WEBSITE}/${type}/${id}`,
+    changesetUrl: changeset && `${OSM_WEBSITE}/changeset/${changeset}`,
+    userUrl: user && `${OSM_WEBSITE}/user/${user}`,
+    idUrl: getIdEditorLink(feature),
+  };
+};
+
+const IdEditorButton = ({ href }: { href: string }) => (
+  <Button
+    variant="outlined"
+    size="small"
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    sx={{ fontWeight: 700 }}
+  >
+    iD editor
+  </Button>
+);
+
+// A clicked spot on the map isn't an OSM element, but iD can still open there.
+export const IdEditorForPoint = () => {
+  const { feature } = useFeatureContext();
+  return (
+    <Box sx={{ mt: 1.5 }}>
+      <IdEditorButton href={getIdEditorLink(feature)} />
+    </Box>
+  );
+};
 
 const Meta = styled.div`
   display: flex;
@@ -69,9 +96,9 @@ const Meta = styled.div`
 `;
 
 const Urls = () => {
-  const { osmMeta } = useFeatureContext().feature;
-  const { timestamp, type, id, user, version } = osmMeta;
-  const { itemUrl, changesetUrl, userUrl, idUrl } = getUrls(osmMeta);
+  const { feature } = useFeatureContext();
+  const { timestamp, type, id, user, version } = feature.osmMeta;
+  const { itemUrl, changesetUrl, userUrl, idUrl } = getUrls(feature);
   const date = timestamp?.split('T')[0];
 
   return (
@@ -87,16 +114,7 @@ const Urls = () => {
         >
           {type}/{id}
         </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          href={idUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{ fontWeight: 700 }}
-        >
-          iD editor
-        </Button>
+        <IdEditorButton href={idUrl} />
       </Stack>
       {(version != null || date || user) && (
         <Meta>
