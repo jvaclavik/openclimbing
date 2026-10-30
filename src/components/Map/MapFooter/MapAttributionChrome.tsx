@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import React from 'react';
 import { useMobileMode } from '../../helpers';
 import { QUARTER_PEEK_PX } from '../../utils/drawerSnap';
-import { FEATURE_PANEL_WIDTH } from '../../utils/PanelHelpers';
+import { useFeaturePanelWidth } from '../../utils/featurePanelWidth';
 import { useMapChrome } from '../../utils/mapChromeRegistry';
 import { usePanelShown } from '../../utils/usePanelShown';
 
@@ -30,8 +30,9 @@ export const MapAttributionChrome = ({
   const isMobile = useMobileMode();
   const panelShown = usePanelShown();
   const { drawerPeek } = useMapChrome();
+  const featurePanelWidth = useFeaturePanelWidth();
 
-  const x = !isMobile && panelShown ? FEATURE_PANEL_WIDTH : 0;
+  const x = !isMobile && panelShown ? featurePanelWidth : 0;
   const y = drawerPeek ? QUARTER_PEEK_PX : 0;
 
   return (

@@ -8,27 +8,13 @@ import {
   useOptions,
 } from './useOptions';
 import { SearchRow } from './SearchRow';
-import { allPresets } from '../../../../../../services/tagging/data';
+import { switchPresetTags } from './switchPreset';
 
 const useGetOnClick = () => {
   const { presetKey, setTagsEntries } = useCurrentItem();
 
   return (newPreset: TranslatedPreset) => {
-    const oldPreset = allPresets[presetKey];
-    const toRemove = oldPreset
-      ? (oldPreset.addTags ?? oldPreset.tags ?? {})
-      : {};
-
-    const toAdd = newPreset
-      ? Object.entries(newPreset.addTags ?? newPreset.tags ?? {})
-      : [];
-
-    setTagsEntries((prev) => [
-      ...toAdd,
-      ...prev.filter(
-        ([key, value]) => !(toRemove[key] && toRemove[key] === value),
-      ),
-    ]);
+    setTagsEntries((prev) => switchPresetTags(prev, presetKey, newPreset));
   };
 };
 

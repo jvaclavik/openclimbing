@@ -1,6 +1,7 @@
 import { ClimbingNearbyRecord } from '../../types';
 import { getDb } from '../db/db';
 import { LonLat, OsmType } from '../../services/types';
+import { removeDiacritics } from './utils';
 
 const EARTH_RADIUS = 6372795;
 const MAX_RESULTS = 20;
@@ -8,6 +9,8 @@ const DEFAULT_RADIUS_M: Record<ClimbingNearbyRecord['type'], number> = {
   crag: 8000,
   area: 15000,
 };
+// A typed name is a deliberate lookup, so we look further than for plain suggestions.
+const QUERY_RADIUS_FACTOR = 3;
 
 const degreesToRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
@@ -35,6 +38,7 @@ type NearbyRow = {
   osmType: OsmType;
   osmId: number;
   name: string;
+  nameRaw: string | null;
   parentId: number | null;
   routeCount: number | null;
 };
@@ -48,6 +52,7 @@ export type GetClimbingNearbyParams = {
   excludeOsmType?: OsmType;
   excludeOsmId?: number;
   radiusMeters?: number;
+  q?: string;
 };
 
 const isFiniteNumber = (value: unknown): value is number =>
@@ -74,6 +79,19 @@ const lookupOrigin = (
   return row ? [row.lon, row.lat] : null;
 };
 
+const toSearchWords = (text: string | undefined) =>
+  removeDiacritics(text ?? '')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+// Filter by name before the MAX_RESULTS cut, otherwise a typed crag in a dense
+// area may never make it into the (distance ordered) suggestions.
+const matchesWords = (row: NearbyRow, words: string[]) => {
+  const name = removeDiacritics(row.nameRaw ?? row.name).toLowerCase();
+  return words.every((word) => name.includes(word));
+};
+
 const fetchParentNames = (parentIds: number[]): Map<number, string> => {
   if (!parentIds.length) return new Map();
   const placeholders = parentIds.map(() => '?').join(',');
@@ -94,6 +112,7 @@ export const getClimbingNearby = ({
   excludeOsmType,
   excludeOsmId,
   radiusMeters,
+  q,
 }: GetClimbingNearbyParams): ClimbingNearbyRecord[] => {
   if (type !== 'crag' && type !== 'area') {
     throw new Error('type must be crag or area');
@@ -102,7 +121,10 @@ export const getClimbingNearby = ({
   const origin = lookupOrigin(lon, lat, excludeOsmType, excludeOsmId);
   if (!origin) return [];
 
-  const radius = radiusMeters ?? DEFAULT_RADIUS_M[type];
+  const words = toSearchWords(q);
+  const radius =
+    radiusMeters ??
+    DEFAULT_RADIUS_M[type] * (words.length ? QUERY_RADIUS_FACTOR : 1);
   const delta = (radius / 111_000) * 2;
   const excludeChildrenOfArea =
     type === 'crag' &&
@@ -130,7 +152,7 @@ export const getClimbingNearby = ({
   const rows = getDb()
     .prepare<Record<string, unknown>, NearbyRow>(
       `SELECT "type", "lon", "lat", "osmType", "osmId",
-              COALESCE("name", "nameRaw", '') AS "name",
+              COALESCE("name", "nameRaw", '') AS "name", "nameRaw",
               "parentId", "routeCount"
        FROM climbing_features
        WHERE ${conditions.join(' AND ')}`,
@@ -146,6 +168,7 @@ export const getClimbingNearby = ({
     });
 
   const withDistance = rows
+    .filter((row) => matchesWords(row, words))
     .map((row) => ({
       ...row,
       distanceMeters: getDistance(origin, [row.lon, row.lat]),

@@ -1,9 +1,16 @@
 import styled from '@emotion/styled';
 import React, { Ref } from 'react';
-import { isDesktop } from '../helpers';
+import SplitPane from 'react-split-pane';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
-
-export const FEATURE_PANEL_WIDTH = 480;
+import { splitPaneResizerStyles } from '../FeaturePanel/Climbing/splitPaneResizerStyles';
+import {
+  FEATURE_PANEL_MIN_WIDTH,
+  getFeaturePanelMaxWidth,
+  saveFeaturePanelWidth,
+  setFeaturePanelWidth,
+  useFeaturePanelWidth,
+  useViewportWidth,
+} from './featurePanelWidth';
 
 const PanelMain = styled.main`
   display: flex;
@@ -12,30 +19,56 @@ const PanelMain = styled.main`
   min-height: 0;
 `;
 
-const MARGIN = 0;
+// The panel floats over the full-width map (bbox/center maths rely on that), so
+// the split pane is an overlay whose empty second pane lets the map get clicks.
+const SplitOverlay = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: ${SEARCH_BOX_HEIGHT}px;
+  z-index: 1100;
+  pointer-events: none;
+
+  ${({ theme }) => splitPaneResizerStyles(theme)}
+`;
 
 const Container = styled.div`
-  position: absolute;
-  left: ${MARGIN}px;
-  bottom: ${MARGIN}px;
-  top: ${SEARCH_BOX_HEIGHT + MARGIN}px;
+  height: 100%;
   background: ${({ theme }) => theme.palette.background.default};
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   color: ${({ theme }) => theme.palette.text.primary};
   overflow: hidden;
-  z-index: 1100;
-
-  width: 100%;
-  @media ${isDesktop} {
-    width: ${FEATURE_PANEL_WIDTH}px;
-  }
 `;
 
-export const PanelWrapper = ({ children }) => (
-  <Container>
-    <PanelMain>{children}</PanelMain>
-  </Container>
-);
+const INTERACTIVE = { pointerEvents: 'auto' } as const;
+
+export const PanelWrapper = ({ children }) => {
+  const width = useFeaturePanelWidth();
+  const viewportWidth = useViewportWidth();
+
+  return (
+    <SplitOverlay>
+      <SplitPane
+        split="vertical"
+        size={width}
+        minSize={FEATURE_PANEL_MIN_WIDTH}
+        maxSize={getFeaturePanelMaxWidth(viewportWidth)}
+        onChange={(size: number) => setFeaturePanelWidth(size)}
+        onDragFinished={(size?: number) => {
+          if (typeof size === 'number') saveFeaturePanelWidth(size);
+        }}
+        pane1Style={INTERACTIVE}
+        resizerStyle={INTERACTIVE}
+      >
+        <Container>
+          <PanelMain>{children}</PanelMain>
+        </Container>
+        <div />
+      </SplitPane>
+    </SplitOverlay>
+  );
+};
 
 type PanelScrollbarsProps = {
   children: React.ReactNode;

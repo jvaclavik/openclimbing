@@ -25,26 +25,38 @@ const convertDescription = (shortId: string, tags: FeatureTags) => {
     : t('editdialog.members.convert_description');
 };
 
-export const ConvertNodeToRelation = () => {
+// Converts the current item and switches to the new relation. Resolves to its
+// shortId, or undefined when the item can't be converted (already in a crag).
+export const useConvertCurrentToRelation = () => {
   const { setCurrent, removeItem } = useEditContext();
-  const { shortId, tags, convertToRelation } = useCurrentItem();
+  const { shortId, convertToRelation } = useCurrentItem();
   const { feature } = useFeatureContext();
   const { showToast } = useSnackbar();
 
-  const handleConvertToRelation = async () => {
+  return async (): Promise<string | undefined> => {
     try {
       const newShortId = await convertToRelation(feature?.center);
       setCurrent(newShortId);
       if (getApiId(shortId).id < 0) {
         removeItem(shortId);
       }
+      return newShortId;
     } catch (error) {
       if (error instanceof AlreadyInCragError) {
         showToast(t('editdialog.members.convert_already_in_crag'), 'warning');
-        return;
+        return undefined;
       }
       throw error;
     }
+  };
+};
+
+export const ConvertNodeToRelation = () => {
+  const { shortId, tags } = useCurrentItem();
+  const convertCurrentToRelation = useConvertCurrentToRelation();
+
+  const handleConvertToRelation = async () => {
+    await convertCurrentToRelation();
   };
 
   return (

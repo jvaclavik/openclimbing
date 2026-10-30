@@ -2,7 +2,7 @@ import * as maplibregl from 'maplibre-gl';
 import type { Map, Point } from 'maplibre-gl';
 import styled from '@emotion/styled';
 import { isMobileModeVanilla } from '../../helpers';
-import { FEATURE_PANEL_WIDTH } from '../../utils/PanelHelpers';
+import { getFeaturePanelWidth } from '../../utils/featurePanelWidth';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
@@ -140,7 +140,7 @@ export const updateArrowFactory = (map: Map, isPanelOpen: boolean) => () => {
     return;
   }
 
-  const leftOffset = isPanelOpen ? FEATURE_PANEL_WIDTH : 0;
+  const leftOffset = isPanelOpen ? getFeaturePanelWidth() : 0;
 
   const canvas = map.getCanvas();
   const w = canvas.clientWidth;

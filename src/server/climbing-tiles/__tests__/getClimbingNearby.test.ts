@@ -167,6 +167,28 @@ describe('getClimbingNearby', () => {
     expect(results.map((r) => r.osmId)).not.toContain(20);
   });
 
+  it('filters by name ignoring case, diacritics and word order', () => {
+    const results = getClimbingNearby({
+      type: 'crag',
+      lon: ORIGIN.lon,
+      lat: ORIGIN.lat,
+      q: 'SKÁLA osamělá',
+    });
+
+    expect(results.map((r) => r.osmId)).toEqual([2]);
+  });
+
+  it('looks further away when searching by name', () => {
+    const results = getClimbingNearby({
+      type: 'area',
+      lon: ORIGIN.lon + 0.25,
+      lat: ORIGIN.lat,
+      q: 'adrspach',
+    });
+
+    expect(results.map((r) => r.osmId)).toEqual([1]);
+  });
+
   it('returns nothing without a usable origin', () => {
     expect(getClimbingNearby({ type: 'crag' })).toEqual([]);
   });

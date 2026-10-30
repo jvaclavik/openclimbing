@@ -20,7 +20,6 @@ import { getApiId } from '../../../../../services/helpers';
 import { t } from '../../../../../services/intl';
 import { GRADE_TABLE } from '../../../../../services/tagging/climbing/gradeData';
 import { getOsmTagFromGradeSystem } from '../../../../../services/tagging/climbing/routeGrade';
-import { getPresetTranslation } from '../../../../../services/tagging/translations';
 import { FeatureTags } from '../../../../../services/types';
 import { Setter } from '../../../../../types';
 import { useSnackbar } from '../../../../utils/SnackbarContext';
@@ -29,34 +28,19 @@ import { GradeSystemSelect } from '../../../Climbing/GradeSystemSelect';
 import { useMoreMenu } from '../../../Climbing/useMoreMenu';
 import { useCurrentItem, useEditContext } from '../../context/EditContext';
 import { fetchFreshItem, getNewNodeItem } from '../../context/itemsHelpers';
-import { DataItem, Members } from '../../context/types';
-import { findInItems, getPresetKey } from '../../context/utils';
+import { Members } from '../../context/types';
+import { findInItems } from '../../context/utils';
 import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
 import { parseOsmShortId } from './parseOsmShortId';
 import { parseTagBatch } from './parseTagBatch';
+import {
+  getMemberTags,
+  getTagBatchDrafts,
+  toMemberDraft,
+} from './memberDrafts';
 import { useLinkEditItem } from './useLinkEditItem';
 
 export type Scene = null | 'single' | 'batch' | 'url';
-
-const ROUTE_BOTTOM_TAGS = {
-  climbing: 'route_bottom',
-  sport: 'climbing',
-};
-
-const CRAG_TAGS = {
-  climbing: 'crag',
-  sport: 'climbing',
-};
-
-const getMemberTags = (parentTags: FeatureTags) => {
-  if (parentTags.climbing === 'crag') {
-    return ROUTE_BOTTOM_TAGS;
-  }
-  if (parentTags.climbing === 'area') {
-    return CRAG_TAGS;
-  }
-  return {};
-};
 
 const parseGradeFromLine = (line: string, gradeSystem?: string) => {
   if (!gradeSystem) {
@@ -76,30 +60,6 @@ const parseGradeFromLine = (line: string, gradeSystem?: string) => {
   }
 
   return { gradeTags: {}, name: line };
-};
-
-const applyMissingTags = (tags: FeatureTags, defaults: FeatureTags) => {
-  const merged = { ...tags };
-  for (const [key, value] of Object.entries(defaults)) {
-    if (!(key in merged)) merged[key] = value;
-  }
-  return merged;
-};
-
-const toMemberDraft = (newItem: DataItem) => {
-  // TODO this code could be removed, if we lookup the label in render among editItems
-  const presetKey = getPresetKey(newItem);
-  const presetLabel = getPresetTranslation(presetKey);
-  const tags = Object.fromEntries(newItem.tagsEntries);
-  return {
-    newItem,
-    newMember: {
-      shortId: newItem.shortId,
-      role: '',
-      originalLabel: tags.name ?? presetLabel,
-      originalTags: tags,
-    },
-  };
 };
 
 const convertLine = async (
@@ -152,14 +112,7 @@ const useHandleAddMember = (
       .map((line) => line.trim())
       .filter(Boolean);
     const drafts = tagRoutes
-      ? tagRoutes.map((routeTags) =>
-          toMemberDraft(
-            getNewNodeItem(
-              undefined,
-              applyMissingTags(routeTags, getMemberTags(relation.tags)),
-            ),
-          ),
-        )
+      ? getTagBatchDrafts(tagRoutes, relation.tags)
       : lines.length
         ? await Promise.all(
             lines.map((line) => convertLine(line, relation.tags, gradeSystem)),

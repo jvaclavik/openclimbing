@@ -25,7 +25,11 @@ import { findInItems, isInItems } from '../../EditDialog/context/utils';
 import { usePhotoHighlightContext } from '../contexts/PhotoHighlightContext';
 import { RouteDifficulty } from '../types';
 import { getValidCragCenter, isValidLonLat } from './cragCenter';
-import { findCragItemForRoutes, isRouteTags } from './cragRoutesItems';
+import {
+  findCragItemForRoutes,
+  getDraftCragCenter,
+  isRouteTags,
+} from './cragRoutesItems';
 import { isRouteDrawnOnPhoto } from './photo';
 import { createPitchRotationControl } from './pitchRotationControl';
 import {
@@ -422,12 +426,13 @@ export const useCragRoutePositionEditor = (
   // crags whose relation has no usable `center`). Prefer the crag center, then
   // any existing route position, so new markers never snap to [0, 0].
   const fallbackCenter = useMemo<LonLat | undefined>(() => {
-    const cragCenter = getValidCragCenter(crag);
+    const cragCenter =
+      getDraftCragCenter(items, cragItem) ?? getValidCragCenter(crag);
     if (cragCenter) return cragCenter;
     return editableRoutes
       .map((route) => route.originalLonLat)
       .find(isValidLonLat);
-  }, [crag, editableRoutes]);
+  }, [crag, cragItem, items, editableRoutes]);
 
   // Routes drawn on the currently highlighted photo — their markers render bold.
   const boldRouteIds = useMemo(

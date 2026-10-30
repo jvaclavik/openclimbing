@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { getGlobalMap } from '../../services/mapStorage';
 import { useMobileMode } from '../helpers';
 import { Bbox, useMapStateContext } from './MapStateContext';
-import { FEATURE_PANEL_WIDTH } from './PanelHelpers';
+import { useFeaturePanelWidth } from './featurePanelWidth';
 
 /**
  * The bbox in MapStateContext comes from map.getBounds(), so it also covers the
@@ -13,6 +13,7 @@ import { FEATURE_PANEL_WIDTH } from './PanelHelpers';
 export const useVisibleBbox = (): Bbox | undefined => {
   const { bbox } = useMapStateContext();
   const isMobileMode = useMobileMode();
+  const panelWidth = useFeaturePanelWidth();
 
   return useMemo(() => {
     const map = getGlobalMap();
@@ -21,12 +22,12 @@ export const useVisibleBbox = (): Bbox | undefined => {
     }
 
     const { clientWidth, clientHeight } = map.getCanvas();
-    if (clientWidth <= FEATURE_PANEL_WIDTH) {
+    if (clientWidth <= panelWidth) {
       return bbox;
     }
 
-    const northWest = map.unproject([FEATURE_PANEL_WIDTH, 0]);
+    const northWest = map.unproject([panelWidth, 0]);
     const southEast = map.unproject([clientWidth, clientHeight]);
     return [northWest.lng, northWest.lat, southEast.lng, southEast.lat] as Bbox;
-  }, [bbox, isMobileMode]);
+  }, [bbox, isMobileMode, panelWidth]);
 };

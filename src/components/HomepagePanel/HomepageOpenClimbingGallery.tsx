@@ -20,10 +20,12 @@ import {
 import { useVisibleBbox } from '../utils/useVisibleBbox';
 
 const GAP = 8;
-const COLUMNS = 2;
+const MIN_COLUMNS = 1; // the narrowest panel shows a single column
+const MIN_COLUMN_WIDTH = 200; // a wider (resized) panel gets more columns
 const ROW_HEIGHT = 6; // grid row unit – the finer, the tighter the masonry fits
 
-const GALLERY_LIMIT = 24;
+const GALLERY_LIMIT = 24; // also the number of photos one "show more" adds
+const MORE_TILE_HEIGHT = 48;
 const PHOTO_WIDTH = 330; // tiles are ~150–200px wide, this covers retina too
 const DEFAULT_RATIO = 4 / 3;
 
@@ -33,9 +35,17 @@ export const GalleryWrapper = styled.div`
   padding: 0 12px;
 `;
 
-const Grid = styled.div`
+const getColumns = (width: number) =>
+  Math.max(MIN_COLUMNS, Math.floor((width + GAP) / (MIN_COLUMN_WIDTH + GAP)));
+
+const getColumnWidth = (width: number) => {
+  const columns = getColumns(width);
+  return (width - GAP * (columns - 1)) / columns;
+};
+
+const Grid = styled.div<{ $columns: number }>`
   display: grid;
-  grid-template-columns: repeat(${COLUMNS}, 1fr);
+  grid-template-columns: repeat(${({ $columns }) => $columns}, 1fr);
   grid-auto-rows: ${ROW_HEIGHT}px;
   grid-auto-flow: row dense;
   gap: ${GAP}px;
@@ -184,7 +194,7 @@ const isInViewport = (item: ClimbingGalleryItem, bbox: Bbox) => {
 // Areas visible on the map, most drawn routes first. When the user looks at a
 // place with no drawn areas we fall back to the global top, so the homepage
 // never shows an empty gallery.
-const useVisibleItems = () => {
+const useVisibleItems = (limit: number) => {
   const bbox = useVisibleBbox();
   const { data, isLoading } = useQuery(
     ['climbing-gallery'],
@@ -198,12 +208,14 @@ const useVisibleItems = () => {
       ? all.filter((item) => isInViewport(item, bbox))
       : all;
     const isFallback = inViewport.length === 0;
+    const matching = isFallback ? all : inViewport;
     return {
-      items: (isFallback ? all : inViewport).slice(0, GALLERY_LIMIT),
+      items: matching.slice(0, limit),
+      hiddenCount: Math.max(0, matching.length - limit),
       isFallback: isFallback && all.length > 0 && !!bbox,
       isLoading,
     };
-  }, [data, bbox, isLoading]);
+  }, [data, bbox, isLoading, limit]);
 };
 
 type Tile = {
@@ -217,7 +229,7 @@ const getRowSpan = (ratio: number, columnWidth: number) =>
   Math.max(1, Math.round((columnWidth / ratio + GAP) / (ROW_HEIGHT + GAP)));
 
 const buildTiles = (items: ClimbingGalleryItem[], width: number): Tile[] => {
-  const columnWidth = (width - GAP * (COLUMNS - 1)) / COLUMNS;
+  const columnWidth = getColumnWidth(width);
 
   return items.map((item) => ({
     item,
@@ -263,17 +275,64 @@ const GalleryItem = ({ tile }: { tile: Tile }) => {
   );
 };
 
+// Spans all columns, so the dense masonry can only place it below the photos.
+const MoreTile = styled.button`
+  ${tileStyle}
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 16px;
+  border: 1px dashed ${({ theme }) => theme.palette.divider};
+  background-color: ${({ theme }) => theme.palette.background.elevation};
+  color: ${({ theme }) => theme.palette.text.primary};
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.palette.action.hover};
+  }
+`;
+
+const MoreCount = styled.span`
+  color: ${({ theme }) => theme.palette.primary.main};
+  font-size: 18px;
+  font-weight: 700;
+`;
+
+const ShowMoreTile = ({
+  hiddenCount,
+  onClick,
+}: {
+  hiddenCount: number;
+  onClick: () => void;
+}) => (
+  <MoreTile
+    type="button"
+    onClick={onClick}
+    style={{ gridRow: `span ${getRowSpan(1, MORE_TILE_HEIGHT)}` }}
+  >
+    <MoreCount>+{hiddenCount}</MoreCount>
+    {t('homepage.gallery.show_more')}
+  </MoreTile>
+);
+
 const SkeletonTile = styled(Skeleton)`
   ${tileStyle}
   transform: none;
 `;
 
 const GallerySkeleton = ({ width }: { width: number }) => {
-  const columnWidth = (width - GAP * (COLUMNS - 1)) / COLUMNS;
+  const columnWidth = getColumnWidth(width);
   const ratios = [4 / 3, 3 / 4, 3 / 4, 1, 4 / 3, 3 / 4, 1, 3 / 4];
 
   return (
-    <Grid>
+    <Grid $columns={getColumns(width)}>
       {ratios.map((ratio, index) => (
         <SkeletonTile
           // eslint-disable-next-line react/no-array-index-key
@@ -289,7 +348,8 @@ const GallerySkeleton = ({ width }: { width: number }) => {
 export const HomepageOpenClimbingGallery = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const width = useContainerWidth(wrapperRef);
-  const { items, isFallback, isLoading } = useVisibleItems();
+  const [limit, setLimit] = useState(GALLERY_LIMIT);
+  const { items, hiddenCount, isFallback, isLoading } = useVisibleItems(limit);
 
   const tiles = useMemo(
     () => (width > 0 ? buildTiles(items, width) : []),
@@ -303,10 +363,16 @@ export const HomepageOpenClimbingGallery = () => {
         <FallbackNote>{t('homepage.gallery.nothing_in_viewport')}</FallbackNote>
       )}
       {!isLoading && !!width && (
-        <Grid>
+        <Grid $columns={getColumns(width)}>
           {tiles.map((tile) => (
             <GalleryItem key={tile.item.osmId} tile={tile} />
           ))}
+          {hiddenCount > 0 && (
+            <ShowMoreTile
+              hiddenCount={hiddenCount}
+              onClick={() => setLimit((prev) => prev + GALLERY_LIMIT)}
+            />
+          )}
         </Grid>
       )}
     </GalleryWrapper>

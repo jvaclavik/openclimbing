@@ -8,6 +8,7 @@ import { isValidLonLat } from '../../../Climbing/utils/cragCenter';
 import { useFeatureContext } from '../../../../utils/FeatureContext';
 import { useCurrentItem, useEditContext } from '../../context/EditContext';
 import { findInItems } from '../../context/utils';
+import { parseOsmShortId } from './parseOsmShortId';
 
 const findCenterInFeatureTree = (
   feature: Feature | undefined,
@@ -58,13 +59,28 @@ const useCurrentItemCenter = (): LonLat | undefined => {
   return isValidLonLat(feature?.center) ? feature.center : undefined;
 };
 
+const QUERY_DEBOUNCE_MS = 250;
+
+const useDebouncedValue = (value: string) => {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebounced(value), QUERY_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [value]);
+  return debounced;
+};
+
 const fetchNearby = async (
   type: 'crag' | 'area',
   shortId: string,
   center: LonLat | undefined,
+  query: string,
 ) => {
   const { type: osmType, id: osmId } = getApiId(shortId);
   const params = new URLSearchParams({ type });
+  if (query) {
+    params.set('q', query);
+  }
   if (osmType && osmId > 0) {
     params.set('osmType', osmType);
     params.set('osmId', String(osmId));
@@ -82,20 +98,28 @@ const fetchNearby = async (
 export const nearbyShortId = (record: ClimbingNearbyRecord) =>
   getShortId({ type: record.osmType, id: record.osmId });
 
-export const useNearbyClimbing = (type: 'crag' | 'area' | null) => {
+// The server filters by `query` before limiting the results, so a typed crag
+// shows up even when it isn't among the nearest few.
+export const useNearbyClimbing = (
+  type: 'crag' | 'area' | null,
+  query: string,
+) => {
   const current = useCurrentItem();
   const { items } = useEditContext();
   const center = useCurrentItemCenter();
   const centerKey = center?.map((value) => value.toFixed(5)).join(',') ?? '';
   const [records, setRecords] = useState<ClimbingNearbyRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const debouncedQuery = useDebouncedValue(
+    parseOsmShortId(query) ? '' : query.trim(),
+  );
 
   const { type: osmType, id: osmId } = getApiId(current.shortId);
   const canQuery = type != null && (!!center || (osmType && osmId > 0));
 
   useEffect(() => {
+    // Keep the last records while closed, so reopening doesn't flash empty.
     if (!canQuery || type == null) {
-      setRecords([]);
       setLoading(false);
       return;
     }
@@ -106,7 +130,7 @@ export const useNearbyClimbing = (type: 'crag' | 'area' | null) => {
 
     let cancelled = false;
     setLoading(true);
-    fetchNearby(type, current.shortId, parsedCenter)
+    fetchNearby(type, current.shortId, parsedCenter, debouncedQuery)
       .then((next) => {
         if (!cancelled) setRecords(next);
       })
@@ -123,7 +147,7 @@ export const useNearbyClimbing = (type: 'crag' | 'area' | null) => {
     return () => {
       cancelled = true;
     };
-  }, [canQuery, centerKey, current.shortId, type]);
+  }, [canQuery, centerKey, current.shortId, type, debouncedQuery]);
 
   const excludedIds = new Set<string>([current.shortId]);
   for (const member of current.members ?? []) {

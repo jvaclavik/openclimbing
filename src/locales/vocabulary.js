@@ -325,6 +325,7 @@ export default {
   'homepage.gallery.nothing_in_viewport_ferrata': `No via ferratas in the current map view – showing a wider selection.`,
   'homepage.gallery.nothing_in_viewport_gym': `No climbing gyms in the current map view – showing a wider selection.`,
   'homepage.gallery.show_area': `Show area`,
+  'homepage.gallery.show_more': `more photos`,
   'homepage.about_banner_desc': `No ads. No paywall. A climbing guide that belongs to everyone.`,
   'homepage.about_banner_cta': `Learn more`,
 
@@ -558,6 +559,7 @@ export default {
   'featurepanel.drawn_routes': 'Drawn on this photo: __count__',
   'featurepanel.gallery_scroll_left': 'Scroll left',
   'featurepanel.gallery_scroll_right': 'Scroll right',
+  'featurepanel.more_photos': 'more photos',
   'featurepanel.photo_show_topo': 'Show topo',
   'featurepanel.photo_enlarge': 'Enlarge',
   'featurepanel.photo_alt': 'Photo of __type__ __name__',
@@ -755,6 +757,15 @@ export default {
     'For adding climbing routes, convert this node to a relation. The peak stays beside it.',
   'editdialog.members.convert_already_in_crag': 'This object is already a member of a climbing crag.',
   'editdialog.members.convert_button': 'Convert to relation',
+  'editdialog.members.pasted': 'Members added from clipboard: __count__',
+  'editdialog.members.paste_convert_title': 'Convert to relation?',
+  'editdialog.members.paste_convert_description':
+    'The clipboard contains __count__ items with OSM tags. To add them as members, this object has to be converted to a relation first.',
+  'editdialog.members.paste_crag_title': 'Change to a climbing crag?',
+  'editdialog.members.paste_crag_description':
+    'The clipboard contains __count__ climbing routes. This object will become a climbing crag (a relation) and the routes will be added to it.',
+  'editdialog.members.paste_crag_button': 'Change to crag',
+  'editdialog.members.paste_needs_relation': 'Members from the clipboard can be added only to a relation (climbing area or crag).',
   'editdialog.location_change_current_item': 'Edit',
   'editdialog.description_helper_text': 'Please enter your own description or with written approval of its author.',
   'editdialog.description_lang': 'Language',

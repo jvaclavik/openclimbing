@@ -309,6 +309,7 @@ export default {
   'homepage.gallery.nothing_in_viewport_ferrata': `V aktuálním výřezu mapy nejsou ferraty – zobrazujeme širší výběr.`,
   'homepage.gallery.nothing_in_viewport_gym': `V aktuálním výřezu mapy nejsou lezecké stěny – zobrazujeme širší výběr.`,
   'homepage.gallery.show_area': `Zobrazit oblast`,
+  'homepage.gallery.show_more': `dalších fotek`,
 
   'homepage.about_banner_desc': `Žádné reklamy. Žádný paywall. Lezecký průvodce, který patří všem.`,
   'homepage.about_banner_cta': `Zjistit víc`,
@@ -508,6 +509,7 @@ export default {
   'featurepanel.drawn_routes': 'Zakresleno na fotce: __count__',
   'featurepanel.gallery_scroll_left': 'Posunout doleva',
   'featurepanel.gallery_scroll_right': 'Posunout doprava',
+  'featurepanel.more_photos': 'dalších fotek',
   'featurepanel.photo_show_topo': 'Zobrazit topo',
   'featurepanel.photo_enlarge': 'Zvětšit',
   'featurepanel.photo_alt': 'Fotka __type__ __name__',
@@ -702,6 +704,15 @@ export default {
   'editdialog.members.climbing_crag_convert_peak_description': 'Pro přidání lezeckých cest změňte uzel na relaci. Vrchol zůstane samostatně vedle.',
   'editdialog.members.convert_already_in_crag': 'Tenhle objekt už je členem lezecké skály.',
   'editdialog.members.convert_button': 'Změnit na relaci',
+  'editdialog.members.pasted': 'Přidáno členů ze schránky: __count__',
+  'editdialog.members.paste_convert_title': 'Změnit na relaci?',
+  'editdialog.members.paste_convert_description':
+    'Ve schránce je __count__ položek s OSM tagy. Aby šly přidat jako členové, je potřeba nejdřív změnit tento objekt na relaci.',
+  'editdialog.members.paste_crag_title': 'Změnit na lezecký sektor?',
+  'editdialog.members.paste_crag_description':
+    'Ve schránce je __count__ lezeckých cest. Tento objekt se změní na lezecký sektor (relaci) a cesty se do něj přidají.',
+  'editdialog.members.paste_crag_button': 'Změnit na sektor',
+  'editdialog.members.paste_needs_relation': 'Členy ze schránky lze přidat jen do relace (lezecké oblasti nebo sektoru).',
   'editdialog.location_change_current_item': 'Upravit',
   'editdialog.description_helper_text': 'Zadávejte prosím vlastní popis nebo s písemným souhlasem autora.',
   'editdialog.description_lang': 'Jazyk',

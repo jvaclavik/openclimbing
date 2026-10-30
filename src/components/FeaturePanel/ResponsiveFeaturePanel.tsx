@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { getMapViewFromHash } from '../App/helpers';
 import { getFeatureBbox } from '../../services/getCenter';
 import { mapCreatedPromise } from '../../services/mapStorage';
-import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
+import { getFeaturePanelWidth } from '../utils/featurePanelWidth';
 import { Feature } from '../../services/types';
 import { View } from '../utils/MapStateContext';
 import type { LngLat } from 'maplibre-gl';
@@ -26,7 +26,7 @@ const getBboxView = async (feature: Feature): Promise<View | undefined> => {
   }
 
   const map = await mapCreatedPromise;
-  const panelWidth = window.innerWidth > 700 ? FEATURE_PANEL_WIDTH : 0;
+  const panelWidth = window.innerWidth > 700 ? getFeaturePanelWidth() : 0;
   const camera = map.cameraForBounds([w, s, e, n], {
     padding: {
       top: PADDING,

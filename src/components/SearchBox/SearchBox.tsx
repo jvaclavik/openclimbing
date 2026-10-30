@@ -9,7 +9,7 @@ import { isDesktop, isMobileMode, useMobileMode } from '../helpers';
 import { SEARCH_BOX_HEIGHT } from './consts';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { usePanelShown } from '../utils/usePanelShown';
-import { FEATURE_PANEL_WIDTH } from '../utils/PanelHelpers';
+import { FEATURE_PANEL_WIDTH_CSS } from '../utils/featurePanelWidth';
 
 const TopPanel = styled.div`
   position: absolute;
@@ -22,7 +22,7 @@ const TopPanel = styled.div`
 
   width: 100%;
   @media ${isDesktop} {
-    width: ${FEATURE_PANEL_WIDTH}px;
+    width: ${FEATURE_PANEL_WIDTH_CSS};
   }
 `;
 

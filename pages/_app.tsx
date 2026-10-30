@@ -14,6 +14,7 @@ import { GoogleAnalytics } from '../src/components/App/google-analytics';
 import { Umami } from '../src/components/App/umami';
 import { SnackbarProvider } from '../src/components/utils/SnackbarContext';
 import { UserSettingsProvider } from '../src/components/utils/userSettings/UserSettingsContext';
+import { FeaturePanelWidthSync } from '../src/components/utils/featurePanelWidth';
 import {
   MapStateProvider,
   View,
@@ -130,6 +131,7 @@ const MyApp = (props: Props) => {
                                   />
                                 </Head>
                                 <DebugModeManager />
+                                <FeaturePanelWidthSync />
                                 <Loading />
                                 <TopBar />
                                 <PhotoHighlightProvider>
