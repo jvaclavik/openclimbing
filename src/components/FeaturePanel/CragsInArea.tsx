@@ -31,10 +31,13 @@ import { naturalSort } from './Climbing/utils/array';
 import { hasPathOnPhoto } from './Climbing/utils/photo';
 import { Slider, Wrapper } from './FeatureImages/FeatureImages';
 import { getClickHandler } from './FeatureImages/Image/helpers';
+import { tileCss } from './FeatureImages/helpers';
 import { Image } from './FeatureImages/Image/Image';
 import { getClimbingPhotoAlt } from './FeatureImages/getClimbingPhotoAlt';
 
 const MAX_CRAG_CARD_IMAGES = 3;
+const MAX_AREA_CARD_IMAGES = 20;
+const MORE_IMAGES_STEP = 10; // photos added by one click on the "+N" tile
 
 const findScrollParent = (el: HTMLElement | null): HTMLElement | undefined => {
   let node = el?.parentElement ?? null;
@@ -230,51 +233,124 @@ const AreaInfo = ({
   );
 };
 
-const Gallery = ({
+type CardImage = {
+  def: Feature['imageDefs'][number];
+  image: ReturnType<typeof getInstantImage>;
+  owner?: Feature;
+};
+
+const MoreImagesTileWrapper = styled.div`
+  ${tileCss}
+  width: 120px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px dashed ${({ theme }) => theme.palette.divider};
+  background-color: ${({ theme }) => theme.palette.background.elevation};
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 13px;
+  font-weight: 600;
+  white-space: normal;
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.palette.action.hover};
+  }
+`;
+
+const MoreImagesCount = styled.span`
+  color: ${({ theme }) => theme.palette.primary.main};
+  font-size: 22px;
+  font-weight: 700;
+`;
+
+// The card is a link to the crag, so the tile must not navigate.
+const MoreImagesTile = ({
+  hiddenCount,
+  onShowMore,
+}: {
+  hiddenCount: number;
+  onShowMore: () => void;
+}) => {
+  const handleClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onShowMore();
+  };
+
+  return (
+    <MoreImagesTileWrapper
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') handleClick(e);
+      }}
+    >
+      <MoreImagesCount>+{hiddenCount}</MoreImagesCount>
+      {t('featurepanel.more_photos')}
+    </MoreImagesTileWrapper>
+  );
+};
+
+export const Gallery = ({
   images,
+  initialCount,
   feature,
   priority,
 }: {
-  images: {
-    def: Feature['imageDefs'][number];
-    image: ReturnType<typeof getInstantImage>;
-    owner?: Feature;
-  }[];
+  images: CardImage[];
+  initialCount: number;
   feature: Feature;
   priority?: boolean;
-}) => (
-  <Wrapper>
-    <Slider>
-      {naturalSort(images, (item) => item.def.k).map((item, index) => {
-        const owner = item.owner ?? feature;
-        const openTopo = getClickHandler(owner, item.def);
-        return (
-          <Image
-            key={item.image.imageUrl}
-            def={item.def}
-            image={item.image}
-            alt={getClimbingPhotoAlt(owner, item.def)}
-            onClick={openTopo}
-            actionLabel={
-              openTopo ? t('featurepanel.photo_show_topo') : undefined
-            }
-            actionAccent={!!openTopo}
-            priority={priority && index === 0}
-          />
-        );
-      })}
-    </Slider>
-  </Wrapper>
-);
+}) => {
+  const [count, setCount] = useState(initialCount);
+  const hiddenCount = images.length - count;
 
-const getFeatureImages = (feature: Feature, limit = MAX_CRAG_CARD_IMAGES) =>
-  (
+  return (
+    <Wrapper>
+      <Slider>
+        {images.slice(0, count).map((item, index) => {
+          const owner = item.owner ?? feature;
+          const openTopo = getClickHandler(owner, item.def);
+          return (
+            <Image
+              key={item.image.imageUrl}
+              def={item.def}
+              image={item.image}
+              alt={getClimbingPhotoAlt(owner, item.def)}
+              onClick={openTopo}
+              actionLabel={
+                openTopo ? t('featurepanel.photo_show_topo') : undefined
+              }
+              actionAccent={!!openTopo}
+              priority={priority && index === 0}
+            />
+          );
+        })}
+        {hiddenCount > 0 && (
+          <MoreImagesTile
+            hiddenCount={hiddenCount}
+            onShowMore={() => setCount((prev) => prev + MORE_IMAGES_STEP)}
+          />
+        )}
+      </Slider>
+    </Wrapper>
+  );
+};
+
+const getFeatureImages = (feature: Feature): CardImage[] =>
+  naturalSort(
     feature?.imageDefs?.filter(isInstant)?.map((def) => ({
       def,
       image: getInstantImage(def),
       owner: feature,
-    })) ?? []
-  ).slice(0, limit);
+    })) ?? [],
+    (item) => item.def.k,
+  );
 
 const countRoutesInArea = (feature: Feature): number =>
   (feature.memberFeatures ?? []).reduce((acc, child) => {
@@ -301,12 +377,22 @@ const countRoutesWithPhotoInArea = (feature: Feature): number =>
     return acc;
   }, 0);
 
-const collectAreaImages = (feature: Feature, limit = 20) => {
-  const ownImages = getFeatureImages(feature);
-  const childImages = (feature.memberFeatures ?? []).flatMap((child) =>
-    getFeatureImages(child),
+// A few photos of the area and of each of its members first, the rest after
+// them – so revealing more never reorders what is already shown.
+export const collectAreaImages = (feature: Feature) => {
+  const perFeature = [feature, ...(feature.memberFeatures ?? [])].map(
+    getFeatureImages,
   );
-  return [...ownImages, ...childImages].slice(0, limit);
+  const preview = perFeature.flatMap((images) =>
+    images.slice(0, MAX_CRAG_CARD_IMAGES),
+  );
+  const rest = perFeature.flatMap((images) =>
+    images.slice(MAX_CRAG_CARD_IMAGES),
+  );
+  return {
+    images: [...preview, ...rest],
+    initialCount: Math.min(preview.length, MAX_AREA_CARD_IMAGES),
+  };
 };
 
 const CragItem = ({
@@ -370,7 +456,12 @@ const CragItem = ({
             }
           />
           {images.length ? (
-            <Gallery feature={feature} images={images} priority={priority} />
+            <Gallery
+              feature={feature}
+              images={images}
+              initialCount={MAX_CRAG_CARD_IMAGES}
+              priority={priority}
+            />
           ) : null}
         </InnerContainer>
       </StyledLink>
@@ -395,7 +486,7 @@ const AreaItem = ({
   const { setPreview } = useFeatureContext();
   const handleHover = () => feature.center && setPreview(feature);
 
-  const images = collectAreaImages(feature);
+  const { images, initialCount } = collectAreaImages(feature);
   const cragCount =
     feature.memberFeatures?.filter(({ tags }) => isClimbingCragLike(tags))
       .length ?? 0;
@@ -449,7 +540,12 @@ const AreaItem = ({
             withArrow
           />
           {images.length ? (
-            <Gallery feature={feature} images={images} priority={priority} />
+            <Gallery
+              feature={feature}
+              images={images}
+              initialCount={initialCount}
+              priority={priority}
+            />
           ) : null}
         </InnerContainer>
       </StyledLink>

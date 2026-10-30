@@ -18,6 +18,7 @@ import { OsmUserLogged } from './OsmUserLogged';
 import { LoginToSaveBanner } from '../../helpers/LoginToSaveBanner';
 import { TestApiWarning } from '../../helpers/TestApiWarning';
 import { ItemsTabs } from './ItemsTabs';
+import { ClipboardMembersPaste } from './ClipboardMembersPaste';
 import { ItemEditSection } from './ItemEditSection';
 import { t, Translation } from '../../../../services/intl';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
@@ -182,6 +183,7 @@ export const EditContent = () => {
 
   return (
     <>
+      <ClipboardMembersPaste />
       <SplitContainer>
         <SplitPane
           split={layout}

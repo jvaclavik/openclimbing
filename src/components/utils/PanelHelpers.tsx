@@ -6,11 +6,11 @@ import { splitPaneResizerStyles } from '../FeaturePanel/Climbing/splitPaneResize
 import {
   FEATURE_PANEL_MIN_WIDTH,
   getFeaturePanelMaxWidth,
+  saveFeaturePanelWidth,
   setFeaturePanelWidth,
   useFeaturePanelWidth,
   useViewportWidth,
 } from './featurePanelWidth';
-import { useUserSettingsContext } from './userSettings/UserSettingsContext';
 
 const PanelMain = styled.main`
   display: flex;
@@ -46,7 +46,6 @@ const INTERACTIVE = { pointerEvents: 'auto' } as const;
 export const PanelWrapper = ({ children }) => {
   const width = useFeaturePanelWidth();
   const viewportWidth = useViewportWidth();
-  const { setUserSetting } = useUserSettingsContext();
 
   return (
     <SplitOverlay>
@@ -57,7 +56,7 @@ export const PanelWrapper = ({ children }) => {
         maxSize={getFeaturePanelMaxWidth(viewportWidth)}
         onChange={(size: number) => setFeaturePanelWidth(size)}
         onDragFinished={(size?: number) => {
-          if (typeof size === 'number') setUserSetting('panel.width', size);
+          if (typeof size === 'number') saveFeaturePanelWidth(size);
         }}
         pane1Style={INTERACTIVE}
         resizerStyle={INTERACTIVE}
