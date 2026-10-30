@@ -5,6 +5,7 @@ import {
   FeaturePanelWidthSync,
   getFeaturePanelWidth,
   saveFeaturePanelWidth,
+  scaleWithPanelWidth,
 } from '../featurePanelWidth';
 
 const STORAGE_KEY = 'featurePanelWidth';
@@ -44,5 +45,13 @@ describe('FeaturePanelWidthSync', () => {
     render(<FeaturePanelWidthSync />);
 
     expect(getFeaturePanelWidth()).toBe(FEATURE_PANEL_MIN_WIDTH);
+  });
+});
+
+describe('scaleWithPanelWidth', () => {
+  it('scales from the default panel width down to the minimum size', () => {
+    expect(scaleWithPanelWidth(48, 30)).toBe(
+      'clamp(30px, calc(var(--feature-panel-width, 480px) * 0.1), 48px)',
+    );
   });
 });
