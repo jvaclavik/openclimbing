@@ -20,6 +20,7 @@ import Coordinates from './Coordinates';
 import {
   FeatureDescription,
   FromOsm,
+  IdEditorForPoint,
   OpenInProduction,
 } from './FeatureDescription';
 import { ObjectsAround } from './ObjectsAround';
@@ -88,7 +89,7 @@ export const FeaturePanelFooter = ({
       <AccordionDetails sx={{ px: 0, pt: 0, pb: 1 }}>
         <PanelFooterWrapper>
           <PanelSidePadding>
-            {feature.point ? null : <FromOsm />}
+            {feature.point ? <IdEditorForPoint /> : <FromOsm />}
             {point || nonOsmObject ? null : (
               <Box
                 sx={{
