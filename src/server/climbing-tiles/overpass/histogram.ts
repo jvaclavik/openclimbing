@@ -9,14 +9,14 @@ export const encodeHistogram = (array: number[] | undefined): string | null => {
   if (array.length > 255) {
     throw new Error('Index exceeds Uint8 max value (255)');
   }
-  if (array.some((v) => v > 255)) {
-    throw new Error('Some value exceeds Uint8 max value (255)');
-  }
 
   const entries: [number, number][] = [];
   for (let i = 0; i < array.length; i++) {
-    if (array[i] > 0) {
-      entries.push([i, array[i]]);
+    // the count is stored as Uint8, so clamp values over 255 (large areas like
+    // Frankenjura have more routes of a single grade than fits in one byte)
+    const value = Math.min(array[i], 255);
+    if (value > 0) {
+      entries.push([i, value]);
     }
   }
 
