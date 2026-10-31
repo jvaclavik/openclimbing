@@ -2,38 +2,63 @@ import { getDifficulty } from '../../../services/tagging/climbing/routeGrade';
 import { GRADE_TABLE } from '../../../services/tagging/climbing/gradeData';
 import { GeojsonFeature } from './types';
 
+// The histogram is a list of (gradeIndex, routeCount) pairs. Each entry starts
+// with the grade index in one byte, followed by the count:
+// - grade indices are < 128 (GRADE_TABLE has ~94 rows), so the top bit of the
+//   index byte is free and is used as a flag for a multi-byte count
+// - a count up to 255 is stored in a single byte (same layout as before)
+// - a count over 255 is stored as an unsigned LEB128 varint, so only these
+//   rare entries (large areas like Frankenjura) take more than two bytes
+const CONTINUATION = 0x80;
+const MAX_INDEX = 0x7f;
+
+const writeVarint = (out: number[], value: number) => {
+  let rest = value;
+  while (rest >= CONTINUATION) {
+    out.push(rest % CONTINUATION | CONTINUATION);
+    rest = Math.floor(rest / CONTINUATION);
+  }
+  out.push(rest);
+};
+
+const readVarint = (view: DataView, offset: number) => {
+  let value = 0;
+  let multiplier = 1;
+  let position = offset;
+  for (;;) {
+    const byte = view.getUint8(position);
+    position += 1;
+    value += (byte % CONTINUATION) * multiplier;
+    if (byte < CONTINUATION) {
+      return { value, offset: position };
+    }
+    multiplier *= CONTINUATION;
+  }
+};
+
 export const encodeHistogram = (array: number[] | undefined): string | null => {
   if (!array) {
     return null;
   }
-  if (array.length > 255) {
-    throw new Error('Index exceeds Uint8 max value (255)');
-  }
-  if (array.some((v) => v > 255)) {
-    throw new Error('Some value exceeds Uint8 max value (255)');
+  if (array.length > MAX_INDEX + 1) {
+    throw new Error(`Index exceeds 7-bit max value (${MAX_INDEX})`);
   }
 
-  const entries: [number, number][] = [];
+  const bytes: number[] = [];
   for (let i = 0; i < array.length; i++) {
-    if (array[i] > 0) {
-      entries.push([i, array[i]]);
+    const count = array[i];
+    if (!(count > 0)) {
+      continue;
+    }
+    if (count <= 0xff) {
+      bytes.push(i, count);
+    } else {
+      bytes.push(i | CONTINUATION);
+      writeVarint(bytes, count);
     }
   }
 
-  const bufferSize = entries.length * 2;
-  const buffer = new ArrayBuffer(bufferSize);
-  const view = new DataView(buffer);
-
-  let offset = 0;
-  for (const [index, value] of entries) {
-    view.setUint8(offset, index);
-    offset += 1;
-    view.setUint8(offset, value);
-    offset += 1;
-  }
-
-  const nodeBuffer = Buffer.from(buffer);
-  return nodeBuffer.toString('base64'); // TODO optimization pack in 6 bits instead of 8 bits
+  return Buffer.from(bytes).toString('base64');
 };
 
 export const decodeHistogram = (base64String: string): number[] => {
@@ -45,10 +70,20 @@ export const decodeHistogram = (base64String: string): number[] => {
 
   let offset = 0;
   while (offset < view.byteLength) {
-    const index = view.getUint8(offset);
+    const header = view.getUint8(offset);
     offset += 1;
-    const value = view.getUint8(offset);
-    offset += 1;
+    const index = header & MAX_INDEX;
+
+    let value: number;
+    if (header & CONTINUATION) {
+      const read = readVarint(view, offset);
+      value = read.value;
+      offset = read.offset;
+    } else {
+      value = view.getUint8(offset);
+      offset += 1;
+    }
+
     if (index >= originalArrayLength) continue;
     resultArray[index] = value;
   }
