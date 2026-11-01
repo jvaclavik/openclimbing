@@ -62,6 +62,7 @@ export default {
   'tick.style_description_RK': 'Rotkreis——墜落後不從地面重新開始，而是從無手休息點繼續並自由完攀路線。',
   'tick.style_description_RX': '混合使用自由攀登和人工攀登來完成路線。',
   'tick.style_description_AF': '完全以自由攀登、不使用任何人工輔助器材的方式完成路線（All Free）。',
+  'tick.style_description_AL': '通过交替领攀来完成这条路线 (Alternating leads)。',
   'tick.style_description_TR': '在繩索已預先架設於頂部確保點的情況下攀爬路線（Top-rope）。',
   'tick.style_description_FS': '在不使用任何確保裝備或繩索的情況下攀爬路線（Free-solo）。',
   'tick.style_description_PJ': '尚未完攀的練習與嘗試：試攀、掛繩休息、研究動作，或作為進行中的目標路線。',

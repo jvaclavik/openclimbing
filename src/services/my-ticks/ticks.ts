@@ -15,6 +15,7 @@ export const TICK_STYLE_SEGMENT_ORDER: TickStyle[] = [
   'RK',
   'RX',
   'AF',
+  'AL',
   'TR',
   'FS',
   'PF',
@@ -40,6 +41,7 @@ const TICK_STYLE_COLORS = {
   RK: '#a16207', // yellow-700: rotkreis (send restarted from a no-hands rest)
   RX: '#92400e', // amber-800: aid involvement (rustic)
   AF: '#0e7490', // cyan-700: multipitch all free
+  AL: '#e4ec00', // yellow: alternating leads
   TR: '#2563eb', // blue-600: top rope
   FS: '#c2410c', // orange-700: free solo, intense
   PF: '#9333ea', // purple-600: project finished in sections
@@ -114,6 +116,12 @@ export const tickStyles: Array<{
     name: 'All free',
     description: t('tick.style_description_AF'),
     color: TICK_STYLE_COLORS.AF,
+  },
+  {
+    key: 'AL',
+    name: 'Alternating leads',
+    description: t('tick.style_description_AL'),
+    color: TICK_STYLE_COLORS.AL,
   },
   {
     key: 'TR',

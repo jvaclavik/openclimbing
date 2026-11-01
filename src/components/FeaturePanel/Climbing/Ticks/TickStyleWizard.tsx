@@ -9,7 +9,7 @@ import { TickStyle } from '../types';
 import { tickStyles } from '../../../../services/my-ticks/ticks';
 import { t } from '../../../../services/intl';
 
-type Method = 'lead' | 'tr' | 'solo';
+type Method = 'lead' | 'partly_lead' | 'tr' | 'solo';
 type YesNo = 'yes' | 'no';
 
 export type Answers = {
@@ -35,6 +35,7 @@ export const resolveStyle = (a: Answers): TickStyle | null => {
   }
   if (a.clean !== 'yes') return null;
   if (a.method === 'tr') return 'TR';
+  if (a.method === 'partly_lead') return 'AL';
   if (a.method === 'solo') return 'FS';
   if (a.method !== 'lead') return null;
   if (!a.prePlaced) return null;
@@ -257,6 +258,10 @@ export const TickStyleWizard = ({ onSelect }: WizardProps) => {
           {
             label: t('tick.wizard.a_method_lead'),
             onClick: () => setAnswers({ ...answers, method: 'lead' }),
+          },
+          {
+            label: t('tick.wizard.a_method_partly_lead'),
+            onClick: () => setAnswers({ ...answers, method: 'partly_lead' }),
           },
           {
             label: t('tick.wizard.a_method_tr'),

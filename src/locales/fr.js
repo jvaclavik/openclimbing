@@ -185,6 +185,7 @@ export default {
   'tick.style_description_RK': 'Rotkreis – après une chute, tu es reparti d’un repos sans les mains (pas du sol) et tu as terminé la voie en libre.',
   'tick.style_description_RX': 'Grimper la voie en mêlant escalade libre et escalade artificielle.',
   'tick.style_description_AF': "Grimper la voie entièrement en libre sans recours à l'artificiel.",
+  'tick.style_description_AL': 'Grimper la voie en réversible.',
   'tick.style_description_TR': 'Grimper la voie avec une corde déjà ancrée au sommet.',
   'tick.style_description_FS': 'Grimper la voie sans aucune protection ni corde.',
   'tick.style_description_PJ':
@@ -223,6 +224,7 @@ export default {
   'tick.wizard.a_aid_no': 'Non, je ne suis pas arrivé en haut',
   'tick.wizard.q_method': "Comment l'avez-vous grimpée ?",
   'tick.wizard.a_method_lead': 'En tête — j’ai mousquetonné le matériel en montant',
+  'tick.wizard.a_method_partly_lead': "Guidage en alternance — je n'ai guidé qu'une partie de l'itinéraire.",
   'tick.wizard.a_method_tr': 'Moulinette — la corde était déjà ancrée au sommet',
   'tick.wizard.a_method_solo': 'Sans corde du tout (free solo)',
   'tick.wizard.q_first_attempt': 'Était-ce votre premier essai sur cette voie ?',
