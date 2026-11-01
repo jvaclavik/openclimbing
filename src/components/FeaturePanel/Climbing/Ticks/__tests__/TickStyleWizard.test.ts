@@ -59,6 +59,7 @@ describe('resolveStyle', () => {
         firstAttempt: 'no',
       }),
     ).toBe('PP');
+    expect(resolveStyle({ clean: 'yes', method: 'partly_lead' })).toBe('AL');
     expect(resolveStyle({ clean: 'yes', method: 'tr' })).toBe('TR');
     expect(resolveStyle({ clean: 'yes', method: 'solo' })).toBe('FS');
   });

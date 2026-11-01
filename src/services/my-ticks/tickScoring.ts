@@ -30,6 +30,7 @@ export const TICK_STYLE_MULTIPLIERS: Record<
   RK: 0.9,
   RX: 0.65,
   AF: 0.95,
+  AL: 0.6,
   TR: 0.45,
   FS: 1.1,
   PF: 0.25,

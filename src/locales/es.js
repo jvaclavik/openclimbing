@@ -184,6 +184,7 @@ export default {
     'Rotkreis: tras una caída volviste a empezar desde un descanso sin manos (no desde el suelo) y terminaste la vía en libre.',
   'tick.style_description_RX': 'Escalar la vía combinando escalada libre y escalada artificial.',
   'tick.style_description_AF': 'Escalar la vía completamente en libre sin usar ayudas.',
+  'tick.style_description_AL': 'Escalar la vía alternando el liderazgo.',
   'tick.style_description_TR': 'Escalar la vía con una cuerda ya anclada en la parte superior.',
   'tick.style_description_FS': 'Escalar la vía sin ningún equipo de protección ni cuerdas.',
   'tick.style_description_PJ':
@@ -222,6 +223,7 @@ export default {
   'tick.wizard.a_aid_no': 'No, no llegué arriba',
   'tick.wizard.q_method': '¿Cómo la escalaste?',
   'tick.wizard.a_method_lead': 'De primero — chapé el material durante la subida',
+  'tick.wizard.a_method_partly_lead': 'Guía alterna: solo guié parte de la ruta',
   'tick.wizard.a_method_tr': 'Top rope — la cuerda ya estaba anclada arriba',
   'tick.wizard.a_method_solo': 'Sin cuerda en absoluto (free solo)',
   'tick.wizard.q_first_attempt': '¿Era tu primer intento en esta vía?',
