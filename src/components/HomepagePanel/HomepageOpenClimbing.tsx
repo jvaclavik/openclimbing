@@ -267,7 +267,7 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
   const { poiTypes } = useUserSettingsContext().climbingFilter;
   const listType = listTypeFromPoiTypes(poiTypes);
   const isMobileMode = useMobileMode();
-  // homepage drawer defaults to full – treat unknown (SSR / before mount) as expanded
+  // treat unknown (SSR / before the drawer mounts) as expanded
   const { drawerSnap } = useMapChrome();
   const isPeek = drawerSnap === 'quarter';
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Drawer } from './Drawer';
 import { PanelWrapper } from './PanelHelpers';
 import { useMobileMode } from '../helpers';
+import { Snap } from './drawerSnap';
 
 export const DRAWER_PREVIEW_PADDING = 24;
 export const DRAWER_PREVIEW_HEIGHT = 62 + DRAWER_PREVIEW_PADDING;
@@ -12,6 +13,7 @@ type MobilePageDrawerProps = {
   onClose?: (e: React.TransitionEvent<HTMLDivElement>, open: boolean) => void;
   className: string;
   topOffset?: number;
+  defaultSnap?: Snap;
 };
 
 export const MobilePageDrawer = ({
@@ -19,6 +21,7 @@ export const MobilePageDrawer = ({
   onClose,
   className,
   topOffset = DRAWER_TOP_OFFSET,
+  defaultSnap = 'full',
 }: MobilePageDrawerProps) => {
   const isMobileMode = useMobileMode();
 
@@ -27,7 +30,7 @@ export const MobilePageDrawer = ({
       topOffset={topOffset}
       className={className}
       onTransitionEnd={onClose}
-      defaultSnap="full"
+      defaultSnap={defaultSnap}
     >
       {children}
     </Drawer>
