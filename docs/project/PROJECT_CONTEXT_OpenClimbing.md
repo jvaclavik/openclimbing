@@ -7,6 +7,27 @@
 
 > **Wichtig:** Dieses Dokument ist eine Übergabe aus bisherigen Gesprächen und einem von Cursor erstellten Bestandsbericht. Es ist **keine** Garantie, dass der aktuelle Repository-Stand unverändert ist. Vor Änderungen den Code, die Konfiguration und den aktuellen Git-Status selbst prüfen. **Bestätigte Tatsachen, Berichtsangaben, Wünsche und offene Fragen nicht vermischen.**
 
+## Aktueller Stand (05.11.2026 Abend, verifiziert)
+
+Die Abschnitte darunter bleiben die ursprüngliche Übergabe. Seitdem ist Folgendes erledigt; nicht mehr als offen behandeln:
+
+- **PR #1, #2, #3 und #5 sind in `master` gemergt.** `vps-deploy.yml` ist gelöscht.
+- Die App läuft öffentlich auf **Vercel**: [https://klettersteig-karte.vercel.app](https://klettersteig-karte.vercel.app). Team „OpenClimbing“, Production-Branch `master`. Jeder Merge auf `master` wird automatisch live.
+- Deutsch, Klettersteig-Schalter, Grad A–F und Startausschnitt Franken/Alpen sind in `master`.
+- Auf Hosts ohne lokale SQLite (also Vercel) sind **Meine Listen, Ticks, Kletterprofil und Rangliste ausgeblendet** (`HAS_USER_DB` in `src/services/osm/consts.ts`).
+- Die Kletter-Kacheln kommen weiter von `openclimbing.org`. Eine eigene Datenbank gibt es auf Vercel nicht.
+- Cursor-Umgebung: `.cursor/environment.json` und `.cursor/cloud-agent-start.sh` liegen im Repo.
+
+**Dadurch veraltet in den Abschnitten 3, 5, 9 und 10:** Die Frage, ob PR #1 gemergt ist; ob Start/Build/Test schon gelaufen sind; die Empfehlung, Vercel nicht zu nutzen. Die Oberfläche läuft bewusst auf Vercel. Ein eigener Docker-Server bleibt nur nötig, wenn eigene Kacheln oder Nutzerlisten gewünscht sind.
+
+**Noch offen, nicht ungefragt anfassen:**
+
+1. Eigene Schlüssel für MapTiler und OSM-/Wikimedia-Login (die in `.env` gehören dem Originalprojekt).
+2. Optional eine eigene Domain.
+3. Produktarbeit an Karte, Filtern, Deutsch und iPhone/iPad.
+
+Raspberry Pi nicht verändern. Keine Secrets ausgeben.
+
 ## 1. Das Vorhaben in einem Satz
 
 Aus einem bereits existierenden Open-Source-Projekt soll schrittweise eine **eigene, moderne, deutschsprachige Klettersteig-Web-App** entstehen, die sich auf Klettersteige in Deutschland und Österreich, insbesondere Franken und den Alpen, konzentriert, auf iPhone/iPad gut funktioniert und langfristig unabhängig vom privaten Raspberry Pi öffentlich erreichbar ist.
@@ -66,19 +87,19 @@ Der Nutzer bestätigte nach einer Anleitung, dass die Installation bzw. Nutzung 
 
 ### 4.1 Technologie
 
-| Bereich | Berichteter Stand |
-|---|---|
-| Sprache | TypeScript / JavaScript |
-| Web-App | Next.js 15, Pages Router |
-| Oberfläche | React 19, Material UI |
-| Interaktive Karte | MapLibre GL |
-| Datenbank | SQLite, `better-sqlite3` |
-| Geodaten | OpenStreetMap, Overpass API, Turf.js |
-| Anmeldung | OpenStreetMap OAuth, Wikimedia |
-| Routing | GraphHopper (optional) |
-| Betrieb | Docker, GitHub Actions; ursprünglich VPS-orientiert |
-| Qualität | Jest, ESLint, Prettier, Sentry |
-| Mobil | Responsives Layout, PWA-Manifest, iOS-Home-Screen-Nutzung |
+| Bereich           | Berichteter Stand                                         |
+| ----------------- | --------------------------------------------------------- |
+| Sprache           | TypeScript / JavaScript                                   |
+| Web-App           | Next.js 15, Pages Router                                  |
+| Oberfläche        | React 19, Material UI                                     |
+| Interaktive Karte | MapLibre GL                                               |
+| Datenbank         | SQLite, `better-sqlite3`                                  |
+| Geodaten          | OpenStreetMap, Overpass API, Turf.js                      |
+| Anmeldung         | OpenStreetMap OAuth, Wikimedia                            |
+| Routing           | GraphHopper (optional)                                    |
+| Betrieb           | Docker, GitHub Actions; ursprünglich VPS-orientiert       |
+| Qualität          | Jest, ESLint, Prettier, Sentry                            |
+| Mobil             | Responsives Layout, PWA-Manifest, iOS-Home-Screen-Nutzung |
 
 ### 4.2 Relevante Codebereiche laut Bericht
 
