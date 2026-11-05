@@ -264,3 +264,7 @@ Eine übersichtliche, schnelle, **deutschsprachige Klettersteig-Karte** für die
 ## 11. Empfohlener Einstieg für jeden neuen KI-Agenten
 
 > Lies diese Datei vollständig. Untersuche danach den **aktuellen** Zustand von `mandala-wt/openclimbing`. Betrachte das Dokument als Projektkontext und Wunschbild, **nicht** als Beweis für bereits implementierte Funktionen. Erstelle zunächst eine knappe Übersicht: (a) verifiziert vorhanden, (b) noch offen, (c) empfohlener nächster Schritt. Arbeite auf Deutsch. Verändere nichts ohne entsprechenden Auftrag; schütze `master`, die Raspberry-Pi-Installation und sämtliche Zugangsdaten. Entwickle auf dem bestehenden OpenClimbing-Code weiter, statt die Anwendung neu zu schreiben.
+
+## Produktidee (05.11.2026)
+
+Filter für Routen nach Schwierigkeitsgrad und/oder Region würden die Karte übersichtlicher machen.
