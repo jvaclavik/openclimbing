@@ -3,10 +3,10 @@ import { View } from '../../utils/MapStateContext';
 const EARTH_RADIUS_M = 6372795;
 
 /** Map has to be this close before a clip appears. */
-export const HIDDEN_FERRATA_MIN_ZOOM = 15;
+export const HIDDEN_FERRATA_MIN_ZOOM = 13;
 
 /** Centre of the view, in metres, from the via ferrata point. */
-export const HIDDEN_FERRATA_MAX_DISTANCE_M = 400;
+export const HIDDEN_FERRATA_MAX_DISTANCE_M = 1000;
 
 export type HiddenFerrataClipMatch = {
   id: 'lenzsteig' | 'tegelberg';

@@ -53,6 +53,11 @@ const CloseButton = styled.button`
   }
 `;
 
+/** The clip plays this many times, then closes on its own. */
+export const HIDDEN_FERRATA_PLAY_COUNT = 2;
+
+const UNMUTE_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'] as const;
+
 const playWithSound = (video: HTMLVideoElement) => {
   video.muted = false;
   video.volume = 1;
@@ -70,14 +75,44 @@ export const HiddenFerrataClip = () => {
   const clip = ready ? matchHiddenFerrataClip(view) : null;
   const [dismissedId, setDismissedId] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playsRef = useRef(0);
   const visible = clip != null && clip.id !== dismissedId;
+
+  // Leaving the spot re-arms it, so coming back plays the clip again.
+  useEffect(() => {
+    if (clip == null && dismissedId != null) setDismissedId(null);
+  }, [clip, dismissedId]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !visible) return undefined;
-    // If unmuted autoplay is blocked, the promise rejects and a tap plays it.
-    playWithSound(video)?.catch(() => undefined);
-    return undefined;
+    playsRef.current = 0;
+
+    // Browsers (iOS above all) refuse unmuted autoplay without a fresh tap.
+    // Muted autoplay is always allowed, so start muted and turn the sound on
+    // with the next touch anywhere on the page.
+    const unmute = () => {
+      video.muted = false;
+      video.volume = 1;
+      if (video.paused) video.play().catch(() => undefined);
+      UNMUTE_EVENTS.forEach((type) =>
+        document.removeEventListener(type, unmute, true),
+      );
+    };
+
+    playWithSound(video)?.catch(() => {
+      video.muted = true;
+      video.play().catch(() => undefined);
+      UNMUTE_EVENTS.forEach((type) =>
+        document.addEventListener(type, unmute, true),
+      );
+    });
+
+    return () => {
+      UNMUTE_EVENTS.forEach((type) =>
+        document.removeEventListener(type, unmute, true),
+      );
+    };
   }, [clip?.id, visible]);
 
   if (!visible || !clip) return null;
@@ -88,14 +123,25 @@ export const HiddenFerrataClip = () => {
         key={clip.id}
         ref={videoRef}
         src={clip.src}
-        autoPlay
-        loop
         playsInline
         preload="auto"
+        onEnded={() => {
+          const video = videoRef.current;
+          playsRef.current += 1;
+          if (!video || playsRef.current >= HIDDEN_FERRATA_PLAY_COUNT) {
+            video?.pause();
+            setDismissedId(clip.id);
+            return;
+          }
+          video.currentTime = 0;
+          video.play().catch(() => undefined);
+        }}
         onClick={() => {
           const video = videoRef.current;
-          if (!video || !video.paused) return;
-          playWithSound(video)?.catch(() => undefined);
+          if (!video) return;
+          if (video.paused || video.muted) {
+            playWithSound(video)?.catch(() => undefined);
+          }
         }}
       />
       <CloseButton
