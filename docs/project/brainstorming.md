@@ -18,3 +18,5 @@ Weitere Ideen:
 Persönliches Kletter-Log / Statistik: Man könnte markieren, welche Klettersteige man schon gegangen ist, mit Datum und einer Smiley-Bewertung für den Tag. Auf der Karte würden erledigte Steige gelbe Smileys zeigen (wie beim Geocaching), damit man auf einen Blick sieht, was man schon gemacht hat – vor allem zur eigenen Motivation und Übersicht.
 
 Der Name „Klettersteigkarte“ klingt zu langweilig; Favorit ist „Kletterglück“ (vor „Kletterfreude“).
+
+Verstecktes Fundstück, nur für die eigene Runde: Das Musikvideo ist insgesamt etwa zwei Minuten lang. Auf der Karte gibt es davon nur kurze Szenen mit Ton, wenige Stück, jeweils am passenden Klettersteig – bisher der Lenzsteig bei Karlstadt und der Tegelberg bei Neuschwanstein. Immer dieselben Personen, meist zu dritt, eine vierte nur selten. Kein Menüpunkt, nur wer den Ort kennt, findet es.
