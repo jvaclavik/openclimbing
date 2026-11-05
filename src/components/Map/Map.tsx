@@ -12,6 +12,7 @@ import { MaptilerLogo } from './MapFooter/MaptilerLogo';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { MapFilter } from './MapFilter/MapFilter';
 import { ViaFerrataToggle } from './MapFilter/ViaFerrataToggle';
+import { HiddenFerrataClip } from './HiddenFerrataClip/HiddenFerrataClip';
 import { SunShadowMapButton, SunShadowProvider } from './SunShadow/SunShadow';
 import { RadarMapButton, RadarProvider } from './Radar/Radar';
 import { PrecipAccumMapButton, PrecipAccumProvider } from './Radar/PrecipAccum';
@@ -102,6 +103,7 @@ const Map = () => {
       {mapLoaded && <UserGeojsonLayers />}
       {!mapLoaded && <Spinner color="secondary" />}
       <NoscriptMessage />
+      <HiddenFerrataClip />
       <MapAttributionChrome>
         {SHOW_PROTOTYPE_UI && <BugReportButton />}
         <MaptilerLogo />
