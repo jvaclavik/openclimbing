@@ -4,6 +4,9 @@ import {
   getViaFerrataScaleRangeColor,
   getViaFerrataGrades,
   formatViaFerrataScaleRange,
+  describeViaFerrataScale,
+  resolveViaFerrataScale,
+  isViaFerrataTags,
   VIA_FERRATA_SCALE_COLORS,
 } from '../viaFerrataScale';
 
@@ -12,39 +15,73 @@ describe('getViaFerrataGrades', () => {
     expect(getViaFerrataGrades('0')).toEqual({
       french: 'F',
       german: undefined,
+      huesler: undefined,
     });
   });
 
-  it('converts scale 1 to PD / K1', () => {
-    expect(getViaFerrataGrades('1')).toEqual({ french: 'PD', german: 'K1' });
+  it('converts scale 1 to PD / K1 / Hüsler A', () => {
+    expect(getViaFerrataGrades('1')).toEqual({
+      french: 'PD',
+      german: 'K1',
+      huesler: 'A',
+    });
   });
 
-  it('converts scale 2 to AD / K2', () => {
-    expect(getViaFerrataGrades('2')).toEqual({ french: 'AD', german: 'K2' });
+  it('converts scale 2 to AD / K2 / Hüsler B', () => {
+    expect(getViaFerrataGrades('2')).toEqual({
+      french: 'AD',
+      german: 'K2',
+      huesler: 'B',
+    });
   });
 
-  it('converts scale 3 to D / K3', () => {
-    expect(getViaFerrataGrades('3')).toEqual({ french: 'D', german: 'K3' });
+  it('converts scale 3 to D / K3 / Hüsler C', () => {
+    expect(getViaFerrataGrades('3')).toEqual({
+      french: 'D',
+      german: 'K3',
+      huesler: 'C',
+    });
   });
 
-  it('converts scale 4 to TD / K4', () => {
-    expect(getViaFerrataGrades('4')).toEqual({ french: 'TD', german: 'K4' });
+  it('converts scale 4 to TD / K4 / Hüsler D', () => {
+    expect(getViaFerrataGrades('4')).toEqual({
+      french: 'TD',
+      german: 'K4',
+      huesler: 'D',
+    });
   });
 
-  it('converts scale 5 to ED / K5', () => {
-    expect(getViaFerrataGrades('5')).toEqual({ french: 'ED', german: 'K5' });
+  it('converts scale 5 to ED / K5 / Hüsler E', () => {
+    expect(getViaFerrataGrades('5')).toEqual({
+      french: 'ED',
+      german: 'K5',
+      huesler: 'E',
+    });
   });
 
-  it('converts scale 6 to ABO / K6', () => {
-    expect(getViaFerrataGrades('6')).toEqual({ french: 'ABO', german: 'K6' });
+  it('converts scale 6 to ABO / K6 / Hüsler F', () => {
+    expect(getViaFerrataGrades('6')).toEqual({
+      french: 'ABO',
+      german: 'K6',
+      huesler: 'F',
+    });
   });
 
   it('supports plus and minus grades', () => {
-    expect(getViaFerrataGrades('2+')).toEqual({ french: 'AD+', german: 'K2+' });
-    expect(getViaFerrataGrades('3-')).toEqual({ french: 'D-', german: 'K3-' });
+    expect(getViaFerrataGrades('2+')).toEqual({
+      french: 'AD+',
+      german: 'K2+',
+      huesler: 'B+',
+    });
+    expect(getViaFerrataGrades('3-')).toEqual({
+      french: 'D-',
+      german: 'K3-',
+      huesler: 'C-',
+    });
     expect(getViaFerrataGrades('0+')).toEqual({
       french: 'F+',
       german: undefined,
+      huesler: undefined,
     });
   });
 
@@ -101,5 +138,44 @@ describe('getViaFerrataScaleColor', () => {
     expect(getViaFerrataScaleRangeColor('2+–4', 'light')).toBe(
       VIA_FERRATA_SCALE_COLORS['4'].light,
     );
+  });
+});
+
+describe('describeViaFerrataScale', () => {
+  it('leads with the Hüsler letter used in the Alps', () => {
+    expect(describeViaFerrataScale('3')).toMatchObject({
+      letter: 'C',
+      schall: '3',
+      french: 'D',
+      german: 'K3',
+      veryEasy: false,
+    });
+    expect(describeViaFerrataScale('2+–4')?.letter).toBe('B+–D');
+  });
+
+  it('uses the French grade when there is no Hüsler letter', () => {
+    expect(describeViaFerrataScale('0')).toMatchObject({
+      letter: 'F',
+      veryEasy: true,
+    });
+  });
+});
+
+describe('resolveViaFerrataScale', () => {
+  it('reads the feature tag, then member sections', () => {
+    expect(
+      resolveViaFerrataScale({
+        highway: 'via_ferrata',
+        via_ferrata_scale: '4',
+      }),
+    ).toBe('4');
+    expect(
+      resolveViaFerrataScale({ route: 'via_ferrata' }, ['4', '2+', '3']),
+    ).toBe('2+–4');
+  });
+
+  it('recognises climbing=via_ferrata and ignores ordinary crags', () => {
+    expect(isViaFerrataTags({ climbing: 'via_ferrata' })).toBe(true);
+    expect(resolveViaFerrataScale({ climbing: 'crag' }, ['3'])).toBeNull();
   });
 });

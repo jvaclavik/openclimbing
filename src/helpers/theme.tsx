@@ -1,5 +1,5 @@
 import { useMediaQuery } from '@mui/material';
-import { grey, red } from '@mui/material/colors';
+import { red } from '@mui/material/colors';
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles';
 import Cookies from 'js-cookie';
 import {
@@ -63,26 +63,26 @@ const lightTheme = createTheme({
   palette: {
     divider: 'rgba(0, 0, 0, 0.04)',
     primary: {
-      main: '#ae2f0c',
+      main: '#8c4a2f',
     },
     secondary: {
-      main: '#737373',
+      main: '#5c675f',
     },
     tertiary: {
-      main: '#0078a8', // links
+      main: '#1d6a8a', // links
     },
     error: {
       main: red.A400,
     },
     background: {
-      default: '#f6f6f6ff',
-      elevation: '#ddd',
-      paper: '#fafafa',
-      hover: '#f2f3f2',
-      searchBox: '#eb5757',
-      searchInput: 'rgba(255,255,255,0.6)',
-      searchInputSolid: 'rgb(249, 248, 244)',
-      searchInputPanel: 'rgba(255,255,255,0.8)',
+      default: '#f3efe8',
+      elevation: '#e4ddd2',
+      paper: '#fbf8f4',
+      hover: '#efe8de',
+      searchBox: '#1f4a3c',
+      searchInput: 'rgba(255,250,244,0.72)',
+      searchInputSolid: '#f6f1e8',
+      searchInputPanel: 'rgba(255,250,244,0.88)',
     },
     invertFilter: 'invert(0)',
     climbing: {
@@ -106,27 +106,27 @@ const darkTheme = createTheme({
     mode: 'dark',
     divider: 'rgba(255, 255, 255, 0.04)',
     primary: {
-      main: '#f37553',
+      main: '#e0a36a',
     },
     secondary: {
-      main: '#ffffff96',
+      main: '#c5cdc6',
     },
     tertiary: {
-      main: '#00b6ff', // links
+      main: '#7ec8e3', // links
     },
     error: {
       main: red.A400,
     },
 
     background: {
-      default: '#1a1a1a',
-      elevation: '#2e2e2e',
-      paper: '#242424',
-      hover: grey['700'],
-      searchBox: '#963838',
-      searchInput: 'rgba(0,0,0,0.5)',
-      searchInputSolid: 'rgb(42, 34, 34)',
-      searchInputPanel: 'rgba(0,0,0,0.55)',
+      default: '#141a17',
+      elevation: '#2a332e',
+      paper: '#1c2420',
+      hover: '#2e3833',
+      searchBox: '#16362d',
+      searchInput: 'rgba(12,18,16,0.55)',
+      searchInputSolid: '#1a2420',
+      searchInputPanel: 'rgba(12,18,16,0.62)',
     },
     invertFilter: 'invert(1)',
     climbing: {

@@ -1,5 +1,6 @@
 import { intl } from '../../../services/intl';
 import { PROJECT_ID } from '../../../services/project';
+import { isViaFerrataTags } from '../../../services/tagging/viaFerrataScale';
 import { Feature, FeatureTags } from '../../../services/types';
 
 export const isOpenClimbingSelfLink = (value: string) =>
@@ -23,11 +24,7 @@ const isDisallowed = (tags: FeatureTags) =>
 const isRoute = (tags: FeatureTags) =>
   ['route', 'route_bottom', 'abseil_route'].includes(tags.climbing);
 
-const isFerrata = (tags: FeatureTags) =>
-  tags.highway === 'via_ferrata' ||
-  tags.route === 'via_ferrata' ||
-  tags.sport === 'via_ferrata' ||
-  !!tags.via_ferrata_scale;
+const isFerrata = (tags: FeatureTags) => isViaFerrataTags(tags);
 
 const hasClimbingTags = (tags: FeatureTags) =>
   tags.sport === 'climbing' ||

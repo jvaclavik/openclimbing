@@ -1,3 +1,4 @@
+import { isViaFerrataTags } from '../services/tagging/viaFerrataScale';
 import { Feature } from '../services/types';
 import { roundedToDeg } from '../utils';
 import { intl, t } from '../services/intl';
@@ -34,6 +35,9 @@ export const getHumanPoiType = (feature: Feature) =>
   hasName(feature) ? getTypeLabel(feature) : t('featurepanel.no_name');
 
 export const getSeoPoiType = (feature: Feature) => {
+  if (isViaFerrataTags(feature.tags)) {
+    return t('climbing.type.ferrata');
+  }
   switch (feature.tags?.climbing) {
     case 'area':
       return t('seo.type.area');

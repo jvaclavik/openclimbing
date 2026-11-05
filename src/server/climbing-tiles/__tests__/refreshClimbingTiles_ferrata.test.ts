@@ -35,6 +35,14 @@ const response: OsmResponse = {
       nodes: [4, 5],
       tags: { highway: 'via_ferrata' },
     },
+    { type: 'node', id: 11, lat: 47.5, lon: 11.1 },
+    { type: 'node', id: 12, lat: 47.51, lon: 11.12 },
+    {
+      type: 'way',
+      id: 13,
+      nodes: [11, 12],
+      tags: { climbing: 'via_ferrata', name: 'Innsbrucker Klettersteig' },
+    },
     {
       type: 'relation',
       id: 7,
@@ -56,6 +64,7 @@ describe('getNewRecords', () => {
 
     expect(records.map(({ type, osmType }) => `${osmType}:${type}`)).toEqual([
       'node:ferrata',
+      'way:ferrata',
       'way:ferrata',
       'way:ferrata',
       'relation:ferrata',

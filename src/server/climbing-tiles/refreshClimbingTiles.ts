@@ -11,6 +11,7 @@ import {
 import { cacheTile000 } from './getClimbingTile';
 import { GeojsonFeature, OsmResponse } from './overpass/types';
 import { FeatureTags } from '../../services/types';
+import { isViaFerrataTags } from '../../services/tagging/viaFerrataScale';
 import { ClimbingFeaturesRow } from '../db/types';
 import { resolveCountryCode } from 'next-codegrid';
 
@@ -46,11 +47,7 @@ const ROUTE_VALUES = ['route', 'route_bottom', 'abseil_route'];
 
 const isRoute = (tags: FeatureTags) => ROUTE_VALUES.includes(tags.climbing);
 
-const isFerrata = (tags: FeatureTags) =>
-  tags.highway === 'via_ferrata' ||
-  tags.route === 'via_ferrata' ||
-  tags.sport === 'via_ferrata' ||
-  !!tags.via_ferrata_scale;
+const isFerrata = (tags: FeatureTags) => isViaFerrataTags(tags);
 
 // same condition as the osmium tags-filter which builds ../overpass.json
 const hasClimbingTags = (tags: FeatureTags) =>

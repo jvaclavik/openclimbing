@@ -15,7 +15,7 @@ export const LogoOpenClimbing = ({ width, style }: LogoOpenClimbingProps) => (
   >
     <path
       d="M 60,0 L 549,0 A 60,60 0 0 1 609,60 L 609,549 A 60,60 0 0 1 549,609 L 60,609 A 60,60 0 0 1 0,549 L 0,60 A 60,60 0 0 1 60,0 "
-      fill="#EB5757"
+      fill="#1f4a3c"
     />
     <mask
       id="mask0_1702_220"

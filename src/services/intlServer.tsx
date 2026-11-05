@@ -1,4 +1,3 @@
-import acceptLanguageParser from 'accept-language-parser';
 import nextCookies from 'next-cookies';
 import { LANGUAGES } from '../config.mjs';
 import { Intl } from './intl';
@@ -7,14 +6,10 @@ import { Intl } from './intl';
 const getMessages = async (lang) =>
   (await import(`../locales/${lang}.js`)).default;
 
-const getLangFromAcceptHeader = (ctx) => {
-  const header = ctx.req.headers['accept-language'];
-  return acceptLanguageParser.pick(Object.keys(LANGUAGES), header, {
-    loose: true,
-  });
-};
-
-const DEFAULT_LANG = 'en';
+// vocabulary.js is the English source catalog. German is the UI default for
+// this fork, but it still has to be merged on top of that catalog.
+const MESSAGE_SOURCE_LANG = 'en';
+export const DEFAULT_LANG = 'de';
 
 const resolveCurrentLang = (ctx) => {
   const langInUrl = ctx.locale;
@@ -25,13 +20,14 @@ const resolveCurrentLang = (ctx) => {
     return langInUrl;
   }
 
-  // app is usually used without lang prefix (cookie or accept-language)
+  // cookie from the language switcher. Browser Accept-Language is ignored so
+  // the map opens in German until someone picks another language.
   const { lang } = nextCookies(ctx);
   if (lang && LANGUAGES[lang]) {
     return lang;
   }
 
-  return getLangFromAcceptHeader(ctx) ?? DEFAULT_LANG;
+  return DEFAULT_LANG;
 };
 
 // _app and _document both need the server intl within the same request; cache
@@ -48,7 +44,8 @@ export const getServerIntl = async (ctx): Promise<Intl> => {
   const compute = async (): Promise<Intl> => {
     const lang = resolveCurrentLang(ctx);
     const vocabulary = await getMessages('vocabulary');
-    const messages = lang === DEFAULT_LANG ? {} : await getMessages(lang);
+    const messages =
+      lang === MESSAGE_SOURCE_LANG ? {} : await getMessages(lang);
 
     return {
       lang,

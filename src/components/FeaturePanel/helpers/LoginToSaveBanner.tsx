@@ -8,8 +8,8 @@ import { useState } from 'react';
 import { t } from '../../../services/intl';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 
-const ACCENT = '#eb5757';
-const ACCENT_HOVER = '#c2185b';
+const ACCENT = '#8c4a2f';
+const ACCENT_HOVER = '#6e3924';
 
 const Card = styled.div<{ $overlay?: boolean }>`
   position: relative;

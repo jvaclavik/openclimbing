@@ -22,7 +22,7 @@ export const CRAG = {
 
 export const VIA_FERRATA = {
   IMAGE: 'climbing:via-ferrata-gray',
-  COLOR: '#666',
+  COLOR: '#c56a12',
 };
 
 export const GYM = {
