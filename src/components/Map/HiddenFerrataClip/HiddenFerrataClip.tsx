@@ -56,7 +56,9 @@ const CloseButton = styled.button`
 /** The clip plays this many times, then closes on its own. */
 export const HIDDEN_FERRATA_PLAY_COUNT = 2;
 
-const UNMUTE_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'] as const;
+// Only these count as a user gesture in Safari. Unmuting on pointerdown or
+// touchstart makes iOS pause the clip instead.
+const UNMUTE_EVENTS = ['touchend', 'click', 'keydown'] as const;
 
 const playWithSound = (video: HTMLVideoElement) => {
   video.muted = false;
@@ -76,7 +78,14 @@ export const HiddenFerrataClip = () => {
   const [dismissedId, setDismissedId] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playsRef = useRef(0);
+  const stoppingRef = useRef(false);
   const visible = clip != null && clip.id !== dismissedId;
+
+  const close = (id: string) => {
+    stoppingRef.current = true;
+    videoRef.current?.pause();
+    setDismissedId(id);
+  };
 
   // Leaving the spot re-arms it, so coming back plays the clip again.
   useEffect(() => {
@@ -87,31 +96,47 @@ export const HiddenFerrataClip = () => {
     const video = videoRef.current;
     if (!video || !visible) return undefined;
     playsRef.current = 0;
+    stoppingRef.current = false;
+    let armed = false;
 
-    // Browsers (iOS above all) refuse unmuted autoplay without a fresh tap.
-    // Muted autoplay is always allowed, so start muted and turn the sound on
-    // with the next touch anywhere on the page.
-    const unmute = () => {
-      video.muted = false;
-      video.volume = 1;
-      if (video.paused) video.play().catch(() => undefined);
+    const disarm = () => {
+      armed = false;
       UNMUTE_EVENTS.forEach((type) =>
         document.removeEventListener(type, unmute, true),
       );
     };
 
-    playWithSound(video)?.catch(() => {
+    // Browsers (iOS above all) refuse unmuted autoplay without a fresh tap.
+    // Muted autoplay is always allowed, so keep playing muted and turn the
+    // sound on with the next tap anywhere on the page.
+    const playMuted = () => {
       video.muted = true;
       video.play().catch(() => undefined);
+      if (armed) return;
+      armed = true;
       UNMUTE_EVENTS.forEach((type) =>
         document.addEventListener(type, unmute, true),
       );
-    });
+    };
+
+    function unmute() {
+      disarm();
+      playWithSound(video!).catch(playMuted);
+    }
+
+    // iOS can still pause a clip on its own (e.g. after unmuting). Only the
+    // end of the second run or the close button may stop it.
+    const onPause = () => {
+      if (video.ended || stoppingRef.current || !video.isConnected) return;
+      playMuted();
+    };
+
+    video.addEventListener('pause', onPause);
+    playWithSound(video).catch(playMuted);
 
     return () => {
-      UNMUTE_EVENTS.forEach((type) =>
-        document.removeEventListener(type, unmute, true),
-      );
+      disarm();
+      video.removeEventListener('pause', onPause);
     };
   }, [clip?.id, visible]);
 
@@ -129,8 +154,7 @@ export const HiddenFerrataClip = () => {
           const video = videoRef.current;
           playsRef.current += 1;
           if (!video || playsRef.current >= HIDDEN_FERRATA_PLAY_COUNT) {
-            video?.pause();
-            setDismissedId(clip.id);
+            close(clip.id);
             return;
           }
           video.currentTime = 0;
@@ -149,7 +173,7 @@ export const HiddenFerrataClip = () => {
         aria-label="close"
         onClick={(event) => {
           event.stopPropagation();
-          setDismissedId(clip.id);
+          close(clip.id);
         }}
       >
         <CloseIcon fontSize="inherit" />

@@ -3,13 +3,13 @@ import { View } from '../../utils/MapStateContext';
 const EARTH_RADIUS_M = 6372795;
 
 /** Map has to be this close before a clip appears. */
-export const HIDDEN_FERRATA_MIN_ZOOM = 13;
+export const HIDDEN_FERRATA_MIN_ZOOM = 14;
 
 /** Centre of the view, in metres, from the via ferrata point. */
-export const HIDDEN_FERRATA_MAX_DISTANCE_M = 1000;
+export const HIDDEN_FERRATA_MAX_DISTANCE_M = 700;
 
 export type HiddenFerrataClipMatch = {
-  id: 'lenzsteig' | 'tegelberg';
+  id: 'lenzsteig' | 'tegelberg' | 'mezzocorona';
   src: string;
 };
 
@@ -27,6 +27,13 @@ const SPOTS: Array<HiddenFerrataClipMatch & { lat: number; lon: number }> = [
     // Tegelbergsteig, OSM way 84013032
     lat: 47.5626131,
     lon: 10.7747456,
+  },
+  {
+    id: 'mezzocorona',
+    src: '/versteckt/mezzocorona.mp4',
+    // Ferrata Burrone Giovannelli, Mezzocorona, OSM way 219231582
+    lat: 46.2304381,
+    lon: 11.0987999,
   },
 ];
 
