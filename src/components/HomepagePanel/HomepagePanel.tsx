@@ -24,10 +24,10 @@ export const HomepagePanel = () => {
     return null;
   }
 
-  // swiping the drawer down only collapses it to the preview strip (like the
-  // other pages) – the homepage is dismissed for good by the close button
+  // starts as the preview strip so the map and its bottom controls stay usable
+  // on phones; swiping up opens it, the close button dismisses it for good
   return (
-    <MobilePageDrawer className="homepage-drawer">
+    <MobilePageDrawer className="homepage-drawer" defaultSnap="quarter">
       <Homepage onClick={persistHideHomepage} mobileMode={isMobileMode} />
     </MobilePageDrawer>
   );
