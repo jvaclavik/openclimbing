@@ -43,6 +43,7 @@ import {
   HAMBURGER_OVERLAY_Z,
 } from '../../utils/mapChromeRegistry';
 import { COMMUNITY_URL } from '../../consts';
+import { HAS_USER_DB } from '../../../services/osm/consts';
 
 const StyledGithubIcon = styled(GithubIcon)`
   filter: ${({ theme }) => theme.palette.invertFilter};
@@ -246,7 +247,7 @@ export const HamburgerMenu = () => {
                 openUserSettings={handleOpenUserSettings}
               />
               <Divider sx={{ mt: 1, mb: 2 }} />
-              {isOpenClimbing && (
+              {isOpenClimbing && HAS_USER_DB && (
                 <MyClimbingProfileMenuItem closeMenu={close} />
               )}
               {isMobileMode && (
@@ -255,7 +256,7 @@ export const HamburgerMenu = () => {
                   <AboutLink closeMenu={close} />
                 </>
               )}
-              {loggedIn && (
+              {loggedIn && HAS_USER_DB && (
                 <>
                   <Divider sx={{ my: 1 }} />
                   <MyListsSection closeMenu={close} />
@@ -266,7 +267,7 @@ export const HamburgerMenu = () => {
                 <>
                   <ClimbingGradesTableLink closeMenu={close} />
                   <TickScoringLink closeMenu={close} />
-                  {isOpenClimbing && (
+                  {isOpenClimbing && HAS_USER_DB && (
                     <ClimbingLeaderboardLink closeMenu={close} />
                   )}
                 </>

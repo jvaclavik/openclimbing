@@ -12,6 +12,7 @@ import { UserList, UserListItem } from '../../services/my-lists/myListsTypes';
 import { pickNextListColor } from '../../services/my-lists/listColors';
 import { useOsmAuthContext } from './OsmAuthContext';
 import { usePersistedState } from './usePersistedState';
+import { HAS_USER_DB } from '../../services/osm/consts';
 
 const QUERY_KEY = ['my-lists'];
 
@@ -110,7 +111,7 @@ const listsContainingFn = (lists: UserList[] | null) => (shortId: string) =>
 
 export const MyListsProvider: React.FC = ({ children }) => {
   const { loggedIn } = useOsmAuthContext();
-  const { lists, isFetching } = useListsQuery(loggedIn);
+  const { lists, isFetching } = useListsQuery(loggedIn && HAS_USER_DB);
   const m = useListsMutations();
 
   const [lastUsedListId, setLastUsedListId] = usePersistedState<number | null>(
