@@ -20,9 +20,14 @@ const toFeature = async (full: ClimbingFeatureFull): Promise<Feature> => {
   return addSchemaToFeature(full as unknown as Feature);
 };
 
-// On the server we read the local SQLite DB directly (no network round-trip).
-// The dynamic import keeps better-sqlite3 out of the client bundle - it is
-// aliased away for the browser build in next.config.mjs.
+// Only the canonical host owns the SQLite DB (see getClimbingAreas.ts). Hosts
+// without it (e.g. Vercel) must use the remote API even during SSR, otherwise
+// every feature page falls back to slow OSM/Overpass requests.
+const isCanonicalHost = CLIMBING_TILES_HOST === '/';
+
+// On the canonical server we read the local SQLite DB directly (no network
+// round-trip). The dynamic import keeps better-sqlite3 out of the client
+// bundle - it is aliased away for the browser build in next.config.mjs.
 const getFromSqlite = async (apiId: OsmId): Promise<ClimbingFeatureFull> => {
   const { getClimbingFeature } = await import(
     '../../server/climbing-tiles/getClimbingFeature'
@@ -37,8 +42,9 @@ const getFromApi = async (apiId: OsmId): Promise<ClimbingFeatureFull> => {
 
 /**
  * Fetches a full feature from the climbing-tiles SQLite DB:
- *  - on the server it calls the select code directly,
- *  - in the browser it hits the GET /api/climbing-tiles/get endpoint.
+ *  - on the canonical server it calls the select code directly,
+ *  - elsewhere (browser, hosts without the DB) it hits the
+ *    GET /api/climbing-tiles/get endpoint.
  *
  * On ANY failure (feature not in DB -> 404, missing db.sqlite / 500, network,
  * non-climbing POI, ...) it transparently falls back to the original
@@ -56,9 +62,10 @@ export const fetchFeatureFromTiles = async (apiId: OsmId): Promise<Feature> => {
   }
 
   try {
-    const full = isServer()
-      ? await getFromSqlite(apiId)
-      : await getFromApi(apiId);
+    const full =
+      isCanonicalHost && isServer()
+        ? await getFromSqlite(apiId)
+        : await getFromApi(apiId);
     return await toFeature(full);
   } catch (e) {
     // eslint-disable-next-line no-console
