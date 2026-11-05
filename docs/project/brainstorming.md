@@ -19,4 +19,4 @@ Persönliches Kletter-Log / Statistik: Man könnte markieren, welche Kletterstei
 
 Der Name „Klettersteigkarte“ klingt zu langweilig; Favorit ist „Kletterglück“ (vor „Kletterfreude“).
 
-Verstecktes Fundstück, nur für die eigene Runde: An dem Klettersteig, wo das Experiment entstanden ist, zoomt die Karte hin und spielt das kurze Musikvideo mit Ton – die KI-animierten Fotos aus den Bergen, ungefähr fünf Sekunden pro Szene. Kein Menüpunkt, nur wer den Ort kennt, findet es.
+Verstecktes Fundstück, nur für die eigene Runde: Das Musikvideo ist insgesamt etwa zwei Minuten lang. Auf der Karte gibt es davon nur kurze Szenen mit Ton, wenige Stück, jeweils am passenden Klettersteig – bisher der Lenzsteig bei Karlstadt und der Tegelberg bei Neuschwanstein. Immer dieselben Personen, meist zu dritt, eine vierte nur selten. Kein Menüpunkt, nur wer den Ort kennt, findet es.
