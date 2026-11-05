@@ -11,6 +11,7 @@ import { LayerSwitcherButton } from '../LayerSwitcher/LayerSwitcherButton';
 import { MaptilerLogo } from './MapFooter/MaptilerLogo';
 import { useMapStateContext } from '../utils/MapStateContext';
 import { MapFilter } from './MapFilter/MapFilter';
+import { ViaFerrataToggle } from './MapFilter/ViaFerrataToggle';
 import { SunShadowMapButton, SunShadowProvider } from './SunShadow/SunShadow';
 import { RadarMapButton, RadarProvider } from './Radar/Radar';
 import { PrecipAccumMapButton, PrecipAccumProvider } from './Radar/PrecipAccum';
@@ -128,6 +129,7 @@ const Map = () => {
                   <PrecipAccumMapButton />
                   <SunShadowMapButton />
                   <Terrain3dMapButton />
+                  {hasClimbingLayer && <ViaFerrataToggle />}
                   {hasClimbingLayer && <MapFilter />}
                   <LayerSwitcherDynamic />
                 </Stack>

@@ -250,6 +250,11 @@ export default {
   'climbing_renderer.climbing_grade_maximum': 'maximum climbing grade',
   'climbing_renderer.via_ferrata_scale': 'via ferrata scale',
   'climbing_renderer.sac_scale': 'SAC scale',
+  'via_ferrata.difficulty': 'Via ferrata grade',
+  'via_ferrata.huesler': 'Hüsler',
+  'via_ferrata.schall': 'Schall',
+  'via_ferrata.very_easy': 'very easy',
+  'via_ferrata.unknown_grade': 'Via ferrata · grade not set',
   'featurepanel.fee.free_access': 'No fee',
   'featurepanel.fee.required': 'Fee required',
   'featurepanel.fee.charge_amount': '__amount__ fee',
@@ -266,6 +271,7 @@ export default {
     'openclimbing.org is an open platform for climbing guides and maps. Topos and photos are stored in OpenStreetMap and Wikipedia projects, so they can be edited by anyone.',
   'climbing.guideinfo.button': 'More info',
 
+  'project.brand_name': 'Klettersteig-Karte',
   'project.openclimbing.description': 'Open climbing guidebook',
   'project.openclimbing.serpDescription': 'A wiki based open-source climbing map with topos. Built on OpenStreetMap and Wikipedia projects.',
   'project.openclimbing.climbing_guide': 'Free climbing guide & topos',
@@ -328,6 +334,7 @@ export default {
   'homepage.gallery.show_more': `more photos`,
   'homepage.about_banner_desc': `No ads. No paywall. A climbing guide that belongs to everyone.`,
   'homepage.about_banner_cta': `Learn more`,
+  'homepage.footer_credit': `Based on OpenClimbing · data © OpenStreetMap and Wikimedia`,
 
   'support_us.title': `Support us`,
   'support_us.p1': `We're building this app in our spare time because we enjoy it and because we believe that information about climbing routes in public spaces should be freely available, just like street names.`,
@@ -605,6 +612,7 @@ export default {
   'climbing_legend.areas_crags': 'Climbing',
   'climbing_legend.topos': 'topo',
   'climbing_legend.only_position': 'only position',
+  'climbing_legend.ferrata': 'via ferrata',
 
   'editdialog.save_button_delete': 'Delete',
   'editdialog.add_heading': 'Add to OpenStreetMap',
@@ -1080,6 +1088,7 @@ export default {
   'crag_filter.type': 'Type',
   'crag_filter.type_rock': 'Rock climbing',
   'crag_filter.type_ferrata': 'Via ferrata',
+  'crag_filter.only_ferrata': 'Only via ferratas',
   'crag_filter.type_gym': 'Climbing gym',
   'crag_filter.advanced': 'Advanced filters',
   'crag_filter.material_placeholder': 'Any material',

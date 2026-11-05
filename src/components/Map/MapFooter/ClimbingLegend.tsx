@@ -7,6 +7,7 @@ import CragRed from '../../../../public/icons-climbing/icons/crag-red.svg';
 import AreaGray from '../../../../public/icons-climbing/icons/area-gray.svg';
 import CragGray from '../../../../public/icons-climbing/icons/crag-gray.svg';
 import { t } from '../../../services/intl';
+import { VIA_FERRATA_LINE_COLOR } from '../../../services/tagging/viaFerrataScale';
 
 const HideableContainer = styled.div<{ $isVisible: boolean }>`
   transition: max-height 0.15s ease-out;
@@ -105,6 +106,18 @@ export const ClimbingLegend = ({ isVisible, setLegendShown }) => {
               />
             </span>
             {t('climbing_legend.topos')}
+          </Item>
+          <Item>
+            <span
+              style={{
+                width: 18,
+                height: 4,
+                borderRadius: 2,
+                background: VIA_FERRATA_LINE_COLOR,
+                boxShadow: '0 0 0 2px #fff8ee',
+              }}
+            />
+            {t('climbing_legend.ferrata')}
           </Item>
           <ItemFaded>
             <span>

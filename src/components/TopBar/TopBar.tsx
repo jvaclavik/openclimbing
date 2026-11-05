@@ -71,10 +71,25 @@ const BrandLink = styled.a`
   color: ${({ theme }) => theme.palette.text.primary};
   text-decoration: none;
   flex-shrink: 0;
+  min-width: 0;
 
   &:hover {
     text-decoration: none;
     opacity: 0.85;
+  }
+`;
+
+const Wordmark = styled.span`
+  font-family: ${({ theme }) => theme.typography.h1.fontFamily};
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: ${({ theme }) => theme.palette.primary.main};
+  white-space: nowrap;
+
+  @media ${isMobileMode} {
+    display: none;
   }
 `;
 
@@ -189,9 +204,10 @@ const Brand = () => {
     <BrandLink
       href="/"
       onClick={handleClick}
-      aria-label={t('topbar.climbing_areas')}
+      aria-label={t('project.brand_name')}
     >
       <LogoOpenClimbing width={36} style={{ minWidth: 36 }} />
+      <Wordmark>{t('project.brand_name')}</Wordmark>
     </BrandLink>
   );
 };

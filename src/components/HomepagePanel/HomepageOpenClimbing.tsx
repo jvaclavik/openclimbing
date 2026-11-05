@@ -258,7 +258,7 @@ const Footer = () => (
       pb: 2,
     }}
   >
-    Made in Prague with ♥
+    {t('homepage.footer_credit')}
   </Typography>
 );
 
@@ -275,7 +275,7 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
     <>
       <MobileOnly>
         <BrandBar $peek={isPeek}>
-          <Brand $peek={isPeek}>OpenClimbing</Brand>
+          <Brand $peek={isPeek}>{t('project.brand_name')}</Brand>
         </BrandBar>
       </MobileOnly>
       <ClosePanelButton right onClick={onClose} />
@@ -299,7 +299,7 @@ export function HomepageOpenClimbing({ onClose }: { onClose: () => void }) {
               }}
             >
               <DesktopOnly>
-                <Brand>OpenClimbing</Brand>
+                <Brand>{t('project.brand_name')}</Brand>
               </DesktopOnly>
               <Subtitle />
             </Stack>

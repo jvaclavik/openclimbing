@@ -1,18 +1,45 @@
-import { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
+import {
+  FilterSpecification,
+  LayerSpecification,
+} from '@maplibre/maplibre-gl-style-spec';
 import { CLIMBING_TILES_SOURCE, VIA_FERRATA } from '../consts';
+import { linear } from './helpers';
+
+const ferrataGeometry = (
+  geometry: 'Point' | 'LineString',
+): FilterSpecification => [
+  'all',
+  ['==', 'type', 'ferrata'],
+  ['==', '$type', geometry],
+];
 
 export const ferrataLines: LayerSpecification[] = [
+  {
+    id: 'climbing via_ferrata (point)',
+    metadata: { clickableWithOsmId: true },
+    type: 'circle',
+    source: CLIMBING_TILES_SOURCE,
+    minzoom: 3,
+    filter: ferrataGeometry('Point'),
+    paint: {
+      'circle-color': VIA_FERRATA.COLOR,
+      'circle-radius': linear(4, 3.5, 10, 6, 14, 8),
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff8ee',
+      'circle-opacity': 0.95,
+    },
+  },
   {
     id: 'climbing via_ferrata (line) - casing',
     metadata: { clickableWithOsmId: true },
     type: 'line',
     source: CLIMBING_TILES_SOURCE,
-    minzoom: 13,
-    filter: ['==', 'type', 'ferrata'],
-    layout: { 'line-cap': 'round' },
+    minzoom: 11,
+    filter: ferrataGeometry('LineString'),
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
-      'line-color': '#f8f4f0',
-      'line-width': 4,
+      'line-color': '#fff8ee',
+      'line-width': 7,
     },
   },
   {
@@ -20,13 +47,13 @@ export const ferrataLines: LayerSpecification[] = [
     metadata: { clickableWithOsmId: true },
     type: 'line',
     source: CLIMBING_TILES_SOURCE,
-    minzoom: 13,
-    filter: ['==', 'type', 'ferrata'],
-    layout: { 'line-cap': 'round' },
+    minzoom: 11,
+    filter: ferrataGeometry('LineString'),
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
       'line-color': VIA_FERRATA.COLOR,
-      'line-width': 2,
-      'line-dasharray': [2, 1],
+      'line-width': 3.5,
+      'line-dasharray': [1.2, 0.9],
     },
   },
   {
@@ -34,9 +61,9 @@ export const ferrataLines: LayerSpecification[] = [
     metadata: { clickableWithOsmId: true },
     type: 'line',
     source: CLIMBING_TILES_SOURCE,
-    minzoom: 13,
-    filter: ['==', 'type', 'ferrata'],
-    layout: { 'line-cap': 'round' },
+    minzoom: 11,
+    filter: ferrataGeometry('LineString'),
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
       'line-color': '#000',
       'line-opacity': [
@@ -45,7 +72,7 @@ export const ferrataLines: LayerSpecification[] = [
         1,
         0,
       ],
-      'line-width': 2,
+      'line-width': 3.5,
     },
   },
 ];

@@ -14,6 +14,7 @@ import { scaleWithPanelWidth } from '../utils/featurePanelWidth';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { PoiDescription } from './helpers/PoiDescription';
 import { QuickActions } from './QuickActions/QuickActions';
+import { ViaFerrataGrade } from './ViaFerrataGrade';
 
 const Container = styled.div<{ $isStandalone: boolean; $compact?: boolean }>`
   margin: ${({ $compact }) => ($compact ? '0 0 16px' : '20px 0')};
@@ -86,6 +87,7 @@ const TitleRow = () => {
 export const FeatureStickyTitle = () => (
   <StickyTitle>
     <TitleRow />
+    <ViaFerrataGrade compact />
   </StickyTitle>
 );
 
@@ -165,6 +167,7 @@ export const FeatureHeading = ({ headingRef }: FeatureHeadingProps) => {
           }}
         >
           <Headings />
+          <ViaFerrataGrade />
         </Stack>
       )}
       <QuickActions />

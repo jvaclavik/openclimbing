@@ -4,6 +4,13 @@ import React from 'react';
 // eslint-disable-next-line max-lines-per-function
 export const FaviconsOpenClimbing = () => (
   <>
+    <link rel="icon" href="/klettersteig/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/klettersteig/icon-32.png"
+    />
     <link
       rel="shortcut icon"
       href="/openclimbing/logo/openclimbing_192.png"
@@ -42,15 +49,15 @@ export const FaviconsOpenClimbing = () => (
     <link
       rel="mask-icon"
       href="/openclimbing/logo/fav/safari-pinned-tab.svg"
-      color="#eb5757"
+      color="#1f4a3c"
     />{' '}
     {/* For safari tab-favicon */}
     <link rel="manifest" href="/manifest-openclimbing.json" />
-    <meta name="application-name" content="OpenClimbing.org" />
-    <meta name="apple-mobile-web-app-title" content="OpenClimbing.org" />
-    <meta name="theme-color" content="#ffffff" />{' '}
+    <meta name="application-name" content="Klettersteig-Karte" />
+    <meta name="apple-mobile-web-app-title" content="Klettersteig-Karte" />
+    <meta name="theme-color" content="#f3efe8" />{' '}
     {/* override for chrome desktop PWA */}
-    <meta name="theme-color" content="#eb5757" />{' '}
+    <meta name="theme-color" content="#1f4a3c" />{' '}
     {/* HACK: second theme-color is ignored on desktop/mobile, but: makes Android PWA to take the color only from manifest */}
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />

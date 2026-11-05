@@ -3,8 +3,8 @@ import styled from '@emotion/styled';
 import { useTheme } from '@mui/material';
 import { t } from '../../../services/intl';
 import {
+  describeViaFerrataScale,
   getViaFerrataScaleColor,
-  getViaFerrataGrades,
 } from '../../../services/tagging/viaFerrataScale';
 
 const Container = styled.div`
@@ -44,16 +44,17 @@ export const ScaleRenderer = ({ k, v }) => {
       ? (getViaFerrataScaleColor(v, theme.palette.mode) ?? '#555')
       : '#555';
 
-  const grades = k === 'via_ferrata_scale' ? getViaFerrataGrades(v) : null;
+  const grades = k === 'via_ferrata_scale' ? describeViaFerrataScale(v) : null;
 
   return (
     <Container>
-      <Circle $color={color}>{v}</Circle>
+      <Circle $color={color}>{grades?.letter ?? v}</Circle>
       <span>{label}</span>
       {grades && (
         <GradeDetail>
-          ({grades.french}
-          {grades.german ? ` / ${grades.german}` : ''})
+          ({t('via_ferrata.schall')} {grades.schall}
+          {` · ${grades.french}`}
+          {grades.german ? ` · ${grades.german}` : ''})
         </GradeDetail>
       )}
     </Container>

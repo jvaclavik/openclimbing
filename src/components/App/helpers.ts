@@ -3,7 +3,6 @@ import nextCookies from 'next-cookies';
 import Cookies from 'js-cookie';
 import { clearFeatureCache } from '../../services/osm/osmApi';
 import { fetchFeatureFromTiles } from '../../services/osm/fetchFeatureFromTiles';
-import { fetchJson } from '../../services/fetch';
 import { isServer } from '../helpers';
 import { getCoordsFeature } from '../../services/getCoordsFeature';
 import { getOsmappLink, getShortId } from '../../services/helpers';
@@ -11,59 +10,17 @@ import { Feature, OsmId } from '../../services/types';
 import { View } from '../utils/MapStateContext';
 import { NextPageContext } from 'next';
 
-export const DEFAULT_VIEW: View = ['4', '50', '14'];
-
-type IpApiResponse = {
-  status: string;
-  lat: number;
-  lon: number;
-};
-
-const getViewFromIp = async (ip: string): Promise<View> => {
-  try {
-    // TODO Currently we dont do rate limiting on our side #83
-    // 45 requests per minute from an IP address https://ip-api.com/docs/api:json
-    const url = `http://ip-api.com/json/${ip}?fields=status,lat,lon`;
-    const { status, lat, lon } = await fetchJson<IpApiResponse>(url);
-
-    if (status === 'success') {
-      return lat && lon ? ['7', `${lat}`, `${lon}`] : null;
-    }
-
-    return null;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.warn('getViewFromIp', e.message ?? e);
-    return null;
-  }
-};
-
-const isLocalhostOrNgnix = (ip: string) => ['127.0.0.1', '::1'].includes(ip);
-
-export const getIp = (req: NextPageContext['req']) => {
-  const remoteIp = req.socket.remoteAddress;
-  const fwdIp = ((req.headers['x-forwarded-for'] as string) || '') // ngnix: proxy_set_header X-Forwarded-For $remote_addr;
-    .split(',')[0]
-    .trim();
-  return isLocalhostOrNgnix(remoteIp) ? fwdIp : remoteIp;
-};
-
-export const getViewFromRequest = async (
-  req: NextPageContext['req'],
-): Promise<View> => {
-  const ip = getIp(req);
-  const view = ip ? await getViewFromIp(ip) : null;
-  return view ?? DEFAULT_VIEW;
-};
+// Franconia (Würzburg / Fränkische Schweiz) and the northern Alps.
+// Zoom 6.5 around 48.5°N 11°E shows both. A #z/lat/lon hash and the mapView
+// cookie still win — see getMapViewFromHash() in _app.
+export const DEFAULT_VIEW: View = ['6.5', '48.5', '11'];
 
 export const getInitialMapView = async (
   ctx: NextPageContext,
 ): Promise<View> => {
   const cookies = nextCookies(ctx);
   const viewCookie = cookies.mapView;
-  return viewCookie
-    ? (viewCookie.split('/') as View)
-    : getViewFromRequest(ctx.req);
+  return viewCookie ? (viewCookie.split('/') as View) : DEFAULT_VIEW;
 };
 
 const saveLastUrl = (feature: Feature, ctx?: NextPageContext) => {

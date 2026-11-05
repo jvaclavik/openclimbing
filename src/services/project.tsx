@@ -29,7 +29,7 @@ const osmappDev: Project = {
 
 const openclimbing: Project = {
   id: 'openclimbing',
-  name: 'openclimbing.org',
+  name: 'Klettersteig-Karte',
   url: 'https://openclimbing.org',
   ogImage: 'https://openclimbing.org/openclimbing/homepage.png',
   description: 'project.openclimbing.description',
@@ -37,7 +37,7 @@ const openclimbing: Project = {
 };
 const openclimbingDev: Project = {
   ...openclimbing,
-  name: 'openclimbing-DEV',
+  name: 'Klettersteig-Karte',
 };
 
 const domains: Record<string, Project> = {

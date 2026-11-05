@@ -125,6 +125,12 @@ export const ferrataLayer: LayerSpecification = {
   layout: {
     ...groupsLayer.layout,
     'icon-image': VIA_FERRATA.IMAGE,
-    'symbol-sort-key': sortKey(),
+    'icon-size': linear(4, 0.55, 12, 0.75, 18, 0.9),
+    // outrank nearby crags so the cable icon stays visible when labels collide
+    'symbol-sort-key': sortKey(50_000),
+  },
+  paint: {
+    ...groupsLayer.paint,
+    'text-color': VIA_FERRATA.COLOR,
   },
 };
