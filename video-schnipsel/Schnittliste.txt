@@ -1,0 +1,21 @@
+Schnittliste
+Quelle: 67,3 s, Hochformat, Reihenfolge unverändert.
+Geschnitten nur an den echten Szenenwechseln. Die weißen und roten Blitzframes zwischen den Szenen sind raus. Ton bleibt bei jedem Schnipsel.
+
+Nr  Datei                 Länge   Inhalt
+01  01_felsband.mp4       4,8 s   Felsband, Mann mit weißem Helm
+02  02_wiese.mp4          6,8 s   Wiese, zwei Personen
+03  03_felsen.mp4         5,9 s   Felsen, Frau im pinken Top
+04  04_klettersteig.mp4   5,0 s   Klettersteig, Selfie mit weißem Helm
+05  05_see.mp4            7,0 s   See, Mann an der Balustrade
+06  06_selfie_wald.mp4    6,8 s   Selfie im Wald, zwei Personen mit Helm
+07  07_leiter.mp4         5,1 s   Leiter, Frau im schwarzen Gurt
+08  08_schnee.mp4         6,1 s   Schnee-Selfie, zwei Personen
+09  09_gletscher.mp4      4,6 s   Gletscher, drei Personen mit weißen Helmen
+10  10_grat.mp4           1,8 s   Grat, drei Personen in Rot, Blau und Grün
+11  11_huette.mp4         3,3 s   Hütte, Selfie mit der Gruppe
+12  12_waldweg.mp4        4,4 s   Waldweg, drei Personen
+13  13_wald_paar.mp4      2,3 s   Paar am Baum
+
+Kurz geblieben, weil die Einstellung selbst kurz ist: 09, 10, 11, 12 und 13.
+Jede Datei liegt unter 15 MB. Größte Datei: 03_felsen.mp4 mit 14,5 MB.
