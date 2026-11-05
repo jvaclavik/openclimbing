@@ -11,6 +11,7 @@ import { Table } from './Table';
 import { getReactKey } from '../../../services/helpers';
 import * as Sentry from '@sentry/nextjs';
 import { MyRouteTicks } from '../Climbing/Ticks/MyRouteTicks';
+import { HAS_USER_DB } from '../../../services/osm/consts';
 
 class ErrorBoundary extends React.Component<
   { fallback: React.ReactNode },
@@ -88,7 +89,7 @@ export const Properties = ({ showTags }) => {
         </ErrorBoundary>
       )}
 
-      <MyRouteTicks />
+      {HAS_USER_DB && <MyRouteTicks />}
     </>
   );
 };

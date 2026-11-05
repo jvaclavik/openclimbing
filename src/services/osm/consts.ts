@@ -23,3 +23,7 @@ const localClimbingTiles = process.env.NEXT_PUBLIC_CLIMBING_TILES_LOCAL;
 export const CLIMBING_TILES_HOST = localClimbingTiles
   ? '/'
   : 'https://openclimbing.org/';
+
+// My lists, ticks and the leaderboard are stored in this host's SQLite, which
+// only exists where the climbing tiles are served locally.
+export const HAS_USER_DB = CLIMBING_TILES_HOST === '/';

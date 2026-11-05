@@ -11,6 +11,7 @@ import { SaveButton } from './SaveButton';
 import { ShareButton } from './ShareDialog/ShareButton';
 import { EditQuickAction } from '../EditButton';
 import { CONTENT_GAP } from '../../utils/PanelHelpers';
+import { HAS_USER_DB } from '../../../services/osm/consts';
 
 const Wrapper = styled.div`
   margin-top: 12px;
@@ -64,7 +65,7 @@ export const QuickActions = () => {
     <Wrapper>
       <Container>
         <EditQuickAction />
-        <SaveButton />
+        {HAS_USER_DB && <SaveButton />}
         <ShareButton />
         {showPdfButton && (
           <QuickActionButton

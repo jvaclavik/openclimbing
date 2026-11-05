@@ -17,6 +17,7 @@ import { PROJECT_ID } from '../../services/project';
 import { useOsmAuthContext } from './OsmAuthContext';
 import { getTickDefaultsForToday } from '../../services/my-ticks/tickDefaultsForToday';
 import { t } from '../../services/intl';
+import { HAS_USER_DB } from '../../services/osm/consts';
 
 const QUERY_KEY = ['climbing-ticks'];
 
@@ -49,7 +50,7 @@ const useMigrateFromLocalStorage = () => {
     (async () => {
       const oldTicks = getAllTicks();
 
-      if (loggedIn && oldTicks && oldTicks.length > 0) {
+      if (loggedIn && HAS_USER_DB && oldTicks && oldTicks.length > 0) {
         for (const tick of oldTicks) {
           await postClimbingTick({
             shortId: tick.osmId,
@@ -112,20 +113,20 @@ const useGetUpdateTick = () => {
 
 const useClimbingTicksQuery = () => {
   const { loggedIn } = useOsmAuthContext();
+  const enabled = PROJECT_ID === 'openclimbing' && loggedIn && HAS_USER_DB;
   const { data, error, isFetching, isFetched } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: getClimbingTicks,
     keepPreviousData: true,
-    enabled: PROJECT_ID === 'openclimbing' && loggedIn,
+    enabled,
   });
 
   // `isLoading` can be false before the first network round-trip settles; `isFetched` is false until then.
-  const ticks: ClimbingTick[] | null =
-    PROJECT_ID !== 'openclimbing' || !loggedIn
-      ? []
-      : !isFetched
-        ? null
-        : (data ?? []);
+  const ticks: ClimbingTick[] | null = !enabled
+    ? []
+    : !isFetched
+      ? null
+      : (data ?? []);
 
   return { ticks, error, isFetching };
 };

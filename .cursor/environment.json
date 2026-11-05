@@ -1,0 +1,5 @@
+{
+  "name": "OpenClimbing",
+  "install": "yarn install --frozen-lockfile --network-timeout 600000",
+  "start": "bash .cursor/cloud-agent-start.sh"
+}

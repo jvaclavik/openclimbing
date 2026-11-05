@@ -22,11 +22,6 @@ const osmapp: Project = {
   serpDescription: 'project.osmapp.serpDescription',
 };
 
-const osmappDev: Project = {
-  ...osmapp,
-  name: 'OsmAPP-DEV',
-};
-
 const openclimbing: Project = {
   id: 'openclimbing',
   name: 'Klettersteig-Karte',
@@ -35,10 +30,6 @@ const openclimbing: Project = {
   description: 'project.openclimbing.description',
   serpDescription: 'project.openclimbing.serpDescription',
 };
-const openclimbingDev: Project = {
-  ...openclimbing,
-  name: 'Klettersteig-Karte',
-};
 
 const domains: Record<string, Project> = {
   'osmapp.org': osmapp,
@@ -46,8 +37,14 @@ const domains: Record<string, Project> = {
   '127.0.0.1:3000': openclimbing,
   'localhost:3000': openclimbing,
 };
-const climbingDev = (host: string) =>
-  /climbing(.*)vercel.app$/.test(host) ? openclimbingDev : null;
+
+// This fork is the via ferrata app: any other host (own domain, *.vercel.app
+// previews, other ports) keeps its branding and links back to itself.
+const openclimbingOnHost = (host: string | undefined): Project => {
+  if (!host) return openclimbing;
+  const isLocal = /^(localhost|127\.0\.0\.1)(:|$)/.test(host);
+  return { ...openclimbing, url: `${isLocal ? 'http' : 'https'}://${host}` };
+};
 
 const forceProjectHost = process.env.NEXT_PUBLIC_FORCE_PROJECT;
 const forcedProject = forceProjectHost ? domains[forceProjectHost] : undefined;
@@ -61,8 +58,7 @@ export let PROJECT_DECRIPTION = 'error: PROJECT not set' as TranslationId;
 export let PROJECT_SERP_DESCRIPTION = 'error: PROJECT not set' as TranslationId;
 
 const setProject = (host: string) => {
-  const project =
-    forcedProject ?? domains[host] ?? climbingDev(host) ?? osmappDev;
+  const project = forcedProject ?? domains[host] ?? openclimbingOnHost(host);
   PROJECT_ID = project.id;
   PROJECT_NAME = project.name;
   PROJECT_URL = project.url;
