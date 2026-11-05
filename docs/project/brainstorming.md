@@ -18,3 +18,5 @@ Weitere Ideen:
 Persönliches Kletter-Log / Statistik: Man könnte markieren, welche Klettersteige man schon gegangen ist, mit Datum und einer Smiley-Bewertung für den Tag. Auf der Karte würden erledigte Steige gelbe Smileys zeigen (wie beim Geocaching), damit man auf einen Blick sieht, was man schon gemacht hat – vor allem zur eigenen Motivation und Übersicht.
 
 Der Name „Klettersteigkarte“ klingt zu langweilig; Favorit ist „Kletterglück“ (vor „Kletterfreude“).
+
+Verstecktes Fundstück, nur für die eigene Runde: An dem Klettersteig, wo das Experiment entstanden ist, zoomt die Karte hin und spielt das kurze Musikvideo mit Ton – die KI-animierten Fotos aus den Bergen, ungefähr fünf Sekunden pro Szene. Kein Menüpunkt, nur wer den Ort kennt, findet es.
