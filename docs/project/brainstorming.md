@@ -14,3 +14,5 @@ Weitere Ideen:
 - Wenn vorhanden, auch ein Topo bzw. eine topografische Karte.
 - Als Inhaltsquellen: via-ferrata.de und bergsteigen.de.
 - Solche Inhalte müsste man Klettersteig für Klettersteig einzeln zusammentragen.
+
+Persönliches Kletter-Log / Statistik: Man könnte markieren, welche Klettersteige man schon gegangen ist, mit Datum und einer Smiley-Bewertung für den Tag. Auf der Karte würden erledigte Steige gelbe Smileys zeigen (wie beim Geocaching), damit man auf einen Blick sieht, was man schon gemacht hat – vor allem zur eigenen Motivation und Übersicht.
