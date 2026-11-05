@@ -17,6 +17,7 @@ import { getOsmappLink, getShortId } from '../../../../services/helpers';
 import { intl, t } from '../../../../services/intl';
 import { featureToItem } from '../../../../services/my-lists/featureToItem';
 import { PROJECT_ID } from '../../../../services/project';
+import { HAS_USER_DB } from '../../../../services/osm/consts';
 import {
   getDifficulties,
   getDifficulty,
@@ -255,11 +256,15 @@ const MoreMenu = ({ feature }: MoreMenuProps) => {
       </IconButton>
 
       <MoreMenu>
-        <AddTickMenuItem feature={feature} closeMenu={handleCloseMore} />
-        <AddToListMenuItem
-          closeMenu={handleCloseMore}
-          onOpenPicker={() => setPickerOpen(true)}
-        />
+        {HAS_USER_DB && (
+          <AddTickMenuItem feature={feature} closeMenu={handleCloseMore} />
+        )}
+        {HAS_USER_DB && (
+          <AddToListMenuItem
+            closeMenu={handleCloseMore}
+            onOpenPicker={() => setPickerOpen(true)}
+          />
+        )}
 
         <MenuItem
           onClick={(e: React.MouseEvent) => {
