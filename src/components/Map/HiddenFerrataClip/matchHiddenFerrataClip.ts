@@ -9,7 +9,7 @@ export const HIDDEN_FERRATA_MIN_ZOOM = 14;
 export const HIDDEN_FERRATA_MAX_DISTANCE_M = 700;
 
 export type HiddenFerrataClipMatch = {
-  id: 'lenzsteig' | 'tegelberg' | 'mezzocorona';
+  id: 'lenzsteig' | 'tegelberg' | 'mezzocorona' | 'rivadelgarda';
   src: string;
 };
 
@@ -34,6 +34,13 @@ const SPOTS: Array<HiddenFerrataClipMatch & { lat: number; lon: number }> = [
     // Ferrata Burrone Giovannelli, Mezzocorona, OSM way 219231582
     lat: 46.2304381,
     lon: 11.0987999,
+  },
+  {
+    id: 'rivadelgarda',
+    src: '/versteckt/rivadelgarda.mp4',
+    // Riva del Garda town centre
+    lat: 45.8847708,
+    lon: 10.8396942,
   },
 ];
 
