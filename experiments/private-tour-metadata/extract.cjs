@@ -11,7 +11,7 @@ function extractTour(document) {
       if (!item || typeof item !== 'object') continue;
       if (Array.isArray(item['@graph'])) pending.push(...item['@graph']);
       const type = Array.isArray(item['@type']) ? item['@type'] : [item['@type']];
-      if (type.some((t) => t === 'TouristAttraction' || t === 'TouristTrip')) candidates.push(item);
+      if (type.some((t) => t === 'TouristAttraction' || t === 'TouristTrip' || t === 'Trip')) candidates.push(item);
     }
   }
   if (candidates.length !== 1) return { ok: false, reason: 'Keine eindeutigen strukturierten Tourdaten' };
