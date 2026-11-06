@@ -3,20 +3,23 @@ import * as maplibregl from 'maplibre-gl';
 import Router from 'next/router';
 import { useMyListsContext } from '../utils/MyListsContext';
 import { getGlobalMap } from '../../services/mapStorage';
-import { getApiId, getUrlOsmId } from '../../services/helpers';
+import { useMapStateContext } from '../utils/MapStateContext';
+import { getListItemTarget } from '../MyLists/getListItemTarget';
 import { DEFAULT_LIST_COLOR } from '../../services/my-lists/listColors';
 
 const buildMarkerElement = (
   emoji: string,
   color: string,
   title: string,
-): HTMLDivElement => {
-  const el = document.createElement('div');
-  el.setAttribute('role', 'button');
+): HTMLButtonElement => {
+  const el = document.createElement('button');
+  el.type = 'button';
   el.setAttribute('aria-label', title);
   el.style.cssText = [
     'width: 28px',
     'height: 28px',
+    'padding: 0',
+    'color: #153229',
     'border-radius: 50%',
     `background: ${color}`,
     'box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35)',
@@ -33,18 +36,8 @@ const buildMarkerElement = (
   return el;
 };
 
-const navigateToItem = (shortId: string) => {
-  try {
-    const apiId = getApiId(shortId);
-    if (apiId.type) {
-      Router.push(`/${getUrlOsmId(apiId)}`);
-    }
-  } catch {
-    // ignore
-  }
-};
-
 export const MyListsLayer = () => {
+  const { setView } = useMapStateContext();
   const { lists, visibleListIds } = useMyListsContext();
 
   useEffect(() => {
@@ -70,7 +63,9 @@ export const MyListsLayer = () => {
         );
         el.addEventListener('click', (e) => {
           e.stopPropagation();
-          navigateToItem(item.shortId);
+          const { href, view } = getListItemTarget(item);
+          if (view) setView(view);
+          void Router.push(href);
         });
         const marker = new maplibregl.Marker({ element: el })
           .setLngLat(item.center)
@@ -84,7 +79,7 @@ export const MyListsLayer = () => {
         marker.remove();
       }
     };
-  }, [lists, visibleListIds]);
+  }, [lists, visibleListIds, setView]);
 
   return null;
 };

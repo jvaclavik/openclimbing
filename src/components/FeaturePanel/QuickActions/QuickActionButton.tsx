@@ -7,13 +7,15 @@ type Props = {
   suffix?: ReactNode;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   loading?: boolean;
+  pressed?: boolean;
 };
 
 export const QuickActionButton = forwardRef<HTMLButtonElement, Props>(
-  ({ icon: Icon, label, suffix, onClick, loading }, ref) => (
+  ({ icon: Icon, label, suffix, onClick, loading, pressed }, ref) => (
     <Chip
       ref={ref}
       component="button"
+      aria-pressed={pressed}
       label={
         suffix ? (
           <Stack

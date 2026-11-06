@@ -52,6 +52,19 @@ describe('HiddenFerrataClip', () => {
     expect(video()?.getAttribute('src')).toBe('/versteckt/rivadelgarda.mp4');
   });
 
+  it('can skip directly to the next clip', () => {
+    const { container, getByRole } = render(<HiddenFerrataClip />);
+    const nextButton = () => getByRole('button', { name: 'Nächstes Video' });
+    fireEvent.click(nextButton());
+    expect(container.querySelector('video')?.getAttribute('src')).toBe(
+      '/versteckt/szene-33.mp4',
+    );
+    fireEvent.click(nextButton());
+    expect(container.querySelector('video')?.getAttribute('src')).toBe(
+      '/versteckt/rivadelgarda.mp4',
+    );
+  });
+
   it('reopens a dismissed spot after visiting another spot', () => {
     const { container, getByRole, rerender } = render(<HiddenFerrataClip />);
     fireEvent.click(getByRole('button', { name: 'close' }));
