@@ -33,6 +33,14 @@ Status: Änderungen zur Abnahme vorbereitet, offene Punkte unten dokumentiert. D
 - Nur rechtlich zulässige Inhalte innerhalb der Kletterglück-Detailansicht anzeigen; Quelle klar nennen. Ziel bleibt ein In-App-Erlebnis ohne Safari-Wechsel. Bei ungeklärten Rechten lediglich Machbarkeit und offene Punkte dokumentieren, keine fremden Inhalte dauerhaft speichern oder übernehmen.
 - Nach dem Prototyp Ergebnisse, Grenzen, Wartungsaufwand und eine Empfehlung zur weiteren Umsetzung vorlegen. Keine produktiven Änderungen ohne gesonderte Freigabe.
 
+## Arbeitsorganisation und Credit-Verbrauch (für alle zukünftigen Work-Aufträge)
+
+- **Aufgaben in kleine, zusammenhängende Pakete aufteilen:** in der Regel 1–3 eng verwandte Aufgaben pro Work-Durchlauf statt die komplette Liste auf einmal. Reihenfolge nach Abhängigkeiten und Nutzen festlegen.
+- **Vor Beginn Bestandsabgleich:** aktuellen Standardbranch, bereits gemergte Pull Requests und Aufgabenstatus prüfen; nichts doppelt implementieren.
+- **Pro Paket klaren Umfang und Abschlusskriterien definieren:** erst ein Paket umsetzen, passende Tests durchführen und einen PR erstellen; danach Rückmeldung und Freigabe für das nächste Paket abwarten.
+- **Credits schonen:** mit angemessenem Denkaufwand/Standardgeschwindigkeit arbeiten, sofern verfügbar; keine unnötigen Wiederholungen, aufwendigen Vollprüfungen oder Endlosschleifen. Bei wiederkehrenden Fehlern nach wenigen gezielten Versuchen stoppen, Ursache und Blocker dokumentieren und Rückfrage stellen.
+- **Transparente Übergabe:** pro Paket kurz umgesetzte Änderungen, Testergebnisse, PR-Link, offene Punkte und nächste empfohlene Aufgabe nennen. Keine automatischen Merges, Deployments oder Löschungen produktiver Daten ohne Freigabe.
+
 ## Umsetzungshinweise für Work
 
 - Zuerst Repository und vorhandene Authentifizierung, Datenhaltung, Karten- und Videoansichten untersuchen; nicht blind löschen.
