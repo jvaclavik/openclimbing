@@ -7,6 +7,7 @@ import { t } from '../../../services/intl';
 import { isClimbingRelation } from '../../../utils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { QuickActionButton } from './QuickActionButton';
+import { NorissteigTrackAction } from './NorissteigTrackAction';
 import { FerrataListActions } from './FerrataListActions';
 import { SaveButton } from './SaveButton';
 import { ShareButton } from './ShareDialog/ShareButton';
@@ -72,6 +73,10 @@ export const QuickActions = () => {
           <FerrataListActions key={feature.osmMeta?.id} />
         )}
         <ShareButton />
+        {feature.osmMeta?.type === 'way' &&
+          String(feature.osmMeta.id) === '1156787758' && (
+            <NorissteigTrackAction />
+          )}
         {showPdfButton && (
           <QuickActionButton
             icon={PictureAsPdfIcon}
