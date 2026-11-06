@@ -1,6 +1,6 @@
 # Kletterglück – Aufgabenübergabe
 
-Status: Änderungen zur Abnahme vorbereitet, offene Punkte unten dokumentiert. Diese Datei ist die gemeinsame Übergabe zwischen Schnellchat und Work-Modus.
+Status: PR #17 ist in `master` zusammengeführt. Abgleich vom 06.11.2026 mit `master` bei Commit `d69d536`. Diese Datei ist die gemeinsame Übergabe zwischen Schnellchat und Work-Modus.
 
 ## Beschlossene Änderungen
 
@@ -42,7 +42,7 @@ Status: Änderungen zur Abnahme vorbereitet, offene Punkte unten dokumentiert. D
 - Keine automatische Veröffentlichung oder Löschung produktiver Nutzerdaten ohne gesonderte Freigabe.
 - Nach Umsetzung Status und PR-Link hier dokumentieren.
 
-## Stand zur Abnahme
+## Umsetzungsstand auf dem Standardbranch
 
 Die Änderungen sind für die öffentliche, kontofreie Kletterglück-Karte vorgesehen. Die bestehende Servervariante mit eigener Benutzerdatenbank behält ihre Anmeldung und die geschützten OSM-/Wikimedia-Bearbeitungs- und Datenfunktionen. Die lokalen Listen behalten ihre bestehenden Speicherbereiche und Einträge.
 
@@ -63,6 +63,24 @@ Quellen zur Prüfung
 - [OpenStreetMap – Norissteig, Brettl](https://www.openstreetmap.org/way/1156787758)
 - [Komoot – GPX-Import](https://support.komoot.com/hc/de/articles/10115477099674-Routen-und-Touren-exportieren-und-importieren)
 
-Pull Request zur Abnahme: [#17](https://github.com/mandala-wt/openclimbing/pull/17).
+Vorheriger Pull Request: [#17](https://github.com/mandala-wt/openclimbing/pull/17), zusammengeführt.
 
 Prüfung: 42 gezielte Tests bestanden. Mobilansichten in Chromium für iPhone 13 und iPad Mini geprüft. Der Gesamtlauf hatte dieselben 43 Fehler wie der unveränderte Vergleichsstand. Der vollständige Produktionsbuild ist noch offen.
+
+## Abgleich und nächste Schritte (06.11.2026)
+
+- **Umgesetzt:** öffentliche Karte ohne Konto-Einstiege; lokale Favoriten, Listen und Besuche; Videos für fünf zugeordnete Steige; A–F-Filter; drei eingebaute Grundkarten. Die separate Servervariante mit Authentifizierung und ihre Daten bleiben bestehen. Keine Community oder Komoot-Anmeldung ergänzen.
+- **Karten:** Der öffentliche Layer-Schalter enthält OpenStreetMap, Topografisch und Satellit; eigene Karten und Überlagerungen bleiben verfügbar. Die topografische Darstellung nutzt den vorhandenen Tourist-Stil mit Höhenlinien und Relief; Satellit und topografischer Stil verwenden MapTiler. Für deren Betrieb bleiben gültiger Schlüssel, Vertrag, Attribution und Kontingent zu prüfen. Für die OSM-Standardkacheln gelten sichtbare Attribution, reguläre Browser-Referer- und Cache-Nutzung sowie kein Offline-Vorladen. Die tatsächliche Netzwerkkonfiguration und Limits der produktiven Installation wurden hier nicht erneut geprüft.
+- **Routenplaner: offen / durch Datenlage blockiert.** Ein OSM-Klettersteigobjekt oder eine Relation beweist nicht automatisch einen vollständigen Zu- und Abstieg oder eine eindeutige Richtung. Ein Pilot benötigt eine nach Quelle und Stand dokumentierte Route mit belegtem Start und Ziel sowie geordneten, tatsächlich verbundenen Abschnitten für Zustieg, Klettersteig und Abstieg. Varianten, Richtung, Zugang und Aktualität müssen geprüft werden. Nicht verbundene oder unklare Abschnitte dürfen nicht durch Luftlinien ergänzt werden. Die vorherige Prüfung zum Norissteig reicht hierfür nicht aus; in diesem Abgleich wurde kein weiterer vollständiger Pilot verifiziert.
+- **GPX: blockiert durch fehlende Pilotroute.** Erst nach Prüfung der Route einen geordneten Track mit Quellennachweis erstellen; Entfernung und ggf. Höhenmeter und Dauer nur bei geeigneter Datenbasis als Schätzung ausweisen. Vor Freigabe GPX-Datei auf iPhone/iPad speichern bzw. teilen und den Import in Komoot praktisch testen; Komoot dokumentiert den GPX-Import, aber ein automatisches Öffnen ist nicht zugesagt.
+- **via-ferrata.de: offen.** Keine Inhalte oder Einbettung ohne geklärte Rechte und technische Freigabe übernehmen. Der private Scraper-Prototyp bleibt ausdrücklich zurückgestellt.
+- **„Für uns passend“: nur Idee zur späteren Prüfung**, nicht beschlossen und nicht implementiert.
+
+### Quellen und technische Voraussetzungen
+
+- [OSMF-Kachelrichtlinie](https://operations.osmfoundation.org/policies/tiles/) und [OSM-Lizenz- und Quellenhinweise](https://osmfoundation.org/wiki/Attribution_Guidelines): Daten und Kacheldienst haben unterschiedliche Nutzungsbedingungen; Datenherkunft und Lizenz bei einer späteren Route sichtbar dokumentieren.
+- [OSM-Wiki: Klettersteigrelation](https://wiki.openstreetmap.org/wiki/Tag:route%3Dvia_ferrata): Anfang und Richtung sind aus einer Relation nicht immer zuverlässig ableitbar.
+- [Komoot: Routen importieren](https://support.komoot.com/hc/de/articles/10115477099674-Routen-und-Touren-exportieren-und-importieren): GPX-Import ist dokumentiert; tatsächlichen iOS-Ablauf mit einer validierten Beispieldatei prüfen.
+- [via-ferrata.de: Nutzungsbedingungen](https://www.via-ferrata.de/nutzungsbedingungen/): keine Freigabe zur Übernahme von Beschreibungen, Bildern oder Bewertungen festgestellt.
+
+Dieser Abgleich aktualisiert ausschließlich die Dokumentation. Es wurden keine App-Funktionen geändert; ein neuer mobiler Funktionstest und ein Produktionsbuild wurden in diesem Schritt nicht durchgeführt. Die oben genannten 42 Tests und Mobilprüfungen stammen aus PR #17.
