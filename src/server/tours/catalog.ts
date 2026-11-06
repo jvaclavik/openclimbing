@@ -127,7 +127,7 @@ export const canWriteTours = (
   secret: string | undefined,
 ) => {
   if (!secret || secret.length < 32 || !header) return false;
-  const expected = Buffer.from('Bearer ' + secret);
-  const actual = Buffer.from(header);
+  const expected = Uint8Array.from(Buffer.from('Bearer ' + secret));
+  const actual = Uint8Array.from(Buffer.from(header));
   return expected.length === actual.length && timingSafeEqual(expected, actual);
 };
