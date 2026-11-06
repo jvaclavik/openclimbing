@@ -84,3 +84,7 @@ Prüfung: 42 gezielte Tests bestanden. Mobilansichten in Chromium für iPhone 13
 - [via-ferrata.de: Nutzungsbedingungen](https://www.via-ferrata.de/nutzungsbedingungen/): keine Freigabe zur Übernahme von Beschreibungen, Bildern oder Bewertungen festgestellt.
 
 Dieser Abgleich aktualisiert ausschließlich die Dokumentation. Es wurden keine App-Funktionen geändert; ein neuer mobiler Funktionstest und ein Produktionsbuild wurden in diesem Schritt nicht durchgeführt. Die oben genannten 42 Tests und Mobilprüfungen stammen aus PR #17.
+
+### Pilotprüfung Norissteig
+
+Die [DAV-Sektion Noris beschreibt den Norissteig und eine Rundtour ab Hirschbach](https://www.dav-noris.de/klettersteige/norissteig): Zustieg über den gelb markierten Weg Richtung Fischbrunn, anschließend der rot markierte Norissteig zurück nach Hirschbach. Dies ist eine geeignete fachliche Referenz für einen Pilot, aber die Beschreibung allein liefert noch keinen nachprüfbar geordneten GPX-Track mit eindeutig verbundenen OSM-Objekten. Varianten und die genauen Übergänge müssen gesondert identifiziert und geprüft werden. Die DAV weist zudem auf [Ausrüstung und Eigenverantwortung](https://www.dav-noris.de/Klettersteige/sicherheitshinweis-zur-nutzung-von-klettersteigen) hin. Bis zur Prüfung bleibt die Umsetzung blockiert; keine Übernahme fremder Tourentexte oder Tracks.
