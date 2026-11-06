@@ -54,6 +54,13 @@ describe('matchHiddenFerrataClip', () => {
     });
   });
 
+  it('matches Riva del Garda at the town centre', () => {
+    expect(matchHiddenFerrataClip(['14', '45.8848', '10.8397'])).toEqual({
+      id: 'rivadelgarda',
+      src: '/versteckt/rivadelgarda.mp4',
+    });
+  });
+
   it('stays hidden below zoom 14', () => {
     const onThePoint: View = ['13.99', '49.9913425', '9.7612947'];
     expect(matchHiddenFerrataClip(onThePoint)).toBeNull();
