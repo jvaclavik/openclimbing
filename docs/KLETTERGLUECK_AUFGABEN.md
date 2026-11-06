@@ -23,9 +23,9 @@ Status: PR #17 ist in `master` zusammengeführt. Abgleich vom 06.11.2026 mit `ma
 - **Schnellfilter „Für uns passend“**: Optional eine einfache Voreinstellung für bevorzugte Schwierigkeitsgrade, ohne Nutzerkonto. Nur umsetzen, wenn die Oberfläche dadurch wirklich einfacher wird; ansonsten weglassen.
 
 
-## Spätere Prüfung: privater via-ferrata.de-Prototyp (zurückgestellt)
+## Privater via-ferrata.de-Prototyp (beauftragt)
 
-**Zeitpunkt:** Erst nach Abschluss und Prüfung des derzeit laufenden Work-Auftrags. Dies ist ein Prüfauftrag für später, keine Aufforderung, jetzt parallel mit der Umsetzung zu beginnen.
+**Aktualisierung:** Simon möchte den begrenzten Prototyp für sich und seine Mutter jetzt in die Planung aufnehmen. Vor einer produktiven Übernahme bleiben Rechte, Zugriffsschutz und technische Machbarkeit zu klären.
 
 - Für die ausschließlich private Nutzung von Kletterglück durch zwei Personen einen eng begrenzten Prototyp mit zunächst drei öffentlich erreichbaren Klettersteig-Detailseiten auf via-ferrata.de prüfen.
 - Untersuchen, welche Daten technisch zuverlässig zugeordnet und extrahiert werden können (z. B. Name, Lage, Schwierigkeit, Höhenmeter, Dauer, Hinweise). Beschreibungen, Fotos, Rezensionen und Bewertungen gesondert nach Rechten und technischer Machbarkeit beurteilen.
@@ -73,7 +73,7 @@ Prüfung: 42 gezielte Tests bestanden. Mobilansichten in Chromium für iPhone 13
 - **Karten:** Der öffentliche Layer-Schalter enthält OpenStreetMap, Topografisch und Satellit; eigene Karten und Überlagerungen bleiben verfügbar. Die topografische Darstellung nutzt den vorhandenen Tourist-Stil mit Höhenlinien und Relief; Satellit und topografischer Stil verwenden MapTiler. Für deren Betrieb bleiben gültiger Schlüssel, Vertrag, Attribution und Kontingent zu prüfen. Für die OSM-Standardkacheln gelten sichtbare Attribution, reguläre Browser-Referer- und Cache-Nutzung sowie kein Offline-Vorladen. Die tatsächliche Netzwerkkonfiguration und Limits der produktiven Installation wurden hier nicht erneut geprüft.
 - **Routenplaner: offen / durch Datenlage blockiert.** Ein OSM-Klettersteigobjekt oder eine Relation beweist nicht automatisch einen vollständigen Zu- und Abstieg oder eine eindeutige Richtung. Ein Pilot benötigt eine nach Quelle und Stand dokumentierte Route mit belegtem Start und Ziel sowie geordneten, tatsächlich verbundenen Abschnitten für Zustieg, Klettersteig und Abstieg. Varianten, Richtung, Zugang und Aktualität müssen geprüft werden. Nicht verbundene oder unklare Abschnitte dürfen nicht durch Luftlinien ergänzt werden. Die vorherige Prüfung zum Norissteig reicht hierfür nicht aus; in diesem Abgleich wurde kein weiterer vollständiger Pilot verifiziert.
 - **GPX: blockiert durch fehlende Pilotroute.** Erst nach Prüfung der Route einen geordneten Track mit Quellennachweis erstellen; Entfernung und ggf. Höhenmeter und Dauer nur bei geeigneter Datenbasis als Schätzung ausweisen. Vor Freigabe GPX-Datei auf iPhone/iPad speichern bzw. teilen und den Import in Komoot praktisch testen; Komoot dokumentiert den GPX-Import, aber ein automatisches Öffnen ist nicht zugesagt.
-- **via-ferrata.de: offen.** Keine Inhalte oder Einbettung ohne geklärte Rechte und technische Freigabe übernehmen. Der private Scraper-Prototyp bleibt ausdrücklich zurückgestellt.
+- **via-ferrata.de: offen.** Keine Inhalte oder Einbettung ohne geklärte Rechte und technische Freigabe übernehmen. Der begrenzte private Prototyp ist wieder beauftragt; Rechte und Zugriffsschutz sind vor einer produktiven Datenübernahme zu klären.
 - **„Für uns passend“: nur Idee zur späteren Prüfung**, nicht beschlossen und nicht implementiert.
 
 ### Quellen und technische Voraussetzungen
@@ -88,3 +88,7 @@ Dieser Abgleich aktualisiert ausschließlich die Dokumentation. Es wurden keine 
 ### Pilotprüfung Norissteig
 
 Die [DAV-Sektion Noris beschreibt den Norissteig und eine Rundtour ab Hirschbach](https://www.dav-noris.de/klettersteige/norissteig): Zustieg über den gelb markierten Weg Richtung Fischbrunn, anschließend der rot markierte Norissteig zurück nach Hirschbach. Dies ist eine geeignete fachliche Referenz für einen Pilot, aber die Beschreibung allein liefert noch keinen nachprüfbar geordneten GPX-Track mit eindeutig verbundenen OSM-Objekten. Varianten und die genauen Übergänge müssen gesondert identifiziert und geprüft werden. Die DAV weist zudem auf [Ausrüstung und Eigenverantwortung](https://www.dav-noris.de/Klettersteige/sicherheitshinweis-zur-nutzung-von-klettersteigen) hin. Bis zur Prüfung bleibt die Umsetzung blockiert; keine Übernahme fremder Tourentexte oder Tracks.
+
+### Aktueller Stand zum privaten Prototyp
+
+Die private Nutzung für zwei Personen ist gewünscht, begründet aber allein noch keine allgemeine Freigabe für automatisierte Übernahme und Anzeige fremder Inhalte. Die öffentlich gefundenen Nutzungsbedingungen betreffen insbesondere das Board; sie enthalten nach Prüfung keine eindeutige Aussage zur hier geplanten automatisierten Nutzung. Daraus folgt weder ein allgemeines Verbot noch eine Erlaubnis. Für konkrete Daten und Darstellungsarten Nutzungsrechte und eine geeignete Schnittstelle beim Betreiber klären. Die bestehende Vercel-Adresse ist öffentlich erreichbar; der Schutz der privaten Anwendung für zwei Personen muss vor einer privaten Bereitstellung technisch überprüft werden. Keine Anfrage an den Betreiber ohne Simons ausdrücklichen Auftrag absenden.
