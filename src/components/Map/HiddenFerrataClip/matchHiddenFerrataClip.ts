@@ -1,4 +1,4 @@
-import { View } from '../../utils/MapStateContext';
+import type { View } from '../../utils/MapStateContext';
 
 const EARTH_RADIUS_M = 6372795;
 
@@ -9,38 +9,130 @@ export const HIDDEN_FERRATA_MIN_ZOOM = 14;
 export const HIDDEN_FERRATA_MAX_DISTANCE_M = 700;
 
 export type HiddenFerrataClipMatch = {
-  id: 'lenzsteig' | 'tegelberg' | 'mezzocorona' | 'rivadelgarda';
-  src: string;
+  id: string;
+  sources: readonly [string, ...string[]];
 };
 
-const SPOTS: Array<HiddenFerrataClipMatch & { lat: number; lon: number }> = [
+type Spot = HiddenFerrataClipMatch & { lat: number; lon: number };
+
+const SPOTS: Spot[] = [
   {
-    id: 'lenzsteig',
-    src: '/versteckt/lenzsteig.mp4',
     // Lenzsteig, Karlstadt / Kalbenstein, OSM way 42213444
+    id: 'lenzsteig',
+    sources: [
+      '/versteckt/lenzsteig.mp4',
+      '/versteckt/lenzsteig-waldweg.mp4',
+      '/versteckt/szene-13.mp4',
+      '/versteckt/szene-23.mp4',
+      '/versteckt/szene-25.mp4',
+    ],
     lat: 49.9913425,
     lon: 9.7612947,
   },
   {
-    id: 'tegelberg',
-    src: '/versteckt/tegelberg.mp4',
     // Tegelbergsteig, OSM way 84013032
+    id: 'tegelberg',
+    sources: ['/versteckt/tegelberg.mp4'],
     lat: 47.5626131,
     lon: 10.7747456,
   },
   {
-    id: 'mezzocorona',
-    src: '/versteckt/mezzocorona.mp4',
     // Ferrata Burrone Giovannelli, Mezzocorona, OSM way 219231582
+    id: 'mezzocorona',
+    sources: [
+      '/versteckt/mezzocorona.mp4',
+      '/versteckt/mezzocorona-felsen.mp4',
+      '/versteckt/mezzocorona-leiter.mp4',
+    ],
     lat: 46.2304381,
     lon: 11.0987999,
   },
   {
+    // Riva del Garda town centre and harbour
     id: 'rivadelgarda',
-    src: '/versteckt/rivadelgarda.mp4',
-    // Riva del Garda town centre
+    sources: ['/versteckt/rivadelgarda.mp4', '/versteckt/szene-33.mp4'],
     lat: 45.8847708,
     lon: 10.8396942,
+  },
+  {
+    // Norissteig, OSM way 1156787758
+    id: 'norissteig',
+    sources: ['/versteckt/norissteig.mp4'],
+    lat: 49.5441152,
+    lon: 11.5306697,
+  },
+  {
+    // Laber summit and upper cable car station, OSM node 452941377
+    id: 'laber',
+    sources: [
+      '/versteckt/laber.mp4',
+      '/versteckt/laber-huette.mp4',
+      '/versteckt/szene-32.mp4',
+      '/versteckt/szene-35.mp4',
+    ],
+    lat: 47.5858442,
+    lon: 11.102169,
+  },
+  {
+    // Stopselzieher, OSM way 37293628
+    id: 'stopselzieher',
+    sources: ['/versteckt/stopselzieher.mp4'],
+    lat: 47.4225221,
+    lon: 10.9729653,
+  },
+  {
+    // Wiener-Neustädter-Hütte
+    id: 'wiener-neustaedter-huette',
+    sources: ['/versteckt/szene-14.mp4'],
+    lat: 47.423253,
+    lon: 10.970203,
+  },
+  {
+    // Zugspitze summit, Wikidata Q3375
+    id: 'zugspitze',
+    sources: [
+      '/versteckt/szene-15.mp4',
+      '/versteckt/szene-16.mp4',
+      '/versteckt/szene-29.mp4',
+      '/versteckt/szene-30.mp4',
+    ],
+    lat: 47.42122,
+    lon: 10.98631,
+  },
+  {
+    // Schloss Neuschwanstein, OSM way 221601969
+    id: 'neuschwanstein',
+    sources: ['/versteckt/szene-26.mp4'],
+    lat: 47.55755,
+    lon: 10.74952,
+  },
+  {
+    // Malcesine town centre, OSM node 64778921
+    id: 'malcesine',
+    sources: ['/versteckt/szene-27.mp4', '/versteckt/szene-28.mp4'],
+    lat: 45.7643,
+    lon: 10.8101,
+  },
+  {
+    // Kofel summit, OSM node 296034076
+    id: 'kofel',
+    sources: ['/versteckt/szene-37.mp4'],
+    lat: 47.5869,
+    lon: 11.0595,
+  },
+  {
+    // Cima Capi summit, Ferrata Fausto Susatti
+    id: 'cima-capi',
+    sources: ['/versteckt/szene-12.mp4'],
+    lat: 45.869364,
+    lon: 10.828636,
+  },
+  {
+    // Cima Rocca summit, near the historic tunnels
+    id: 'cima-rocca',
+    sources: ['/versteckt/szene-11.mp4'],
+    lat: 45.87222,
+    lon: 10.82195,
   },
 ];
 
@@ -77,13 +169,12 @@ export const matchHiddenFerrataClip = (
   const parsed = parseView(view);
   if (!parsed || parsed.zoom < HIDDEN_FERRATA_MIN_ZOOM) return null;
 
-  let best: { spot: (typeof SPOTS)[number]; distance: number } | null = null;
+  let best: { spot: Spot; distance: number } | null = null;
   for (const spot of SPOTS) {
     const distance = distanceMeters(parsed.lat, parsed.lon, spot.lat, spot.lon);
     if (distance > HIDDEN_FERRATA_MAX_DISTANCE_M) continue;
     if (!best || distance < best.distance) best = { spot, distance };
   }
 
-  if (!best) return null;
-  return { id: best.spot.id, src: best.spot.src };
+  return best?.spot ?? null;
 };
