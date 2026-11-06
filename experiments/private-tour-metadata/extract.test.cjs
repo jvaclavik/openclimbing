@@ -1,0 +1,12 @@
+const { JSDOM } = require('jsdom');
+const { extractTour } = require('./extract.cjs');
+const assert = require('node:assert/strict');
+const doc = (value) => new JSDOM(`<script type="application/ld+json">${value}</script>`).window.document;
+const data = (x) => JSON.stringify(x);
+assert.deepEqual(extractTour(doc(data({ '@type': 'TouristAttraction', name: 'Beispielsteig', geo: { latitude: 49.1, longitude: 11.2 } }))), { ok: true, name: 'Beispielsteig', coordinates: {lat:49.1,lon:11.2} });
+assert.equal(extractTour(doc(data([{ '@type':'TouristTrip', name:'A' },{ '@type':'TouristTrip',name:'B' }]))).ok, false);
+assert.equal(extractTour(doc('{broken')).ok, false);
+assert.deepEqual(extractTour(doc(data({ '@type':'TouristTrip', name:'A', geo:{latitude:91,longitude:11} }))), {ok:true,name:'A'});
+assert.equal(extractTour(doc(data({ '@type':'TouristTrip', name:' ' }))).ok, false);
+assert.equal(extractTour(doc(data({ '@type':'Trip', name:'Testtour', duration:'PT2H' }))).ok, true);
+console.log('6 synthetic cases passed');
