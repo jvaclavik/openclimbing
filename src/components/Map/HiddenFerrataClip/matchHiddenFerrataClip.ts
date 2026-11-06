@@ -13,12 +13,17 @@ export type HiddenFerrataClipMatch = {
   sources: readonly [string, ...string[]];
 };
 
-type Spot = HiddenFerrataClipMatch & { lat: number; lon: number };
+type Spot = HiddenFerrataClipMatch & {
+  lat: number;
+  lon: number;
+  shortId?: string;
+};
 
 const SPOTS: Spot[] = [
   {
     // Lenzsteig, Karlstadt / Kalbenstein, OSM way 42213444
     id: 'lenzsteig',
+    shortId: 'w42213444',
     sources: [
       '/versteckt/lenzsteig.mp4',
       '/versteckt/lenzsteig-waldweg.mp4',
@@ -32,6 +37,7 @@ const SPOTS: Spot[] = [
   {
     // Tegelbergsteig, OSM way 84013032
     id: 'tegelberg',
+    shortId: 'w84013032',
     sources: ['/versteckt/tegelberg.mp4'],
     lat: 47.5626131,
     lon: 10.7747456,
@@ -39,6 +45,7 @@ const SPOTS: Spot[] = [
   {
     // Ferrata Burrone Giovannelli, Mezzocorona, OSM way 219231582
     id: 'mezzocorona',
+    shortId: 'w219231582',
     sources: [
       '/versteckt/mezzocorona.mp4',
       '/versteckt/mezzocorona-felsen.mp4',
@@ -57,6 +64,7 @@ const SPOTS: Spot[] = [
   {
     // Norissteig, OSM way 1156787758
     id: 'norissteig',
+    shortId: 'w1156787758',
     sources: ['/versteckt/norissteig.mp4'],
     lat: 49.5441152,
     lon: 11.5306697,
@@ -76,6 +84,7 @@ const SPOTS: Spot[] = [
   {
     // Stopselzieher, OSM way 37293628
     id: 'stopselzieher',
+    shortId: 'w37293628',
     sources: ['/versteckt/stopselzieher.mp4'],
     lat: 47.4225221,
     lon: 10.9729653,
@@ -135,6 +144,11 @@ const SPOTS: Spot[] = [
     lon: 10.82195,
   },
 ];
+
+export const FERRATA_DETAIL_VIDEO_OPENED = 'kletterglueck:detail-video-opened';
+
+export const getFerrataDetailClips = (shortId: string) =>
+  SPOTS.find((spot) => spot.shortId === shortId)?.sources;
 
 const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 

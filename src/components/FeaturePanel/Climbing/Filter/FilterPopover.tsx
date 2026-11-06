@@ -3,6 +3,8 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import React from 'react';
 import { t } from '../../../../services/intl';
 import { MinimumRoutesFilter } from './MinimumRoutesFilter';
+import { HAS_USER_DB } from '../../../../services/osm/consts';
+import { FerrataGradeFilter } from './FerrataGradeFilter';
 import { GradeFilter } from './GradeFilter';
 import { ClimbingTypeFilter } from './ClimbingTypeFilter';
 import { AdvancedFilters } from './AdvancedFilters';
@@ -46,7 +48,7 @@ export const FilterPopover = ({
       anchorEl={anchorEl}
       placement={placement}
       offset={offset}
-      sx={{ minWidth: 320, maxWidth: 360 }}
+      sx={{ width: 360, maxWidth: 'calc(100vw - 24px)' }}
       paperSx={GLASS_PAPER_SX}
       addition={
         <Stack
@@ -82,13 +84,14 @@ export const FilterPopover = ({
     >
       <FilterBody>
         <ClimbingTypeFilter />
-        {showRockFilters && (
+        {poiTypes.ferrata && <FerrataGradeFilter />}
+        {HAS_USER_DB && showRockFilters && (
           <>
             <GradeFilter />
             <MinimumRoutesFilter />
           </>
         )}
-        {showAdvancedFilters && (
+        {HAS_USER_DB && showAdvancedFilters && (
           <AdvancedFilters
             showClimbingType={showRockFilters}
             showInclination={showRockFilters}

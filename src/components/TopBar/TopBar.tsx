@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { LogoOpenClimbing } from '../../assets/LogoOpenClimbing';
 import { t } from '../../services/intl';
 import { isDesktop, isMobileMode, isModifiedClick } from '../helpers';
+import { HAS_USER_DB } from '../../services/osm/consts';
 import { useAddNewCragContext } from '../Map/HamburgerMenu/AddNewCrag/AddNewCragContext';
 import { HamburgerMenu } from '../Map/HamburgerMenu/HamburgerMenu';
 import { SEARCH_BOX_HEIGHT } from '../SearchBox/consts';
@@ -245,7 +246,9 @@ const NavLinks = () => {
         active={areasActive}
       />
       <NavButton label={t('topbar.about')} href="/about" active={aboutActive} />
-      <NavButton label={t('topbar.community')} href={COMMUNITY_URL} />
+      {HAS_USER_DB && (
+        <NavButton label={t('topbar.community')} href={COMMUNITY_URL} />
+      )}
     </Stack>
   );
 };
@@ -280,7 +283,7 @@ export const TopBar = () => {
         <NavLinks />
         <Box sx={{ flexGrow: 1 }} />
         <SearchSlot>{!isDirections && <SearchField />}</SearchSlot>
-        <AddClimbingCta />
+        {HAS_USER_DB && <AddClimbingCta />}
         <HamburgerMenu />
       </DesktopBar>
 

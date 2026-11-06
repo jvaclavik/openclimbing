@@ -1,3 +1,4 @@
+import { HAS_USER_DB } from '../../services/osm/consts';
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -128,17 +129,19 @@ const Buttons = ({ onClose }) => (
     >
       {t('homepage.go_to_map_button')}
     </Button>
-    <Button
-      variant="text"
-      color="secondary"
-      startIcon={<QuestionAnswerIcon />}
-      href={COMMUNITY_URL}
-      target="_blank"
-      fullWidth
-      sx={{ mt: 1 }}
-    >
-      {t('climbing.forum')}
-    </Button>
+    {HAS_USER_DB && (
+      <Button
+        variant="text"
+        color="secondary"
+        startIcon={<QuestionAnswerIcon />}
+        href={COMMUNITY_URL}
+        target="_blank"
+        fullWidth
+        sx={{ mt: 1 }}
+      >
+        {t('climbing.forum')}
+      </Button>
+    )}
   </MobileOnly>
 );
 

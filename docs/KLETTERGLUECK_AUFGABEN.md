@@ -30,3 +30,24 @@ Status: Geplant, noch nicht umgesetzt. Diese Datei ist die gemeinsame Übergabe 
 - Änderungen in einem eigenen Branch und Pull Request vorbereiten; Tests und Mobilansicht prüfen.
 - Keine automatische Veröffentlichung oder Löschung produktiver Nutzerdaten ohne gesonderte Freigabe.
 - Nach Umsetzung Status und PR-Link hier dokumentieren.
+
+## Stand zur Abnahme
+
+Die Änderungen sind für die öffentliche, kontofreie Kletterglück-Karte vorgesehen. Die bestehende Servervariante mit eigener Benutzerdatenbank behält ihre Anmeldung und die geschützten OSM-/Wikimedia-Bearbeitungs- und Datenfunktionen. Die lokalen Listen behalten ihre bestehenden Speicherbereiche und Einträge.
+
+| Punkt | Stand |
+| --- | --- |
+| Kontofreie Karte | Konto-Einstiege, Community-Links und von Anmeldung abhängige Bearbeitungsaktionen aus der öffentlichen Kartenoberfläche entfernt. Kontobezogene Serverpfade bleiben für die getrennte Betriebsvariante bestehen. |
+| Favoriten und Besuche | Bestehende lokale Favoriten und eigene Listen weiterverwendet. Besuchsstatus bleibt getrennt. Besuchte Steige haben weiterhin Kartenmarkierungen und erscheinen auch in der Klettersteigliste mit Haken. |
+| Videos | Direkt in den Details der fünf eindeutig per OSM-ID zugeordneten Steige. Bestehende ortsbasierte Clips bleiben verfügbar. Ohne gesicherte Objekt-ID gibt es keinen zusätzlichen Detailknopf. |
+| A–F-Filter | Mehrfachauswahl mit A–F und Unbekannt, alles anfangs aktiv. B/C passt zu B oder C. Bereiche enthalten die Zwischenstufen. OSM-Werte 1–6 werden A–F zugeordnet, Zusätze +/− ändern die Grundstufe nicht. 0, fehlende und nicht unterstützte Werte bleiben unbekannt. Karte und Entdeckungsliste nutzen denselben Katalog und dieselbe Filterregel. Kartenobjekte ohne Katalogeintrag gelten als unbekannt. Persönliche Listenmarkierungen bleiben eine eigene Ebene. |
+| Kartenauswahl | OpenStreetMap, die vorhandene topografische Karte und die vorhandene MapTiler-Satellitenansicht. Vorhandene eigene Karten und Funktions-Overlays bleiben verfügbar. Alte eingebaute Basiskarten wechseln zur topografischen Karte. Die OSM-Standardkarte verwendet den offiziellen Kachel-Endpunkt mit Attribution. |
+| via-ferrata.de | Offen. Keine dokumentierte öffentliche API oder ausdrückliche Erlaubnis für Beschreibung, Fotos, Erfahrungsberichte oder Bewertungen gefunden. Die geprüfte Seite antwortet mit `X-Frame-Options: SAMEORIGIN`. Eine ausdrückliche Freigabe des Betreibers und eine stabile Schnittstelle fehlen. |
+| Tourenplaner und GPX | Offen. Die vorhandene Klettersteiggeometrie belegt nicht automatisch Zustieg und Abstieg. Beim Norissteig ist das zugeordnete OSM-Objekt ein kurzes Steigstück. Für einen ersten Pilotsteig werden drei belegte, zusammenhängende Abschnitte und für Höhenmeter eine geeignete Höhenquelle benötigt. Erst danach kann daraus ein Track erzeugt werden. |
+
+Quellen zur Prüfung
+
+- [via-ferrata.de – Nutzungsbedingungen](https://www.via-ferrata.de/nutzungsbedingungen/)
+- [OpenStreetMap – Regeln für Standardkartenkacheln](https://operations.osmfoundation.org/policies/tiles/)
+- [OpenStreetMap – Norissteig, Brettl](https://www.openstreetmap.org/way/1156787758)
+- [Komoot – GPX-Import](https://support.komoot.com/hc/de/articles/10115477099674-Routen-und-Touren-exportieren-und-importieren)

@@ -1,3 +1,9 @@
+import { FerrataGradeFilter } from '../FeaturePanel/Climbing/Filter/FerrataGradeFilter';
+import { matchesFerrataGrade } from '../../services/tagging/ferrataGradeFilter';
+import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
+import { useMyListsContext } from '../utils/MyListsContext';
+import { VISITED_ID } from '../../services/my-lists/localFerrataLists';
+import { getShortId } from '../../services/helpers';
 import React, { useEffect, useMemo, useState } from 'react';
 import Router, { useRouter } from 'next/router';
 import {
@@ -230,6 +236,24 @@ const AreaThumb = ({ photo, name }: { photo?: string; name: string }) => (
   </Thumb>
 );
 
+const VisitedBadge = ({ area }: { area: ClimbingArea }) => {
+  const { listsContaining } = useMyListsContext();
+  const shortId = getShortId({ type: area.osmType, id: area.osmId });
+  if (!listsContaining(shortId).some(({ id }) => id === VISITED_ID))
+    return null;
+
+  return (
+    <Typography
+      component="span"
+      aria-label="Schon da gewesen"
+      title="Schon da gewesen"
+      sx={{ color: 'success.main', fontWeight: 700 }}
+    >
+      ✓
+    </Typography>
+  );
+};
+
 const CountryAccordion = ({
   group,
   defaultExpanded,
@@ -367,6 +391,7 @@ const CountryAccordion = ({
                     >
                       {area.name || `N/A – ${area.osmType}/${area.osmId}`}
                     </Link>
+                    {listType === 'ferrata' && <VisitedBadge area={area} />}
                     {area.viaFerrataScale && (
                       <ViaFerrataScaleChip scale={area.viaFerrataScale} />
                     )}
@@ -426,6 +451,7 @@ export const ClimbingAreasPanel = ({
   const router = useRouter();
   const isMobileMode = useMobileMode();
   const { bbox } = useMapStateContext();
+  const { ferrataGrades } = useUserSettingsContext().climbingFilter;
   const { setPreview } = useFeatureContext();
   const copy = LIST_COPY[listType];
   const sortOptions = sortOptionsFor(listType);
@@ -457,10 +483,14 @@ export const ClimbingAreasPanel = ({
   useEffect(() => () => setPreview(null), [setPreview]);
 
   const visibleAreas = useMemo(() => {
-    const allAreas = data ?? [];
+    const allAreas = (data ?? []).filter(
+      (area) =>
+        listType !== 'ferrata' ||
+        matchesFerrataGrade(area.viaFerrataScale, ferrataGrades),
+    );
     if (!filterViewport || !bbox) return allAreas;
     return allAreas.filter((area) => isInViewport(area, bbox));
-  }, [data, filterViewport, bbox]);
+  }, [data, filterViewport, bbox, listType, ferrataGrades]);
 
   const groups = useMemo(
     () => groupByCountry(visibleAreas, sortBy),
@@ -474,6 +504,7 @@ export const ClimbingAreasPanel = ({
         <ClosePanelButton right onClick={handleClose} />
         <h1>{t(copy.title)}</h1>
         <ClimbingListTypeTabs listType={listType} />
+        {listType === 'ferrata' && <FerrataGradeFilter />}
         <Stack
           direction="row"
           spacing={0.5}

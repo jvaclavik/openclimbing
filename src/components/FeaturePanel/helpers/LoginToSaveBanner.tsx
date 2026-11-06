@@ -1,3 +1,4 @@
+import { HAS_USER_DB } from '../../../services/osm/consts';
 import styled from '@emotion/styled';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseIcon from '@mui/icons-material/Close';
@@ -141,7 +142,7 @@ export const LoginToSaveBanner = ({ overlay }: LoginToSaveBannerProps) => {
   const { loggedIn, handleLogin, loading } = useOsmAuthContext();
   const [dismissed, setDismissed] = useState(false);
 
-  if (loggedIn || dismissed) return null;
+  if (!HAS_USER_DB || loggedIn || dismissed) return null;
 
   return (
     <Card $overlay={overlay}>

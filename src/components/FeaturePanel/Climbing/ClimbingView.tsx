@@ -1,3 +1,4 @@
+import { HAS_USER_DB } from '../../../services/osm/consts';
 import styled from '@emotion/styled';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -526,7 +527,7 @@ export const ClimbingView = () => {
             $imageUrl={backgroundImageUrl}
           >
             <>
-              {!isEditMode && (
+              {HAS_USER_DB && !isEditMode && (
                 <FabContainer>
                   <Tooltip
                     title={t('climbingpanel.draw_routes')}
