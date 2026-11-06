@@ -17,6 +17,7 @@ import * as maplibregl from 'maplibre-gl';
 import type { Map, MapGeoJSONFeature } from 'maplibre-gl';
 import type { MapClickOverrideRef } from '../../utils/MapStateContext';
 import { USER_GEOJSON_LAYER_ID } from '../userGeojson/consts';
+import { CENTRAL_TOUR_LINE, CENTRAL_TOUR_START } from '../centralToursIds';
 
 const isSameOsmId = (feature: Feature, skeleton: Feature) =>
   feature && skeleton && getOsmappLink(feature) === getOsmappLink(skeleton);
@@ -109,7 +110,9 @@ export const useOnMapClicked = createMapEventHook<
   eventType: 'click',
   eventHandler: async ({ point }) => {
     const coords = map.unproject(point).toArray();
-    const features = map.queryRenderedFeatures(point);
+    const features = map
+      .queryRenderedFeatures(point)
+      .filter((f) => f.layer.id !== CENTRAL_TOUR_LINE);
 
     if (mapClickOverrideRef.current) {
       const label = getOnlyLabel(features, coords, map);
@@ -118,7 +121,13 @@ export const useOnMapClicked = createMapEventHook<
     }
 
     // user GeoJSON points open their own popup (UserGeojsonLayers)
-    if (features.some((f) => f.layer.id === USER_GEOJSON_LAYER_ID)) {
+    if (
+      features.some(
+        (f) =>
+          f.layer.id === USER_GEOJSON_LAYER_ID ||
+          f.layer.id === CENTRAL_TOUR_START,
+      )
+    ) {
       return;
     }
 

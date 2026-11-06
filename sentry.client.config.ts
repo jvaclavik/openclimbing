@@ -4,7 +4,9 @@
 
 import * as Sentry from '@sentry/nextjs';
 
-const enabled = process.env.NODE_ENV === 'production';
+const enabled =
+  process.env.NODE_ENV === 'production' &&
+  process.env.kletterglueckPrivateTours !== 'true';
 Sentry.init({
   enabled,
   dsn: enabled

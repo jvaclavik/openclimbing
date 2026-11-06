@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppContext, AppInitialProps, AppProps } from 'next/app';
 import nextCookies from 'next-cookies';
 import { CssBaseline } from '@mui/material';
@@ -73,6 +73,7 @@ const reactQueryClient = new QueryClient();
 
 type OwnProps = {
   userThemeCookie: string;
+  privateTours?: boolean;
   featureFromRouter: Feature | '404' | null;
   initialMapView: View;
   cookies: Record<string, string>;
@@ -80,6 +81,7 @@ type OwnProps = {
 
 type Props = AppProps & EmotionCacheProviderProps & OwnProps;
 const MyApp = (props: Props) => {
+  const [privateTours] = useState(props.privateTours);
   const cookies = fakeStaticExportCookies(props.cookies);
   const initialMapView = fakeStaticExportMapView(props.initialMapView);
   const {
@@ -101,6 +103,25 @@ const MyApp = (props: Props) => {
 
     fakeStaticExportStartup();
   }, []);
+
+  if (props.router.pathname === '/kletterglueck-touren') {
+    return (
+      <AppCacheProvider emotionCache={emotionCache}>
+        <UserThemeProvider userThemeCookie={userThemeCookie}>
+          <CssBaseline />
+          <Head>
+            <meta name="robots" content="noindex, nofollow" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1"
+            />
+          </Head>
+          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+          <Component {...pageProps} />
+        </UserThemeProvider>
+      </AppCacheProvider>
+    );
+  }
 
   return (
     <CrashErrorBoundary>
@@ -160,8 +181,8 @@ const MyApp = (props: Props) => {
           <GlobalStyle />
         </UserThemeProvider>
       </AppCacheProvider>
-      <Umami />
-      {PROJECT_ID === 'openclimbing' && (
+      {!privateTours && <Umami />}
+      {!privateTours && PROJECT_ID === 'openclimbing' && (
         <>
           <GoogleAnalytics />
           <HotJar />
@@ -186,6 +207,19 @@ MyApp.getInitialProps = async ({
     };
   }
 
+  const privateTours = process.env.KLETTERGLUECK_TOURS_ENABLED === 'true';
+  if (ctx.pathname === '/kletterglueck-touren') {
+    ctx.res?.setHeader('Cache-Control', 'private, no-store');
+    return {
+      privateTours,
+      cookies: {},
+      featureFromRouter: null,
+      initialMapView: ['', '', ''],
+      userThemeCookie: nextCookies(ctx).userTheme,
+      pageProps: {},
+    };
+  }
+
   await setIntlForSSR(ctx); // needed for lang urls like /es/node/123
 
   // These three are independent; running them concurrently avoids an SSR
@@ -207,6 +241,7 @@ MyApp.getInitialProps = async ({
   }
 
   return {
+    privateTours,
     featureFromRouter,
     initialMapView,
     cookies,

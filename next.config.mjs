@@ -23,7 +23,13 @@ const nextConfig = {
     emotion: true,
   },
   output: process.env.NEXTJS_OUTPUT || undefined,
-  env: { osmappVersion, sentryRelease },
+  env: {
+    osmappVersion,
+    sentryRelease,
+    kletterglueckPrivateTours: String(
+      process.env.KLETTERGLUECK_TOURS_ENABLED === 'true',
+    ),
+  },
   experimental: {
     // Rewrite barrel imports (`import { Button } from '@mui/material'`) to
     // direct submodule imports so only used components are bundled.

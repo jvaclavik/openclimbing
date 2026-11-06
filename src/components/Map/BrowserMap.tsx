@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useCentralTours } from './useCentralTours';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { useMapStateContext, View } from '../utils/MapStateContext';
@@ -118,6 +119,11 @@ const BrowserMap = () => {
 
   const [map, containerRef, mapRef] = useInitMap();
   useSuppressMapSelection(containerRef);
+  const isPickingMapPoint = useCallback(
+    () => Boolean(mapClickOverrideRef.current),
+    [mapClickOverrideRef],
+  );
+  const centralToursNotice = useCentralTours(map, isPickingMapPoint);
   useAddTopRightControls(map, mobileMode);
   useOnMapClicked(map, setFeature, mapClickOverrideRef);
   useOnMapLongPressed(map, setFeature);
@@ -148,6 +154,23 @@ const BrowserMap = () => {
         style={{ height: '100%', width: '100%', backgroundColor: '#4a463d' }}
       />
       <PreviewArrow />
+      {centralToursNotice && (
+        <span
+          role="status"
+          style={{
+            position: 'absolute',
+            top: 64,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#fff',
+            color: '#222',
+            padding: '4px 8px',
+            pointerEvents: 'none',
+          }}
+        >
+          {centralToursNotice}
+        </span>
+      )}
     </>
   );
 };
