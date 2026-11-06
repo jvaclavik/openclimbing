@@ -1,6 +1,6 @@
 # Kletterglück – Aufgabenübergabe
 
-Status: Geplant, noch nicht umgesetzt. Diese Datei ist die gemeinsame Übergabe zwischen Schnellchat und Work-Modus.
+Status: Änderungen zur Abnahme vorbereitet, offene Punkte unten dokumentiert. Diese Datei ist die gemeinsame Übergabe zwischen Schnellchat und Work-Modus.
 
 ## Beschlossene Änderungen
 
@@ -21,6 +21,17 @@ Status: Geplant, noch nicht umgesetzt. Diese Datei ist die gemeinsame Übergabe 
 ## Zusätzliche Idee zur Prüfung (nicht beschlossen)
 
 - **Schnellfilter „Für uns passend“**: Optional eine einfache Voreinstellung für bevorzugte Schwierigkeitsgrade, ohne Nutzerkonto. Nur umsetzen, wenn die Oberfläche dadurch wirklich einfacher wird; ansonsten weglassen.
+
+
+## Spätere Prüfung: privater via-ferrata.de-Prototyp (zurückgestellt)
+
+**Zeitpunkt:** Erst nach Abschluss und Prüfung des derzeit laufenden Work-Auftrags. Dies ist ein Prüfauftrag für später, keine Aufforderung, jetzt parallel mit der Umsetzung zu beginnen.
+
+- Für die ausschließlich private Nutzung von Kletterglück durch zwei Personen einen eng begrenzten Prototyp mit zunächst drei öffentlich erreichbaren Klettersteig-Detailseiten auf via-ferrata.de prüfen.
+- Untersuchen, welche Daten technisch zuverlässig zugeordnet und extrahiert werden können (z. B. Name, Lage, Schwierigkeit, Höhenmeter, Dauer, Hinweise). Beschreibungen, Fotos, Rezensionen und Bewertungen gesondert nach Rechten und technischer Machbarkeit beurteilen.
+- Eine private Nutzung ist **keine pauschale rechtliche Freigabe** für automatisiertes Auslesen oder Kopieren. Vor Datenübernahme Nutzungsbedingungen, Urheber-/Datenbankrechte, Datenschutz sowie ggf. robots.txt und Zugriffsbeschränkungen prüfen. Keine Login-, Paywall-, CAPTCHA- oder anderen Zugriffsschutzmaßnahmen umgehen; keine massenhafte Extraktion.
+- Nur rechtlich zulässige Inhalte innerhalb der Kletterglück-Detailansicht anzeigen; Quelle klar nennen. Ziel bleibt ein In-App-Erlebnis ohne Safari-Wechsel. Bei ungeklärten Rechten lediglich Machbarkeit und offene Punkte dokumentieren, keine fremden Inhalte dauerhaft speichern oder übernehmen.
+- Nach dem Prototyp Ergebnisse, Grenzen, Wartungsaufwand und eine Empfehlung zur weiteren Umsetzung vorlegen. Keine produktiven Änderungen ohne gesonderte Freigabe.
 
 ## Umsetzungshinweise für Work
 
@@ -51,3 +62,7 @@ Quellen zur Prüfung
 - [OpenStreetMap – Regeln für Standardkartenkacheln](https://operations.osmfoundation.org/policies/tiles/)
 - [OpenStreetMap – Norissteig, Brettl](https://www.openstreetmap.org/way/1156787758)
 - [Komoot – GPX-Import](https://support.komoot.com/hc/de/articles/10115477099674-Routen-und-Touren-exportieren-und-importieren)
+
+Pull Request zur Abnahme: [#17](https://github.com/mandala-wt/openclimbing/pull/17).
+
+Prüfung: 42 gezielte Tests bestanden. Mobilansichten in Chromium für iPhone 13 und iPad Mini geprüft. Der Gesamtlauf hatte dieselben 43 Fehler wie der unveränderte Vergleichsstand. Der vollständige Produktionsbuild ist noch offen.
