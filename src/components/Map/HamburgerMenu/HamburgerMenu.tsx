@@ -31,6 +31,7 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Link from 'next/link';
+import { UserSettingsItem } from './UserSettingsItem';
 import { UserHeader } from './UserHeader';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import { MyListsSection } from './MyListsSection';
@@ -242,10 +243,14 @@ export const HamburgerMenu = () => {
             }}
           >
             <div>
-              <UserHeader
-                closeMenu={close}
-                openUserSettings={handleOpenUserSettings}
-              />
+              {HAS_USER_DB ? (
+                <UserHeader
+                  closeMenu={close}
+                  openUserSettings={handleOpenUserSettings}
+                />
+              ) : (
+                <UserSettingsItem openUserSettings={handleOpenUserSettings} />
+              )}
               <Divider sx={{ mt: 1, mb: 2 }} />
               {isOpenClimbing && HAS_USER_DB && (
                 <MyClimbingProfileMenuItem closeMenu={close} />
@@ -266,13 +271,15 @@ export const HamburgerMenu = () => {
               {(hasClimbingLayer || isOpenClimbing) && (
                 <>
                   <ClimbingGradesTableLink closeMenu={close} />
-                  <TickScoringLink closeMenu={close} />
+                  {HAS_USER_DB && <TickScoringLink closeMenu={close} />}
                   {isOpenClimbing && HAS_USER_DB && (
                     <ClimbingLeaderboardLink closeMenu={close} />
                   )}
                 </>
               )}
-              {isMobileMode && <CommunityForumLink closeMenu={close} />}
+              {HAS_USER_DB && isMobileMode && (
+                <CommunityForumLink closeMenu={close} />
+              )}
             </div>
             <div>
               <Divider />
@@ -281,7 +288,7 @@ export const HamburgerMenu = () => {
                   mb: 2,
                 }}
               >
-                <EditLink />
+                {HAS_USER_DB && <EditLink />}
               </Box>
               <Divider />
               <Stack

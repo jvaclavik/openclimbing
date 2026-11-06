@@ -1,3 +1,4 @@
+import { HAS_USER_DB } from '../../services/osm/consts';
 import { Box, Button } from '@mui/material';
 import styled from '@emotion/styled';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,7 +35,7 @@ export const EditQuickAction = () => {
   const { feature, isAddPlace, isUndelete } = useEditDialogFeature();
   const { open } = useEditDialogContext();
 
-  if (feature.skeleton) return null;
+  if (!HAS_USER_DB || feature.skeleton) return null;
 
   return (
     <QuickActionButton
@@ -48,6 +49,7 @@ export const EditQuickAction = () => {
 export const EditButton = () => {
   const { isAddPlace, isUndelete } = useEditDialogFeature();
   const { open } = useEditDialogContext();
+  if (!HAS_USER_DB) return null;
 
   return (
     <Box

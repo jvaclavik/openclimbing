@@ -1,3 +1,4 @@
+import { HAS_USER_DB } from '../../../services/osm/consts';
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { useEditDialogContext } from '../helpers/EditDialogContext';
@@ -14,9 +15,11 @@ export const EditDialog = () => {
   const { opened } = useEditDialogContext();
   const { feature } = useEditDialogFeature();
 
+  if (!HAS_USER_DB || !opened) return null;
+
   return (
     <EditContextProvider key={getReactKey(feature)}>
-      {opened && <EditDialogBody />}
+      <EditDialogBody />
     </EditContextProvider>
   );
 };

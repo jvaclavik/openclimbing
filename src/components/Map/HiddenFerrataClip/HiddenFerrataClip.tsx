@@ -3,7 +3,10 @@ import styled from '@emotion/styled';
 import CloseIcon from '@mui/icons-material/Close';
 import { isMobileMode } from '../../helpers';
 import { useMapStateContext } from '../../utils/MapStateContext';
-import { matchHiddenFerrataClip } from './matchHiddenFerrataClip';
+import {
+  FERRATA_DETAIL_VIDEO_OPENED,
+  matchHiddenFerrataClip,
+} from './matchHiddenFerrataClip';
 import type { HiddenFerrataClipMatch } from './matchHiddenFerrataClip';
 
 const Frame = styled.div`
@@ -199,12 +202,14 @@ const HiddenFerrataClipPlayer = ({
     };
 
     video.addEventListener('pause', onPause);
+    document.addEventListener(FERRATA_DETAIL_VIDEO_OPENED, close);
     playWithSound(video).catch(playMuted);
 
     return () => {
       disposed = true;
       disarm();
       video.removeEventListener('pause', onPause);
+      document.removeEventListener(FERRATA_DETAIL_VIDEO_OPENED, close);
     };
   }, [dismissed]);
 

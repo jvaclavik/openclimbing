@@ -1,3 +1,5 @@
+import { HAS_USER_DB } from '../../services/osm/consts';
+import { KLETTERGLUECK_BASE_MAPS } from './osmappLayers';
 import {
   Bbox,
   Layer,
@@ -26,7 +28,9 @@ import { t } from '../../services/intl';
 
 /** Always visible in the layer list – the rest lives under “More maps”.
  *  `cuzkSat` is only in `baseLayers` while the view is over CZ (bbox filter). */
-const FEATURED_ORDER = ['tourist', 'carto', 'sat', 'cuzkSat'] as const;
+const FEATURED_ORDER = HAS_USER_DB
+  ? ['tourist', 'carto', 'sat', 'cuzkSat']
+  : KLETTERGLUECK_BASE_MAPS;
 
 const OutsideOfView = () => (
   <Tooltip title="Not visible currently" arrow placement="top-end">
@@ -51,7 +55,15 @@ const BaseLayerItem = ({ layer }: { layer: Layer }) => {
     <ListItemButton selected={selected} onClick={handleClick}>
       <LayerIcon Icon={Icon} />
       <ListItemText
-        primary={name}
+        primary={
+          HAS_USER_DB
+            ? name
+            : ({
+                carto: 'OpenStreetMap',
+                tourist: 'Topografisch',
+                sat: 'Satellit',
+              }[key] ?? name)
+        }
         secondary={selected && secondLine ? secondLine : undefined}
       />
       {isOutsideOfView && <OutsideOfView />}
@@ -69,7 +81,10 @@ const splitLayers = (baseLayers: Layer[]) => {
   ) as Layer[];
   const featuredKeys = new Set(FEATURED_ORDER as readonly string[]);
   const more = baseLayers.filter(
-    (l) => l.type !== 'spacer' && !featuredKeys.has(l.key),
+    (l) =>
+      l.type !== 'spacer' &&
+      !featuredKeys.has(l.key) &&
+      (HAS_USER_DB || l.type === 'user'),
   );
   return { featured, more };
 };

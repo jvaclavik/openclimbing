@@ -12,6 +12,11 @@ import {
   LENGTH_FILTER_MAX_M,
 } from '../../../services/tagging/climbing/parseClimbingLength';
 import { Setter } from '../../../types';
+import { HAS_USER_DB } from '../../../services/osm/consts';
+import {
+  ALL_FERRATA_GRADES,
+  FerrataGrade,
+} from '../../../services/tagging/ferrataGradeFilter';
 import { updateMapFilter } from './mapClimbingFilter';
 
 export type Interval = [number, number];
@@ -26,6 +31,7 @@ export type PhotoDrawnFilter = 'any' | 'with' | 'without';
 
 export type ClimbingFilterSettings = {
   filterGradeSystem: GradeSystem;
+  ferrataGrades?: FerrataGrade[];
   gradeInterval: Interval | null;
   minimumRoutes: number;
   poiTypes: Partial<PoiTypes>;
@@ -54,6 +60,8 @@ const isSamePoiTypes = (a: PoiTypes, b: PoiTypes) =>
 
 export type ClimbingFilter = {
   grades: string[];
+  ferrataGrades: FerrataGrade[];
+  setFerrataGrades: Setter<FerrataGrade[]>;
   gradeInterval: Interval;
   setGradeInterval: Setter<Interval>;
   minimumRoutes: number;
@@ -100,12 +108,20 @@ export const getClimbingFilter = (
     setUserSetting(SETTINGS_KEY, { ...data, [name]: value });
   };
 
+  const ferrataGrades = data.ferrataGrades ?? ALL_FERRATA_GRADES;
+  const isFerrataGradeDefault = ALL_FERRATA_GRADES.every((grade) =>
+    ferrataGrades.includes(grade),
+  );
+  const setFerrataGrades = (next: FerrataGrade[]) =>
+    setFilter('ferrataGrades', next);
+  // Ignore legacy sport-climbing filters in the account-free UI.
+  const rockFilters = HAS_USER_DB ? data : ({} as ClimbingFilterSettings);
   const defaultGradeInterval = [0, grades.length - 1] as Interval;
-  const gradeInterval = data?.gradeInterval ?? defaultGradeInterval;
+  const gradeInterval = rockFilters.gradeInterval ?? defaultGradeInterval;
   const setGradeInterval = (interval: Interval) =>
     setFilter('gradeInterval', interval);
 
-  const minimumRoutes = data?.minimumRoutes ?? DEFAULT_MINIMUM_ROUTES;
+  const minimumRoutes = rockFilters.minimumRoutes ?? DEFAULT_MINIMUM_ROUTES;
   const setMinimumRoutes = (num: number) => setFilter('minimumRoutes', num);
 
   const poiTypes: PoiTypes = {
@@ -114,24 +130,24 @@ export const getClimbingFilter = (
   };
   const setPoiTypes = (next: PoiTypes) => setFilter('poiTypes', next);
 
-  const climbingTypes = data?.climbingTypes ?? [];
+  const climbingTypes = rockFilters.climbingTypes ?? [];
   const setClimbingTypes = (next: string[]) => setFilter('climbingTypes', next);
 
-  const inclinations = data?.inclinations ?? [];
+  const inclinations = rockFilters.inclinations ?? [];
   const setInclinations = (next: string[]) => setFilter('inclinations', next);
 
-  const materials = data?.materials ?? [];
+  const materials = rockFilters.materials ?? [];
   const setMaterials = (next: string[]) => setFilter('materials', next);
 
-  const familyFriendly = data?.familyFriendly ?? false;
+  const familyFriendly = rockFilters.familyFriendly ?? false;
   const setFamilyFriendly = (next: boolean) =>
     setFilter('familyFriendly', next);
 
-  const photoDrawn: PhotoDrawnFilter = data?.photoDrawn ?? 'any';
+  const photoDrawn: PhotoDrawnFilter = rockFilters.photoDrawn ?? 'any';
   const setPhotoDrawn = (next: PhotoDrawnFilter) =>
     setFilter('photoDrawn', next);
 
-  const lengthInterval = data?.lengthInterval ?? DEFAULT_LENGTH_INTERVAL;
+  const lengthInterval = rockFilters.lengthInterval ?? DEFAULT_LENGTH_INTERVAL;
   const setLengthInterval = (interval: Interval) =>
     setFilter('lengthInterval', interval);
 
@@ -152,6 +168,7 @@ export const getClimbingFilter = (
   );
 
   const isDefaultFilter =
+    isFerrataGradeDefault &&
     isGradeIntervalDefault &&
     isMinimumRoutesDefault &&
     isPoiTypesDefault &&
@@ -163,6 +180,7 @@ export const getClimbingFilter = (
     isLengthIntervalDefault;
 
   const numberOfActiveFilters = [
+    isFerrataGradeDefault,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
     isPoiTypesDefault,
@@ -175,6 +193,7 @@ export const getClimbingFilter = (
   ].filter((isDefault) => !isDefault).length;
 
   updateMapFilter({
+    ferrataGrades,
     userSystem,
     gradeInterval,
     minimumRoutes,
@@ -193,6 +212,8 @@ export const getClimbingFilter = (
 
   return {
     grades,
+    ferrataGrades,
+    setFerrataGrades,
     gradeInterval,
     setGradeInterval,
     minimumRoutes,

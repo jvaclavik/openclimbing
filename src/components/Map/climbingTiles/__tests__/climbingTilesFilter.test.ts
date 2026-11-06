@@ -49,6 +49,47 @@ describe('filterClimbingTilesFeatures', () => {
     ]);
   });
 
+  it('applies catalog ferrata grades to the point and line of the same OSM object', () => {
+    const point: ClimbingTilesFeature = {
+      type: 'Feature',
+      id: 101,
+      geometry: pt(),
+      properties: { type: 'ferrata', name: 'B/C' },
+    };
+    const line: ClimbingTilesFeature = {
+      ...point,
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [14, 50],
+          [14.1, 50.1],
+        ],
+      },
+    };
+    const unknown: ClimbingTilesFeature = { ...point, id: 201 };
+    const params = {
+      ...baseParams,
+      gradeInterval: [0, 10] as [number, number],
+      minimumRoutes: 1,
+      isDefaultFilter: false,
+      poiTypes: { rock: true, ferrata: true, gym: false },
+      ferrataScales: new Map([[101, 'B/C']]),
+    };
+    const features = [point, line, unknown];
+    expect(
+      filterClimbingTilesFeatures(features, {
+        ...params,
+        ferrataGrades: ['C'],
+      }),
+    ).toEqual([point, line]);
+    expect(
+      filterClimbingTilesFeatures(features, {
+        ...params,
+        ferrataGrades: ['unknown'],
+      }),
+    ).toEqual([unknown]);
+  });
+
   it('drops only disabled poi type', () => {
     const features: ClimbingTilesFeature[] = [
       {

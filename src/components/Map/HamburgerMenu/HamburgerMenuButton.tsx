@@ -2,6 +2,8 @@ import { IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import React from 'react';
 import styled from '@emotion/styled';
+import { HAS_USER_DB } from '../../../services/osm/consts';
+
 import { LoginIconButton } from './LoginIconButton';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { useMobileMode } from '../../helpers';
@@ -40,7 +42,7 @@ export const HamburgerMenuButton = ({ anchorRef, onClick }) => {
   const { osmUser } = useOsmAuthContext();
   const isMobileMode = useMobileMode();
 
-  if (osmUser) {
+  if (HAS_USER_DB && osmUser) {
     return (
       <UserIconButton ref={anchorRef} color="primary" onClick={onClick}>
         <LoginIconButton size={isMobileMode ? 32 : 36} />
@@ -49,7 +51,12 @@ export const HamburgerMenuButton = ({ anchorRef, onClick }) => {
   }
 
   return (
-    <MenuIconButton ref={anchorRef} color="primary" onClick={onClick}>
+    <MenuIconButton
+      ref={anchorRef}
+      color="primary"
+      onClick={onClick}
+      aria-label="Menü"
+    >
       <MenuIcon />
     </MenuIconButton>
   );

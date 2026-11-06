@@ -1,9 +1,14 @@
+import {
+  ALL_FERRATA_GRADES,
+  FerrataGrade,
+} from '../../../services/tagging/ferrataGradeFilter';
 import { GradeSystem } from '../../../services/tagging/climbing/gradeSystems';
 import isEqual from 'lodash/isEqual';
 import { Interval, PhotoDrawnFilter, PoiTypes } from './getClimbingFilter';
 import { DEFAULT_LENGTH_INTERVAL } from '../../../services/tagging/climbing/parseClimbingLength';
 
 export type MapClimbingFilterState = {
+  ferrataGrades: FerrataGrade[];
   userSystem: GradeSystem | undefined;
   gradeInterval: Interval | undefined;
   minimumRoutes: number | undefined;
@@ -23,6 +28,7 @@ export type MapClimbingFilterState = {
 export const mapClimbingFilter: MapClimbingFilterState & {
   callback: () => void;
 } = {
+  ferrataGrades: ALL_FERRATA_GRADES,
   userSystem: undefined,
   gradeInterval: undefined,
   minimumRoutes: undefined,
@@ -42,6 +48,7 @@ export const mapClimbingFilter: MapClimbingFilterState & {
 
 export const updateMapFilter = (next: MapClimbingFilterState) => {
   if (
+    !isEqual(mapClimbingFilter.ferrataGrades, next.ferrataGrades) ||
     mapClimbingFilter.userSystem != next.userSystem ||
     !isEqual(mapClimbingFilter.gradeInterval, next.gradeInterval) ||
     mapClimbingFilter.minimumRoutes != next.minimumRoutes ||

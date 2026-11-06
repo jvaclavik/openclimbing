@@ -18,6 +18,8 @@ interface Layers {
   [key: string]: Layer;
 }
 
+export const KLETTERGLUECK_BASE_MAPS = ['carto', 'tourist', 'sat'] as const;
+
 const isOpenClimbing = PROJECT_ID === 'openclimbing';
 
 const retina =
@@ -73,7 +75,7 @@ export const osmappLayers: Layers = {
   carto: {
     name: t('layers.carto'),
     type: 'basemap',
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     Icon: MapIcon,
     attribution: ['osm'],
   },

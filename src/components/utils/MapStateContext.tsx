@@ -1,3 +1,4 @@
+import { HAS_USER_DB } from '../../services/osm/consts';
 import React, {
   createContext,
   useCallback,
@@ -15,7 +16,10 @@ import { LonLat } from '../../services/types';
 import Cookies from 'js-cookie';
 import Router from 'next/router';
 import { getMapViewFromHash } from '../App/helpers';
-import { osmappLayers } from '../LayerSwitcher/osmappLayers';
+import {
+  KLETTERGLUECK_BASE_MAPS,
+  osmappLayers,
+} from '../LayerSwitcher/osmappLayers';
 import { fakeStaticExportSkipDefaultMapView } from '../App/fakeStaticExportHelpers';
 import {
   USER_GEOJSON_STORAGE_KEY,
@@ -49,8 +53,7 @@ export type Layer = {
 export type View = [string, string, string];
 
 export type MapClickOverride =
-  | ((coords: LonLat, label: string) => void)
-  | undefined;
+  ((coords: LonLat, label: string) => void) | undefined;
 export type MapClickOverrideRef = React.MutableRefObject<MapClickOverride>;
 
 type MapStateContextType = {
@@ -100,12 +103,30 @@ const useUpdateViewFromHash = (setView: Setter<View>) => {
   }, [setView]);
 };
 
+const migrateBaseMap = (layers: string[]) => {
+  const [base, ...overlays] = layers;
+  const allowed: readonly string[] = KLETTERGLUECK_BASE_MAPS;
+  if (
+    HAS_USER_DB ||
+    !base ||
+    osmappLayers[base]?.type !== 'basemap' ||
+    allowed.includes(base)
+  ) {
+    return layers;
+  }
+  return ['tourist', ...overlays];
+};
+
 const useActiveLayersState = () => {
   const isClimbing = PROJECT_ID === 'openclimbing';
   const initLayers = isClimbing
     ? ['tourist', 'climbing']
     : [DEFAULT_MAP, 'indoor'];
-  return usePersistedState(ACTIVE_LAYERS_STORAGE_KEY, initLayers);
+  return usePersistedState(
+    ACTIVE_LAYERS_STORAGE_KEY,
+    initLayers,
+    migrateBaseMap,
+  );
 };
 
 export const MapStateProvider: React.FC<{ initialMapView: View }> = ({

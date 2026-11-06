@@ -1,3 +1,10 @@
+import {
+  ALL_FERRATA_GRADES,
+  FerrataGrade,
+  matchesFerrataGrade,
+} from '../../../services/tagging/ferrataGradeFilter';
+import { getClimbingAreas } from '../../../services/climbing-areas/getClimbingAreas';
+import { convertOsmIdToMapId } from '../helpers';
 import debounce from 'lodash/debounce';
 import { fetchJson } from '../../../services/fetch';
 import { EMPTY_GEOJSON_SOURCE, OSMAPP_SPRITE } from '../consts';
@@ -102,6 +109,8 @@ const processFeature = (
 };
 
 type FilterParams = {
+  ferrataGrades?: FerrataGrade[];
+  ferrataScales?: Map<number, string | null | undefined>;
   gradeInterval: Interval;
   minimumRoutes: number;
   isDefaultFilter: boolean;
@@ -239,7 +248,15 @@ export const filterClimbingTilesFeatures = (
     const { type, routeCount, gradeId, histogramCode } = feature.properties;
 
     if (type === 'gym') return poiTypes.gym;
-    if (type === 'ferrata') return poiTypes.ferrata;
+    if (type === 'ferrata') {
+      return (
+        poiTypes.ferrata &&
+        matchesFerrataGrade(
+          params.ferrataScales?.get(Number(feature.id)),
+          params.ferrataGrades ?? ALL_FERRATA_GRADES,
+        )
+      );
+    }
 
     if (type === 'crag' || type === 'area') {
       if (!poiTypes.rock) return false;
@@ -280,8 +297,13 @@ export const filterClimbingTilesFeatures = (
   });
 };
 
-const doClimbingFilter = (features: ClimbingTilesFeature[]) =>
+const doClimbingFilter = (
+  features: ClimbingTilesFeature[],
+  ferrataScales: FilterParams['ferrataScales'],
+) =>
   filterClimbingTilesFeatures(features, {
+    ferrataGrades: mapClimbingFilter.ferrataGrades,
+    ferrataScales,
     gradeInterval: mapClimbingFilter.gradeInterval,
     minimumRoutes: mapClimbingFilter.minimumRoutes,
     isDefaultFilter: mapClimbingFilter.isDefaultFilter,
@@ -321,7 +343,14 @@ const updateData = async () => {
   const tiles = computeTiles(z, northWest, southEast);
 
   const promises = tiles.map((tile) => getTileJson(tile)); // TODO consider showing results after each tile is loaded
-  const data = await Promise.all(promises);
+  const selected = mapClimbingFilter.ferrataGrades;
+  const needsFerrataGrades =
+    mapClimbingFilter.poiTypes?.ferrata &&
+    ALL_FERRATA_GRADES.some((grade) => !selected.includes(grade));
+  const [data, catalog] = await Promise.all([
+    Promise.all(promises),
+    needsFerrataGrades ? getClimbingAreas('ferrata') : Promise.resolve([]),
+  ]);
   if (generation !== updateGeneration) {
     return;
   }
@@ -335,7 +364,16 @@ const updateData = async () => {
     features.push(...tileFeatures);
   }
   const uniqueFeatures = dedupeClimbingFeatures(features);
-  const filteredFeatures = doClimbingFilter(uniqueFeatures);
+  const ferrataScales = new Map<number, string | null | undefined>(
+    catalog.map(
+      (entry) =>
+        [
+          convertOsmIdToMapId({ type: entry.osmType, id: entry.osmId }),
+          entry.viaFerrataScale,
+        ] as const,
+    ),
+  );
+  const filteredFeatures = doClimbingFilter(uniqueFeatures, ferrataScales);
 
   const boxes = constructOutlines(uniqueFeatures);
   const nextFeatures = [...filteredFeatures.map(processFeature), ...boxes];

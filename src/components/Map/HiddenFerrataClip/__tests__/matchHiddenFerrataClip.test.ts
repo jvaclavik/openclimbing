@@ -3,6 +3,7 @@ import {
   HIDDEN_FERRATA_MAX_DISTANCE_M,
   HIDDEN_FERRATA_MIN_ZOOM,
   matchHiddenFerrataClip,
+  getFerrataDetailClips,
 } from '../matchHiddenFerrataClip';
 
 const lenzsteig = {
@@ -115,4 +116,11 @@ describe('matchHiddenFerrataClip', () => {
     expect(matchHiddenFerrataClip(['', '', ''])).toBeNull();
     expect(matchHiddenFerrataClip(['16', 'nope', '9.76'])).toBeNull();
   });
+});
+
+it('only exposes explicitly assigned clips in a detail view', () => {
+  expect(getFerrataDetailClips('w1156787758')).toEqual([
+    '/versteckt/norissteig.mp4',
+  ]);
+  expect(getFerrataDetailClips('r1156787758')).toBeUndefined();
 });
