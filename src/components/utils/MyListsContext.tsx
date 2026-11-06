@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+} from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import {
   addMyListItem,
@@ -12,6 +18,10 @@ import { UserList, UserListItem } from '../../services/my-lists/myListsTypes';
 import { pickNextListColor } from '../../services/my-lists/listColors';
 import { useOsmAuthContext } from './OsmAuthContext';
 import { usePersistedState } from './usePersistedState';
+import {
+  INITIAL_LOCAL_LISTS,
+  VISITED_ID,
+} from '../../services/my-lists/localFerrataLists';
 import { HAS_USER_DB } from '../../services/osm/consts';
 
 const QUERY_KEY = ['my-lists'];
@@ -109,7 +119,7 @@ const listsContainingFn = (lists: UserList[] | null) => (shortId: string) =>
     list.items.some((item) => item.shortId === shortId),
   );
 
-export const MyListsProvider: React.FC = ({ children }) => {
+const AccountMyListsProvider: React.FC = ({ children }) => {
   const { loggedIn } = useOsmAuthContext();
   const { lists, isFetching } = useListsQuery(loggedIn && HAS_USER_DB);
   const m = useListsMutations();
@@ -191,6 +201,104 @@ export const MyListsProvider: React.FC = ({ children }) => {
     <MyListsContext.Provider value={value}>{children}</MyListsContext.Provider>
   );
 };
+
+const LocalMyListsProvider: React.FC = ({ children }) => {
+  const [lists, setLists] = usePersistedState(
+    'myLists.local',
+    INITIAL_LOCAL_LISTS,
+  );
+  const [lastUsedListId, setLastUsedListId] = usePersistedState<number | null>(
+    'myLists.local.lastUsed',
+    null,
+  );
+  const [visibleListIds, setVisibleListIds] = usePersistedState<number[]>(
+    'myLists.local.visible',
+    [VISITED_ID],
+  );
+  const latestId = useRef(0);
+
+  const value: MyListsContextType = {
+    lists,
+    isLoading: false,
+    isInAnyList: isInAnyListFn(lists),
+    listsContaining: listsContainingFn(lists),
+    addToList: async (id, item) => {
+      const entry = { ...item, addedAt: new Date().toISOString() };
+      setLists((current) =>
+        current.map((list) =>
+          list.id !== id ||
+          list.items.some(({ shortId }) => shortId === item.shortId)
+            ? list
+            : { ...list, items: [...list.items, entry] },
+        ),
+      );
+    },
+    removeFromList: async (id, shortId) => {
+      setLists((current) =>
+        current.map((list) =>
+          list.id === id
+            ? {
+                ...list,
+                items: list.items.filter((item) => item.shortId !== shortId),
+              }
+            : list,
+        ),
+      );
+    },
+    createList: async (name, emoji, color) => {
+      const id = Math.max(
+        Date.now(),
+        latestId.current + 1,
+        ...lists.map((list) => list.id + 1),
+      );
+      latestId.current = id;
+      const createdAt = new Date().toISOString();
+      setLists((current) => [
+        ...current,
+        {
+          id,
+          name,
+          emoji,
+          color: color ?? pickNextListColor(current.map((list) => list.color)),
+          createdAt,
+          sortOrder: current.length,
+          items: [],
+        },
+      ]);
+      setVisibleListIds((current) => [...current, id]);
+      return id;
+    },
+    updateList: async (id, patch) => {
+      if (id < 0) return;
+      setLists((current) =>
+        current.map((list) => (list.id === id ? { ...list, ...patch } : list)),
+      );
+    },
+    deleteList: async (id) => {
+      if (id < 0) return;
+      setLists((current) => current.filter((list) => list.id !== id));
+      setVisibleListIds((current) => current.filter((listId) => listId !== id));
+    },
+    lastUsedListId,
+    setLastUsedListId,
+    visibleListIds,
+    setVisibleListIds,
+    toggleListVisibility: (id) => {
+      setVisibleListIds((current) =>
+        current.includes(id)
+          ? current.filter((listId) => listId !== id)
+          : [...current, id],
+      );
+    },
+  };
+  return (
+    <MyListsContext.Provider value={value}>{children}</MyListsContext.Provider>
+  );
+};
+
+export const MyListsProvider = HAS_USER_DB
+  ? AccountMyListsProvider
+  : LocalMyListsProvider;
 
 export const useMyListsContext = () => {
   const ctx = useContext(MyListsContext);

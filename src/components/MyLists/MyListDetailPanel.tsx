@@ -27,7 +27,9 @@ import { ClientOnly } from '../helpers';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
 import { useMyListsContext } from '../utils/MyListsContext';
 import { useOsmAuthContext } from '../utils/OsmAuthContext';
-import { getApiId, getUrlOsmId } from '../../services/helpers';
+import { HAS_USER_DB } from '../../services/osm/consts';
+import { useMapStateContext } from '../utils/MapStateContext';
+import { getListItemTarget } from './getListItemTarget';
 import { UserList, UserListItem } from '../../services/my-lists/myListsTypes';
 import { EditListDialog } from './EditListDialog';
 import { ListAvatar } from './ListAvatar';
@@ -49,16 +51,6 @@ const useExclusiveListVisibility = (listId: number | null) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listId]);
-};
-
-const featureLinkForShortId = (shortId: string) => {
-  try {
-    const apiId = getApiId(shortId);
-    if (!apiId.type) return '/';
-    return `/${getUrlOsmId(apiId)}`;
-  } catch {
-    return '/';
-  }
 };
 
 type HeaderProps = {
@@ -97,23 +89,27 @@ const ListHeader = ({ list, onRename, onDelete, deleting }: HeaderProps) => (
         {t('mylists.item_count', { count: String(list.items.length) })}
       </Typography>
     </Box>
-    <Button
-      size="small"
-      startIcon={<EditIcon fontSize="small" />}
-      onClick={onRename}
-      disabled={deleting}
-    >
-      {t('mylists.edit')}
-    </Button>
-    <Button
-      size="small"
-      color="error"
-      startIcon={<DeleteIcon fontSize="small" />}
-      onClick={onDelete}
-      loading={deleting}
-    >
-      {t('mylists.delete')}
-    </Button>
+    {list.id > 0 && (
+      <>
+        <Button
+          size="small"
+          startIcon={<EditIcon fontSize="small" />}
+          onClick={onRename}
+          disabled={deleting}
+        >
+          {t('mylists.edit')}
+        </Button>
+        <Button
+          size="small"
+          color="error"
+          startIcon={<DeleteIcon fontSize="small" />}
+          onClick={onDelete}
+          loading={deleting}
+        >
+          {t('mylists.delete')}
+        </Button>
+      </>
+    )}
   </Stack>
 );
 
@@ -122,30 +118,47 @@ type ItemRowProps = {
   onRemove: () => void;
 };
 
-const ItemRow = ({ item, onRemove }: ItemRowProps) => (
-  <ListItem key={item.shortId} disablePadding>
-    <ListItemButton component={Link} href={featureLinkForShortId(item.shortId)}>
-      <ListItemText
-        primary={item.label || item.shortId}
-        secondary={item.poiType}
-      />
-      <ListItemSecondaryAction>
-        <IconButton
-          edge="end"
-          size="small"
-          aria-label={t('mylists.remove_item')}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onRemove();
-          }}
-        >
-          <DeleteOutlinedIcon fontSize="small" />
-        </IconButton>
-      </ListItemSecondaryAction>
-    </ListItemButton>
-  </ListItem>
-);
+const ItemRow = ({ item, onRemove }: ItemRowProps) => {
+  const { setView } = useMapStateContext();
+  const { href, view } = getListItemTarget(item);
+  return (
+    <ListItem key={item.shortId} disablePadding>
+      <ListItemButton
+        component={Link}
+        href={href}
+        onClick={(event) => {
+          if (
+            view &&
+            !event.metaKey &&
+            !event.ctrlKey &&
+            !event.shiftKey &&
+            !event.altKey
+          )
+            setView(view);
+        }}
+      >
+        <ListItemText
+          primary={item.label || item.shortId}
+          secondary={item.poiType}
+        />
+        <ListItemSecondaryAction>
+          <IconButton
+            edge="end"
+            size="small"
+            aria-label={t('mylists.remove_item')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRemove();
+            }}
+          >
+            <DeleteOutlinedIcon fontSize="small" />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItemButton>
+    </ListItem>
+  );
+};
 
 type ListBodyProps = {
   list: UserList;
@@ -224,7 +237,7 @@ export const MyListDetailPanel = () => {
           <PanelScrollbars>
             <ClosePanelButton right onClick={handleClose} />
             <PanelSidePadding>
-              {!loggedIn ? (
+              {HAS_USER_DB && !loggedIn ? (
                 <Typography
                   variant="body1"
                   sx={{

@@ -61,6 +61,18 @@ export const HIDDEN_FERRATA_PLAY_COUNT = 2;
 // touchstart makes iOS pause the clip instead.
 const UNMUTE_EVENTS = ['touchend', 'click', 'keydown'] as const;
 
+const NextButton = styled(CloseButton)`
+  top: auto;
+  bottom: 4px;
+  width: auto;
+  min-width: 32px;
+  min-height: 28px;
+  padding: 0 7px;
+  border-radius: 14px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.7);
+`;
+
 const playWithSound = (video: HTMLVideoElement) => {
   video.muted = false;
   video.volume = 1;
@@ -93,11 +105,47 @@ export const HiddenFerrataClip = () => {
   }, [spot]);
 
   if (!spot || spot !== visit.spot) return null;
-  const src = spot.sources[visit.indices[spot.id] ?? 0] ?? spot.sources[0];
-  return <HiddenFerrataClipPlayer key={spot.id} id={spot.id} src={src} />;
+  const index = visit.indices[spot.id] ?? 0;
+  const src = spot.sources[index] ?? spot.sources[0];
+  const onNext = () => {
+    setVisit((previous) => {
+      if (previous.spot !== spot) return previous;
+      const nextIndex =
+        ((previous.indices[spot.id] ?? 0) + 1) % spot.sources.length;
+      return {
+        ...previous,
+        indices: { ...previous.indices, [spot.id]: nextIndex },
+      };
+    });
+  };
+  return (
+    <HiddenFerrataClipPlayer
+      key={src}
+      id={spot.id}
+      src={src}
+      nextLabel={
+        spot.sources.length > 1
+          ? `${index + 1}/${spot.sources.length} ›`
+          : undefined
+      }
+      onNext={onNext}
+    />
+  );
 };
 
-const HiddenFerrataClipPlayer = ({ id, src }: { id: string; src: string }) => {
+type PlayerProps = {
+  id: string;
+  src: string;
+  nextLabel?: string;
+  onNext: () => void;
+};
+
+const HiddenFerrataClipPlayer = ({
+  id,
+  src,
+  nextLabel,
+  onNext,
+}: PlayerProps) => {
   const [dismissed, setDismissed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playsRef = useRef(0);
@@ -197,6 +245,18 @@ const HiddenFerrataClipPlayer = ({ id, src }: { id: string; src: string }) => {
       >
         <CloseIcon fontSize="inherit" />
       </CloseButton>
+      {nextLabel && (
+        <NextButton
+          type="button"
+          aria-label="Nächstes Video"
+          onClick={(event) => {
+            event.stopPropagation();
+            onNext();
+          }}
+        >
+          {nextLabel}
+        </NextButton>
+      )}
     </Frame>
   );
 };

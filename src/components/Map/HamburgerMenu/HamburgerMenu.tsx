@@ -256,7 +256,7 @@ export const HamburgerMenu = () => {
                   <AboutLink closeMenu={close} />
                 </>
               )}
-              {loggedIn && HAS_USER_DB && (
+              {(!HAS_USER_DB || loggedIn) && (
                 <>
                   <Divider sx={{ my: 1 }} />
                   <MyListsSection closeMenu={close} />

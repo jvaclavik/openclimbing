@@ -7,6 +7,7 @@ import { t } from '../../../services/intl';
 import { isClimbingRelation } from '../../../utils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { QuickActionButton } from './QuickActionButton';
+import { FerrataListActions } from './FerrataListActions';
 import { SaveButton } from './SaveButton';
 import { ShareButton } from './ShareDialog/ShareButton';
 import { EditQuickAction } from '../EditButton';
@@ -65,7 +66,11 @@ export const QuickActions = () => {
     <Wrapper>
       <Container>
         <EditQuickAction />
-        {HAS_USER_DB && <SaveButton />}
+        {HAS_USER_DB ? (
+          <SaveButton />
+        ) : (
+          <FerrataListActions key={feature.osmMeta?.id} />
+        )}
         <ShareButton />
         {showPdfButton && (
           <QuickActionButton
