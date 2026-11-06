@@ -13,16 +13,31 @@ const METADATA =
 export const config = { api: { bodyParser: { sizeLimit: '512kb' } } };
 
 const databaseSettings = () => {
-  const endpoint = process.env.KLETTERGLUECK_SUPABASE_URL;
-  const key = process.env.KLETTERGLUECK_SUPABASE_SECRET_KEY;
-  if (
-    process.env.KLETTERGLUECK_TOURS_ENABLED !== 'true' ||
-    !endpoint ||
-    !/^https:\/\/[a-z0-9]+\.supabase\.co\/?$/.test(endpoint) ||
-    !key?.startsWith('sb_secret_')
-  )
-    return null;
-  return { endpoint: new URL('/rest/v1/kletterglueck_tours', endpoint), key };
+  const endpoint = process.env.KLETTERGLUECK_SUPABASE_URL?.trim();
+  const key = process.env.KLETTERGLUECK_SUPABASE_SECRET_KEY?.trim();
+  const issues: string[] = [];
+  if (process.env.KLETTERGLUECK_TOURS_ENABLED !== 'true') {
+    issues.push('KLETTERGLUECK_TOURS_ENABLED muss true sein.');
+  }
+  if (!endpoint || !/^https:\/\/[a-z0-9]+\.supabase\.co\/?$/.test(endpoint)) {
+    issues.push(
+      'KLETTERGLUECK_SUPABASE_URL muss die Supabase-Projekt-URL sein.',
+    );
+  }
+  if (!key?.startsWith('sb_secret_')) {
+    issues.push(
+      'KLETTERGLUECK_SUPABASE_SECRET_KEY muss ein Supabase Secret Key sein.',
+    );
+  }
+  return issues.length
+    ? { issues, database: null }
+    : {
+        issues,
+        database: {
+          endpoint: new URL('/rest/v1/kletterglueck_tours', endpoint),
+          key,
+        },
+      };
 };
 
 export default async function handler(
@@ -30,9 +45,13 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   res.setHeader('Cache-Control', 'private, no-store');
-  const database = databaseSettings();
-  if (!database)
+  const { database, issues } = databaseSettings();
+  if (!database) {
+    if (process.env.VERCEL_ENV === 'preview') {
+      return res.status(503).json({ error: issues.join(' ') });
+    }
     return res.status(404).json({ error: 'Tourenspeicher ist deaktiviert.' });
+  }
   if (!['GET', 'POST', 'PATCH'].includes(req.method ?? '')) {
     res.setHeader('Allow', 'GET, POST, PATCH');
     return res.status(405).end();
