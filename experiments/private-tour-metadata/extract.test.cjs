@@ -8,4 +8,5 @@ assert.equal(extractTour(doc(data([{ '@type':'TouristTrip', name:'A' },{ '@type'
 assert.equal(extractTour(doc('{broken')).ok, false);
 assert.deepEqual(extractTour(doc(data({ '@type':'TouristTrip', name:'A', geo:{latitude:91,longitude:11} }))), {ok:true,name:'A'});
 assert.equal(extractTour(doc(data({ '@type':'TouristTrip', name:' ' }))).ok, false);
-console.log('5 synthetic cases passed');
+assert.equal(extractTour(doc(data({ '@type':'Trip', name:'Testtour', duration:'PT2H' }))).ok, true);
+console.log('6 synthetic cases passed');
