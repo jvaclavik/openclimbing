@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Star from '@mui/icons-material/Star';
 import StarBorder from '@mui/icons-material/StarBorder';
 import CheckCircle from '@mui/icons-material/CheckCircle';
-import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import BookmarkBorder from '@mui/icons-material/BookmarkBorder';
 import { featureToItem } from '../../../services/my-lists/featureToItem';
 import {
@@ -44,7 +44,7 @@ export const FerrataListActions = () => {
         onClick={() => void toggle(FAVORITES_ID, favorite)}
       />
       <QuickActionButton
-        icon={visited ? CheckCircle : CheckCircleOutline}
+        icon={visited ? CheckCircle : CheckCircleOutlined}
         label={visited ? 'Schon da gewesen' : 'Als besucht markieren'}
         pressed={visited}
         onClick={() => void toggle(VISITED_ID, visited)}
