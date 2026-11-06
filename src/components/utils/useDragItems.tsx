@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { toInsertIndexAfterRemove } from '../FeaturePanel/Climbing/utils/array';
 
 export const HighlightedDropzoneVertical = styled.div`
@@ -103,20 +103,6 @@ const DragDropIndicator = ({
   return <HighlightedDropzoneVertical />;
 };
 
-const reorderItemsAfterDrop = <T,>(
-  items: Item<T>[],
-  draggedItem: Item<T>,
-  draggedOverIndex: number,
-): { newItems: Item<T>[]; oldIndex: number; newIndex: number } => {
-  const newItems = [...items];
-  const oldIndex = items.findIndex((item) => item.id === draggedItem.id);
-  newItems.splice(oldIndex, 1);
-
-  const insertAt = toInsertIndexAfterRemove(oldIndex, draggedOverIndex);
-  newItems.splice(insertAt, 0, draggedItem);
-  return { newItems, oldIndex, newIndex: insertAt };
-};
-
 // TODO refactor this - extract member functions
 // eslint-disable-next-line max-lines-per-function
 export const useDragItems = <T,>({
@@ -124,22 +110,17 @@ export const useDragItems = <T,>({
   moveItems,
   direction = 'horizontal',
 }: UseDragItemsProps<T>) => {
-  const [items, setItems] = useState<Item<T>[]>([]);
   const [draggedItem, setDraggedItem] = useState<Item<T> | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    const next = (initialItems ?? []).map((item, index) => ({
-      id: index,
-      content: item,
-    }));
-    setItems((prev) =>
-      prev.length === next.length &&
-      prev.every((item, index) => item.content === next[index].content)
-        ? prev
-        : next,
-    );
-  }, [initialItems]);
+  // Item ids are always the current index – callers pass `{ id: index }` to
+  // handleDragStart, so keeping a locally reordered copy (with ids permuted by a
+  // previous drop) would make every subsequent drag move the wrong item.
+  const items = useMemo<Item<T>[]>(
+    () =>
+      (initialItems ?? []).map((item, index) => ({ id: index, content: item })),
+    [initialItems],
+  );
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -183,13 +164,13 @@ export const useDragItems = <T,>({
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     if (draggedOverIndex !== null && draggedItem) {
-      const { newItems, oldIndex, newIndex } = reorderItemsAfterDrop(
-        items,
-        draggedItem,
-        draggedOverIndex,
-      );
-      setItems(newItems);
-      moveItems(oldIndex, newIndex);
+      const oldIndex = items.findIndex((item) => item.id === draggedItem.id);
+      if (oldIndex !== -1) {
+        moveItems(
+          oldIndex,
+          toInsertIndexAfterRemove(oldIndex, draggedOverIndex),
+        );
+      }
     }
     setDraggedItem(null);
     setDraggedOverIndex(null);
