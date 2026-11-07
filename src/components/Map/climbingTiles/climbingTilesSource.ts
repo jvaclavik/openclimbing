@@ -375,6 +375,7 @@ const onStyleData = debounce(() => {
 let eventsAdded = false;
 
 export const addClimbingTilesSource = (style: StyleSpecification) => {
+  filledSource = undefined;
   style.sources[CLIMBING_TILES_SOURCE] = EMPTY_GEOJSON_SOURCE;
   style.sprite = [...OSMAPP_SPRITE, CLIMBING_SPRITE];
   style.layers.push(...climbingLayers); // must be also in `layersWithOsmId` because of hover effect
