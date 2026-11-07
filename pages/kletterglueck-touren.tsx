@@ -307,14 +307,6 @@ export default function KletterglueckTouren() {
             ))}
           </TextField>
         )}
-        {selected && (
-          <Button
-            href={'/kletterglueck-bewertungen?tour=' + selected.id}
-            sx={{ minHeight: 48 }}
-          >
-            Diese Tour bewerten
-          </Button>
-        )}
         {cursor && (
           <Button disabled={busy} onClick={() => void loadCatalog(cursor)}>
             Weitere Touren laden

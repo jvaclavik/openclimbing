@@ -17,20 +17,8 @@ export type ViaFerrataRatings = {
   reviews: ViaFerrataReview[];
 };
 
-const PAGES: Record<string, { name: string; url: string }> = {
-  norissteig: {
-    name: 'Norissteig',
-    url: 'https://www.via-ferrata.de/klettersteige/topo/norissteig',
-  },
-  lenzsteig: {
-    name: 'Lenzsteig',
-    url: 'https://www.via-ferrata.de/klettersteige/topo/lenzsteig',
-  },
-  stopselzieher: {
-    name: 'Stopselzieher',
-    url: 'https://www.via-ferrata.de/klettersteige/topo/stopselzieher',
-  },
-};
+const SITEMAP = 'https://www.via-ferrata.de/klettersteige/sitemap.xml';
+const TOPO = 'https://www.via-ferrata.de/klettersteige/topo/';
 
 const textOf = (value: string) =>
   value
@@ -47,18 +35,64 @@ const textOf = (value: string) =>
 const clip = (value: string, max = 500) =>
   value.length <= max ? value : `${value.slice(0, max - 1).trim()}…`;
 
-export const viaFerrataPage = (slug: string) => PAGES[slug];
+export const climbKey = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '');
+
+export const parseClimbSlugs = (xml: string) => [
+  ...new Set(
+    [...xml.matchAll(/\/topo\/([a-z0-9-]{3,80})/g)].map((match) => match[1]),
+  ),
+];
+
+export const matchClimbSlug = (name: string, slugs: string[]) => {
+  const key = climbKey(name);
+  const stripped = key
+    .replace(/klettersteig/g, '')
+    .replace(/viaferrata/g, '')
+    .replace(/ferrata/g, '');
+  let best: { slug: string; score: number } | null = null;
+  slugs.forEach((slug) => {
+    const plain = slug.replace(/-/g, '');
+    let score = 0;
+    if (plain === key || (stripped.length >= 5 && plain === stripped))
+      score = 100;
+    else if (stripped.length >= 6 && plain.startsWith(stripped)) score = 80;
+    else if (stripped.length >= 8 && plain.includes(stripped)) score = 60;
+    else if (key.length >= 8 && plain.includes(key)) score = 50;
+    if (
+      score > 0 &&
+      (!best ||
+        score > best.score ||
+        (score === best.score && slug.length < best.slug.length))
+    )
+      best = { slug, score };
+  });
+  return best && best.score >= 50 ? best.slug : null;
+};
+
+const pageFor = (slug: string) => ({
+  name: slug,
+  url: `${TOPO}${slug}`,
+});
 
 export const parseViaFerrataRatings = (
   slug: string,
   html: string,
 ): ViaFerrataRatings | null => {
-  const page = PAGES[slug];
-  if (!page) return null;
+  if (!/^[a-z0-9-]{3,80}$/.test(slug)) return null;
+  const page = pageFor(slug);
   const main = html.split('sabai-directory-main')[1] ?? '';
   const average = Number(main.match(/itemprop="ratingValue">([0-9.]+)/)?.[1]);
   const count = Number(main.match(/itemprop="reviewCount">(\d+)/)?.[1]);
   if (!Number.isFinite(average) || !Number.isFinite(count)) return null;
+  const heading =
+    textOf(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? '') || page.name;
   const reviews = html
     .split('sabai-directory-review-title')
     .slice(1)
@@ -93,7 +127,7 @@ export const parseViaFerrataRatings = (
     .filter((review): review is ViaFerrataReview => review !== null);
   return {
     slug,
-    name: page.name,
+    name: heading,
     average,
     count,
     url: page.url,
@@ -102,16 +136,35 @@ export const parseViaFerrataRatings = (
   };
 };
 
-export const readViaFerrataRatings = async (slug: string) => {
-  const page = PAGES[slug];
-  if (!page) return null;
-  const response = await fetch(page.url, {
-    headers: {
-      Accept: 'text/html',
-      'User-Agent': 'Kletterglueck/1.0 (private family app)',
-    },
+let catalog: { at: number; slugs: string[] } = { at: 0, slugs: [] };
+
+const headers = {
+  Accept: 'text/html, application/xml',
+  'User-Agent': 'Kletterglueck/1.0 (private family app)',
+};
+
+export const loadClimbSlugs = async () => {
+  if (catalog.slugs.length && Date.now() - catalog.at < 6 * 60 * 60 * 1000)
+    return catalog.slugs;
+  const response = await fetch(SITEMAP, {
+    headers,
     signal: AbortSignal.timeout(12000),
   });
-  if (!response.ok) throw new Error(`via-ferrata antwortet mit ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Sitemap antwortet mit ${response.status}`);
+  const slugs = parseClimbSlugs(await response.text());
+  if (!slugs.length) throw new Error('Keine Klettersteige in der Sitemap');
+  catalog = { at: Date.now(), slugs };
+  return slugs;
+};
+
+export const readViaFerrataRatings = async (slug: string) => {
+  if (!/^[a-z0-9-]{3,80}$/.test(slug)) return null;
+  const response = await fetch(`${TOPO}${slug}`, {
+    headers,
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!response.ok)
+    throw new Error(`via-ferrata antwortet mit ${response.status}`);
   return parseViaFerrataRatings(slug, await response.text());
 };

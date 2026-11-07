@@ -19,19 +19,28 @@ type Ratings = {
   error?: string;
 };
 
-export const ViaFerrataRatings = ({ slug = 'norissteig' }: { slug?: string }) => {
+export const ViaFerrataRatings = ({ name }: { name: string }) => {
   const [data, setData] = useState<Ratings | null>(null);
   const [error, setError] = useState('');
+  const [missing, setMissing] = useState(false);
 
   useEffect(() => {
+    if (!name.trim()) return undefined;
     const controller = new AbortController();
+    setData(null);
+    setError('');
+    setMissing(false);
     void (async () => {
       try {
         const response = await fetch(
-          `/api/kletterglueck/via-ferrata?slug=${encodeURIComponent(slug)}`,
+          `/api/kletterglueck/via-ferrata?name=${encodeURIComponent(name)}`,
           { signal: controller.signal },
         );
         const body = (await response.json()) as Ratings;
+        if (response.status === 404) {
+          setMissing(true);
+          return;
+        }
         if (!response.ok) throw new Error(body.error);
         setData(body);
       } catch (cause) {
@@ -44,24 +53,30 @@ export const ViaFerrataRatings = ({ slug = 'norissteig' }: { slug?: string }) =>
       }
     })();
     return () => controller.abort();
-  }, [slug]);
+  }, [name]);
 
+  if (!name.trim() || missing) return null;
   if (error) return <Alert severity="warning">{error}</Alert>;
-  if (!data) return <Typography>Bewertungen von via-ferrata.de werden geladen.</Typography>;
+  if (!data)
+    return (
+      <Typography variant="body2">
+        Bewertungen von via-ferrata.de werden geladen.
+      </Typography>
+    );
 
   return (
-    <Stack id="via-ferrata" spacing={1.5}>
+    <Stack spacing={1.5} sx={{ mb: 2 }}>
       <Typography component="h2" variant="h6">
-        {data.name} auf via-ferrata.de
+        via-ferrata.de
       </Typography>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <Rating value={data.average} precision={0.1} readOnly />
         <Typography>
-          {data.average.toLocaleString('de-DE')} aus {data.count} Bewertungen
+          {data.average.toLocaleString('de-DE')} aus {data.count}
         </Typography>
       </Stack>
       {data.reviews.map((review) => (
-        <Stack key={review.url + review.title} spacing={0.5}>
+        <Stack key={`${review.url}-${review.title}`} spacing={0.5}>
           <Typography component="h3" variant="subtitle1">
             {review.title}
           </Typography>
@@ -75,12 +90,11 @@ export const ViaFerrataRatings = ({ slug = 'norissteig' }: { slug?: string }) =>
       <Typography variant="body2">
         Quelle{' '}
         <Link href={data.reviews_url} target="_blank" rel="noreferrer">
-          via-ferrata.de
+          {data.name} auf via-ferrata.de
         </Link>
-        . Anzeige mit Genehmigung des Betreibers. Fotos bleiben auf der
-        Originalseite.
+        .
         {data.reviews.length < data.count
-          ? ` ${data.count - data.reviews.length} weitere stehen nur dort.`
+          ? ` ${data.count - data.reviews.length} weitere nur dort.`
           : ''}
       </Typography>
     </Stack>

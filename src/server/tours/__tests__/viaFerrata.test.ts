@@ -1,6 +1,11 @@
-import { parseViaFerrataRatings } from '../viaFerrata';
+import {
+  matchClimbSlug,
+  parseClimbSlugs,
+  parseViaFerrataRatings,
+} from '../viaFerrata';
 
 const html = `
+<h1>Norissteig</h1>
 <div class="sabai-directory-main">
   <span class="sabai-voting-rating-average" itemprop="ratingValue">4.05</span>
   <span itemprop="reviewCount">2</span>
@@ -15,6 +20,13 @@ const html = `
 </li></ul>
 <div class="sabai-directory-body" itemprop="reviewBody"><p>Kurzer Satz & noch einer.</p></div>
 `;
+
+const slugs = [
+  'norissteig',
+  'hoehengluecksteig',
+  'via-ferrata-piero-rossi-ex-ferrata-marmol',
+  'steig',
+];
 
 test('liest Durchschnitt und eine Bewertung', () => {
   const ratings = parseViaFerrataRatings('norissteig', html);
@@ -35,6 +47,16 @@ test('liest Durchschnitt und eine Bewertung', () => {
   });
 });
 
-test('lehnt eine unbekannte Seite ab', () => {
-  expect(parseViaFerrataRatings('fremd', html)).toBeNull();
+test('ordnet Namen der kompletten Sitemap zu', () => {
+  expect(
+    parseClimbSlugs(
+      '<loc>https://www.via-ferrata.de/klettersteige/topo/norissteig</loc>',
+    ),
+  ).toEqual(['norissteig']);
+  expect(matchClimbSlug('Norissteig', slugs)).toBe('norissteig');
+  expect(matchClimbSlug('Höhenglücksteig', slugs)).toBe('hoehengluecksteig');
+  expect(matchClimbSlug('Via Ferrata Piero Rossi', slugs)).toBe(
+    'via-ferrata-piero-rossi-ex-ferrata-marmol',
+  );
+  expect(matchClimbSlug('Irgendwas', slugs)).toBeNull();
 });

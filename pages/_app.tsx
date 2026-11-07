@@ -105,7 +105,7 @@ const MyApp = (props: Props) => {
   }, []);
 
   if (
-    ['/kletterglueck-touren', '/kletterglueck-bewertungen'].includes(
+    ['/kletterglueck-touren'].includes(
       props.router.pathname,
     )
   ) {
@@ -213,7 +213,7 @@ MyApp.getInitialProps = async ({
 
   const privateTours = process.env.KLETTERGLUECK_TOURS_ENABLED === 'true';
   if (
-    ['/kletterglueck-touren', '/kletterglueck-bewertungen'].includes(
+    ['/kletterglueck-touren'].includes(
       ctx.pathname,
     )
   ) {

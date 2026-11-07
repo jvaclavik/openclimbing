@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
+  loadClimbSlugs,
+  matchClimbSlug,
   readViaFerrataRatings,
-  viaFerrataPage,
 } from '../../../src/server/tours/viaFerrata';
 
 export default async function handler(
@@ -13,12 +14,19 @@ export default async function handler(
     res.setHeader('Allow', 'GET');
     return res.status(405).end();
   }
-  const slug = String(req.query.slug ?? 'norissteig');
-  if (!viaFerrataPage(slug))
-    return res
-      .status(404)
-      .json({ error: 'Diese via-ferrata-Seite ist nicht freigegeben.' });
+  const requested = String(req.query.slug ?? '');
+  const name = String(req.query.name ?? '');
   try {
+    const slugs = await loadClimbSlugs();
+    const slug = requested
+      ? slugs.includes(requested)
+        ? requested
+        : ''
+      : (matchClimbSlug(name, slugs) ?? '');
+    if (!slug)
+      return res
+        .status(404)
+        .json({ error: 'Keine passende via-ferrata.de-Seite.' });
     const ratings = await readViaFerrataRatings(slug);
     if (!ratings)
       return res
