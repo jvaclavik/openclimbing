@@ -1,6 +1,17 @@
 # Tourenchat (Vorschau)
 
-Der Kartenknopf **Tourenchat** öffnet einen deutschsprachigen KI-Chat. GPT-4.1 mini
+Am Kartenrand liegt ein kleiner Hinweis **Tourenhilfe**. Erst ein Tipp öffnet ein
+kompaktes, nicht modales Feld mit Eingabe und kurzen Startfragen. Die Karte bleibt
+bedienbar: kein Abdunkeln, keine Fokusfalle, kein Vollbild. Minimieren zeigt wieder
+nur den Hinweis; der Verlauf bleibt in diesem Feld erhalten, **Neuer Chat** löscht
+ihn. Die Hilfe öffnet sich nicht von selbst und schreibt nichts, wenn die Karte
+bewegt wird.
+
+Ein Standort wird nicht aus der Kartenansicht abgeleitet. Nur die Startfrage
+„Leichte Touren hier finden“ hängt den Namen einer bereits geöffneten Tour oder
+eines Ortes an, sofern ein Name vorliegt. Koordinaten werden nicht mitgeschickt.
+
+GPT-4.1 mini
 (OpenAI) wird serverseitig über Vercel AI Gateway aufgerufen. Auf Vercel verwendet
 das AI SDK die OIDC-Identität des Projekts: kein Schlüssel im Browser oder Repository.
 Eine vorhandene `AI_GATEWAY_API_KEY`-Variable hätte Vorrang vor OIDC; sie ist für
@@ -26,7 +37,7 @@ lokalen manuellen Test wäre zusätzlich eine eigene Gateway-Authentifizierung n
 - Nachrichten und ausgewählte Metadaten werden an Gateway/Modellanbieter
   übertragen. Keine Familiennotizen, Bewertungen, Profile oder GPX-Tracks.
   Der Browser speichert den Verlauf nur im React-Zustand, nicht dauerhaft.
-  Schließen/erneut öffnen erhält ihn; Neuladen oder „Neuer Chat“ löscht ihn
+  Minimieren und erneut öffnen erhält ihn; Neuladen oder „Neuer Chat“ löscht ihn
   im Browser, nicht etwaige Logs bei Gateway/Anbieter.
 
 ## Kosten und Schutz
@@ -46,7 +57,10 @@ mitgesendet. Keine Systemrollen/Werkzeugaufrufe vom Browser akzeptiert.
 
 ## Prüfung
 
-`yarn jest src/server/chat/__tests__/chat.test.ts --runInBand` prüft Validierung,
-Vorschau- und Origin-Schutz, Drosselung, echte Quellenlinks, Gesprächskontext,
-Datenminimierung und bereinigte Fehler. Zusätzlich in der PR-Vorschau den Chat
-öffnen, Region anfragen, Folgefrage stellen und einen Kartenlink prüfen.
+`yarn jest src/server/chat/__tests__/chat.test.ts src/components/TourChat --runInBand`
+prüft Validierung, Vorschau- und Origin-Schutz, Drosselung, echte Quellenlinks,
+Gesprächskontext, Datenminimierung, bereinigte Fehler und das nicht modale Feld
+(zunächst eingeklappt, Vorschläge erst nach dem Tipp, Verlauf beim Minimieren,
+Karte nicht blockiert). Zusätzlich in der PR-Vorschau die Tourenhilfe öffnen,
+die Karte dabei verschieben, Region anfragen, Folgefrage stellen und einen
+Kartenlink prüfen.

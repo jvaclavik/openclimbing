@@ -22,7 +22,7 @@ Siehe [Tourenchat](tourenchat.md) für Kosten, Datenübertragung und Grenzen.
 
 - Geschützte Vorschau öffnen; Karte und Klettersteigdetails prüfen.
 - Auf einen bereits gespeicherten Track zoomen und dessen Anzeige prüfen.
-- Tourenchat öffnen, eine konkrete Ortsfrage und eine Folgefrage stellen.
+- Tourenhilfe antippen, die Karte dabei verschieben, eine konkrete Ortsfrage und eine Folgefrage stellen.
 - Einen angebotenen Kartenlink öffnen und mit den Quellen vergleichen.
 - Fehlende Wetter-, Sperrungs- und Schwierigkeitsdaten dürfen nicht erfunden werden.
 - Mobile Ansicht prüfen. Vor einer späteren öffentlichen Freigabe Zugangskontrolle
