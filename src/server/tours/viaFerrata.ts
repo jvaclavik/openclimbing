@@ -100,11 +100,7 @@ const readDescription = (html: string): ViaFerrataBlock[] => {
       text: textOf(match[2]),
     }))
     .filter((block) => block.text);
-  let used = 0;
-  return blocks.filter((block) => {
-    used += block.text.length;
-    return used <= 7000;
-  });
+  return blocks;
 };
 
 const readImages = (html: string) => [
@@ -115,7 +111,7 @@ const readImages = (html: string) => [
       ),
     ].map((match) => match[1]),
   ),
-].slice(0, 12);
+];
 
 const readFact = (html: string, kind: 'difficulty' | 'duration') =>
   textOf(

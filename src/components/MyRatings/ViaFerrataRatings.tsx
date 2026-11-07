@@ -1,4 +1,4 @@
-import { Alert, Box, Link, Rating, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Link, Rating, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 type Review = {
@@ -27,6 +27,7 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
   const [data, setData] = useState<Ratings | null>(null);
   const [error, setError] = useState('');
   const [missing, setMissing] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
     if (!name.trim()) return undefined;
@@ -34,6 +35,7 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
     setData(null);
     setError('');
     setMissing(false);
+    setShowAllReviews(false);
     void (async () => {
       try {
         const response = await fetch(
@@ -61,12 +63,10 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
 
   if (!name.trim() || missing) return null;
   if (error) return <Alert severity="warning">{error}</Alert>;
-  if (!data)
-    return (
-      <Typography variant="body2">
-        Bewertungen und Beschreibung von via-ferrata.de werden geladen.
-      </Typography>
-    );
+  if (!data) return null;
+  const visibleReviews = showAllReviews
+    ? data.reviews
+    : data.reviews.slice(0, 5);
 
   return (
     <Stack spacing={1.5} sx={{ mb: 2 }}>
@@ -108,7 +108,7 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
           </Typography>
         </Stack>
       )}
-      {data.reviews.map((review) => (
+      {visibleReviews.map((review) => (
         <Stack key={`${review.url}-${review.title}`} spacing={0.5}>
           <Typography component="h3" variant="subtitle1">
             {review.title}
@@ -120,6 +120,9 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
           {review.text && <Typography variant="body2">{review.text}</Typography>}
         </Stack>
       ))}
+      {data.reviews.length > 5 && !showAllReviews && (
+        <Button onClick={() => setShowAllReviews(true)}>Mehr anzeigen</Button>
+      )}
       <Typography variant="body2">
         Quelle{' '}
         <Link href={data.reviews_url} target="_blank" rel="noreferrer">
