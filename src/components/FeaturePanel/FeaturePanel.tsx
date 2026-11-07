@@ -31,6 +31,7 @@ import { useFeaturePanelShortcuts } from './useFeaturePanelShortcuts';
 import { useRouter } from 'next/router';
 import { isViaFerrataTags } from '../../services/tagging/viaFerrataScale';
 import { ViaFerrataRatings } from '../MyRatings/ViaFerrataRatings';
+import { KomootRouteButton } from './QuickActions/KomootRouteButton';
 
 const Flex = styled.div`
   flex: 1;
@@ -116,9 +117,12 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
           </Stack>
           {isMobileMode && <ParentLink />}
           {isViaFerrataTags(tags) && (
-            <ViaFerrataRatings
-              name={String(tags.name || tags['name:de'] || '')}
-            />
+            <>
+              <KomootRouteButton />
+              <ViaFerrataRatings
+                name={String(tags.name || tags['name:de'] || '')}
+              />
+            </>
           )}
         </PanelSidePadding>
 
