@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import Router from 'next/router';
@@ -73,6 +74,21 @@ export const QuickActions = () => {
           <FerrataListActions key={feature.osmMeta?.id} />
         )}
         <ShareButton />
+        {feature.osmMeta?.id &&
+          ['way', 'relation'].includes(feature.osmMeta.type) && (
+            <QuickActionButton
+              icon={StarBorderIcon}
+              label="Unsere Bewertungen"
+              onClick={() =>
+                Router.push(
+                  '/kletterglueck-bewertungen?osm=' +
+                    feature.osmMeta.type +
+                    '/' +
+                    feature.osmMeta.id,
+                )
+              }
+            />
+          )}
         {feature.osmMeta?.type === 'way' &&
           String(feature.osmMeta.id) === '1156787758' && (
             <NorissteigTrackAction />

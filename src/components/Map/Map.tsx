@@ -127,6 +127,15 @@ const Map = () => {
                     gap: 1,
                   }}
                 >
+                  <Button
+                    component="a"
+                    href="/kletterglueck-bewertungen"
+                    size="small"
+                    aria-label="Unsere Tourbewertungen"
+                    sx={{ bgcolor: 'background.paper' }}
+                  >
+                    ☆
+                  </Button>
                   <RadarMapButton />
                   <PrecipAccumMapButton />
                   <SunShadowMapButton />

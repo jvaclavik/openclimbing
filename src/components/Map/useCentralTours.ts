@@ -35,6 +35,7 @@ const popupContent = ({
   source,
   attribution,
   osm_ref,
+  id,
 }: Tour) => {
   const root = document.createElement('div');
   root.style.color = '#222';
@@ -60,6 +61,11 @@ const popupContent = ({
     detail.textContent = 'Klettersteig-Details';
     root.append(detail);
   }
+  const rating = document.createElement('a');
+  rating.href = '/kletterglueck-bewertungen?tour=' + encodeURIComponent(id);
+  rating.textContent = 'Unsere Bewertungen';
+  rating.style.display = 'block';
+  root.append(rating);
   return root;
 };
 
