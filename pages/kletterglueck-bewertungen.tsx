@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { RatingProfile } from '../src/services/tours/ratings';
+import { ViaFerrataRatings } from '../src/components/MyRatings/ViaFerrataRatings';
 import { useFamilyRatings } from '../src/components/MyRatings/useFamilyRatings';
 
 export default function Familienbewertungen() {
@@ -52,6 +53,7 @@ export default function Familienbewertungen() {
           Gemeinsame Familienwertung. Mit eurem privaten Zugang könnt ihr beide
           Profile ansehen und bearbeiten.
         </Typography>
+        <ViaFerrataRatings />
         <Button href="/">Zur Karte</Button>
         <TextField
           select

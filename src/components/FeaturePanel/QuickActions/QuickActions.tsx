@@ -93,6 +93,16 @@ export const QuickActions = () => {
           String(feature.osmMeta.id) === '1156787758' && (
             <NorissteigTrackAction />
           )}
+        {feature.osmMeta?.type === 'way' &&
+          String(feature.osmMeta.id) === '1156787758' && (
+            <QuickActionButton
+              icon={StarBorderIcon}
+              label="via-ferrata-Bewertungen"
+              onClick={() =>
+                Router.push('/kletterglueck-bewertungen#via-ferrata')
+              }
+            />
+          )}
         {showPdfButton && (
           <QuickActionButton
             icon={PictureAsPdfIcon}

@@ -1,6 +1,6 @@
 # Gemeinsame Familienbewertungen
 
-Die Oberfläche unter `/kletterglueck-bewertungen` nutzt dieselbe Supabase-Datenbank und dieselben Touren-UUIDs wie der zentrale Katalog. Die Karte bietet den Einstieg über den Stern-Knopf, bestehende Klettersteigdetails über **Unsere Bewertungen**, gespeicherte Touren zusätzlich über ihr Startpunkt-Popup.
+Die Oberfläche unter `/kletterglueck-bewertungen` nutzt dieselbe Supabase-Datenbank und dieselben Touren-UUIDs wie der zentrale Katalog. Darüber stehen die Besucherbewertungen des Norissteigs von via-ferrata.de. Die App liest sie bei Bedarf, speichert sie nicht im Repository und zeigt Fotos nicht an. Quelle und Link bleiben sichtbar. Die Karte bietet den Einstieg über den Stern-Knopf, am Norissteig zusätzlich über **via-ferrata-Bewertungen**, bestehende Klettersteigdetails über **Unsere Bewertungen**, gespeicherte Touren zusätzlich über ihr Startpunkt-Popup.
 
 Die zentrale Datenhaltung aus PR #22 muss eingerichtet sein. Anschließend [ratings.sql](ratings.sql) einmal im SQL Editor desselben Supabase-Projekts ausführen. Einträge für Simon und Mama sind durch den zusammengesetzten Primärschlüssel aus Tour-ID und Profil eindeutig. Bewertet werden ausschließlich bereits zentral gespeicherte Touren. Die Oberfläche kann die Touren suchen und in Seiten zu 50 Einträgen laden. Notizen sind auf 2.000 Zeichen beschränkt. Sterne ohne Begehung und Begehung ohne Sterne sind möglich. Der Durchschnitt enthält nur tatsächlich vergebene Sterne.
 
