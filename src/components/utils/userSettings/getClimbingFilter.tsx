@@ -32,6 +32,7 @@ export type PhotoDrawnFilter = 'any' | 'with' | 'without';
 export type ClimbingFilterSettings = {
   filterGradeSystem: GradeSystem;
   ferrataGrades?: FerrataGrade[];
+  ferrataCountries?: string[];
   gradeInterval: Interval | null;
   minimumRoutes: number;
   poiTypes: Partial<PoiTypes>;
@@ -62,6 +63,8 @@ export type ClimbingFilter = {
   grades: string[];
   ferrataGrades: FerrataGrade[];
   setFerrataGrades: Setter<FerrataGrade[]>;
+  ferrataCountries: string[];
+  setFerrataCountries: Setter<string[]>;
   gradeInterval: Interval;
   setGradeInterval: Setter<Interval>;
   minimumRoutes: number;
@@ -114,6 +117,10 @@ export const getClimbingFilter = (
   );
   const setFerrataGrades = (next: FerrataGrade[]) =>
     setFilter('ferrataGrades', next);
+  const ferrataCountries = data.ferrataCountries ?? [];
+  const isFerrataCountryDefault = ferrataCountries.length === 0;
+  const setFerrataCountries = (next: string[]) =>
+    setFilter('ferrataCountries', next);
   // Ignore legacy sport-climbing filters in the account-free UI.
   const rockFilters = HAS_USER_DB ? data : ({} as ClimbingFilterSettings);
   const defaultGradeInterval = [0, grades.length - 1] as Interval;
@@ -169,6 +176,7 @@ export const getClimbingFilter = (
 
   const isDefaultFilter =
     isFerrataGradeDefault &&
+    isFerrataCountryDefault &&
     isGradeIntervalDefault &&
     isMinimumRoutesDefault &&
     isPoiTypesDefault &&
@@ -181,6 +189,7 @@ export const getClimbingFilter = (
 
   const numberOfActiveFilters = [
     isFerrataGradeDefault,
+    isFerrataCountryDefault,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
     isPoiTypesDefault,
@@ -194,6 +203,7 @@ export const getClimbingFilter = (
 
   updateMapFilter({
     ferrataGrades,
+    ferrataCountries,
     userSystem,
     gradeInterval,
     minimumRoutes,
@@ -214,6 +224,8 @@ export const getClimbingFilter = (
     grades,
     ferrataGrades,
     setFerrataGrades,
+    ferrataCountries,
+    setFerrataCountries,
     gradeInterval,
     setGradeInterval,
     minimumRoutes,

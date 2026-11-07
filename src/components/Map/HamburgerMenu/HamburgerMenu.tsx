@@ -12,16 +12,15 @@ import {
   ListItemText,
   Stack,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
-import styled from '@emotion/styled';
 import { isModifiedClick, useBoolState, useMobileMode } from '../../helpers';
 import { t } from '../../../services/intl';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useMapStateContext } from '../../utils/MapStateContext';
 import { getIdEditorLink } from '../../FeaturePanel/helpers/externalLinks';
 import { UserTheme, useUserThemeContext } from '../../../helpers/theme';
-import GithubIcon from '../../../assets/GithubIcon';
 import { LangSwitcher } from './LangSwitcher';
 import { HamburgerMenuButton } from './HamburgerMenuButton';
 import { PROJECT_ID } from '../../../services/project';
@@ -30,8 +29,8 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SettingsIcon from '@mui/icons-material/Settings';
 import Link from 'next/link';
-import { UserSettingsItem } from './UserSettingsItem';
 import { UserHeader } from './UserHeader';
 import { MyClimbingProfileMenuItem } from './MyClimbingProfileMenuItem';
 import { MyListsSection } from './MyListsSection';
@@ -46,19 +45,37 @@ import {
 import { COMMUNITY_URL } from '../../consts';
 import { HAS_USER_DB } from '../../../services/osm/consts';
 
-const StyledGithubIcon = styled(GithubIcon)`
-  filter: ${({ theme }) => theme.palette.invertFilter};
-`;
-
 const useIsBrowser = () => {
-  // fixes hydrationStyledDivider error - server and browser have different view (cookies and window.hash)
-  // throwed "Warning: Prop `href` did not match."
+  // fixes hydration error - server and browser have different view (cookies and window.hash)
   const [browser, setBrowser] = useState(false);
   useEffect(() => {
     setBrowser(true);
   }, []);
   return browser;
 };
+
+const MenuIntro = () => (
+  <Box sx={{ px: 2, pt: 2.5, pb: 1 }}>
+    <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+      Klettersteig-Karte
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Für Simon und Mama
+    </Typography>
+  </Box>
+);
+
+const SettingsRow = ({ open }: { open: () => void }) => (
+  <ListItemButton onClick={open}>
+    <ListItemIcon>
+      <SettingsIcon />
+    </ListItemIcon>
+    <ListItemText
+      primary="Einstellungen"
+      secondary="Darstellung und Einheiten"
+    />
+  </ListItemButton>
+);
 
 const EditLink = () => {
   const browser = useIsBrowser();
@@ -75,17 +92,6 @@ const EditLink = () => {
   );
 };
 
-const GithubLink = () => (
-  <Tooltip title={t('map.github_title')}>
-    <IconButton
-      href="https://github.com/jvaclavik/openclimbing"
-      component="a"
-      target="_blank"
-    >
-      <StyledGithubIcon width={22} height={22} />
-    </IconButton>
-  </Tooltip>
-);
 const ClimbingGradesTableLink = ({ closeMenu }) => (
   <ListItemButton href="/climbing-grades" component={Link} onClick={closeMenu}>
     <ListItemIcon>
@@ -140,7 +146,10 @@ const ClimbingAreasLink = ({ closeMenu }) => {
       <ListItemIcon>
         <MapOutlinedIcon />
       </ListItemIcon>
-      <ListItemText>{t('topbar.climbing_areas')}</ListItemText>
+      <ListItemText
+        primary={t('topbar.climbing_areas')}
+        secondary="Alle Klettergebiete"
+      />
     </ListItemButton>
   );
 };
@@ -150,7 +159,10 @@ const AboutLink = ({ closeMenu }) => (
     <ListItemIcon>
       <InfoOutlinedIcon />
     </ListItemIcon>
-    <ListItemText>{t('topbar.about')}</ListItemText>
+    <ListItemText
+      primary={t('topbar.about')}
+      secondary="Wofür die Karte da ist"
+    />
   </ListItemButton>
 );
 
@@ -243,24 +255,21 @@ export const HamburgerMenu = () => {
             }}
           >
             <div>
+              <MenuIntro />
               {HAS_USER_DB ? (
                 <UserHeader
                   closeMenu={close}
                   openUserSettings={handleOpenUserSettings}
                 />
               ) : (
-                <UserSettingsItem openUserSettings={handleOpenUserSettings} />
+                <SettingsRow open={handleOpenUserSettings} />
               )}
               <Divider sx={{ mt: 1, mb: 2 }} />
               {isOpenClimbing && HAS_USER_DB && (
                 <MyClimbingProfileMenuItem closeMenu={close} />
               )}
-              {isMobileMode && (
-                <>
-                  <ClimbingAreasLink closeMenu={close} />
-                  <AboutLink closeMenu={close} />
-                </>
-              )}
+              <ClimbingAreasLink closeMenu={close} />
+              <AboutLink closeMenu={close} />
               {(!HAS_USER_DB || loggedIn) && (
                 <>
                   <Divider sx={{ my: 1 }} />
@@ -302,7 +311,6 @@ export const HamburgerMenu = () => {
                 <LangSwitcher />
                 <div>
                   <ThemeSelection />
-                  <GithubLink />
                 </div>
               </Stack>
             </div>

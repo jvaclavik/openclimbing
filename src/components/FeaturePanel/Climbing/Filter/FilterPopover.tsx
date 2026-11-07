@@ -4,6 +4,7 @@ import React from 'react';
 import { t } from '../../../../services/intl';
 import { MinimumRoutesFilter } from './MinimumRoutesFilter';
 import { HAS_USER_DB } from '../../../../services/osm/consts';
+import { FerrataCountryFilter } from './FerrataCountryFilter';
 import { FerrataGradeFilter } from './FerrataGradeFilter';
 import { GradeFilter } from './GradeFilter';
 import { ClimbingTypeFilter } from './ClimbingTypeFilter';
@@ -84,7 +85,12 @@ export const FilterPopover = ({
     >
       <FilterBody>
         <ClimbingTypeFilter />
-        {poiTypes.ferrata && <FerrataGradeFilter />}
+        {poiTypes.ferrata && (
+          <>
+            <FerrataGradeFilter />
+            <FerrataCountryFilter />
+          </>
+        )}
         {HAS_USER_DB && showRockFilters && (
           <>
             <GradeFilter />

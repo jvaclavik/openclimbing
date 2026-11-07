@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import { Box, Stack } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import { getReactKey } from '../../services/helpers';
 import { isPublictransportRoute } from '../../utils';
-import { useMobileMode, useToggleState } from '../helpers';
+import { useMobileMode } from '../helpers';
 import { useFeatureContext } from '../utils/FeatureContext';
 import { PanelContent, PanelSidePadding } from '../utils/PanelHelpers';
 import { BackChip } from './BackChip';
@@ -18,11 +18,9 @@ import { FeaturedTag } from './FeaturedTag';
 import { FeatureHeading, FeatureStickyTitle } from './FeatureHeading';
 import { FeatureImages } from './FeatureImages/FeatureImages';
 import { FeatureOpenPlaceGuideLink } from './FeatureOpenPlaceGuideLink';
-import { FeaturePanelFooter } from './FeaturePanelFooter';
 import { FeaturePanelSkeleton } from './FeaturePanelSkeleton';
 import { TestApiWarning } from './helpers/TestApiWarning';
 import { MemberFeatures } from './MemberFeatures/MemberFeatures';
-import { Members } from './Members';
 import { OsmError } from './OsmError';
 import { ParentLink } from './ParentLink';
 import { Properties } from './Properties/Properties';
@@ -52,8 +50,7 @@ type FeaturePanelProps = {
 
 export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
   const { feature } = useFeatureContext();
-  const [advanced, setAdvanced] = useState(false);
-  const [showTags, toggleShowTags] = useToggleState(false);
+  const showTags = false;
   const isMobileMode = useMobileMode();
   const router = useRouter();
   const isClimbingDialog = router.query.all?.[2] === 'climbing';
@@ -146,7 +143,6 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
               <RouteDistributionInFeaturePanel />
               <PanelSidePadding>
                 {!isPublictransportRoute(feature) && <MemberFeatures />}
-                {advanced && <Members />}
                 {movePropertiesBelowMembers && <PropertiesComponent />}
                 <PublicTransport />
                 <Runways />
@@ -160,13 +156,6 @@ export const FeaturePanel = ({ headingRef }: FeaturePanelProps) => {
             </>
           )}
         </Flex>
-
-        <FeaturePanelFooter
-          advanced={advanced}
-          setAdvanced={setAdvanced}
-          showTagsTable={showTagsTable}
-          toggleShowTags={toggleShowTags}
-        />
       </PanelContent>
       <ClimbingStructuredData />
     </>

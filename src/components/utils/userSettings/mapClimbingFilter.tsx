@@ -9,6 +9,7 @@ import { DEFAULT_LENGTH_INTERVAL } from '../../../services/tagging/climbing/pars
 
 export type MapClimbingFilterState = {
   ferrataGrades: FerrataGrade[];
+  ferrataCountries: string[];
   userSystem: GradeSystem | undefined;
   gradeInterval: Interval | undefined;
   minimumRoutes: number | undefined;
@@ -29,6 +30,7 @@ export const mapClimbingFilter: MapClimbingFilterState & {
   callback: () => void;
 } = {
   ferrataGrades: ALL_FERRATA_GRADES,
+  ferrataCountries: [],
   userSystem: undefined,
   gradeInterval: undefined,
   minimumRoutes: undefined,
@@ -49,6 +51,7 @@ export const mapClimbingFilter: MapClimbingFilterState & {
 export const updateMapFilter = (next: MapClimbingFilterState) => {
   if (
     !isEqual(mapClimbingFilter.ferrataGrades, next.ferrataGrades) ||
+    !isEqual(mapClimbingFilter.ferrataCountries, next.ferrataCountries) ||
     mapClimbingFilter.userSystem != next.userSystem ||
     !isEqual(mapClimbingFilter.gradeInterval, next.gradeInterval) ||
     mapClimbingFilter.minimumRoutes != next.minimumRoutes ||

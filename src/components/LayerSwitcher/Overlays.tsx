@@ -1,17 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Checkbox,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
-  Stack,
   Typography,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { LayerIcon, Spacer, StyledList } from './helpers';
+import { LayerIcon, StyledList } from './helpers';
 import { Layer, useMapStateContext } from '../utils/MapStateContext';
 import { dotToOptionalBr } from '../helpers';
 import { intl, t, Translation } from '../../services/intl';
@@ -21,8 +16,7 @@ import { CLIMBING_STATS_URL } from '../../services/climbing-areas/getClimbingSta
 import { fetchJson } from '../../services/fetch';
 import type { ClimbingStatsResponse } from '../../types';
 import { nl2br } from '../utils/nl2br';
-import { AddUserLayerButton } from './AddLayerButton';
-import { AddGeojsonButton, UserGeojsonItem } from './UserGeojsonOverlays';
+import { UserGeojsonItem } from './UserGeojsonOverlays';
 
 const getLocalTime = (lastRefresh: string) =>
   lastRefresh ? new Date(lastRefresh).toLocaleString(intl.lang) : null;
@@ -114,94 +108,27 @@ type Props = {
 };
 
 export const Overlays = ({ overlayLayers }: Props) => {
-  const { activeLayers, userGeojsonLayers } = useMapStateContext();
-  const { climbing, other } = useMemo(() => {
-    const items = overlayLayers.filter((l) => l.type !== 'spacer');
-    return {
-      climbing: items.find((l) => l.key === 'climbing'),
-      other: items.filter((l) => l.key !== 'climbing'),
-    };
-  }, [overlayLayers]);
-
-  const otherActive = other.some((l) => activeLayers.includes(l.key));
-  const [moreOpen, setMoreOpen] = useState(otherActive);
-
-  useEffect(() => {
-    if (otherActive) setMoreOpen(true);
-  }, [otherActive]);
+  const { userGeojsonLayers } = useMapStateContext();
+  const climbing = useMemo(
+    () => overlayLayers.find((layer) => layer.key === 'climbing'),
+    [overlayLayers],
+  );
 
   return (
     <>
-      <Stack
-        direction="row"
-        sx={{
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          pr: 1,
-        }}
+      <Typography
+        variant="overline"
+        color="textSecondary"
+        sx={{ display: 'block', px: 2, pt: 2 }}
       >
-        <Typography
-          variant="overline"
-          color="textSecondary"
-          style={{ padding: '1em 0 0 1em' }}
-          sx={{
-            display: 'block',
-          }}
-        >
-          {t('layerswitcher.overlays')}
-        </Typography>
-        <AddGeojsonButton />
-      </Stack>
-
+        {t('layerswitcher.overlays')}
+      </Typography>
       <StyledList dense suppressHydrationWarning>
         {climbing && <OverlayItem layer={climbing} />}
         {userGeojsonLayers.map((layer) => (
           <UserGeojsonItem key={layer.id} layer={layer} />
         ))}
       </StyledList>
-
-      <Accordion
-        disableGutters
-        elevation={0}
-        expanded={moreOpen}
-        onChange={(_, expanded) => setMoreOpen(expanded)}
-        sx={{
-          '&:before': { display: 'none' },
-          bgcolor: 'transparent',
-        }}
-      >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          sx={{
-            minHeight: 40,
-            px: 2,
-            '& .MuiAccordionSummary-content': { my: 0.5 },
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            {t('layerswitcher.more_overlays')}
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails sx={{ p: 0, pb: 1 }}>
-          {other.length > 0 && (
-            <StyledList dense suppressHydrationWarning>
-              {other.map((layer) =>
-                layer.type === 'spacer' ? (
-                  <Spacer key={layer.key} />
-                ) : (
-                  <OverlayItem key={layer.key} layer={layer} />
-                ),
-              )}
-            </StyledList>
-          )}
-          <AddUserLayerButton />
-        </AccordionDetails>
-      </Accordion>
     </>
   );
 };

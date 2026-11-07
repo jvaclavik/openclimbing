@@ -1,5 +1,6 @@
 import { filterClimbingTilesFeatures } from '../climbingTilesSource';
 import { ClimbingTilesFeature } from '../../../../types';
+import { ALL_FERRATA_GRADES } from '../../../../services/tagging/ferrataGradeFilter';
 
 const pt = (lon = 14, lat = 50) => ({
   type: 'Point' as const,
@@ -88,6 +89,22 @@ describe('filterClimbingTilesFeatures', () => {
         ferrataGrades: ['unknown'],
       }),
     ).toEqual([unknown]);
+    expect(
+      filterClimbingTilesFeatures([point, line], {
+        ...params,
+        ferrataGrades: ALL_FERRATA_GRADES,
+        ferrataCountries: new Map([[101, 'at']]),
+        ferrataCountryFilter: ['de'],
+      }),
+    ).toEqual([]);
+    expect(
+      filterClimbingTilesFeatures([point, line], {
+        ...params,
+        ferrataGrades: ALL_FERRATA_GRADES,
+        ferrataCountries: new Map([[101, 'at']]),
+        ferrataCountryFilter: ['at'],
+      }),
+    ).toEqual([point, line]);
   });
 
   it('drops only disabled poi type', () => {

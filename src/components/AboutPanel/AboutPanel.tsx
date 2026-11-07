@@ -1,177 +1,69 @@
-import styled from '@emotion/styled';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Router from 'next/router';
 import React from 'react';
-import { intl, t } from '../../services/intl';
-import { COMMUNITY_URL } from '../consts';
-import { isMobileMode, useMobileMode } from '../helpers';
+import { useMobileMode } from '../helpers';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
 import { MobilePageDrawer } from '../utils/MobilePageDrawer';
-import {
-  ArrowLink,
-  ArrowLinkInternal,
-  GradientHeading,
-} from '../utils/panelUi';
+import { GradientHeading } from '../utils/panelUi';
 import {
   PanelContent,
   PanelScrollbars,
   PanelSidePadding,
 } from '../utils/PanelHelpers';
-import { AboutFeatures } from './AboutFeatures';
-import { AboutOpenData } from './AboutOpenData';
-import { AboutSupport } from './AboutSupport';
-import { OpenPointsCard } from './OpenPointsCard';
-
-const storyUrl = (lang: string) =>
-  lang === 'cs'
-    ? 'https://medium.com/@jvaclavik/p%C5%99%C3%ADb%C4%9Bh-za-openclimbing-org-e1e2b3de2024'
-    : 'https://medium.com/@jvaclavik/story-behind-openclimbing-org-ab448939c6ac';
-
-const StoryLink = styled(ArrowLink)`
-  margin-top: 14px;
-`;
-
-const ExportLink = styled(ArrowLinkInternal)`
-  margin-top: 14px;
-  color: ${({ theme }) => theme.palette.text.primary};
-`;
-
-const MobileOnly = styled.div`
-  display: none;
-
-  @media ${isMobileMode} {
-    display: block;
-    text-align: center;
-  }
-`;
-
-const Hero = () => (
-  <Box
-    sx={{
-      mt: 4,
-    }}
-  >
-    <GradientHeading>{t('about.hero_claim')}</GradientHeading>
-    <Typography
-      variant="body1"
-      sx={{
-        color: 'text.secondary',
-        mt: 1.5,
-        lineHeight: 1.7,
-      }}
-    >
-      {t('about.hero_sub')}
-    </Typography>
-    <StoryLink
-      href={storyUrl(intl.lang)}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t('homepage.our_story')}
-      <ArrowForwardIcon sx={{ fontSize: 16 }} />
-    </StoryLink>
-    <MobileOnly>
-      <Button
-        variant="outlined"
-        color="secondary"
-        size="small"
-        startIcon={<QuestionAnswerIcon />}
-        href={COMMUNITY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        sx={{
-          mt: 2.5,
-          borderRadius: '999px',
-          textTransform: 'none',
-          fontWeight: 800,
-          px: 2,
-        }}
-      >
-        {t('climbing.forum')}
-      </Button>
-    </MobileOnly>
-  </Box>
-);
 
 const Section = ({
   title,
-  lead,
   children,
 }: {
   title: string;
-  lead?: string;
   children: React.ReactNode;
 }) => (
-  <Box
-    sx={{
-      mt: 5,
-    }}
-  >
-    <Typography
-      variant="h5"
-      component="h2"
-      sx={{
-        fontWeight: 800,
-        letterSpacing: -0.4,
-        lineHeight: 1.25,
-      }}
-    >
+  <Box sx={{ mt: 4 }}>
+    <Typography variant="h5" component="h2" sx={{ fontWeight: 800 }}>
       {title}
     </Typography>
-    {lead && (
-      <Typography
-        variant="body1"
-        sx={{
-          color: 'text.secondary',
-          mt: 1.25,
-          mb: 2,
-          lineHeight: 1.7,
-        }}
-      >
-        {lead}
-      </Typography>
-    )}
-    {children}
+    <Typography
+      variant="body1"
+      sx={{ color: 'text.secondary', mt: 1.25, lineHeight: 1.7 }}
+    >
+      {children}
+    </Typography>
   </Box>
-);
-
-const Different = () => (
-  <Section
-    title={t('about.different_heading')}
-    lead={t('about.different_lead')}
-  >
-    <OpenPointsCard>
-      <ExportLink href="/export">
-        {t('about.export_cta')}
-        <ArrowForwardIcon sx={{ fontSize: 16 }} />
-      </ExportLink>
-    </OpenPointsCard>
-  </Section>
 );
 
 export const AboutPanel = () => {
   const isMobileMode = useMobileMode();
-  const handleClose = () => {
-    Router.push('/');
-  };
-
   const body = (
     <PanelSidePadding>
-      <ClosePanelButton right onClick={handleClose} />
-      <Hero />
-      <Section
-        title={t('about.features_heading')}
-        lead={t('about.features_lead')}
-      >
-        <AboutFeatures />
+      <ClosePanelButton right onClick={() => Router.push('/')} />
+      <Box sx={{ mt: 4 }}>
+        <GradientHeading>Für Simon und Mama</GradientHeading>
+        <Typography
+          variant="body1"
+          sx={{ color: 'text.secondary', mt: 1.5, lineHeight: 1.7 }}
+        >
+          Das ist eure Klettersteig-Karte. Nicht für alle, sondern für euch
+          zwei: wo der Steig liegt, wie schwer er ist, und was andere Leute
+          davon erzählt haben.
+        </Typography>
+      </Box>
+      <Section title="So öffnet ihr einen Steig">
+        Tippt den Namen auf der Karte an und zieht die Karteikarte hoch. Zuerst
+        kommen Schwierigkeit und Dauer, dann die Fotos, dann die Beschreibung.
+        Darunter die Sterne und fünf Bewertungen. Den Rest klappt „Mehr
+        anzeigen“ auf.
       </Section>
-      <Section title={t('about.open_heading')} lead={t('about.open_lead')}>
-        <AboutOpenData />
+      <Section title="Woher die Texte kommen">
+        Fotos, Beschreibung und Bewertungen kommen von via-ferrata.de. Die
+        Seite bleibt verlinkt, damit ihr das Original immer wiederfindet. Die
+        Wege und Namen auf der Karte kommen von OpenStreetMap.
       </Section>
-      <Different />
-      <AboutSupport />
+      <Section title="Was die Knöpfe tun">
+        Der Filter unten rechts wählt die Art, den Grad und das Land. Die
+        Kartenlagen wechseln zwischen der normalen Karte, der topografischen
+        Karte und dem Satellitenbild. Drei Striche oben rechts öffnen Listen,
+        Einstellungen und diese Seite.
+      </Section>
     </PanelSidePadding>
   );
 

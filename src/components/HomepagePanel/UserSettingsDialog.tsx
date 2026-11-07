@@ -8,82 +8,44 @@ import {
   MenuItem,
   Select,
   Switch,
+  Typography,
 } from '@mui/material';
 import React from 'react';
 import { ClosePanelButton } from '../utils/ClosePanelButton';
-import { PanelLabel } from '../FeaturePanel/Climbing/PanelLabel';
-import { GradeSystemSelect } from '../FeaturePanel/Climbing/GradeSystemSelect';
 import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
-import { TickStyleSelect } from '../FeaturePanel/Climbing/Ticks/TickStyleSelect';
-import { t } from '../../services/intl';
-import { usePersistedState } from '../utils/usePersistedState';
-import { LOCAL_STORAGE_CACHE } from '../../services/fetchCache';
-import { useMobileMode, useSmallScreen } from '../helpers';
+import { useMobileMode } from '../helpers';
+import { useUserThemeContext, UserTheme } from '../../helpers/theme';
 
 type Props = {
   onClose: (event: unknown) => void;
   isOpened: boolean;
 };
 
-const StoreRequests = () => {
-  const [value, setValue] = usePersistedState(
-    'store_requests_to_local_storage',
-    false,
-  );
+const Appearance = () => {
+  const { userTheme, setUserTheme } = useUserThemeContext();
 
   return (
     <ListItem>
-      <ListItemText>
-        Develop: store all network requests (reload needed)
-      </ListItemText>
-      <Switch
-        color="primary"
-        edge="end"
-        onChange={() => {
-          setValue((prev) => {
-            if (prev) {
-              LOCAL_STORAGE_CACHE.clear();
-            }
-
-            return !prev;
-          });
-        }}
-        checked={!!value}
+      <ListItemText
+        primary="Erscheinungsbild"
+        secondary="Hell, dunkel oder so wie das Gerät"
       />
+      <Select
+        size="small"
+        value={userTheme}
+        onChange={(event) => setUserTheme(event.target.value as UserTheme)}
+      >
+        <MenuItem value="light">Hell</MenuItem>
+        <MenuItem value="dark">Dunkel</MenuItem>
+        <MenuItem value="system">Automatisch</MenuItem>
+      </Select>
     </ListItem>
   );
 };
 
-const ShowAllClimbingOutlines = () => {
-  const [value, setValue] = usePersistedState(
-    'show_all_climbing_outlines',
-    false,
-  );
-
-  return (
-    <ListItem>
-      <ListItemText>
-        Develop: show all outlines on climbing layer (reload needed)
-      </ListItemText>
-      <Switch
-        color="primary"
-        edge="end"
-        onChange={() => setValue((prev) => !prev)}
-        checked={!!value}
-      />
-    </ListItem>
-  );
-};
-
-// TODO refactor this - extract member functions
-
-// eslint-disable-next-line max-lines-per-function
 export const UserSettingsDialog = ({ onClose, isOpened }: Props) => {
   const { setUserSetting, userSettings } = useUserSettingsContext();
   const isMobileMode = useMobileMode();
-  const isSmallScreen = useSmallScreen();
-  const showProtectionPoints =
-    userSettings['climbing.showProtectionPoints'] ?? !isSmallScreen;
 
   return (
     <Dialog
@@ -93,154 +55,29 @@ export const UserSettingsDialog = ({ onClose, isOpened }: Props) => {
       fullWidth
       fullScreen={isMobileMode}
     >
-      <DialogTitle>{t('user.user_settings')}</DialogTitle>
-
+      <DialogTitle>Einstellungen</DialogTitle>
       <ClosePanelButton right onClick={onClose} />
       <DialogContent>
-        <PanelLabel>{t('user_settings.general')}</PanelLabel>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Nur das, was ihr auf der Karte wirklich braucht. Filter und Listen
+          merkt sich dieses Gerät von selbst.
+        </Typography>
         <List>
+          <Appearance />
           <ListItem>
-            <ListItemText>{t('user_settings.is_imperial')}</ListItemText>
+            <ListItemText
+              primary="Entfernungen in Meilen"
+              secondary="Sonst Kilometer und Meter"
+            />
             <Switch
               color="primary"
               edge="end"
-              onChange={(e) => {
-                setUserSetting('isImperial', e.target.checked);
-              }}
+              onChange={(event) =>
+                setUserSetting('isImperial', event.target.checked)
+              }
               checked={userSettings.isImperial}
             />
           </ListItem>
-        </List>
-        <PanelLabel>{t('user_settings.climbing')}</PanelLabel>
-        <List>
-          <ListItem>
-            <ListItemText>
-              {t('user_settings.default_grade_system')}
-            </ListItemText>
-            <GradeSystemSelect />
-          </ListItem>
-          <ListItem>
-            <ListItemText>
-              {t('user_settings.show_grades_in_pictures')}
-            </ListItemText>
-            <Switch
-              color="primary"
-              edge="end"
-              onChange={(e) => {
-                setUserSetting(
-                  'climbing.isGradesOnPhotosVisible',
-                  e.target.checked,
-                );
-              }}
-              checked={userSettings['climbing.isGradesOnPhotosVisible']}
-            />
-          </ListItem>
-
-          <ListItem>
-            <ListItemText>
-              {t('user_settings.show_protection_points')}
-            </ListItemText>
-            <Switch
-              color="primary"
-              edge="end"
-              onChange={(e) => {
-                setUserSetting(
-                  'climbing.showProtectionPoints',
-                  e.target.checked,
-                );
-              }}
-              checked={showProtectionPoints}
-            />
-          </ListItem>
-
-          <ListItem>
-            <ListItemText>
-              {t('user_settings.default_climbing_style')}
-            </ListItemText>
-            <TickStyleSelect
-              value={userSettings['climbing.defaultClimbingStyle']}
-              onChange={(e) => {
-                setUserSetting('climbing.defaultClimbingStyle', e.target.value);
-              }}
-            />
-          </ListItem>
-
-          <ListItem>
-            <ListItemText>
-              {t('user_settings.show_related_photo_by_route_click')}
-            </ListItemText>
-            <Switch
-              color="primary"
-              edge="end"
-              onChange={(e) => {
-                setUserSetting(
-                  'climbing.showRelatedPhotoByRouteClick',
-                  e.target.checked,
-                );
-              }}
-              checked={userSettings['climbing.showRelatedPhotoByRouteClick']}
-            />
-          </ListItem>
-
-          <ListItem>
-            <ListItemText>
-              {t('user_settings.select_climbing_routes_by_scrolling')}
-            </ListItemText>
-            <Switch
-              color="primary"
-              edge="end"
-              onChange={(e) => {
-                setUserSetting(
-                  'climbing.selectRoutesByScrolling',
-                  e.target.checked,
-                );
-              }}
-              checked={userSettings['climbing.selectRoutesByScrolling']}
-            />
-          </ListItem>
-
-          {userSettings['climbing.selectRoutesByScrolling'] && (
-            <ListItem sx={{ paddingLeft: 4 }}>
-              <ListItemText>
-                {t('user_settings.switch_climbing_photos_by_scrolling')}
-              </ListItemText>
-              <Switch
-                color="primary"
-                edge="end"
-                onChange={(e) => {
-                  setUserSetting(
-                    'climbing.switchPhotosByScrolling',
-                    e.target.checked,
-                  );
-                }}
-                checked={userSettings['climbing.switchPhotosByScrolling']}
-              />
-            </ListItem>
-          )}
-
-          <ListItem>
-            <ListItemText>{t('user_settings.crag_view_layout')}</ListItemText>
-            <Select
-              value={userSettings['climbing.cragViewLayout']}
-              onChange={(event: any) => {
-                setUserSetting('climbing.cragViewLayout', event.target.value);
-              }}
-              size="small"
-            >
-              <MenuItem value="vertical">
-                {t('user_settings.crag_view_layout_vertical')}
-              </MenuItem>
-              <MenuItem value="horizontal">
-                {t('user_settings.crag_view_layout_horizontal')}
-              </MenuItem>
-              <MenuItem value="auto">
-                {t('user_settings.crag_view_layout_auto')}
-              </MenuItem>
-            </Select>
-          </ListItem>
-
-          <StoreRequests />
-          <ShowAllClimbingOutlines />
         </List>
       </DialogContent>
     </Dialog>
