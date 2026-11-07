@@ -303,6 +303,10 @@ const doClimbingFilter = (features: ClimbingTilesFeature[]) =>
 
 let updateGeneration = 0;
 
+// the source instance that last received setData - a new instance means the
+// style was rebuilt and the (empty) source has to be filled again
+let filledSource: ReturnType<typeof getClimbingTilesSource>;
+
 const updateData = async () => {
   const generation = ++updateGeneration;
   const map = getGlobalMap();
@@ -341,6 +345,7 @@ const updateData = async () => {
   const nextFeatures = [...filteredFeatures.map(processFeature), ...boxes];
 
   const epoch = beginClimbingSourceUpdate(map);
+  filledSource = getClimbingTilesSource(map);
   commitClimbingSourceData(
     map,
     nextFeatures as GeoJSON.Feature[],
@@ -356,9 +361,21 @@ const updateData = async () => {
 
 mapClimbingFilter.callback = updateData;
 
+// `styledata` fires on every style mutation, also on map.setFilter() (e.g. the
+// hovered crag routes). Refilling the source then wipes the hover feature-state,
+// the hover reset changes the filter again --> endless outline blinking.
+const onStyleData = debounce(() => {
+  const source = getClimbingTilesSource(getGlobalMap());
+  if (source && source === filledSource) {
+    return;
+  }
+  updateData();
+}, 200);
+
 let eventsAdded = false;
 
 export const addClimbingTilesSource = (style: StyleSpecification) => {
+  filledSource = undefined;
   style.sources[CLIMBING_TILES_SOURCE] = EMPTY_GEOJSON_SOURCE;
   style.sprite = [...OSMAPP_SPRITE, CLIMBING_SPRITE];
   style.layers.push(...climbingLayers); // must be also in `layersWithOsmId` because of hover effect
@@ -370,7 +387,7 @@ export const addClimbingTilesSource = (style: StyleSpecification) => {
     // GeoJSON source several times in a row. `load` and `moveend` stay
     // immediate so data appears as soon as possible and reacts to panning.
     map.on('load', updateData);
-    map.on('styledata', debounce(updateData, 200));
+    map.on('styledata', onStyleData);
     map.on('moveend', updateData);
     eventsAdded = true;
   }
@@ -380,7 +397,8 @@ export const removeClimbingTilesSource = () => {
   if (eventsAdded) {
     const map = getGlobalMap();
     map.off('load', updateData);
-    map.off('styledata', updateData);
+    map.off('styledata', onStyleData);
+    onStyleData.cancel();
     map.off('moveend', updateData);
     eventsAdded = false;
   }
