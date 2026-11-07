@@ -295,7 +295,7 @@ const TourHelpPanel = ({
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
-        overflow: 'hidden',
+        overflowY: 'auto',
         bgcolor: 'background.paper',
         color: 'text.primary',
         border: 1,
@@ -328,7 +328,7 @@ const TourHelpPanel = ({
         spacing={1.25}
         sx={{
           overflowY: 'auto',
-          minHeight: 0,
+          minHeight: 100,
           flex: '1 1 auto',
           px: 1.5,
           py: 1,
