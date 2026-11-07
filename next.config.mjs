@@ -27,6 +27,7 @@ const nextConfig = {
     '/api/kletterglueck/tours': ['./docs/project/norissteig-osm-variante.gpx'],
   },
   env: {
+    kletterglueckChatEnabled: String(process.env.VERCEL_ENV === 'preview'),
     osmappVersion,
     sentryRelease,
     kletterglueckPrivateTours: String(

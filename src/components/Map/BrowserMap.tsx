@@ -1,3 +1,4 @@
+import { TourChat } from '../TourChat/TourChat';
 import React, { useCallback, useEffect } from 'react';
 import { useCentralTours } from './useCentralTours';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -154,6 +155,7 @@ const BrowserMap = () => {
         style={{ height: '100%', width: '100%', backgroundColor: '#4a463d' }}
       />
       <PreviewArrow />
+      <TourChat />
       {centralToursNotice && (
         <span
           role="status"

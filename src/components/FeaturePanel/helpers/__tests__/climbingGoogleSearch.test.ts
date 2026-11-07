@@ -8,12 +8,14 @@ const place = (
   extra: FeatureTags = {},
   parents: Feature[] = [],
   osmType: 'node' | 'way' | 'relation' = 'relation',
-): Feature =>
-  ({
-    osmMeta: { type: osmType, id: 1 },
-    tags: { climbing, name, ...extra },
-    parentFeatures: parents,
-  }) as Feature;
+): Feature => ({
+  type: 'Feature',
+  properties: { class: 'natural', subclass: 'cliff' },
+  center: [0, 0],
+  osmMeta: { type: osmType, id: 1 },
+  tags: { climbing, name, ...extra },
+  parentFeatures: parents,
+});
 
 const area = (name: string, extra: FeatureTags = {}) =>
   place('area', name, extra);
@@ -136,14 +138,16 @@ describe('climbingGoogleSearch', () => {
     ).toBeNull();
   });
 
-  it('returns nothing without a name', () => {
+  it('returns nothing for incomplete features', () => {
     expect(
-      climbingGoogleSearch({ tags: { climbing: 'crag' } } as Feature),
+      climbingGoogleSearch({ ...place('crag', ''), osmMeta: undefined }),
     ).toBeNull();
     expect(
-      climbingGoogleSearch({
-        tags: { climbing: 'route', name: 'Cesta' },
-      } as Feature),
+      climbingGoogleSearch({ ...place('route', 'Cesta'), osmMeta: undefined }),
     ).toBeNull();
+  });
+
+  it('returns nothing without a name even with complete metadata', () => {
+    expect(climbingGoogleSearch(place('crag', ''))).toBeNull();
   });
 });
