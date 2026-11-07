@@ -6,6 +6,7 @@ import {
   parseTourBounds,
   prepareTour,
 } from '../../../src/server/tours/catalog';
+import { tourRecordFromBody } from '../../../src/server/tours/osmVariant';
 
 const UUID = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 const METADATA =
@@ -79,7 +80,7 @@ export default async function handler(
     }
     query.set('select', METADATA);
     try {
-      body = JSON.stringify(prepareTour(req.body));
+      body = JSON.stringify(prepareTour(tourRecordFromBody(req.body)));
     } catch (error) {
       return res.status(400).json({
         error: error instanceof Error ? error.message : 'Ungültige Tour.',

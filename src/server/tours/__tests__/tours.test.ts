@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import handler from '../../../../pages/api/kletterglueck/tours';
 import { parseTourGpx, Track } from '../../../services/tours/tracks';
 import { parseTourBounds, prepareTour } from '../catalog';
+import { parseServerGpx, tourRecordFromBody } from '../osmVariant';
 
 const secret = 'example-admin-token-with-at-least-32-chars';
 const bbox = '11.5,49.5,11.6,49.6';
@@ -146,6 +147,44 @@ test('keeps the ID when replacing a tour and paginates the admin catalog', async
     truncated: true,
   });
   expect(database.mock.calls[1][0].searchParams.get('id')).toBe('gt.' + id);
+});
+
+test('stores the named OSM variant without a client GPX upload', async () => {
+  database.mockResolvedValue({
+    ok: true,
+    status: 201,
+    json: async () => [{ id: '241ca1fa-7cb5-4b5d-8a13-9da8fae95ac4' }],
+  });
+  const denied = await request({
+    method: 'POST',
+    headers: { authorization: 'Bearer ' + secret },
+    body: { pilot: 'norissteig-osm-variante', rights_confirmed: false },
+  });
+  expect(denied.status).toHaveBeenCalledWith(400);
+  expect(database).not.toHaveBeenCalled();
+  const unknown = await request({
+    method: 'POST',
+    headers: { authorization: 'Bearer ' + secret },
+    body: { pilot: 'original', rights_confirmed: true },
+  });
+  expect(unknown.status).toHaveBeenCalledWith(400);
+  const saved = await request({
+    method: 'POST',
+    headers: { authorization: 'Bearer ' + secret },
+    body: { pilot: 'norissteig-osm-variante', rights_confirmed: true },
+  });
+  expect(saved.status).toHaveBeenCalledWith(201);
+  const body = JSON.parse(database.mock.calls[0][1].body);
+  expect(body.name).toBe('Norissteig ab Hirschbach – OSM-Variante');
+  expect(body.osm_ref).toBe('way/1156787758');
+  expect(body.source).toContain('ODbL');
+  expect(body.source).toContain('Nicht der 291-Punkte-Originaltrack');
+  expect(body.track).toHaveLength(3);
+  expect(body.track.flat()).toHaveLength(476);
+  expect(body.difficulty).toBeNull();
+  const xml = readFileSync('docs/project/norissteig-osm-variante.gpx', 'utf8');
+  expect(parseServerGpx(xml)).toEqual(parseTourGpx(xml));
+  expect(tourRecordFromBody(undefined)).toBeUndefined();
 });
 
 test('imports GPX segments without connecting them or keeping private metadata', () => {

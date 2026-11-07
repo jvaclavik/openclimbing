@@ -23,6 +23,9 @@ const nextConfig = {
     emotion: true,
   },
   output: process.env.NEXTJS_OUTPUT || undefined,
+  outputFileTracingIncludes: {
+    '/api/kletterglueck/tours': ['./docs/project/norissteig-osm-variante.gpx'],
+  },
   env: {
     osmappVersion,
     sentryRelease,
