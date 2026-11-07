@@ -29,12 +29,13 @@ export const UncertainCover = styled.div`
 
 export type ImageClickHandler = (e: React.MouseEvent) => void | undefined; // undefined = no cursor
 
-export const filterCrags = (parentFeatures: Array<Feature>) => {
-  return parentFeatures.filter((item) => item.tags.climbing === 'crag');
-};
+// member features (e.g. route_bottom photos in an area gallery) come without
+// their parentFeatures loaded
+export const filterCrags = (parentFeatures: Array<Feature> | undefined) =>
+  (parentFeatures ?? []).filter((item) => item.tags.climbing === 'crag');
 
 export const getUrlToParentCrag = (
-  parentFeatures: Array<Feature>,
+  parentFeatures: Array<Feature> | undefined,
   photo?: string,
 ) => {
   const parentCrags = filterCrags(parentFeatures);
