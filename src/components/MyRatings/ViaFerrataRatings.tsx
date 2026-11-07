@@ -1,4 +1,4 @@
-import { Alert, Link, Rating, Stack, Typography } from '@mui/material';
+import { Alert, Box, Link, Rating, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 type Review = {
@@ -12,6 +12,10 @@ type Review = {
 
 type Ratings = {
   name: string;
+  difficulty: string;
+  duration: string;
+  description: { kind: 'h2' | 'p'; text: string }[];
+  images: string[];
   average: number;
   count: number;
   reviews_url: string;
@@ -60,7 +64,7 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
   if (!data)
     return (
       <Typography variant="body2">
-        Bewertungen von via-ferrata.de werden geladen.
+        Bewertungen und Beschreibung von via-ferrata.de werden geladen.
       </Typography>
     );
 
@@ -69,12 +73,41 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
       <Typography component="h2" variant="h6">
         via-ferrata.de
       </Typography>
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <Rating value={data.average} precision={0.1} readOnly />
+      {(data.difficulty || data.duration) && (
         <Typography>
-          {data.average.toLocaleString('de-DE')} aus {data.count}
+          {[data.difficulty, data.duration].filter(Boolean).join(' · ')}
         </Typography>
-      </Stack>
+      )}
+      {data.images.length > 0 && (
+        <Stack direction="row" spacing={1} sx={{ overflowX: 'auto' }}>
+          {data.images.map((src) => (
+            <Box
+              key={src}
+              component="img"
+              src={src}
+              alt={data.name}
+              sx={{ height: 180, width: 'auto', borderRadius: 1 }}
+            />
+          ))}
+        </Stack>
+      )}
+      {data.description.map((block) => (
+        <Typography
+          key={block.text}
+          component={block.kind === 'h2' ? 'h3' : 'p'}
+          variant={block.kind === 'h2' ? 'subtitle1' : 'body2'}
+        >
+          {block.text}
+        </Typography>
+      ))}
+      {data.count > 0 && (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <Rating value={data.average} precision={0.1} readOnly />
+          <Typography>
+            {data.average.toLocaleString('de-DE')} aus {data.count}
+          </Typography>
+        </Stack>
+      )}
       {data.reviews.map((review) => (
         <Stack key={`${review.url}-${review.title}`} spacing={0.5}>
           <Typography component="h3" variant="subtitle1">

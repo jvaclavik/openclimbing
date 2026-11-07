@@ -7,9 +7,15 @@ export type ViaFerrataReview = {
   url: string;
 };
 
+export type ViaFerrataBlock = { kind: 'h2' | 'p'; text: string };
+
 export type ViaFerrataRatings = {
   slug: string;
   name: string;
+  difficulty: string;
+  duration: string;
+  description: ViaFerrataBlock[];
+  images: string[];
   average: number;
   count: number;
   url: string;
@@ -23,12 +29,16 @@ const TOPO = 'https://www.via-ferrata.de/klettersteige/topo/';
 const textOf = (value: string) =>
   value
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&/g, '&')
-    .replace(/"/g, '"')
-    .replace(/&#0?39;|'/g, "'")
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) =>
+      String.fromCodePoint(parseInt(code, 16)),
+    )
+    .replace(/\u0026nbsp;/g, ' ')
+    .replace(/\u0026amp;/g, '\u0026')
+    .replace(/\u0026quot;/g, '"')
+    .replace(/\u0026#0?39;|\u0026apos;/g, "'")
+    .replace(/\u0026lt;/g, '<')
+    .replace(/\u0026gt;/g, '>')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -76,6 +86,44 @@ export const matchClimbSlug = (name: string, slugs: string[]) => {
   return best && best.score >= 50 ? best.slug : null;
 };
 
+
+const listingPart = (html: string) =>
+  html.split('sabai-directory-review-title')[0] ?? html;
+
+const readDescription = (html: string): ViaFerrataBlock[] => {
+  const raw =
+    listingPart(html).match(/itemprop="description">([\s\S]*?)<\/div>/)?.[1] ??
+    '';
+  const blocks = [...raw.matchAll(/<(h2|h3|p)\b[^>]*>([\s\S]*?)<\/\1>/g)]
+    .map((match) => ({
+      kind: (match[1] === 'p' ? 'p' : 'h2') as ViaFerrataBlock['kind'],
+      text: textOf(match[2]),
+    }))
+    .filter((block) => block.text);
+  let used = 0;
+  return blocks.filter((block) => {
+    used += block.text.length;
+    return used <= 7000;
+  });
+};
+
+const readImages = (html: string) => [
+  ...new Set(
+    [
+      ...listingPart(html).matchAll(
+        /property="og:image" content="(https:\/\/www\.via-ferrata\.de\/wp-content\/sabai\/File\/files\/[^"]+)"/g,
+      ),
+    ].map((match) => match[1]),
+  ),
+].slice(0, 12);
+
+const readFact = (html: string, kind: 'difficulty' | 'duration') =>
+  textOf(
+    listingPart(html).match(
+      new RegExp(`vf-${kind}"[\\s\\S]*?<span>([\\s\\S]*?)<\\/span>`),
+    )?.[1] ?? '',
+  );
+
 const pageFor = (slug: string) => ({
   name: slug,
   url: `${TOPO}${slug}`,
@@ -90,7 +138,12 @@ export const parseViaFerrataRatings = (
   const main = html.split('sabai-directory-main')[1] ?? '';
   const average = Number(main.match(/itemprop="ratingValue">([0-9.]+)/)?.[1]);
   const count = Number(main.match(/itemprop="reviewCount">(\d+)/)?.[1]);
-  if (!Number.isFinite(average) || !Number.isFinite(count)) return null;
+  const description = readDescription(html);
+  const images = readImages(html);
+  const difficulty = readFact(html, 'difficulty');
+  const duration = readFact(html, 'duration');
+  const hasRating = Number.isFinite(average) && Number.isFinite(count);
+  if (!hasRating && !description.length && !images.length) return null;
   const heading =
     textOf(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? '') || page.name;
   const reviews = html
@@ -128,8 +181,12 @@ export const parseViaFerrataRatings = (
   return {
     slug,
     name: heading,
-    average,
-    count,
+    difficulty,
+    duration,
+    description,
+    images,
+    average: hasRating ? average : 0,
+    count: hasRating ? count : 0,
     url: page.url,
     reviews_url: `${page.url}/reviews`,
     reviews,

@@ -6,6 +6,11 @@ import {
 
 const html = `
 <h1>Norissteig</h1>
+<div class="vf-info-item vf-difficulty" title="Schwierigkeit"><span>B/C</span></div>
+<div class="vf-info-item vf-duration" title="Dauer"><span>3 h</span></div>
+<meta property="og:image" content="https://www.via-ferrata.de/wp-content/sabai/File/files/l_abc.jpg" />
+<div class="sabai-directory-body" itemprop="description"><p>Kurzer Satz &#8211; mit Gedankenstrich.</p><h2>Zufahrt</h2><p>Vom Parkplatz.</p></div>
+
 <div class="sabai-directory-main">
   <span class="sabai-voting-rating-average" itemprop="ratingValue">4.05</span>
   <span itemprop="reviewCount">2</span>
@@ -32,6 +37,16 @@ test('liest Durchschnitt und eine Bewertung', () => {
   const ratings = parseViaFerrataRatings('norissteig', html);
   expect(ratings).toMatchObject({
     name: 'Norissteig',
+    difficulty: 'B/C',
+    duration: '3 h',
+    images: [
+      'https://www.via-ferrata.de/wp-content/sabai/File/files/l_abc.jpg',
+    ],
+    description: [
+      { kind: 'p', text: 'Kurzer Satz – mit Gedankenstrich.' },
+      { kind: 'h2', text: 'Zufahrt' },
+      { kind: 'p', text: 'Vom Parkplatz.' },
+    ],
     average: 4.05,
     count: 2,
     reviews: [
