@@ -1,4 +1,13 @@
-import { Alert, Box, Button, Link, Rating, Stack, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Link,
+  Rating,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 
 type Review = {
@@ -69,24 +78,56 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
     : data.reviews.slice(0, 5);
 
   return (
-    <Stack spacing={1.5} sx={{ mb: 2 }}>
-      <Typography component="h2" variant="h6">
+    <Stack
+      spacing={1.75}
+      sx={{
+        mb: 2,
+        p: 1.5,
+        border: 1,
+        borderColor: 'divider',
+        borderRadius: 2,
+        bgcolor: 'background.paper',
+      }}
+    >
+      <Typography variant="overline" color="text.secondary">
         via-ferrata.de
       </Typography>
       {(data.difficulty || data.duration) && (
-        <Typography>
-          {[data.difficulty, data.duration].filter(Boolean).join(' · ')}
-        </Typography>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+          {data.difficulty && (
+            <Chip size="small" label={`Schwierigkeit ${data.difficulty}`} />
+          )}
+          {data.duration && <Chip size="small" label={`Dauer ${data.duration}`} />}
+        </Stack>
+      )}
+      {data.count > 0 && (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <Rating value={data.average} precision={0.1} readOnly />
+          <Typography variant="body2">
+            {data.average.toLocaleString('de-DE')} aus {data.count} Bewertungen
+          </Typography>
+        </Stack>
       )}
       {data.images.length > 0 && (
-        <Stack direction="row" spacing={1} sx={{ overflowX: 'auto' }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ mx: -1.5, px: 1.5, overflowX: 'auto', scrollSnapType: 'x mandatory' }}
+        >
           {data.images.map((src) => (
             <Box
               key={src}
               component="img"
               src={src}
               alt={data.name}
-              sx={{ height: 180, width: 'auto', borderRadius: 1 }}
+              sx={{
+                width: 220,
+                height: 148,
+                objectFit: 'cover',
+                borderRadius: 1.5,
+                flex: '0 0 auto',
+                scrollSnapAlign: 'start',
+              }}
             />
           ))}
         </Stack>
@@ -96,34 +137,41 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
           key={block.text}
           component={block.kind === 'h2' ? 'h3' : 'p'}
           variant={block.kind === 'h2' ? 'subtitle1' : 'body2'}
+          sx={{ lineHeight: block.kind === 'p' ? 1.6 : undefined, m: 0 }}
         >
           {block.text}
         </Typography>
       ))}
-      {data.count > 0 && (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Rating value={data.average} precision={0.1} readOnly />
-          <Typography>
-            {data.average.toLocaleString('de-DE')} aus {data.count}
-          </Typography>
-        </Stack>
-      )}
       {visibleReviews.map((review) => (
-        <Stack key={`${review.url}-${review.title}`} spacing={0.5}>
-          <Typography component="h3" variant="subtitle1">
+        <Stack
+          key={`${review.url}-${review.title}`}
+          spacing={0.5}
+          sx={{ p: 1.25, borderRadius: 1.5, bgcolor: 'background.default' }}
+        >
+          <Typography component="h3" variant="subtitle2">
             {review.title}
           </Typography>
           <Rating value={review.stars} precision={0.5} readOnly size="small" />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="caption" color="text.secondary">
             {[review.author, review.date].filter(Boolean).join(' · ')}
           </Typography>
-          {review.text && <Typography variant="body2">{review.text}</Typography>}
+          {review.text && (
+            <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+              {review.text}
+            </Typography>
+          )}
         </Stack>
       ))}
       {data.reviews.length > 5 && !showAllReviews && (
-        <Button onClick={() => setShowAllReviews(true)}>Mehr anzeigen</Button>
+        <Button
+          size="small"
+          onClick={() => setShowAllReviews(true)}
+          sx={{ alignSelf: 'flex-start', px: 0.5 }}
+        >
+          Mehr anzeigen
+        </Button>
       )}
-      <Typography variant="body2">
+      <Typography variant="caption" color="text.secondary">
         Quelle{' '}
         <Link href={data.reviews_url} target="_blank" rel="noreferrer">
           {data.name} auf via-ferrata.de
