@@ -24,7 +24,9 @@ export const parseServerGpx = (xml: string): Track => {
       Array.from(segment.childNodes)
         .filter((node) => node.localName === 'trkpt')
         .map((point) => {
-          const element = point as Element;
+          const element = point as unknown as {
+            getAttribute(name: string): string | null;
+          };
           return [
             Number(element.getAttribute('lon')),
             Number(element.getAttribute('lat')),
