@@ -109,3 +109,22 @@ export const deleteClimbingTick = async (id: number) => {
     headers: { 'Content-Type': 'application/json' },
   });
 };
+
+export const bulkDeleteClimbingTicks = async (ids: number[]) => {
+  return await fetchJson('/api/climbing-ticks/bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', ids }),
+  });
+};
+
+/** Each item must contain `id`; other fields are applied as partial updates. */
+export const bulkUpdateClimbingTicks = async (
+  ticks: (Partial<ClimbingTick> & { id: number })[],
+) => {
+  return await fetchJson('/api/climbing-ticks/bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'update', ticks: ticks.map(convertToDb) }),
+  });
+};

@@ -19,6 +19,18 @@ import { MyTicksRow } from './MyTicksRow';
 import { TicksFilterBanner } from './TicksFilterBanner';
 import { groupTicksByDay } from './groupTicksByDay';
 import { MyTicksDayHeader } from './MyTicksDayHeader';
+import { TickSelection } from './useTickSelection';
+
+const getGroupSelectionState = (
+  ids: readonly number[],
+  selectedIds: ReadonlySet<number>,
+) => {
+  const selectedCount = ids.filter((id) => selectedIds.has(id)).length;
+  return {
+    checked: ids.length > 0 && selectedCount === ids.length,
+    indeterminate: selectedCount > 0 && selectedCount < ids.length,
+  };
+};
 
 /** Hint when the logged-in user has no ticks (e.g. climbing profile). */
 export function MyTicksEmptyHint() {
@@ -46,13 +58,19 @@ type MyTicksContentProps = {
   fetchedTicks: FetchedClimbingTick[];
   readOnly?: boolean;
   emptyTicksMessage?: React.ReactNode;
+  /** Bulk selection state; checkboxes are shown while `selection.active`. */
+  selection?: TickSelection;
 };
 
 export const MyTicksContent = ({
   fetchedTicks,
   readOnly = false,
   emptyTicksMessage,
+  selection,
 }: MyTicksContentProps) => {
+  const selecting = !readOnly && !!selection?.active;
+  const selectedIds = selection?.selectedIds;
+
   const filter = useTicksUrlFilter();
   const filterActive = isTicksFilterActive(filter);
   const filteredTicks = React.useMemo(
@@ -60,10 +78,34 @@ export const MyTicksContent = ({
     [fetchedTicks, filter],
   );
 
+  const filteredIds = React.useMemo(
+    () => filteredTicks.map((row) => row.tick.id),
+    [filteredTicks],
+  );
+  const allSelectionState =
+    selecting && selectedIds
+      ? getGroupSelectionState(filteredIds, selectedIds)
+      : null;
+
   const { visibleRows, tableHeader, groupByDay, columnCount } = useSortedTable(
     filteredTicks,
-    { showActionsColumn: !readOnly },
+    {
+      showActionsColumn: !readOnly && !selecting,
+      selectAllColumn: allSelectionState
+        ? {
+            ...allSelectionState,
+            onToggle: () =>
+              selection.setMany(filteredIds, !allSelectionState.checked),
+          }
+        : undefined,
+    },
   );
+
+  // Visible (sorted) order of tick ids — used for SHIFT range selection.
+  // Not memoized: `visibleRows` is sorted in place, keeping its reference.
+  const visibleOrderedIds = selecting
+    ? visibleRows.map((row) => row.tick.id)
+    : [];
 
   const items = React.useMemo(
     () =>
@@ -119,6 +161,24 @@ export const MyTicksContent = ({
                     sessionTicks={item.sessionTicks}
                     colSpan={columnCount}
                     showShareAction={!readOnly}
+                    selection={
+                      selecting
+                        ? (() => {
+                            const dayIds = item.sessionTicks.map(
+                              (row) => row.tick.id,
+                            );
+                            const state = getGroupSelectionState(
+                              dayIds,
+                              selectedIds,
+                            );
+                            return {
+                              ...state,
+                              onToggle: () =>
+                                selection.setMany(dayIds, !state.checked),
+                            };
+                          })()
+                        : undefined
+                    }
                   />
                 );
               }
@@ -131,6 +191,19 @@ export const MyTicksContent = ({
                   highlighted={
                     filter.highlightTickId != null &&
                     tickRow.tick.id === filter.highlightTickId
+                  }
+                  selection={
+                    selecting
+                      ? {
+                          selected: selectedIds.has(tickRow.tick.id),
+                          onClick: (modifiers) =>
+                            selection.click(
+                              tickRow.tick.id,
+                              modifiers,
+                              visibleOrderedIds,
+                            ),
+                        }
+                      : undefined
                   }
                 />
               );

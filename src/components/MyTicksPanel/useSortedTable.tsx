@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import React from 'react';
-import { TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material';
+import {
+  Checkbox,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+} from '@mui/material';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { t } from '../../services/intl';
 
@@ -73,8 +79,15 @@ interface EnhancedTableProps {
   orderBy: string;
 }
 
+export type SelectAllColumn = {
+  checked: boolean;
+  indeterminate: boolean;
+  onToggle: () => void;
+};
+
 type EnhancedTableHeadProps = EnhancedTableProps & {
   showActionsColumn: boolean;
+  selectAllColumn?: SelectAllColumn;
 };
 
 function EnhancedTableHead({
@@ -82,6 +95,7 @@ function EnhancedTableHead({
   orderBy,
   onRequestSort,
   showActionsColumn,
+  selectAllColumn,
 }: EnhancedTableHeadProps) {
   const createSortHandler =
     (property: OrderKey) => (event: React.MouseEvent<unknown>) => {
@@ -91,6 +105,19 @@ function EnhancedTableHead({
   return (
     <TableHead>
       <TableRow>
+        {selectAllColumn ? (
+          <TableCell padding="checkbox">
+            <Checkbox
+              size="small"
+              checked={selectAllColumn.checked}
+              indeterminate={selectAllColumn.indeterminate}
+              onChange={selectAllColumn.onToggle}
+              slotProps={{
+                input: { 'aria-label': t('my_ticks.select.select_all') },
+              }}
+            />
+          </TableCell>
+        ) : null}
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -114,6 +141,8 @@ function EnhancedTableHead({
 
 type UseSortedTableOptions = {
   showActionsColumn?: boolean;
+  /** When set, renders a leading checkbox column (bulk selection mode). */
+  selectAllColumn?: SelectAllColumn;
 };
 
 export const useSortedTable = (
@@ -121,6 +150,7 @@ export const useSortedTable = (
   options?: UseSortedTableOptions,
 ) => {
   const showActionsColumn = options?.showActionsColumn !== false;
+  const selectAllColumn = options?.selectAllColumn;
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<OrderKey>('date');
 
@@ -143,10 +173,12 @@ export const useSortedTable = (
       orderBy={orderBy}
       onRequestSort={handleRequestSort}
       showActionsColumn={showActionsColumn}
+      selectAllColumn={selectAllColumn}
     />
   );
 
-  const columnCount = showActionsColumn ? 6 : 5;
+  const columnCount =
+    headCells.length + (showActionsColumn ? 1 : 0) + (selectAllColumn ? 1 : 0);
 
   return {
     visibleRows,

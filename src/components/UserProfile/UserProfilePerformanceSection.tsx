@@ -28,6 +28,12 @@ import {
   MyTicksEmptyHint,
 } from '../MyTicksPanel/MyTicksContent';
 import { fetchedTicksToGraphFeatures } from '../MyTicksPanel/mapMyTicksRows';
+import { useTickSelection } from '../MyTicksPanel/useTickSelection';
+import { TicksBulkToolbar } from '../MyTicksPanel/TicksBulkToolbar';
+import {
+  applyTicksUrlFilter,
+  useTicksUrlFilter,
+} from '../../services/my-ticks/ticksUrlFilter';
 import { useUserProfilePerformanceDerived } from './useUserProfilePerformanceDerived';
 import { useUserProfileLeaderboardRank } from './useUserProfileLeaderboardRank';
 import type { GradeStyleSegment } from './userProfilePerformanceAggregates';
@@ -301,6 +307,20 @@ function UserProfileTicksTab({
   ticksPanelEnabled: boolean;
   fetchedTicks: FetchedClimbingTick[];
 }) {
+  const selection = useTickSelection();
+  const filter = useTicksUrlFilter();
+  // Act only on selected ticks that are still visible (filter may change,
+  // ticks may get deleted elsewhere).
+  const selectedTicks = React.useMemo(
+    () =>
+      selection.active
+        ? applyTicksUrlFilter(fetchedTicks, filter)
+            .filter((row) => selection.selectedIds.has(row.tick.id))
+            .map((row) => row.tick)
+        : [],
+    [fetchedTicks, filter, selection.active, selection.selectedIds],
+  );
+
   // When ticksPanelEnabled is false, data is still loading (either own ticks
   // from TicksContext or public profile fetch). Render nothing here — the
   // parent scroll content shows a loader for the whole panel.
@@ -308,14 +328,44 @@ function UserProfileTicksTab({
     return null;
   }
 
+  const canSelect = own && fetchedTicks.length > 0;
+
   return (
     <Box sx={{ pt: 1 }}>
-      <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
-        {t('user_profile.ticks_table_title')}
-      </Typography>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          rowGap: 0.5,
+          mb: 1,
+        }}
+      >
+        <Typography variant="h6" component="h2">
+          {t('user_profile.ticks_table_title')}
+        </Typography>
+        {canSelect ? (
+          <TicksBulkToolbar
+            selection={selection}
+            selectedTicks={selectedTicks}
+          />
+        ) : null}
+      </Stack>
+      {canSelect && selection.active && selectedTicks.length === 0 ? (
+        <Typography
+          variant="caption"
+          component="p"
+          sx={{ color: 'text.secondary', mb: 1 }}
+        >
+          {t('my_ticks.select.hint')}
+        </Typography>
+      ) : null}
       <MyTicksContent
         fetchedTicks={fetchedTicks}
         readOnly={!own}
+        selection={canSelect ? selection : undefined}
         emptyTicksMessage={
           own ? (
             <MyTicksEmptyHint />

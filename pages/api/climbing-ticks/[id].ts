@@ -1,12 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { serverFetchOsmUser } from '../../../src/server/osmApiAuthServer';
 import { OSM_TOKEN_COOKIE } from '../../../src/services/osm/consts';
-import {
-  normalizePairingForDb,
-  parsePairing,
-} from '../../../src/services/my-ticks/tickPairing';
+import { parsePairing } from '../../../src/services/my-ticks/tickPairing';
 import { ClimbingTickDb } from '../../../src/types';
 import { getDb } from '../../../src/server/db/db';
+import {
+  getSafeTickUpdates,
+  updateTickRow,
+} from '../../../src/server/climbing-ticks/climbingTickUpdates';
 
 class HttpError extends Error {
   constructor(
@@ -43,44 +44,14 @@ const deleteTick = async (req: NextApiRequest) => {
   return getDb().prepare('DELETE FROM climbing_ticks WHERE id = ?').run(tickId);
 };
 
-const ALLOWED_FIELDS = [
-  'osmType',
-  'osmId',
-  'timestamp',
-  'style',
-  'myGrade',
-  'note',
-  'pairing',
-];
-
-const getSafeUpdates = (req: NextApiRequest) => {
-  const entries = ALLOWED_FIELDS.map(
-    (field) => [field, req.body[field]] as [string, string | number],
-  );
-  const filtered = entries.filter(([k, v]) => v !== undefined); // careful - empty string or a zero are valid values!!
-  const updates = Object.fromEntries(filtered) as Record<string, unknown>;
-  if (updates.pairing !== undefined) {
-    updates.pairing = normalizePairingForDb(updates.pairing);
-  }
-  return updates;
-};
-
 const updateTick = async (req: NextApiRequest) => {
   const tickId = await validateRequestAndGetTick(req);
-  const updates = getSafeUpdates(req);
+  const updates = getSafeTickUpdates(req.body);
   if (Object.keys(updates).length === 0) {
     return;
   }
 
-  const setClause = Object.keys(updates)
-    .map((k) => `"${k}" = @${k}`)
-    .join(', ');
-
-  const row = getDb()
-    .prepare(
-      `UPDATE climbing_ticks SET ${setClause} WHERE id = @tickId RETURNING *`,
-    )
-    .get({ ...updates, tickId }) as ClimbingTickDb | undefined;
+  const row = updateTickRow<ClimbingTickDb>(getDb(), tickId, updates);
 
   if (!row) {
     return;

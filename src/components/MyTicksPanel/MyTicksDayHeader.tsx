@@ -1,5 +1,6 @@
 import ShareIcon from '@mui/icons-material/Share';
 import {
+  Checkbox,
   IconButton,
   Stack,
   TableCell,
@@ -24,11 +25,19 @@ const formatDayLabel = (sessionDate: string): string => {
   }
 };
 
+export type DayHeaderSelection = {
+  checked: boolean;
+  indeterminate: boolean;
+  onToggle: () => void;
+};
+
 type Props = {
   sessionDate: string;
   sessionTicks: FetchedClimbingTick[];
   colSpan: number;
   showShareAction: boolean;
+  /** Set while bulk selection mode is active. */
+  selection?: DayHeaderSelection;
 };
 
 export const MyTicksDayHeader = ({
@@ -36,6 +45,7 @@ export const MyTicksDayHeader = ({
   sessionTicks,
   colSpan,
   showShareAction,
+  selection,
 }: Props) => {
   const { osmUser } = useOsmAuthContext();
   const [shareOpen, setShareOpen] = useState(false);
@@ -64,9 +74,22 @@ export const MyTicksDayHeader = ({
               left: 0,
               width: 'fit-content',
               py: 0.5,
-              px: 2,
+              // Align the day checkbox with row checkboxes (padding="checkbox").
+              pl: selection ? 0.5 : 2,
+              pr: 2,
             }}
           >
+            {selection ? (
+              <Checkbox
+                size="small"
+                checked={selection.checked}
+                indeterminate={selection.indeterminate}
+                onChange={selection.onToggle}
+                slotProps={{
+                  input: { 'aria-label': t('my_ticks.select.select_day') },
+                }}
+              />
+            ) : null}
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {formatDayLabel(sessionDate)}
             </Typography>
@@ -80,7 +103,7 @@ export const MyTicksDayHeader = ({
                 count: String(tickCount),
               })}
             </Typography>
-            {showShareAction && osmUser && representativeTick ? (
+            {showShareAction && !selection && osmUser && representativeTick ? (
               <Tooltip title={t('my_ticks.share.share_session_tooltip')}>
                 <IconButton
                   size="small"

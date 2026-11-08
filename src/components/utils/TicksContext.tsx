@@ -7,6 +7,8 @@ import { getAllTicks } from '../../services/my-ticks/ticks';
 import { useSnackbar } from './SnackbarContext';
 import { useUserSettingsContext } from './userSettings/UserSettingsContext';
 import {
+  bulkDeleteClimbingTicks,
+  bulkUpdateClimbingTicks,
   deleteClimbingTick,
   getClimbingTicks,
   postClimbingTick,
@@ -26,6 +28,10 @@ export type TicksContextType = {
   addTick: (shortId: string) => Promise<void>;
   deleteTick: (tickId: number) => Promise<void>;
   updateTick: (tick: Partial<ClimbingTick>) => Promise<void>;
+  bulkDeleteTicks: (tickIds: number[]) => Promise<void>;
+  bulkUpdateTicks: (
+    ticks: (Partial<ClimbingTick> & { id: number })[],
+  ) => Promise<void>;
   ticks: ClimbingTick[] | null;
   error: unknown;
   isFetching: boolean;
@@ -110,6 +116,24 @@ const useGetUpdateTick = () => {
   };
 };
 
+const useGetBulkDeleteTicks = () => {
+  const queryClient = useQueryClient();
+  return async (tickIds: number[]) => {
+    if (tickIds.length === 0) return;
+    await bulkDeleteClimbingTicks(tickIds);
+    await queryClient.invalidateQueries(QUERY_KEY);
+  };
+};
+
+const useGetBulkUpdateTicks = () => {
+  const queryClient = useQueryClient();
+  return async (ticks: (Partial<ClimbingTick> & { id: number })[]) => {
+    if (ticks.length === 0) return;
+    await bulkUpdateClimbingTicks(ticks);
+    await queryClient.invalidateQueries(QUERY_KEY);
+  };
+};
+
 const useClimbingTicksQuery = () => {
   const { loggedIn } = useOsmAuthContext();
   const { data, error, isFetching, isFetched } = useQuery({
@@ -142,6 +166,8 @@ export const TicksProvider: React.FC = ({ children }) => {
   const addTick = useGetAddTick(setEditedTickId);
   const deleteTick = useGetDeleteTick();
   const updateTick = useGetUpdateTick();
+  const bulkDeleteTicks = useGetBulkDeleteTicks();
+  const bulkUpdateTicks = useGetBulkUpdateTicks();
   const isTicked = getIsTicked(ticks);
 
   const value: TicksContextType = {
@@ -150,6 +176,8 @@ export const TicksProvider: React.FC = ({ children }) => {
     addTick,
     deleteTick,
     updateTick,
+    bulkDeleteTicks,
+    bulkUpdateTicks,
     ticks,
     error,
     isFetching,

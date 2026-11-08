@@ -61,3 +61,20 @@ curl -X PUT http://127.0.0.1:3000/api/climbing-ticks/1 \
   -H "Cookie: osmAccessToken=XYZ" \
     -d '{"note": "climbing with JV and JayZee"}'
 ```
+
+# POST /api/climbing-ticks/bulk
+
+Bulk delete or update of the user's own ticks. All ids must exist and belong to the
+logged-in user, otherwise nothing is changed (single transaction).
+
+```
+curl -X POST http://127.0.0.1:3000/api/climbing-ticks/bulk \
+  -H "Content-Type: application/json" \
+  -H "Cookie: osmAccessToken=XYZ" \
+  -d '{ "action": "delete", "ids": [1, 2, 3] }'
+
+curl -X POST http://127.0.0.1:3000/api/climbing-ticks/bulk \
+  -H "Content-Type: application/json" \
+  -H "Cookie: osmAccessToken=XYZ" \
+  -d '{ "action": "update", "ticks": [{ "id": 1, "style": "RP" }, { "id": 2, "style": "RP" }] }'
+```

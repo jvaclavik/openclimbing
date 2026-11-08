@@ -1,4 +1,4 @@
-import { Stack, TableCell, TableRow } from '@mui/material';
+import { Checkbox, Stack, TableCell, TableRow } from '@mui/material';
 import { keyframes } from '@mui/system';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -15,6 +15,18 @@ import { PartnersMentionsText } from '../FeaturePanel/Climbing/PartnersMentionsT
 import { t } from '../../services/intl';
 import { TickMoreButton } from '../FeaturePanel/Climbing/TickMoreButton';
 import { useMapStateContext } from '../utils/MapStateContext';
+import { SelectionModifiers } from './tickSelection';
+
+export type MyTicksRowSelection = {
+  selected: boolean;
+  onClick: (modifiers: SelectionModifiers) => void;
+};
+
+const getModifiers = (e: React.MouseEvent): SelectionModifiers => ({
+  shiftKey: e.shiftKey,
+  metaKey: e.metaKey,
+  ctrlKey: e.ctrlKey,
+});
 
 const highlightPulse = keyframes`
   0% { background-color: rgba(255, 213, 79, 0); }
@@ -36,10 +48,13 @@ export const MyTicksRow = ({
   fetchedTick,
   readOnly = false,
   highlighted = false,
+  selection,
 }: {
   fetchedTick: FetchedClimbingTick;
   readOnly?: boolean;
   highlighted?: boolean;
+  /** Set while bulk selection mode is active. */
+  selection?: MyTicksRowSelection;
 }) => {
   const router = useRouter();
   const routeDifficulties = getDifficulties(fetchedTick.tags);
@@ -58,12 +73,49 @@ export const MyTicksRow = ({
   return (
     <TableRow
       ref={rowRef}
-      sx={
-        highlighted
-          ? { animation: `${highlightPulse} 2.8s ease-out 1` }
+      hover={!!selection}
+      selected={selection?.selected ?? false}
+      onClick={
+        selection ? (e) => selection.onClick(getModifiers(e)) : undefined
+      }
+      // In selection mode a click must not follow links (e.g. @partner mentions).
+      onClickCapture={
+        selection
+          ? (e) => {
+              if ((e.target as HTMLElement).closest('a')) e.preventDefault();
+            }
           : undefined
       }
+      // Prevent the browser from selecting text on SHIFT+click ranges.
+      onMouseDown={
+        selection
+          ? (e) => {
+              if (e.shiftKey) e.preventDefault();
+            }
+          : undefined
+      }
+      sx={{
+        ...(highlighted
+          ? { animation: `${highlightPulse} 2.8s ease-out 1` }
+          : {}),
+        ...(selection ? { cursor: 'pointer' } : {}),
+      }}
     >
+      {selection ? (
+        <TableCell padding="checkbox">
+          <Checkbox
+            size="small"
+            checked={selection.selected}
+            onClick={(e) => {
+              e.stopPropagation();
+              selection.onClick(getModifiers(e));
+            }}
+            slotProps={{
+              input: { 'aria-label': t('my_ticks.select.select_row') },
+            }}
+          />
+        </TableCell>
+      ) : null}
       <TableCell>
         <Stack
           spacing={0.25}
@@ -71,13 +123,17 @@ export const MyTicksRow = ({
             alignItems: 'flex-start',
           }}
         >
-          <Link
-            href={`/${getUrlOsmId(apiId)}?back=${encodeURIComponent(
-              router.asPath,
-            )}#${view.join('/')}`}
-          >
-            {routeLabel}
-          </Link>
+          {selection ? (
+            <span>{routeLabel}</span>
+          ) : (
+            <Link
+              href={`/${getUrlOsmId(apiId)}?back=${encodeURIComponent(
+                router.asPath,
+              )}#${view.join('/')}`}
+            >
+              {routeLabel}
+            </Link>
+          )}
           {partners.trim() ? (
             <PartnersMentionsText text={partners} variant="caption" />
           ) : null}
@@ -93,7 +149,7 @@ export const MyTicksRow = ({
         {fetchedTick.tickScore.points}
       </TableCell>
       <TableCell sx={{ textAlign: 'right' }}>{formatTickDate(date)}</TableCell>
-      {readOnly ? null : (
+      {readOnly || selection ? null : (
         <TableCell>
           <TickMoreButton tick={fetchedTick.tick} fetchedTick={fetchedTick} />
         </TableCell>

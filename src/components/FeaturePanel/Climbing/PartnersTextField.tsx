@@ -17,7 +17,9 @@ type PartnersTextFieldProps = {
   value: string;
   onChange: (value: string) => void;
   suggestions: string[];
-  label: string;
+  /** Visible label above the field; omit when the parent renders its own. */
+  label?: string;
+  ariaLabel?: string;
   helperText: string;
   placeholder?: string;
   onFillFromLastRoute?: () => void;
@@ -45,6 +47,7 @@ export const PartnersTextField = ({
   onChange,
   suggestions,
   label,
+  ariaLabel,
   helperText,
   placeholder,
   onFillFromLastRoute,
@@ -109,23 +112,25 @@ export const PartnersTextField = ({
 
   return (
     <Stack spacing={1}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 1,
-        }}
-      >
+      {label || fillButton ? (
         <Box
-          component="span"
-          sx={{ typography: 'body2', color: 'text.secondary' }}
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+          }}
         >
-          {label}
+          <Box
+            component="span"
+            sx={{ typography: 'body2', color: 'text.secondary' }}
+          >
+            {label}
+          </Box>
+          {fillButton}
         </Box>
-        {fillButton}
-      </Box>
+      ) : null}
       <Box ref={setAnchorEl}>
         <TextField
           helperText={helperText}
@@ -135,7 +140,7 @@ export const PartnersTextField = ({
           minRows={2}
           fullWidth
           hiddenLabel
-          aria-label={label}
+          aria-label={label || ariaLabel}
           onChange={(e) => {
             onChange(e.target.value);
             setCursorPos(e.target.selectionStart ?? 0);
