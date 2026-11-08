@@ -1,10 +1,10 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Chip, Stack } from '@mui/material';
 import {
   ALL_FERRATA_GRADES,
-  FERRATA_GRADES,
   FerrataGrade,
 } from '../../../../services/tagging/ferrataGradeFilter';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { FilterCard, FilterSectionLabel, filterChipSx } from './filterUi';
 
 const PRESETS: { label: string; grades: FerrataGrade[] }[] = [
   { label: 'Leicht', grades: ['A', 'B'] },
@@ -13,37 +13,48 @@ const PRESETS: { label: string; grades: FerrataGrade[] }[] = [
   { label: 'Alle', grades: ALL_FERRATA_GRADES },
 ];
 
+const sameGrades = (
+  left: readonly FerrataGrade[],
+  right: readonly FerrataGrade[],
+) =>
+  left.length === right.length && left.every((grade) => right.includes(grade));
+
 export const FerrataGradeFilter = () => {
   const { ferrataGrades, setFerrataGrades } =
     useUserSettingsContext().climbingFilter;
 
   return (
-    <Box component="fieldset" sx={{ m: 0, p: 1, minWidth: 0, border: 0 }}>
-      <Typography component="legend" variant="subtitle2">
-        Klettersteiggrade
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
-        {PRESETS.map((preset) => (
-          <Button
-            key={preset.label}
-            size="small"
-            variant="text"
-            sx={{ minHeight: 36, textTransform: 'none' }}
-            onClick={() => setFerrataGrades(preset.grades)}
-          >
-            {preset.label}
-          </Button>
-        ))}
-      </Box>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+    <FilterCard>
+      <FilterSectionLabel>Klettersteiggrad</FilterSectionLabel>
+      <Stack direction="row" sx={{ gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+        {PRESETS.map((preset) => {
+          const selected = sameGrades(ferrataGrades, preset.grades);
+          return (
+            <Chip
+              key={preset.label}
+              label={preset.label}
+              size="small"
+              color={selected ? 'primary' : 'default'}
+              variant={selected ? 'filled' : 'outlined'}
+              onClick={() => setFerrataGrades(preset.grades)}
+              sx={(theme) => filterChipSx(theme, !selected)}
+            />
+          );
+        })}
+      </Stack>
+      <Stack direction="row" sx={{ gap: 0.5, flexWrap: 'wrap' }}>
         {ALL_FERRATA_GRADES.map((grade) => {
           const selected = ferrataGrades.includes(grade);
           return (
-            <Button
+            <Chip
               key={grade}
+              component="button"
+              type="button"
+              label={grade === 'unknown' ? 'Unbekannt' : grade}
+              size="small"
+              color={selected ? 'primary' : 'default'}
+              variant={selected ? 'filled' : 'outlined'}
               aria-pressed={selected}
-              variant={selected ? 'contained' : 'outlined'}
-              sx={{ minWidth: 42, minHeight: 44, px: 1 }}
               onClick={() =>
                 setFerrataGrades(
                   selected
@@ -51,16 +62,11 @@ export const FerrataGradeFilter = () => {
                     : [...ferrataGrades, grade],
                 )
               }
-            >
-              {grade === 'unknown' ? 'Unbekannt' : grade}
-            </Button>
+              sx={(theme) => filterChipSx(theme, !selected)}
+            />
           );
         })}
-      </Box>
-      <Typography variant="caption" color="text.secondary">
-        A ist der leichteste Grad, F der schwerste. {FERRATA_GRADES[0]} bis{' '}
-        {FERRATA_GRADES[5]} könnt ihr einzeln an- und abwählen.
-      </Typography>
-    </Box>
+      </Stack>
+    </FilterCard>
   );
 };

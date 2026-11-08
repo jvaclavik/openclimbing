@@ -1,5 +1,6 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Chip, Stack } from '@mui/material';
 import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
+import { FilterCard, FilterSectionLabel, filterChipSx } from './filterUi';
 
 const COUNTRIES = [
   ['at', 'Österreich'],
@@ -28,30 +29,27 @@ export const FerrataCountryFilter = () => {
     );
 
   return (
-    <Box component="fieldset" sx={{ m: 0, p: 1, minWidth: 0, border: 0 }}>
-      <Typography component="legend" variant="subtitle2">
-        Land
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+    <FilterCard>
+      <FilterSectionLabel>Land</FilterSectionLabel>
+      <Stack direction="row" sx={{ gap: 0.5, flexWrap: 'wrap' }}>
         {COUNTRIES.map(([code, label]) => {
           const selected = ferrataCountries.includes(code);
           return (
-            <Button
+            <Chip
               key={code}
+              component="button"
+              type="button"
+              label={label}
+              size="small"
+              color={selected ? 'primary' : 'default'}
+              variant={selected ? 'filled' : 'outlined'}
               aria-pressed={selected}
-              variant={selected ? 'contained' : 'outlined'}
-              sx={{ minHeight: 40, px: 1.25, textTransform: 'none' }}
               onClick={() => toggle(code)}
-            >
-              {label}
-            </Button>
+              sx={(theme) => filterChipSx(theme, !selected)}
+            />
           );
         })}
-      </Box>
-      <Typography variant="caption" color="text.secondary">
-        Ohne Auswahl siehst du alle Länder. Länge und Gehzeit stehen in der
-        Beschreibung des Steigs, nicht als eigener Filter.
-      </Typography>
-    </Box>
+      </Stack>
+    </FilterCard>
   );
 };

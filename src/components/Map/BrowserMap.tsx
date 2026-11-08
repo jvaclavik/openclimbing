@@ -161,12 +161,18 @@ const BrowserMap = () => {
           role="status"
           style={{
             position: 'absolute',
-            top: 64,
+            top: 72,
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#fff',
+            maxWidth: 'min(420px, calc(100% - 32px))',
+            background: 'rgba(255, 255, 255, 0.92)',
             color: '#222',
-            padding: '4px 8px',
+            padding: '8px 12px',
+            borderRadius: 12,
+            boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.08)',
+            fontSize: 13,
+            fontWeight: 600,
+            textAlign: 'center',
             pointerEvents: 'none',
           }}
         >

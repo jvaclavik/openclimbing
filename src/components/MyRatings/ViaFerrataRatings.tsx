@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   Chip,
@@ -34,16 +33,16 @@ type Ratings = {
 
 export const ViaFerrataRatings = ({ name }: { name: string }) => {
   const [data, setData] = useState<Ratings | null>(null);
-  const [error, setError] = useState('');
   const [missing, setMissing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!name.trim()) return undefined;
     const controller = new AbortController();
     setData(null);
-    setError('');
     setMissing(false);
+    setFailed(false);
     setShowAllReviews(false);
     void (async () => {
       try {
@@ -58,28 +57,25 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
         }
         if (!response.ok) throw new Error(body.error);
         setData(body);
-      } catch (cause) {
-        if (!controller.signal.aborted)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : 'via-ferrata.de ist gerade nicht erreichbar.',
-          );
+      } catch {
+        if (!controller.signal.aborted) setFailed(true);
       }
     })();
     return () => controller.abort();
   }, [name]);
 
-  if (!name.trim() || missing) return null;
-  if (error) return <Alert severity="warning">{error}</Alert>;
-  if (!data) return null;
+  if (!name.trim() || missing || failed || !data) return null;
   const visibleReviews = showAllReviews
     ? data.reviews
     : data.reviews.slice(0, 5);
+  const facts = [
+    data.difficulty ? `Grad ${data.difficulty}` : '',
+    data.duration ? data.duration : '',
+  ].filter(Boolean);
 
   return (
     <Stack
-      spacing={1.75}
+      spacing={1.25}
       sx={{
         mb: 2,
         p: 1.5,
@@ -89,37 +85,67 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
         bgcolor: 'background.paper',
       }}
     >
-      <Typography variant="overline" color="text.secondary">
-        via-ferrata.de
-      </Typography>
-      {(data.difficulty || data.duration) && (
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-          {data.difficulty && (
-            <Chip size="small" label={`Schwierigkeit ${data.difficulty}`} />
-          )}
-          {data.duration && <Chip size="small" label={`Dauer ${data.duration}`} />}
-        </Stack>
-      )}
-      {data.count > 0 && (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Rating value={data.average} precision={0.1} readOnly />
-          <Typography variant="body2">
-            {data.average.toLocaleString('de-DE')} aus {data.count} Bewertungen
-          </Typography>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1,
+        }}
+      >
+        <Typography variant="overline" color="text.secondary">
+          via-ferrata.de
+        </Typography>
+        {data.count > 0 && (
+          <Stack
+            direction="row"
+            spacing={0.75}
+            sx={{ alignItems: 'center', minWidth: 0 }}
+          >
+            <Rating
+              value={data.average}
+              precision={0.1}
+              readOnly
+              size="small"
+            />
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {data.average.toLocaleString('de-DE')}
+              <Typography
+                component="span"
+                variant="body2"
+                color="text.secondary"
+              >
+                {' '}
+                · {data.count}
+              </Typography>
+            </Typography>
+          </Stack>
+        )}
+      </Stack>
+      {facts.length > 0 && (
+        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
+          {facts.map((fact) => (
+            <Chip key={fact} size="small" label={fact} />
+          ))}
         </Stack>
       )}
       {data.images.length > 0 && (
         <Stack
           direction="row"
           spacing={1}
-          sx={{ mx: -1.5, px: 1.5, overflowX: 'auto', scrollSnapType: 'x mandatory' }}
+          sx={{
+            mx: -1.5,
+            px: 1.5,
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+          }}
         >
           {data.images.map((src) => (
             <Box
               key={src}
               component="img"
               src={src}
-              alt={data.name}
+              alt=""
               sx={{
                 width: 220,
                 height: 148,
@@ -143,20 +169,30 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
         </Typography>
       ))}
       {visibleReviews.map((review) => (
-        <Stack
-          key={`${review.url}-${review.title}`}
-          spacing={0.5}
-          sx={{ p: 1.25, borderRadius: 1.5, bgcolor: 'background.default' }}
-        >
-          <Typography component="h3" variant="subtitle2">
-            {review.title}
-          </Typography>
-          <Rating value={review.stars} precision={0.5} readOnly size="small" />
+        <Stack key={`${review.url}-${review.title}`} spacing={0.25}>
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+            }}
+          >
+            <Typography component="h3" variant="subtitle2">
+              {review.title}
+            </Typography>
+            <Rating
+              value={review.stars}
+              precision={0.5}
+              readOnly
+              size="small"
+            />
+          </Stack>
           <Typography variant="caption" color="text.secondary">
             {[review.author, review.date].filter(Boolean).join(' · ')}
           </Typography>
           {review.text && (
-            <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+            <Typography variant="body2" sx={{ lineHeight: 1.55 }}>
               {review.text}
             </Typography>
           )}
@@ -166,19 +202,17 @@ export const ViaFerrataRatings = ({ name }: { name: string }) => {
         <Button
           size="small"
           onClick={() => setShowAllReviews(true)}
-          sx={{ alignSelf: 'flex-start', px: 0.5 }}
+          sx={{ alignSelf: 'flex-start', px: 0.5, textTransform: 'none' }}
         >
-          Mehr anzeigen
+          {data.reviews.length - 5} weitere Bewertungen
         </Button>
       )}
       <Typography variant="caption" color="text.secondary">
-        Quelle{' '}
         <Link href={data.reviews_url} target="_blank" rel="noreferrer">
           {data.name} auf via-ferrata.de
         </Link>
-        .
         {data.reviews.length < data.count
-          ? ` ${data.count - data.reviews.length} weitere nur dort.`
+          ? ` · ${data.count - data.reviews.length} weitere nur dort`
           : ''}
       </Typography>
     </Stack>

@@ -67,3 +67,43 @@ test('loads shared tracks on map entry, restores them after a style change and r
     jest.useRealTimers();
   }
 });
+
+test('zeigt keinen Hinweis, wenn gespeicherte Touren nicht geladen werden', async () => {
+  const oldFetch = global.fetch;
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: false,
+    status: 503,
+    json: async () => ({}),
+  });
+  jest.useFakeTimers();
+  const map = {
+    getBounds: () => ({
+      getWest: () => 11.5,
+      getEast: () => 11.6,
+      getSouth: () => 49.5,
+      getNorth: () => 49.6,
+    }),
+    getZoom: () => 15,
+    isStyleLoaded: () => true,
+    on: () => undefined,
+    off: () => undefined,
+    getSource: () => undefined,
+    addSource: () => undefined,
+    removeSource: () => undefined,
+    addLayer: () => undefined,
+    getLayer: () => false,
+    removeLayer: () => undefined,
+  };
+  try {
+    const { result } = renderHook(() =>
+      useCentralTours(map as unknown as MapLibreMap, () => false),
+    );
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+    });
+    expect(result.current).toBe('');
+  } finally {
+    global.fetch = oldFetch;
+    jest.useRealTimers();
+  }
+});
