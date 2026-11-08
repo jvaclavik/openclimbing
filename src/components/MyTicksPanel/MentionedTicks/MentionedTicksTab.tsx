@@ -6,18 +6,12 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
-  Paper,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from '@mui/material';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { t } from '../../../services/intl';
+import { Title } from '../../FeaturePanel/Climbing/PanelLabel';
 import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 import { useTicksContext } from '../../utils/TicksContext';
 import { useSnackbar } from '../../utils/SnackbarContext';
@@ -30,7 +24,8 @@ import {
 } from '../../../services/my-ticks/tickMentions';
 import { FetchedClimbingTick } from '../../../services/my-ticks/getMyTicks';
 import { mapFeaturesDataToTicks } from '../mapMyTicksRows';
-import { groupTicksByDay, TickListItem } from '../groupTicksByDay';
+import { TickSession, toSessions } from '../MyTicksContent';
+import { TickColumn, TickSessionCard } from '../TickSessionCard';
 import { MyTicksDayHeader } from '../MyTicksDayHeader';
 import { TickSelection, useTickSelection } from '../useTickSelection';
 import { useMentionedTicksState } from './useMentionedTicks';
@@ -85,14 +80,16 @@ const useAddMentionedTicks = () => {
 const MentionsToolbar = ({
   selection,
   selectedCount,
-  canSelect,
+  selectableIds,
   onCopySelected,
 }: {
   selection: TickSelection;
   selectedCount: number;
-  canSelect: boolean;
+  selectableIds: number[];
   onCopySelected: () => void;
 }) => {
+  const canSelect = selectableIds.length > 0;
+  const allState = groupState(selectableIds, selection.selectedIds);
   if (!canSelect) return null;
   if (!selection.active) {
     return (
@@ -103,6 +100,13 @@ const MentionsToolbar = ({
   }
   return (
     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+      <Checkbox
+        size="small"
+        checked={allState.checked}
+        indeterminate={allState.indeterminate}
+        onChange={() => selection.setMany(selectableIds, !allState.checked)}
+        slotProps={{ input: { 'aria-label': t('my_ticks.select.select_all') } }}
+      />
       <Typography
         variant="body2"
         sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
@@ -125,41 +129,8 @@ const MentionsToolbar = ({
   );
 };
 
-const MentionsTableHead = ({
-  selectAll,
-}: {
-  selectAll?: {
-    checked: boolean;
-    indeterminate: boolean;
-    onToggle: () => void;
-  };
-}) => (
-  <TableHead>
-    <TableRow>
-      {selectAll ? (
-        <TableCell padding="checkbox">
-          <Checkbox
-            size="small"
-            checked={selectAll.checked}
-            indeterminate={selectAll.indeterminate}
-            onChange={selectAll.onToggle}
-            slotProps={{
-              input: { 'aria-label': t('my_ticks.select.select_all') },
-            }}
-          />
-        </TableCell>
-      ) : null}
-      <TableCell>{t('my_ticks.route_name')}</TableCell>
-      <TableCell>{t('my_ticks.route_grade')}</TableCell>
-      <TableCell>{t('my_ticks.route_style')}</TableCell>
-      <TableCell align="right">{t('my_ticks.route_date')}</TableCell>
-      {selectAll ? null : <TableCell />}
-    </TableRow>
-  </TableHead>
-);
-
 type MentionsTableProps = {
-  items: TickListItem[];
+  rows: FetchedClimbingTick[];
   selection: TickSelection;
   selectableIds: number[];
   alreadyLoggedIds: ReadonlySet<number>;
@@ -169,7 +140,7 @@ type MentionsTableProps = {
 };
 
 const MentionsTable = ({
-  items,
+  rows,
   selection,
   selectableIds,
   alreadyLoggedIds,
@@ -178,54 +149,42 @@ const MentionsTable = ({
   onAdd,
 }: MentionsTableProps) => {
   const selecting = selection.active;
-  const allState = selecting
-    ? groupState(selectableIds, selection.selectedIds)
-    : null;
+  const sessions = useMemo(() => toSessions(rows, true), [rows]);
+  const columns: TickColumn[] = selecting
+    ? ['checkbox', 'name', 'grade', 'style']
+    : ['name', 'grade', 'style', 'add'];
+
+  const renderHeader = (session: TickSession) => {
+    const dayIds = session.rows
+      .map((row) => row.tick.id)
+      .filter((id) => !alreadyLoggedIds.has(id));
+    const dayState = groupState(dayIds, selection.selectedIds);
+    return (
+      <MyTicksDayHeader
+        sessionDate={session.day}
+        sessionTicks={session.rows}
+        showShareAction={false}
+        selection={
+          selecting && dayIds.length > 0
+            ? {
+                ...dayState,
+                onToggle: () => selection.setMany(dayIds, !dayState.checked),
+              }
+            : undefined
+        }
+      />
+    );
+  };
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{ mx: -2, width: 'auto', overflowX: 'auto', borderRadius: 0 }}
-    >
-      <Table size="small">
-        <MentionsTableHead
-          selectAll={
-            allState
-              ? {
-                  ...allState,
-                  onToggle: () =>
-                    selection.setMany(selectableIds, !allState.checked),
-                }
-              : undefined
-          }
-        />
-        <TableBody>
-          {items.map((item) => {
-            if (item.type === 'header') {
-              const dayIds = item.sessionTicks
-                .map((row) => row.tick.id)
-                .filter((id) => !alreadyLoggedIds.has(id));
-              const dayState = groupState(dayIds, selection.selectedIds);
-              return (
-                <MyTicksDayHeader
-                  key={`header-${item.sessionDate}`}
-                  sessionDate={item.sessionDate}
-                  sessionTicks={item.sessionTicks}
-                  colSpan={5}
-                  showShareAction={false}
-                  selection={
-                    selecting && dayIds.length > 0
-                      ? {
-                          ...dayState,
-                          onToggle: () =>
-                            selection.setMany(dayIds, !dayState.checked),
-                        }
-                      : undefined
-                  }
-                />
-              );
-            }
-            const { row } = item;
+    <Stack spacing={2.5}>
+      {sessions.map((session) => (
+        <TickSessionCard
+          key={session.day}
+          header={renderHeader(session)}
+          columns={columns}
+        >
+          {session.rows.map((row) => {
             const source = ownerById.get(row.tick.id);
             return (
               <MentionedTickRow
@@ -251,9 +210,9 @@ const MentionsTable = ({
               />
             );
           })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </TickSessionCard>
+      ))}
+    </Stack>
   );
 };
 
@@ -274,7 +233,6 @@ export const MentionedTicksTab = () => {
         .sort(byTimestampDesc),
     [mentionedTicks, gradeSystem, hideLogged, alreadyLoggedIds],
   );
-  const items = useMemo(() => groupTicksByDay(rows), [rows]);
   const ownerById = useMemo(
     () => new Map(mentionedTicks.map((tick) => [tick.id, tick])),
     [mentionedTicks],
@@ -329,13 +287,11 @@ export const MentionedTicksTab = () => {
           mb: 0.5,
         }}
       >
-        <Typography variant="h6" component="h2">
-          {t('my_ticks.mentions.title')}
-        </Typography>
+        <Title>{t('my_ticks.mentions.title')}</Title>
         <MentionsToolbar
           selection={selection}
           selectedCount={selectedTicks.length}
-          canSelect={selectableIds.length > 0}
+          selectableIds={selectableIds}
           onCopySelected={() => setDialogOpen(true)}
         />
       </Stack>
@@ -387,7 +343,7 @@ export const MentionedTicksTab = () => {
             />
           ) : null}
           <MentionsTable
-            items={items}
+            rows={rows}
             selection={selection}
             selectableIds={selectableIds}
             alreadyLoggedIds={alreadyLoggedIds}

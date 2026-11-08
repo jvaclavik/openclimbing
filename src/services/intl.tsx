@@ -44,6 +44,26 @@ export const t = (id: TranslationId, values?: Values) => {
   return replaceValues(translation, values);
 };
 
+const pluralCategory = (count: number): string => {
+  try {
+    return new globalThis.Intl.PluralRules(intl.lang || 'en').select(count);
+  } catch {
+    return 'other';
+  }
+};
+
+/**
+ * Plural-aware translation: looks up `<baseId>_<category>` (CLDR category:
+ * one, few, many, other) and falls back to `<baseId>_other`. `__count__` is
+ * always available in the message.
+ */
+export const tPlural = (baseId: string, count: number, values?: Values) => {
+  const messages = intl.messages as Record<string, string>;
+  const exact = `${baseId}_${pluralCategory(count)}`;
+  const id = messages[exact] != null ? exact : `${baseId}_other`;
+  return t(id as TranslationId, { count, ...values });
+};
+
 interface Props {
   id: TranslationId;
   values?: Values;

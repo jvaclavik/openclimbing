@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Box,
   Checkbox,
   Chip,
   IconButton,
@@ -13,8 +14,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { format } from 'date-fns';
-import { DEFAULT_DATA_FORMAT } from '../../../config.mjs';
 import { t } from '../../../services/intl';
 import { getUrlOsmId } from '../../../services/helpers';
 import { FetchedClimbingTick } from '../../../services/my-ticks/getMyTicks';
@@ -25,14 +24,11 @@ import { getDifficulties } from '../../../services/tagging/climbing/routeGrade';
 import { ConvertedRouteDifficultyBadge } from '../../FeaturePanel/Climbing/ConvertedRouteDifficultyBadge';
 import { PartnersMentionsText } from '../../FeaturePanel/Climbing/PartnersMentionsText';
 import { useMapStateContext } from '../../utils/MapStateContext';
+import { tint } from '../../utils/panelUi';
+import { ROUTE_NAME_SX } from '../MyTicksRow';
+import { TickRowCaption } from '../TickRowCaption';
+import { ACTION_CELL_CLASS, tickRowHoverSx } from '../TickSessionCard';
 import { modifiersFromEvent, SelectionModifiers } from '../tickSelection';
-
-const formatDate = (value: string) => {
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? value
-    : format(parsed, DEFAULT_DATA_FORMAT);
-};
 
 type Props = {
   row: FetchedClimbingTick;
@@ -77,7 +73,7 @@ const ActionCell = ({
   adding,
   onAdd,
 }: Pick<Props, 'alreadyLogged' | 'adding' | 'onAdd'>) => (
-  <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+  <TableCell className={ACTION_CELL_CLASS}>
     {alreadyLogged ? (
       <Chip
         size="small"
@@ -119,7 +115,6 @@ export const MentionedTickRow = ({
 
   return (
     <TableRow
-      hover={!!selectable}
       selected={selection?.selected ?? false}
       onClick={
         selectable ? (e) => selection.onClick(modifiersFromEvent(e)) : undefined
@@ -138,10 +133,12 @@ export const MentionedTickRow = ({
             }
           : undefined
       }
-      sx={{
+      sx={(theme) => ({
+        '& > td': { borderBottom: `1px solid ${tint(theme, 0.05)}` },
+        ...(selectable || !selection ? tickRowHoverSx(theme) : {}),
         ...(selectable ? { cursor: 'pointer' } : {}),
         ...(alreadyLogged ? { opacity: 0.6 } : {}),
-      }}
+      })}
     >
       {selection ? (
         <TableCell padding="checkbox">
@@ -162,20 +159,25 @@ export const MentionedTickRow = ({
       <TableCell>
         <Stack spacing={0.25} sx={{ alignItems: 'flex-start' }}>
           {selection ? (
-            <span>{routeLabel}</span>
+            <Box component="span" sx={ROUTE_NAME_SX}>
+              {routeLabel}
+            </Box>
           ) : (
-            <Link
+            <Box
+              component={Link}
               href={`/${getUrlOsmId(row.apiId)}?back=${encodeURIComponent(
                 router.asPath,
               )}#${view.join('/')}`}
+              sx={ROUTE_NAME_SX}
             >
               {routeLabel}
-            </Link>
+            </Box>
           )}
           <OwnerLine
             ownerDisplayName={ownerDisplayName}
             partners={getPartnersText(row.tick)}
           />
+          <TickRowCaption note={row.tick.note} />
         </Stack>
       </TableCell>
       <TableCell>
@@ -186,7 +188,6 @@ export const MentionedTickRow = ({
       <TableCell>
         <TickStyleBadge style={row.style} />
       </TableCell>
-      <TableCell sx={{ textAlign: 'right' }}>{formatDate(row.date)}</TableCell>
       {selection ? null : (
         <ActionCell
           alreadyLogged={alreadyLogged}
