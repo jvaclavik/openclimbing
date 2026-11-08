@@ -18,6 +18,8 @@ export type ViaFerrataRatings = {
   images: string[];
   average: number;
   count: number;
+  lat: number | null;
+  lng: number | null;
   url: string;
   reviews_url: string;
   reviews: ViaFerrataReview[];
@@ -54,9 +56,16 @@ export const climbKey = (value: string) =>
     .replace(/ß/g, 'ss')
     .replace(/[^a-z0-9]+/g, '');
 
+export const isClimbSlug = (slug: string) =>
+  /^[a-z0-9-]{3,160}(?:%[0-9a-f]{2}[a-z0-9-]*)*$/i.test(slug) &&
+  slug.length <= 200 &&
+  !/%2e|%2f|%5c/i.test(slug);
+
 export const parseClimbSlugs = (xml: string) => [
   ...new Set(
-    [...xml.matchAll(/\/topo\/([a-z0-9-]{3,80})/g)].map((match) => match[1]),
+    [...xml.matchAll(/\/topo\/([^<\s"]+)/g)]
+      .map((match) => match[1].replace(/\/+$/, ''))
+      .filter(isClimbSlug),
   ),
 ];
 
@@ -85,7 +94,6 @@ export const matchClimbSlug = (name: string, slugs: string[]) => {
   });
   return best && best.score >= 50 ? best.slug : null;
 };
-
 
 const listingPart = (html: string) =>
   html.split('sabai-directory-review-title')[0] ?? html;
@@ -125,11 +133,20 @@ const pageFor = (slug: string) => ({
   url: `${TOPO}${slug}`,
 });
 
+const readCoordinate = (html: string, key: 'lat' | 'lng') => {
+  const raw = html.match(new RegExp(`data-${key}="(-?\\d+(?:\\.\\d+)?)"`))?.[1];
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return null;
+  if (key === 'lat' && Math.abs(value) > 90) return null;
+  if (key === 'lng' && Math.abs(value) > 180) return null;
+  return value;
+};
+
 export const parseViaFerrataRatings = (
   slug: string,
   html: string,
 ): ViaFerrataRatings | null => {
-  if (!/^[a-z0-9-]{3,80}$/.test(slug)) return null;
+  if (!isClimbSlug(slug)) return null;
   const page = pageFor(slug);
   const main = html.split('sabai-directory-main')[1] ?? '';
   const average = Number(main.match(/itemprop="ratingValue">([0-9.]+)/)?.[1]);
@@ -183,6 +200,8 @@ export const parseViaFerrataRatings = (
     images,
     average: hasRating ? average : 0,
     count: hasRating ? count : 0,
+    lat: readCoordinate(html, 'lat'),
+    lng: readCoordinate(html, 'lng'),
     url: page.url,
     reviews_url: `${page.url}/reviews`,
     reviews,
@@ -203,8 +222,7 @@ export const loadClimbSlugs = async () => {
     headers,
     signal: AbortSignal.timeout(12000),
   });
-  if (!response.ok)
-    throw new Error(`Sitemap antwortet mit ${response.status}`);
+  if (!response.ok) throw new Error(`Sitemap antwortet mit ${response.status}`);
   const slugs = parseClimbSlugs(await response.text());
   if (!slugs.length) throw new Error('Keine Klettersteige in der Sitemap');
   catalog = { at: Date.now(), slugs };
@@ -212,7 +230,7 @@ export const loadClimbSlugs = async () => {
 };
 
 export const readViaFerrataRatings = async (slug: string) => {
-  if (!/^[a-z0-9-]{3,80}$/.test(slug)) return null;
+  if (!isClimbSlug(slug)) return null;
   const response = await fetch(`${TOPO}${slug}`, {
     headers,
     signal: AbortSignal.timeout(12000),
