@@ -40,6 +40,10 @@ import {
   PoiTypes,
 } from '../../utils/userSettings/getClimbingFilter';
 import { lengthOverlapsFilter } from '../../../services/tagging/climbing/parseClimbingLength';
+import {
+  getFerrataMeasure,
+  matchesFerrataMeasures,
+} from '../../../services/tagging/ferrataMeasures';
 
 const getTileJson = async ({ z, x, y }: Tile) => {
   try {
@@ -113,6 +117,12 @@ type FilterParams = {
   ferrataCountries?: Map<number, string | null | undefined>;
   ferrataCountryFilter?: string[];
   ferrataScales?: Map<number, string | null | undefined>;
+  ferrataLengthInterval?: Interval;
+  ferrataSpanInterval?: Interval;
+  ferrataEleInterval?: Interval;
+  isFerrataLengthDefault?: boolean;
+  isFerrataSpanDefault?: boolean;
+  isFerrataEleDefault?: boolean;
   gradeInterval: Interval;
   minimumRoutes: number;
   isDefaultFilter: boolean;
@@ -251,17 +261,34 @@ export const filterClimbingTilesFeatures = (
 
     if (type === 'gym') return poiTypes.gym;
     if (type === 'ferrata') {
+      if (!poiTypes.ferrata) return false;
       const country = params.ferrataCountries?.get(Number(feature.id)) ?? '';
       const selectedCountries = params.ferrataCountryFilter ?? [];
-      const countryOk =
-        selectedCountries.length === 0 || selectedCountries.includes(country);
-      return (
-        poiTypes.ferrata &&
-        countryOk &&
-        matchesFerrataGrade(
+      if (
+        selectedCountries.length > 0 &&
+        !selectedCountries.includes(country)
+      ) {
+        return false;
+      }
+      if (
+        !matchesFerrataGrade(
           params.ferrataScales?.get(Number(feature.id)),
           params.ferrataGrades ?? ALL_FERRATA_GRADES,
         )
+      ) {
+        return false;
+      }
+      const osmId = osmIdFromFeatureId(feature.id);
+      return matchesFerrataMeasures(
+        osmId == null ? undefined : getFerrataMeasure(osmId),
+        {
+          lengthInterval: params.ferrataLengthInterval ?? [0, 1500],
+          spanInterval: params.ferrataSpanInterval ?? [0, 1000],
+          eleInterval: params.ferrataEleInterval ?? [0, 3000],
+          lengthDefault: params.isFerrataLengthDefault ?? true,
+          spanDefault: params.isFerrataSpanDefault ?? true,
+          eleDefault: params.isFerrataEleDefault ?? true,
+        },
       );
     }
 
@@ -314,6 +341,12 @@ const doClimbingFilter = (
     ferrataCountryFilter: mapClimbingFilter.ferrataCountries,
     ferrataCountries,
     ferrataScales,
+    ferrataLengthInterval: mapClimbingFilter.ferrataLengthInterval,
+    ferrataSpanInterval: mapClimbingFilter.ferrataSpanInterval,
+    ferrataEleInterval: mapClimbingFilter.ferrataEleInterval,
+    isFerrataLengthDefault: mapClimbingFilter.isFerrataLengthDefault,
+    isFerrataSpanDefault: mapClimbingFilter.isFerrataSpanDefault,
+    isFerrataEleDefault: mapClimbingFilter.isFerrataEleDefault,
     gradeInterval: mapClimbingFilter.gradeInterval,
     minimumRoutes: mapClimbingFilter.minimumRoutes,
     isDefaultFilter: mapClimbingFilter.isDefaultFilter,

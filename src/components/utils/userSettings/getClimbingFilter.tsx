@@ -11,6 +11,11 @@ import {
   DEFAULT_LENGTH_INTERVAL,
   LENGTH_FILTER_MAX_M,
 } from '../../../services/tagging/climbing/parseClimbingLength';
+import {
+  DEFAULT_FERRATA_ELE_INTERVAL,
+  DEFAULT_FERRATA_LENGTH_INTERVAL,
+  DEFAULT_FERRATA_SPAN_INTERVAL,
+} from '../../../services/tagging/ferrataMeasures';
 import { Setter } from '../../../types';
 import { HAS_USER_DB } from '../../../services/osm/consts';
 import {
@@ -42,6 +47,9 @@ export type ClimbingFilterSettings = {
   familyFriendly: boolean;
   photoDrawn: PhotoDrawnFilter;
   lengthInterval: Interval | null;
+  ferrataLengthInterval?: Interval | null;
+  ferrataSpanInterval?: Interval | null;
+  ferrataEleInterval?: Interval | null;
 };
 
 type SetFilter = <T extends keyof ClimbingFilterSettings>(
@@ -84,6 +92,12 @@ export type ClimbingFilter = {
   lengthInterval: Interval;
   setLengthInterval: Setter<Interval>;
   lengthFilterMax: number;
+  ferrataLengthInterval: Interval;
+  setFerrataLengthInterval: Setter<Interval>;
+  ferrataSpanInterval: Interval;
+  setFerrataSpanInterval: Setter<Interval>;
+  ferrataEleInterval: Interval;
+  setFerrataEleInterval: Setter<Interval>;
   isDefaultFilter: boolean;
   isGradeIntervalDefault: boolean;
   isMinimumRoutesDefault: boolean;
@@ -94,6 +108,9 @@ export type ClimbingFilter = {
   isFamilyFriendlyDefault: boolean;
   isPhotoDrawnDefault: boolean;
   isLengthIntervalDefault: boolean;
+  isFerrataLengthDefault: boolean;
+  isFerrataSpanDefault: boolean;
+  isFerrataEleDefault: boolean;
   numberOfActiveFilters: number;
   reset: () => void;
 };
@@ -157,6 +174,18 @@ export const getClimbingFilter = (
   const lengthInterval = rockFilters.lengthInterval ?? DEFAULT_LENGTH_INTERVAL;
   const setLengthInterval = (interval: Interval) =>
     setFilter('lengthInterval', interval);
+  const ferrataLengthInterval =
+    data.ferrataLengthInterval ?? DEFAULT_FERRATA_LENGTH_INTERVAL;
+  const setFerrataLengthInterval = (interval: Interval) =>
+    setFilter('ferrataLengthInterval', interval);
+  const ferrataSpanInterval =
+    data.ferrataSpanInterval ?? DEFAULT_FERRATA_SPAN_INTERVAL;
+  const setFerrataSpanInterval = (interval: Interval) =>
+    setFilter('ferrataSpanInterval', interval);
+  const ferrataEleInterval =
+    data.ferrataEleInterval ?? DEFAULT_FERRATA_ELE_INTERVAL;
+  const setFerrataEleInterval = (interval: Interval) =>
+    setFilter('ferrataEleInterval', interval);
 
   const isGradeIntervalDefault = isSameInterval(
     gradeInterval,
@@ -173,6 +202,18 @@ export const getClimbingFilter = (
     lengthInterval,
     DEFAULT_LENGTH_INTERVAL,
   );
+  const isFerrataLengthDefault = isSameInterval(
+    ferrataLengthInterval,
+    DEFAULT_FERRATA_LENGTH_INTERVAL,
+  );
+  const isFerrataSpanDefault = isSameInterval(
+    ferrataSpanInterval,
+    DEFAULT_FERRATA_SPAN_INTERVAL,
+  );
+  const isFerrataEleDefault = isSameInterval(
+    ferrataEleInterval,
+    DEFAULT_FERRATA_ELE_INTERVAL,
+  );
 
   const isDefaultFilter =
     isFerrataGradeDefault &&
@@ -185,7 +226,10 @@ export const getClimbingFilter = (
     isMaterialsDefault &&
     isFamilyFriendlyDefault &&
     isPhotoDrawnDefault &&
-    isLengthIntervalDefault;
+    isLengthIntervalDefault &&
+    isFerrataLengthDefault &&
+    isFerrataSpanDefault &&
+    isFerrataEleDefault;
 
   const numberOfActiveFilters = [
     isFerrataGradeDefault,
@@ -199,6 +243,9 @@ export const getClimbingFilter = (
     isFamilyFriendlyDefault,
     isPhotoDrawnDefault,
     isLengthIntervalDefault,
+    isFerrataLengthDefault,
+    isFerrataSpanDefault,
+    isFerrataEleDefault,
   ].filter((isDefault) => !isDefault).length;
 
   updateMapFilter({
@@ -214,10 +261,16 @@ export const getClimbingFilter = (
     familyFriendly,
     photoDrawn,
     lengthInterval,
+    ferrataLengthInterval,
+    ferrataSpanInterval,
+    ferrataEleInterval,
     isDefaultFilter,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
     isLengthIntervalDefault,
+    isFerrataLengthDefault,
+    isFerrataSpanDefault,
+    isFerrataEleDefault,
   });
 
   return {
@@ -245,6 +298,12 @@ export const getClimbingFilter = (
     lengthInterval,
     setLengthInterval,
     lengthFilterMax: LENGTH_FILTER_MAX_M,
+    ferrataLengthInterval,
+    setFerrataLengthInterval,
+    ferrataSpanInterval,
+    setFerrataSpanInterval,
+    ferrataEleInterval,
+    setFerrataEleInterval,
     isDefaultFilter,
     isGradeIntervalDefault,
     isMinimumRoutesDefault,
@@ -255,6 +314,9 @@ export const getClimbingFilter = (
     isFamilyFriendlyDefault,
     isPhotoDrawnDefault,
     isLengthIntervalDefault,
+    isFerrataLengthDefault,
+    isFerrataSpanDefault,
+    isFerrataEleDefault,
     numberOfActiveFilters,
     reset: () => setUserSetting(SETTINGS_KEY, {} as ClimbingFilterSettings),
   };

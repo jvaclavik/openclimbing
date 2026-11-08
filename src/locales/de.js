@@ -959,6 +959,10 @@ export default {
   'climbing_orientation.nw': 'Nordwest',
 
   'crag_filter.length': 'Länge',
+  'crag_filter.ferrata_length': 'Länge',
+  'crag_filter.ferrata_span': 'Weite',
+  'crag_filter.ferrata_height': 'Höhe',
+  'crag_filter.ferrata_note': 'Steige ohne diese Angabe bleiben auf der Karte.',
   'crag_filter.photo_drawn': 'Foto',
   'crag_filter.photo_drawn_with': 'mit Foto',
   'crag_filter.photo_drawn_without': 'ohne Foto',

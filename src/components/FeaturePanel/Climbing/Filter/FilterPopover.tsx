@@ -6,6 +6,7 @@ import { MinimumRoutesFilter } from './MinimumRoutesFilter';
 import { HAS_USER_DB } from '../../../../services/osm/consts';
 import { FerrataCountryFilter } from './FerrataCountryFilter';
 import { FerrataGradeFilter } from './FerrataGradeFilter';
+import { FerrataMeasureFilters } from './FerrataMeasureFilters';
 import { GradeFilter } from './GradeFilter';
 import { ClimbingTypeFilter } from './ClimbingTypeFilter';
 import { AdvancedFilters } from './AdvancedFilters';
@@ -89,6 +90,7 @@ export const FilterPopover = ({
           <>
             <FerrataGradeFilter />
             <FerrataCountryFilter />
+            <FerrataMeasureFilters />
           </>
         )}
         {HAS_USER_DB && showRockFilters && (

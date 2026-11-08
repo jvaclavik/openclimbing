@@ -364,4 +364,47 @@ describe('filterClimbingTilesFeatures', () => {
     });
     expect(withPhoto.map((f) => f.properties.name)).toEqual(['With photo']);
   });
+
+  it('filters a via ferrata by measured length and country', () => {
+    const lenzsteig: ClimbingTilesFeature = {
+      type: 'Feature',
+      id: 422134441,
+      geometry: pt(),
+      properties: { type: 'ferrata', name: 'Lenzsteig' },
+    };
+    const unknown: ClimbingTilesFeature = {
+      ...lenzsteig,
+      id: 999,
+      properties: { type: 'ferrata', name: 'Ohne Angabe' },
+    };
+    const params = {
+      ...baseParams,
+      gradeInterval: [0, 10] as [number, number],
+      minimumRoutes: 1,
+      isDefaultFilter: false,
+      poiTypes: { rock: false, ferrata: true, gym: false },
+      isFerrataLengthDefault: false,
+      ferrataLengthInterval: [200, 1500] as [number, number],
+    };
+
+    expect(filterClimbingTilesFeatures([lenzsteig, unknown], params)).toEqual([
+      unknown,
+    ]);
+    expect(
+      filterClimbingTilesFeatures([lenzsteig], {
+        ...params,
+        ferrataLengthInterval: [50, 150],
+        ferrataCountryFilter: ['at'],
+        ferrataCountries: new Map([[422134441, 'de']]),
+      }),
+    ).toEqual([]);
+    expect(
+      filterClimbingTilesFeatures([lenzsteig], {
+        ...params,
+        isFerrataLengthDefault: true,
+        ferrataCountryFilter: ['de'],
+        ferrataCountries: new Map([[422134441, 'de']]),
+      }),
+    ).toEqual([lenzsteig]);
+  });
 });
