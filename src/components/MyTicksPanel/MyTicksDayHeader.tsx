@@ -1,100 +1,192 @@
 import ShareIcon from '@mui/icons-material/Share';
-import {
-  IconButton,
-  Stack,
-  TableCell,
-  TableRow,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import { format, parseISO } from 'date-fns';
-import { useState } from 'react';
-import { t } from '../../services/intl';
+import { Box, Checkbox, IconButton, Tooltip, Typography } from '@mui/material';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useState } from 'react';
+import { t, tPlural } from '../../services/intl';
+import { getUrlOsmId } from '../../services/helpers';
+import { tint } from '../utils/panelUi';
+import { isProjectStyle } from '../../services/my-ticks/ticks';
+import { TickStyle } from '../FeaturePanel/Climbing/types';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { useOsmAuthContext } from '../utils/OsmAuthContext';
+import { useMapStateContext } from '../utils/MapStateContext';
 import { ShareTickDialog } from './ShareTickDialog';
+import { TickDate } from './TickDate';
+import { TickPoints } from './TickPoints';
+import { DayCrag, getDayCrags } from './dayCrags';
 
-const DAY_HEADER_FORMAT = 'EEE d.M.yyyy';
+const MAX_CRAGS_IN_HEADER = 2;
 
-const formatDayLabel = (sessionDate: string): string => {
-  try {
-    return format(parseISO(sessionDate), DAY_HEADER_FORMAT);
-  } catch {
-    return sessionDate;
-  }
+/** "3 přelezy", or "1 projekt" on a day with projects only. */
+const dayCountLabel = (ticks: FetchedClimbingTick[]) => {
+  const sends = ticks.filter(
+    (row) => !isProjectStyle(row.style as TickStyle | null),
+  ).length;
+  return sends > 0 || ticks.length === 0
+    ? tPlural('user_profile.unit.sends', sends)
+    : tPlural('user_profile.unit.projects', ticks.length);
+};
+
+export type DayHeaderSelection = {
+  checked: boolean;
+  indeterminate: boolean;
+  onToggle: () => void;
 };
 
 type Props = {
   sessionDate: string;
   sessionTicks: FetchedClimbingTick[];
-  colSpan: number;
   showShareAction: boolean;
+  /** Set while bulk selection mode is active. */
+  selection?: DayHeaderSelection;
 };
+
+const TITLE_SX = {
+  fontWeight: 700,
+  fontSize: 15,
+  lineHeight: 1.3,
+  color: 'text.primary',
+  textDecoration: 'none',
+} as const;
+
+/** Crag names link to the crag; its panel then offers "Back to diary". */
+const CragLinks = ({ crags }: { crags: DayCrag[] }) => {
+  const router = useRouter();
+  const { view } = useMapStateContext();
+  const shown = crags.slice(0, MAX_CRAGS_IN_HEADER);
+  const rest = crags.length - shown.length;
+  return (
+    <Box component="span" sx={{ minWidth: 0 }}>
+      {shown.map((crag, i) => (
+        <React.Fragment key={crag.name}>
+          {i > 0 ? ', ' : null}
+          {crag.osmId ? (
+            <Box
+              component={Link}
+              href={`/${getUrlOsmId(crag.osmId)}?back=${encodeURIComponent(
+                router.asPath,
+              )}#${view.join('/')}`}
+              sx={{ ...TITLE_SX, '&:hover': { color: 'primary.main' } }}
+            >
+              {crag.name}
+            </Box>
+          ) : (
+            <Box component="span" sx={TITLE_SX}>
+              {crag.name}
+            </Box>
+          )}
+        </React.Fragment>
+      ))}
+      {rest > 0 ? (
+        <Box component="span" sx={{ ...TITLE_SX, color: 'text.secondary' }}>
+          {` +${rest}`}
+        </Box>
+      ) : null}
+    </Box>
+  );
+};
+
+const DayTitle = ({
+  sessionDate,
+  crags,
+}: {
+  sessionDate: string;
+  crags: DayCrag[];
+}) =>
+  crags.length > 0 ? (
+    <Box
+      sx={{
+        minWidth: 0,
+        flex: 1,
+        display: 'flex',
+        alignItems: 'baseline',
+        flexWrap: 'wrap',
+        columnGap: 1,
+      }}
+    >
+      <CragLinks crags={crags} />
+      <Typography variant="body2" component="span" color="text.secondary">
+        <TickDate value={sessionDate} />
+      </Typography>
+    </Box>
+  ) : (
+    <Box component="span" sx={{ ...TITLE_SX, flex: 1 }}>
+      <TickDate value={sessionDate} />
+    </Box>
+  );
 
 export const MyTicksDayHeader = ({
   sessionDate,
   sessionTicks,
-  colSpan,
   showShareAction,
+  selection,
 }: Props) => {
   const { osmUser } = useOsmAuthContext();
   const [shareOpen, setShareOpen] = useState(false);
-  const tickCount = sessionTicks.length;
   const representativeTick = sessionTicks[0];
+  const points = sessionTicks.reduce(
+    (sum, row) => sum + (row.tickScore?.points ?? 0),
+    0,
+  );
 
   return (
     <>
-      <TableRow
+      <Box
         sx={(theme) => ({
-          backgroundColor: theme.palette.action.hover,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          minHeight: 46,
+          py: 0.75,
+          // Align the day checkbox with row checkboxes (padding="checkbox").
+          pl: selection ? 0.75 : 2,
+          pr: 1,
+          borderBottom: `1px solid ${tint(theme, 0.06)}`,
+          backgroundColor: theme.palette.background.paper,
+          backgroundImage: `linear-gradient(${tint(theme, 0.025)}, ${tint(
+            theme,
+            0.025,
+          )})`,
         })}
       >
-        <TableCell colSpan={colSpan} sx={{ p: 0 }}>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: 'center',
-
-              // Stick the title + share button to the left edge of the
-              // horizontally scrollable TableContainer so the action stays
-              // reachable even on overflowing tables.
-              position: 'sticky',
-
-              left: 0,
-              width: 'fit-content',
-              py: 0.5,
-              px: 2,
+        {selection ? (
+          <Checkbox
+            size="small"
+            checked={selection.checked}
+            indeterminate={selection.indeterminate}
+            onChange={selection.onToggle}
+            slotProps={{
+              input: { 'aria-label': t('my_ticks.select.select_day') },
             }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {formatDayLabel(sessionDate)}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-              }}
+          />
+        ) : null}
+        <DayTitle sessionDate={sessionDate} crags={getDayCrags(sessionTicks)} />
+        <Typography
+          variant="caption"
+          sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
+        >
+          {dayCountLabel(sessionTicks)}
+          {' · '}
+          <TickPoints
+            points={points}
+            tooltip={t('my_ticks.day_points_tooltip')}
+          />
+        </Typography>
+        {showShareAction && !selection && osmUser && representativeTick ? (
+          <Tooltip title={t('my_ticks.share.share_session_tooltip')}>
+            <IconButton
+              size="small"
+              color="secondary"
+              onClick={() => setShareOpen(true)}
+              aria-label={t('my_ticks.share.share_session_tooltip')}
+              sx={{ mr: -0.5 }}
             >
-              {t('my_ticks.day_header.tick_count', {
-                count: String(tickCount),
-              })}
-            </Typography>
-            {showShareAction && osmUser && representativeTick ? (
-              <Tooltip title={t('my_ticks.share.share_session_tooltip')}>
-                <IconButton
-                  size="small"
-                  color="secondary"
-                  onClick={() => setShareOpen(true)}
-                  aria-label={t('my_ticks.share.share_session_tooltip')}
-                >
-                  <ShareIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            ) : null}
-          </Stack>
-        </TableCell>
-      </TableRow>
+              <ShareIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : null}
+      </Box>
 
       {shareOpen && osmUser && representativeTick ? (
         <ShareTickDialog

@@ -3,6 +3,7 @@ import { fetchJson, fetchText } from '../fetch';
 import { getApiId, getShortId } from '../helpers';
 import { OsmType } from '../types';
 import { parsePairing } from './tickPairing';
+import type { MentionedClimbingTick } from './tickMentions';
 
 const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
   const { shortId, ...rest } = tick;
@@ -108,4 +109,68 @@ export const deleteClimbingTick = async (id: number) => {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
   });
+};
+
+export const bulkDeleteClimbingTicks = async (ids: number[]) => {
+  return await fetchJson('/api/climbing-ticks/bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', ids }),
+  });
+};
+
+/** Each item must contain `id`; other fields are applied as partial updates. */
+export const bulkUpdateClimbingTicks = async (
+  ticks: (Partial<ClimbingTick> & { id: number })[],
+) => {
+  return await fetchJson('/api/climbing-ticks/bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'update', ticks: ticks.map(convertToDb) }),
+  });
+};
+
+/** Creates ticks for the logged-in user; returns new ids in input order. */
+export const bulkCreateClimbingTicks = async (
+  ticks: Partial<Omit<ClimbingTick, 'id' | 'osmUserId'>>[],
+): Promise<number[]> => {
+  const { ids } = await fetchJson<{ ids: number[] }>(
+    '/api/climbing-ticks/bulk',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', ticks: ticks.map(convertToDb) }),
+    },
+  );
+  return ids;
+};
+
+/** Other users' ticks that mention the logged-in user as a partner. */
+export const fetchMentionedClimbingTicks = async (): Promise<
+  MentionedClimbingTick[]
+> => {
+  const { ticks } = await fetchJson<{ ticks: MentionedClimbingTick[] }>(
+    '/api/climbing-ticks/mentions',
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      nocache: true,
+    },
+  );
+  return ticks;
+};
+
+/** Public: all climbers' ticks of one route, newest first. */
+export const fetchRouteTicks = async ({
+  type,
+  id,
+}: {
+  type: OsmType;
+  id: number;
+}): Promise<MentionedClimbingTick[]> => {
+  const { ticks } = await fetchJson<{ ticks: MentionedClimbingTick[] }>(
+    `/api/climbing-ticks/route/${type}/${id}`,
+    { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+  );
+  return ticks;
 };

@@ -117,7 +117,7 @@ const StatValue = styled.div`
 `;
 
 // grouping with a thin space is locale-agnostic, so server and client agree
-const formatCount = (value: number) =>
+export const formatCount = (value: number) =>
   value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
 
 const Stat = ({ value, label }: { value?: number; label: string }) => (

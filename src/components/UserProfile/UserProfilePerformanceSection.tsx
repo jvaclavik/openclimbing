@@ -1,331 +1,194 @@
-import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
-import DownloadIcon from '@mui/icons-material/Download';
-import {
-  Alert,
-  Box,
-  Button,
-  SelectChangeEvent,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
-import { ClimbingTick } from '../../types';
-import {
-  DEFAULT_CLIMBING_STATS_DATE_RANGE,
-  climbingStatsDateRangeToSelectValue,
-  selectValueToClimbingStatsDateRange,
-  type ClimbingStatsDateRange,
-} from '../../services/my-ticks/climbingStatsDateRange';
 import { PANEL_GAP } from '../utils/PanelHelpers';
-import { ClimbingStatsDateRangeSelect } from '../climbingStats/ClimbingStatsDateRangeSelect';
-import { GradeSystemSelect } from '../FeaturePanel/Climbing/GradeSystemSelect';
-import { UserProfilePerformanceStats } from './UserProfilePerformanceStats';
-import {
-  MyTicksContent,
-  MyTicksEmptyHint,
-} from '../MyTicksPanel/MyTicksContent';
-import { fetchedTicksToGraphFeatures } from '../MyTicksPanel/mapMyTicksRows';
-import { useUserProfilePerformanceDerived } from './useUserProfilePerformanceDerived';
-import { useUserProfileLeaderboardRank } from './useUserProfileLeaderboardRank';
-import type { GradeStyleSegment } from './userProfilePerformanceAggregates';
+import { tint } from '../utils/panelUi';
 import { t } from '../../services/intl';
 import {
-  buildTicksCsv,
-  buildTicksCsvFilename,
-} from '../../services/my-ticks/exportTicksCsv';
+  isTicksFilterActive,
+  useTicksUrlFilter,
+} from '../../services/my-ticks/ticksUrlFilter';
+import {
+  computeMilestones,
+  computePersonalRecords,
+} from '../../services/my-ticks/personalRecords';
+import { totalTickPoints } from './userProfilePerformanceAggregates';
+import { useUserProfileLeaderboardRank } from './useUserProfileLeaderboardRank';
+import { UserProfileKpis } from './UserProfileKpis';
+import { UserProfileOverviewTab } from './Overview/UserProfileOverviewTab';
+import { UserProfileDiaryTab } from './UserProfileDiaryTab';
+import { UserProfileChartsSection } from './UserProfileChartsSection';
+import { MentionedTicksTab } from '../MyTicksPanel/MentionedTicks/MentionedTicksTab';
+import { useMentionedTicksState } from '../MyTicksPanel/MentionedTicks/useMentionedTicks';
 
-const UserProfileChartsTab = dynamic(
-  () => import('./UserProfileChartsTab').then((m) => m.UserProfileChartsTab),
-  { ssr: false },
+type ProfileTab = 'overview' | 'ticks' | 'mentions' | 'charts';
+
+const CountBadge = ({ count }: { count: number }) => (
+  <Box
+    component="span"
+    sx={{
+      ml: 0.75,
+      px: 0.75,
+      minWidth: 20,
+      borderRadius: 999,
+      fontSize: 11,
+      fontWeight: 700,
+      lineHeight: '18px',
+      bgcolor: 'primary.main',
+      color: 'primary.contrastText',
+      fontVariantNumeric: 'tabular-nums',
+    }}
+  >
+    {count}
+  </Box>
 );
 
-function UserProfilePerformanceTopBar({
-  years,
-  selectValue,
-  onRangeChange,
-  onExportCsv,
-  exportDisabled,
+function UserProfileTabs({
+  tab,
+  onTabChange,
+  own,
 }: {
-  years: number[];
-  selectValue: string;
-  onRangeChange: (e: SelectChangeEvent<string>) => void;
-  onExportCsv: () => void;
-  exportDisabled: boolean;
+  tab: ProfileTab;
+  onTabChange: (value: ProfileTab) => void;
+  own: boolean;
 }) {
+  // Shares the react-query cache with the mentions tab itself.
+  const { pendingCount } = useMentionedTicksState(own);
   return (
-    <Stack
-      direction={{ xs: 'column', sm: 'row' }}
-      spacing={1}
-      sx={{
-        alignItems: { xs: 'stretch', sm: 'center' },
-        pt: 0.5,
-      }}
+    <Tabs
+      value={tab}
+      onChange={(_, value: ProfileTab) => onTabChange(value)}
+      variant="scrollable"
+      scrollButtons={false}
+      sx={(theme) => ({
+        minHeight: 40,
+        borderBottom: `1px solid ${tint(theme, 0.08)}`,
+        '& .MuiTab-root': {
+          minHeight: 40,
+          minWidth: 0,
+          px: 1.5,
+          textTransform: 'none',
+          fontWeight: 700,
+          fontSize: 15,
+        },
+      })}
     >
-      <ClimbingStatsDateRangeSelect
-        labelId="user-profile-period-label"
-        value={selectValue}
-        onChange={onRangeChange}
-        years={years}
-      />
-      <Box sx={{ flex: 1 }} />
-      <Button
-        size="small"
-        variant="outlined"
-        color="secondary"
-        startIcon={<DownloadIcon />}
-        onClick={onExportCsv}
-        disabled={exportDisabled}
-        aria-label={
-          exportDisabled
-            ? t('user_profile.export_csv_disabled')
-            : t('user_profile.export_csv')
-        }
-      >
-        {t('user_profile.export_csv')}
-      </Button>
-      <GradeSystemSelect size="small" />
-    </Stack>
+      <Tab value="overview" label={t('user_profile.tab_overview')} />
+      <Tab value="ticks" label={t('user_profile.tab_ticks')} />
+      {own ? (
+        <Tab
+          value="mentions"
+          label={
+            <Box component="span" sx={{ display: 'inline-flex' }}>
+              {t('user_profile.tab_mentions')}
+              {pendingCount > 0 ? <CountBadge count={pendingCount} /> : null}
+            </Box>
+          }
+        />
+      ) : null}
+      <Tab value="charts" label={t('user_profile.tab_charts')} />
+    </Tabs>
   );
 }
+
+/** Opens one climbing day in the diary (URL `?session=` filter). */
+const useOpenDayInDiary = (showDiary: () => void) => {
+  const router = useRouter();
+  return (day: string) => {
+    router.replace(
+      { pathname: router.pathname, query: { ...router.query, session: day } },
+      undefined,
+      { shallow: true, scroll: false },
+    );
+    showDiary();
+  };
+};
+
+const useProfileData = (fetchedTicks: FetchedClimbingTick[]) => {
+  const records = useMemo(
+    () => computePersonalRecords(fetchedTicks),
+    [fetchedTicks],
+  );
+  const milestones = useMemo(
+    () => computeMilestones(fetchedTicks),
+    [fetchedTicks],
+  );
+  const personalBestIds = useMemo(
+    () =>
+      new Set(
+        milestones.flatMap((m) =>
+          m.kind === 'grade_pb' ? [m.row.tick.id] : [],
+        ),
+      ),
+    [milestones],
+  );
+  const totalPoints = useMemo(
+    () => totalTickPoints(fetchedTicks),
+    [fetchedTicks],
+  );
+  return { records, milestones, personalBestIds, totalPoints };
+};
 
 export const UserProfilePerformanceSection = ({
   displayName,
   own,
   ticksPanelEnabled,
   fetchedTicks,
-  rawTicks,
 }: {
   displayName: string;
   own: boolean;
   ticksPanelEnabled: boolean;
   fetchedTicks: FetchedClimbingTick[];
-  rawTicks: ClimbingTick[];
 }) => {
-  const [range, setRange] = useState<ClimbingStatsDateRange>(
-    DEFAULT_CLIMBING_STATS_DATE_RANGE,
+  const filter = useTicksUrlFilter();
+  // Own profile is mostly managed, others are mostly browsed. Shared links to
+  // a day / tick always land in the diary.
+  const [tab, setTab] = useState<ProfileTab>(() =>
+    own || isTicksFilterActive(filter) ? 'ticks' : 'overview',
   );
-  const d = useUserProfilePerformanceDerived(fetchedTicks, range);
-  const [tab, setTab] = useState(0);
+  const activeTab = tab === 'mentions' && !own ? 'ticks' : tab;
+  const { records, milestones, personalBestIds, totalPoints } =
+    useProfileData(fetchedTicks);
+  const leaderboardRank = useUserProfileLeaderboardRank(displayName, 'all');
+  const openDay = useOpenDayInDiary(() => setTab('ticks'));
 
-  const onRangeChange = (e: SelectChangeEvent<string>) => {
-    const next = selectValueToClimbingStatsDateRange(e.target.value);
-    if (next) setRange(next);
-  };
-
-  const selectValue = climbingStatsDateRangeToSelectValue(range);
-
-  const leaderboardRank = useUserProfileLeaderboardRank(
-    displayName,
-    selectValue,
-  );
-  const exportDisabled = !ticksPanelEnabled || rawTicks.length === 0;
-
-  const onExportCsv = () => {
-    if (exportDisabled) {
-      return;
-    }
-    const csv = buildTicksCsv(rawTicks);
-    const filename = buildTicksCsvFilename(displayName);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    try {
-      anchor.style.display = 'none';
-      anchor.href = url;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-    } finally {
-      anchor.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 0);
-    }
-  };
-
-  return (
-    <Box sx={{ px: PANEL_GAP, pb: 2 }}>
-      <UserProfilePerformanceContent
-        years={d.years}
-        selectValue={selectValue}
-        onRangeChange={onRangeChange}
-        onExportCsv={onExportCsv}
-        exportDisabled={exportDisabled}
-        totalPoints={d.totalPoints}
-        tickCount={d.tickCount}
-        leaderboardRank={leaderboardRank}
-        monthlySeries={d.monthlySeries}
-        maxMonthly={d.maxMonthly}
-        bestSendSeries={d.bestSendSeries}
-        maxBestRow={d.maxBestRow}
-        areaSeries={d.areaSeries}
-        maxAreaDays={d.maxAreaDays}
-        gradeSeries={d.gradeSeries}
-        maxGradeCount={d.maxGradeCount}
-        stylePie={d.stylePie}
-        weekdayRadar={d.weekdayRadar}
-        tab={tab}
-        onTabChange={(_, v) => setTab(v)}
-        own={own}
-        ticksPanelEnabled={ticksPanelEnabled}
-        fetchedTicks={fetchedTicks}
-      />
-    </Box>
-  );
-};
-
-function UserProfilePerformanceContent({
-  years,
-  selectValue,
-  onRangeChange,
-  onExportCsv,
-  exportDisabled,
-  totalPoints,
-  tickCount,
-  leaderboardRank,
-  monthlySeries,
-  maxMonthly,
-  bestSendSeries,
-  maxBestRow,
-  areaSeries,
-  maxAreaDays,
-  gradeSeries,
-  maxGradeCount,
-  stylePie,
-  weekdayRadar,
-  tab,
-  onTabChange,
-  own,
-  ticksPanelEnabled,
-  fetchedTicks,
-}: {
-  years: number[];
-  selectValue: string;
-  onRangeChange: (e: SelectChangeEvent<string>) => void;
-  onExportCsv: () => void;
-  exportDisabled: boolean;
-  totalPoints: number;
-  tickCount: number;
-  leaderboardRank: number | null;
-  monthlySeries: { key: string; points: number }[];
-  maxMonthly: number;
-  bestSendSeries: Array<{ key: string; gradeLabel: string; rowIndex: number }>;
-  maxBestRow: number;
-  areaSeries: Array<{ crag: string; days: number }>;
-  maxAreaDays: number;
-  gradeSeries: Array<{
-    grade: string;
-    total: number;
-    segments: GradeStyleSegment[];
-    sampleTick: FetchedClimbingTick | null;
-  }>;
-  maxGradeCount: number;
-  stylePie: Array<{ key: string; name: string; value: number; color: string }>;
-  weekdayRadar: Array<{ key: string; label: string; value: number }>;
-  tab: number;
-  onTabChange: (e: React.SyntheticEvent, value: number) => void;
-  own: boolean;
-  ticksPanelEnabled: boolean;
-  fetchedTicks: FetchedClimbingTick[];
-}) {
-  return (
-    <Stack spacing={2.5}>
-      <UserProfilePerformanceTopBar
-        years={years}
-        selectValue={selectValue}
-        onRangeChange={onRangeChange}
-        onExportCsv={onExportCsv}
-        exportDisabled={exportDisabled}
-      />
-
-      <UserProfilePerformanceStats
-        totalPoints={totalPoints}
-        tickCount={tickCount}
-        leaderboardRank={leaderboardRank}
-      />
-
-      <UserProfileProfileTabs tab={tab} onTabChange={onTabChange} />
-
-      {tab === 0 ? (
-        <UserProfileTicksTab
-          own={own}
-          ticksPanelEnabled={ticksPanelEnabled}
-          fetchedTicks={fetchedTicks}
-        />
-      ) : (
-        <UserProfileChartsTab
-          monthlySeries={monthlySeries}
-          maxMonthly={maxMonthly}
-          bestSendSeries={bestSendSeries}
-          maxBestRow={maxBestRow}
-          stylePie={stylePie}
-          weekdayRadar={weekdayRadar}
-          areaSeries={areaSeries}
-          maxAreaDays={maxAreaDays}
-          gradeSeries={gradeSeries}
-          maxGradeCount={maxGradeCount}
-          routeDistributionFeatures={fetchedTicksToGraphFeatures(fetchedTicks)}
-        />
-      )}
-    </Stack>
-  );
-}
-
-function UserProfileProfileTabs({
-  tab,
-  onTabChange,
-}: {
-  tab: number;
-  onTabChange: (e: React.SyntheticEvent, value: number) => void;
-}) {
-  return (
-    <Tabs
-      value={tab}
-      onChange={onTabChange}
-      variant="fullWidth"
-      sx={{ borderBottom: 1, borderColor: 'divider' }}
-    >
-      <Tab label={t('user_profile.tab_ticks')} />
-      <Tab label={t('user_profile.tab_charts')} />
-    </Tabs>
-  );
-}
-
-function UserProfileTicksTab({
-  own,
-  ticksPanelEnabled,
-  fetchedTicks,
-}: {
-  own: boolean;
-  ticksPanelEnabled: boolean;
-  fetchedTicks: FetchedClimbingTick[];
-}) {
-  // When ticksPanelEnabled is false, data is still loading (either own ticks
-  // from TicksContext or public profile fetch). Render nothing here — the
-  // parent scroll content shows a loader for the whole panel.
+  // While ticks are still loading the parent shows a loader for the panel.
   if (!ticksPanelEnabled) {
     return null;
   }
 
   return (
-    <Box sx={{ pt: 1 }}>
-      <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
-        {t('user_profile.ticks_table_title')}
-      </Typography>
-      <MyTicksContent
-        fetchedTicks={fetchedTicks}
-        readOnly={!own}
-        emptyTicksMessage={
-          own ? (
-            <MyTicksEmptyHint />
-          ) : (
-            <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
-              {t('user_profile.no_ticks')}
-            </Alert>
-          )
-        }
-      />
+    <Box sx={{ px: PANEL_GAP, pb: 3 }}>
+      <Stack spacing={2}>
+        <UserProfileKpis
+          totalPoints={totalPoints}
+          sendCount={records.sendCount}
+          hardestSend={records.hardestSend}
+          leaderboardRank={leaderboardRank}
+        />
+        <UserProfileTabs tab={activeTab} onTabChange={setTab} own={own} />
+        {activeTab === 'overview' ? (
+          <UserProfileOverviewTab
+            fetchedTicks={fetchedTicks}
+            records={records}
+            milestones={milestones}
+            own={own}
+            onOpenDay={openDay}
+          />
+        ) : null}
+        {activeTab === 'ticks' ? (
+          <UserProfileDiaryTab
+            own={own}
+            fetchedTicks={fetchedTicks}
+            personalBestIds={personalBestIds}
+          />
+        ) : null}
+        {activeTab === 'mentions' ? <MentionedTicksTab /> : null}
+        {activeTab === 'charts' ? (
+          <UserProfileChartsSection fetchedTicks={fetchedTicks} />
+        ) : null}
+      </Stack>
     </Box>
   );
-}
+};

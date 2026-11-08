@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { Paper, Table, TableContainer } from '@mui/material';
+import { Box } from '@mui/material';
 import { PanelLabel } from '../PanelLabel';
 import { AddTickButton } from './AddTickButton';
 import { DotLoader } from '../../../helpers';
@@ -12,6 +12,8 @@ import { isFeatureClimbingRoute } from '../../../../utils';
 import { useTicksContext } from '../../../utils/TicksContext';
 import { PROJECT_ID } from '../../../../services/project';
 import { t } from '../../../../services/intl';
+import { TickSessionCard } from '../../../MyTicksPanel/TickSessionCard';
+import { useUserSettingsContext } from '../../../utils/userSettings/UserSettingsContext';
 
 const Container = styled.div`
   margin-bottom: 20px;
@@ -49,6 +51,7 @@ const MyRouteTicksInner = () => {
   const { feature } = useFeatureContext();
   const { ticks, error, isFetching } = useTicksContext();
   const { loggedIn } = useOsmAuthContext();
+  const { gradeSystem } = useUserSettingsContext();
 
   if (!loggedIn) {
     return <NotLoggedIn />;
@@ -56,9 +59,9 @@ const MyRouteTicksInner = () => {
   if (ticks === null) {
     return <DotLoader />;
   }
-  const ticksForRoute = ticks.filter(
-    ({ shortId }) => shortId === getShortId(feature.osmMeta),
-  );
+  const ticksForRoute = ticks
+    .filter(({ shortId }) => shortId === getShortId(feature.osmMeta))
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   if (isFetching && ticksForRoute.length === 0) {
     return <DotLoader />;
   }
@@ -76,21 +79,21 @@ const MyRouteTicksInner = () => {
         <span>{isFetching && <DotLoader />}</span>
       </PanelLabel>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          mx: -2,
-          width: 'auto',
-          overflowX: 'auto',
-          borderRadius: 0,
-        }}
-      >
-        <Table size="small">
-          {ticksForRoute.map((tick) => {
-            return <RouteTickRow key={tick.id} tick={tick} />;
-          })}
-        </Table>
-      </TableContainer>
+      <Box sx={{ mt: 1 }}>
+        <TickSessionCard
+          columns={['name', 'style', 'points', 'more']}
+          nameLabel={t('my_ticks.route_date')}
+        >
+          {ticksForRoute.map((tick) => (
+            <RouteTickRow
+              key={tick.id}
+              tick={tick}
+              routeTags={feature.tags}
+              gradeSystem={gradeSystem}
+            />
+          ))}
+        </TickSessionCard>
+      </Box>
     </Container>
   );
 };

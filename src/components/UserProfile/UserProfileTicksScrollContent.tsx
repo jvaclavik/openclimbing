@@ -62,7 +62,11 @@ export const UserProfileTicksScrollContent = ({
 }: Props) => (
   <PanelScrollbars>
     <ClosePanelButton right onClick={onClose} />
-    <UserProfileHero titleName={titleName} />
+    <UserProfileHero
+      titleName={titleName}
+      fetchedTicks={fetchedTicks}
+      rawTicks={rawTicks}
+    />
 
     {state.kind === 'ready' && !isLoading ? (
       <UserProfilePerformanceSection
@@ -70,7 +74,6 @@ export const UserProfileTicksScrollContent = ({
         own={own}
         ticksPanelEnabled={ticksPanelEnabled}
         fetchedTicks={fetchedTicks}
-        rawTicks={rawTicks}
       />
     ) : null}
 
