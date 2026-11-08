@@ -14,6 +14,7 @@ const commitHash = (process.env.VERCEL_GIT_COMMIT_SHA || '').substring(0, 7);
 const commitMessage = process.env.VERCEL_GIT_COMMIT_MESSAGE || 'dev';
 const sentryRelease = `${osmappVersion}-${commitHash}-${commitMessage.substring(0, 20)}`;
 const isVpsDeploy = !!process.env.VPS_DEPLOY; // set only in vps-deploy.yml, so PR/preview builds stay fast
+const isVercelPreview = process.env.VERCEL_ENV === 'preview';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -79,9 +80,14 @@ export default withBundleAnalyzer(
     silent: !process.env.CI,
     widenClientFileUpload: isVpsDeploy, // full source maps only for the production VPS build
     reactComponentAnnotation: { enabled: isVpsDeploy }, // component-name annotations bloat runtime bundle, keep off elsewhere
+    // Preview builds were spending most of their time generating and uploading
+    // source maps. Production and the VPS build still upload them.
+    sourcemaps: { disable: isVercelPreview },
+    release: isVercelPreview ? { create: false, finalize: false } : undefined,
+    telemetry: !isVercelPreview,
     // tunnelRoute: '/monitoring',
     hideSourceMaps: false,
     disableLogger: true, // Automatically tree-shake Sentry logger statements to reduce bundle size
-    automaticVercelMonitors: true, // https://vercel.com/docs/cron-jobs
+    automaticVercelMonitors: !isVercelPreview, // https://vercel.com/docs/cron-jobs
   }),
 );

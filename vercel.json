@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "node --experimental-strip-types scripts/vercel-ignore-build.mts"
+}
