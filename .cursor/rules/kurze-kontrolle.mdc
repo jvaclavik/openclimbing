@@ -1,0 +1,10 @@
+---
+description: Kurze Kontrolle, wenn Tests und Code die Änderung schon tragen
+alwaysApply: true
+---
+
+# Kurze Kontrolle
+
+Wenn Tests das Verhalten schon abdecken und der Code klar ist, reichen die Tests. Den Browser nur öffnen, wenn die Oberfläche neu ist, der Test die sichtbare Sache nicht trifft, oder der erste Blick schon nicht passt.
+
+Kein zweiter Durchgang, keine Bildschirmaufnahme und kein nochmaliges Durchklicken derselben Ansicht.
