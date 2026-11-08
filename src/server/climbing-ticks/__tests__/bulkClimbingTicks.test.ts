@@ -119,4 +119,40 @@ describe('POST /api/climbing-ticks/bulk', () => {
     expect((await call({ action: 'delete', ids: ['x'] })).statusCode).toBe(400);
     expect((await call({ action: 'nope' })).statusCode).toBe(400);
   });
+
+  it('creates ticks for the logged-in user only', async () => {
+    const res = await call({
+      action: 'create',
+      ticks: [
+        {
+          osmType: 'node',
+          osmId: 5,
+          timestamp: '2025-03-03T12:00:00.000Z',
+          style: 'RP',
+          pairing: { partners: '@pepa' },
+          osmUserId: 2,
+          id: 1,
+        },
+      ],
+    });
+    expect(res.statusCode).toBe(200);
+    const { ids } = res.body as { ids: number[] };
+    expect(ids).toHaveLength(1);
+    const created = mockDb
+      .prepare('SELECT * FROM climbing_ticks WHERE id = ?')
+      .get(ids[0]);
+    expect(created).toMatchObject({
+      osmUserId: 1,
+      osmType: 'node',
+      osmId: 5,
+      style: 'RP',
+      pairing: '{"partners":"@pepa"}',
+    });
+  });
+
+  it('rejects create without timestamp', async () => {
+    const res = await call({ action: 'create', ticks: [{ style: 'RP' }] });
+    expect(res.statusCode).toBe(400);
+    expect(getRows()).toHaveLength(4);
+  });
 });

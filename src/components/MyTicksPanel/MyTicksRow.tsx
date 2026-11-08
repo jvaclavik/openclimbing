@@ -15,18 +15,12 @@ import { PartnersMentionsText } from '../FeaturePanel/Climbing/PartnersMentionsT
 import { t } from '../../services/intl';
 import { TickMoreButton } from '../FeaturePanel/Climbing/TickMoreButton';
 import { useMapStateContext } from '../utils/MapStateContext';
-import { SelectionModifiers } from './tickSelection';
+import { modifiersFromEvent, SelectionModifiers } from './tickSelection';
 
 export type MyTicksRowSelection = {
   selected: boolean;
   onClick: (modifiers: SelectionModifiers) => void;
 };
-
-const getModifiers = (e: React.MouseEvent): SelectionModifiers => ({
-  shiftKey: e.shiftKey,
-  metaKey: e.metaKey,
-  ctrlKey: e.ctrlKey,
-});
 
 const highlightPulse = keyframes`
   0% { background-color: rgba(255, 213, 79, 0); }
@@ -76,7 +70,7 @@ export const MyTicksRow = ({
       hover={!!selection}
       selected={selection?.selected ?? false}
       onClick={
-        selection ? (e) => selection.onClick(getModifiers(e)) : undefined
+        selection ? (e) => selection.onClick(modifiersFromEvent(e)) : undefined
       }
       // In selection mode a click must not follow links (e.g. @partner mentions).
       onClickCapture={
@@ -108,7 +102,7 @@ export const MyTicksRow = ({
             checked={selection.selected}
             onClick={(e) => {
               e.stopPropagation();
-              selection.onClick(getModifiers(e));
+              selection.onClick(modifiersFromEvent(e));
             }}
             slotProps={{
               input: { 'aria-label': t('my_ticks.select.select_row') },

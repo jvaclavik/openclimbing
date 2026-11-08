@@ -4,6 +4,16 @@ export type SelectionModifiers = {
   ctrlKey?: boolean;
 };
 
+export const modifiersFromEvent = (e: {
+  shiftKey: boolean;
+  metaKey: boolean;
+  ctrlKey: boolean;
+}): SelectionModifiers => ({
+  shiftKey: e.shiftKey,
+  metaKey: e.metaKey,
+  ctrlKey: e.ctrlKey,
+});
+
 export type SelectionState = {
   selectedIds: ReadonlySet<number>;
   /** Last row clicked without SHIFT — start of a SHIFT range. */

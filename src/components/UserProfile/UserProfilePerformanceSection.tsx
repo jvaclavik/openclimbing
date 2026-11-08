@@ -30,6 +30,8 @@ import {
 import { fetchedTicksToGraphFeatures } from '../MyTicksPanel/mapMyTicksRows';
 import { useTickSelection } from '../MyTicksPanel/useTickSelection';
 import { TicksBulkToolbar } from '../MyTicksPanel/TicksBulkToolbar';
+import { MentionedTicksTab } from '../MyTicksPanel/MentionedTicks/MentionedTicksTab';
+import { useMentionedTicksState } from '../MyTicksPanel/MentionedTicks/useMentionedTicks';
 import {
   applyTicksUrlFilter,
   useTicksUrlFilter,
@@ -114,7 +116,7 @@ export const UserProfilePerformanceSection = ({
     DEFAULT_CLIMBING_STATS_DATE_RANGE,
   );
   const d = useUserProfilePerformanceDerived(fetchedTicks, range);
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<ProfileTab>('ticks');
 
   const onRangeChange = (e: SelectChangeEvent<string>) => {
     const next = selectValueToClimbingStatsDateRange(e.target.value);
@@ -229,12 +231,13 @@ function UserProfilePerformanceContent({
   maxGradeCount: number;
   stylePie: Array<{ key: string; name: string; value: number; color: string }>;
   weekdayRadar: Array<{ key: string; label: string; value: number }>;
-  tab: number;
-  onTabChange: (e: React.SyntheticEvent, value: number) => void;
+  tab: ProfileTab;
+  onTabChange: (e: React.SyntheticEvent, value: ProfileTab) => void;
   own: boolean;
   ticksPanelEnabled: boolean;
   fetchedTicks: FetchedClimbingTick[];
 }) {
+  const activeTab = tab === 'mentions' && !own ? 'ticks' : tab;
   return (
     <Stack spacing={2.5}>
       <UserProfilePerformanceTopBar
@@ -251,15 +254,21 @@ function UserProfilePerformanceContent({
         leaderboardRank={leaderboardRank}
       />
 
-      <UserProfileProfileTabs tab={tab} onTabChange={onTabChange} />
+      <UserProfileProfileTabs
+        tab={activeTab}
+        onTabChange={onTabChange}
+        own={own}
+      />
 
-      {tab === 0 ? (
+      {activeTab === 'ticks' ? (
         <UserProfileTicksTab
           own={own}
           ticksPanelEnabled={ticksPanelEnabled}
           fetchedTicks={fetchedTicks}
         />
-      ) : (
+      ) : null}
+      {activeTab === 'mentions' ? <MentionedTicksTab /> : null}
+      {activeTab === 'charts' ? (
         <UserProfileChartsTab
           monthlySeries={monthlySeries}
           maxMonthly={maxMonthly}
@@ -273,18 +282,24 @@ function UserProfilePerformanceContent({
           maxGradeCount={maxGradeCount}
           routeDistributionFeatures={fetchedTicksToGraphFeatures(fetchedTicks)}
         />
-      )}
+      ) : null}
     </Stack>
   );
 }
 
+type ProfileTab = 'ticks' | 'mentions' | 'charts';
+
 function UserProfileProfileTabs({
   tab,
   onTabChange,
+  own,
 }: {
-  tab: number;
-  onTabChange: (e: React.SyntheticEvent, value: number) => void;
+  tab: ProfileTab;
+  onTabChange: (e: React.SyntheticEvent, value: ProfileTab) => void;
+  own: boolean;
 }) {
+  // Shares the react-query cache with the mentions tab itself.
+  const { pendingCount } = useMentionedTicksState(own);
   return (
     <Tabs
       value={tab}
@@ -292,8 +307,18 @@ function UserProfileProfileTabs({
       variant="fullWidth"
       sx={{ borderBottom: 1, borderColor: 'divider' }}
     >
-      <Tab label={t('user_profile.tab_ticks')} />
-      <Tab label={t('user_profile.tab_charts')} />
+      <Tab value="ticks" label={t('user_profile.tab_ticks')} />
+      {own ? (
+        <Tab
+          value="mentions"
+          label={
+            pendingCount > 0
+              ? `${t('user_profile.tab_mentions')} (${pendingCount})`
+              : t('user_profile.tab_mentions')
+          }
+        />
+      ) : null}
+      <Tab value="charts" label={t('user_profile.tab_charts')} />
     </Tabs>
   );
 }

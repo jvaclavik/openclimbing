@@ -3,6 +3,7 @@ import { fetchJson, fetchText } from '../fetch';
 import { getApiId, getShortId } from '../helpers';
 import { OsmType } from '../types';
 import { parsePairing } from './tickPairing';
+import type { MentionedClimbingTick } from './tickMentions';
 
 const convertToDb = (tick: Partial<ClimbingTick>): Partial<ClimbingTickDb> => {
   const { shortId, ...rest } = tick;
@@ -127,4 +128,34 @@ export const bulkUpdateClimbingTicks = async (
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'update', ticks: ticks.map(convertToDb) }),
   });
+};
+
+/** Creates ticks for the logged-in user; returns new ids in input order. */
+export const bulkCreateClimbingTicks = async (
+  ticks: Partial<Omit<ClimbingTick, 'id' | 'osmUserId'>>[],
+): Promise<number[]> => {
+  const { ids } = await fetchJson<{ ids: number[] }>(
+    '/api/climbing-ticks/bulk',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', ticks: ticks.map(convertToDb) }),
+    },
+  );
+  return ids;
+};
+
+/** Other users' ticks that mention the logged-in user as a partner. */
+export const fetchMentionedClimbingTicks = async (): Promise<
+  MentionedClimbingTick[]
+> => {
+  const { ticks } = await fetchJson<{ ticks: MentionedClimbingTick[] }>(
+    '/api/climbing-ticks/mentions',
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      nocache: true,
+    },
+  );
+  return ticks;
 };

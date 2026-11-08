@@ -4,6 +4,7 @@ import { OSM_TOKEN_COOKIE } from '../../../src/services/osm/consts';
 import { getDb } from '../../../src/server/db/db';
 import {
   getSafeTickUpdates,
+  insertTickRow,
   updateTickRow,
 } from '../../../src/server/climbing-ticks/climbingTickUpdates';
 
@@ -20,7 +21,8 @@ const MAX_BULK_TICKS = 5000;
 
 type BulkBody =
   | { action: 'delete'; ids: unknown }
-  | { action: 'update'; ticks: unknown };
+  | { action: 'update'; ticks: unknown }
+  | { action: 'create'; ticks: unknown };
 
 const parseIds = (raw: unknown): number[] => {
   if (!Array.isArray(raw) || raw.length === 0) {
@@ -84,6 +86,28 @@ const bulkUpdate = (rawTicks: unknown, osmUserId: number) => {
   return { updated: ids.length };
 };
 
+const bulkCreate = (rawTicks: unknown, osmUserId: number) => {
+  if (!Array.isArray(rawTicks) || rawTicks.length === 0) {
+    throw new HttpError('Expected non-empty array of ticks', 400);
+  }
+  if (rawTicks.length > MAX_BULK_TICKS) {
+    throw new HttpError(`Too many ticks (max ${MAX_BULK_TICKS})`, 400);
+  }
+  if (
+    rawTicks.some(
+      (tick) => typeof tick?.timestamp !== 'string' || !tick.timestamp.trim(),
+    )
+  ) {
+    throw new HttpError('Every tick needs a timestamp', 400);
+  }
+
+  const db = getDb();
+  const ids = db.transaction(() =>
+    rawTicks.map((tick) => insertTickRow(db, osmUserId, tick)),
+  )();
+  return { ids };
+};
+
 const performBulk = async (req: NextApiRequest) => {
   if (req.method !== 'POST') {
     throw new HttpError('Method not allowed', 405);
@@ -98,6 +122,9 @@ const performBulk = async (req: NextApiRequest) => {
   }
   if (body.action === 'update') {
     return bulkUpdate(body.ticks, user.id);
+  }
+  if (body.action === 'create') {
+    return bulkCreate(body.ticks, user.id);
   }
   throw new HttpError('Unknown action', 400);
 };

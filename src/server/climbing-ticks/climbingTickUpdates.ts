@@ -42,3 +42,21 @@ export const updateTickRow = <T>(
     )
     .get({ ...updates, tickId }) as T | undefined;
 };
+
+/** Inserts a new tick for `osmUserId`; only user-editable fields are taken. */
+export const insertTickRow = (
+  db: Database,
+  osmUserId: number,
+  body: Record<string, unknown>,
+): number => {
+  const newTick = { ...getSafeTickUpdates(body), osmUserId };
+  const columns = Object.keys(newTick);
+  const columnNames = columns.map((c) => `"${c}"`).join(', ');
+  const placeholders = columns.map((c) => `@${c}`).join(', ');
+  const result = db
+    .prepare(
+      `INSERT INTO climbing_ticks (${columnNames}) VALUES (${placeholders})`,
+    )
+    .run(newTick);
+  return Number(result.lastInsertRowid);
+};
