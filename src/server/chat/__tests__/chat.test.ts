@@ -89,6 +89,38 @@ test('normalizes place searches and filters country codes without inventing tour
   expect(searchChatTours(tours, 'unknown', '')).toEqual([]);
   expect(tours[0].href).toBe('/way/123');
   expect(warnings.join(' ')).toContain('nicht angebunden');
+  const graded = [
+    {
+      name: 'Leicht',
+      href: '/way/1',
+      difficulty: 'A',
+      location: 'Tirol, at',
+      source: 'OSM',
+    },
+    {
+      name: 'Wechsel',
+      href: '/way/4',
+      difficulty: 'B/C',
+      location: 'Tirol, at',
+      source: 'OSM',
+    },
+    {
+      name: 'Schwer',
+      href: '/way/2',
+      difficulty: 'E',
+      location: 'Tirol, at',
+      source: 'OSM',
+    },
+  ];
+  expect(
+    searchChatTours(graded, '', 'at', 'A').map((tour) => tour.name),
+  ).toEqual(['Leicht']);
+  expect(
+    searchChatTours(graded, '', 'at', 'BC').map((tour) => tour.name),
+  ).toEqual(['Wechsel']);
+  expect(
+    searchChatTours(graded, 'tirol', '', '').map((tour) => tour.name),
+  ).toEqual(['Leicht', 'Wechsel', 'Schwer']);
 });
 test('fails closed for source outage, not fake fallback tours', async () => {
   fetchMock.mockRejectedValue(new Error('offline'));
@@ -166,6 +198,7 @@ test('returns actual tool search sources and preserves conversational context', 
     },
   });
   expect(res.status).toHaveBeenCalledWith(200);
+  expect(res.json.mock.calls[0][0].warnings).toEqual([]);
   expect(res.json.mock.calls[0][0].sources[0].href).toBe('/way/123');
   expect(generation.mock.calls[0][0].messages).toHaveLength(3);
 });

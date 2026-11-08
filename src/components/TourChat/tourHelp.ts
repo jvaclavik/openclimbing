@@ -5,16 +5,20 @@ export const TOUR_HELP_Z = 1090;
 
 export const STARTERS = [
   'Leichte Touren hier finden',
-  'Welche Tour passt zu meiner Erfahrung?',
-  'Welche Klettersteige gibt es in einer Region?',
+  'Grad A oder B in Deutschland',
+  'Klettersteige in Österreich',
 ] as const;
 
 export const HERE_STARTER = STARTERS[0];
 
-export const INTRO = 'Frag nach Region, Erfahrung oder Schwierigkeit.';
+export const INTRO = 'Ort oder Grad reicht. Ich suche nur im Katalog.';
 
 export const LIMITATION =
   'Keine Live-Daten zu Wetter oder Sperrungen. Die Kartenansicht wird nicht als Standort gelesen.';
+
+/** Expected preview note. The climber already knows the map is OpenStreetMap. */
+export const visibleChatWarnings = (warnings: string[]) =>
+  warnings.filter((warning) => !warning.includes('nicht angebunden'));
 
 export const DATA_NOTICE =
   'KI-Vorschau mit OpenAI über Vercel AI Gateway. Deine Nachrichten und passende Touren-Metadaten werden zur Beantwortung übertragen. Bitte keine persönlichen Daten eingeben. Familiennotizen und Bewertungen werden nicht übertragen. KI kann Fehler machen; vor Ort und mit verlässlichen Quellen prüfen. Verlauf nur in diesem Fenster; die letzten fünf Frage-Antwort-Paare werden mitgesendet.';

@@ -25,13 +25,16 @@ import {
   TOUR_HELP_LABEL,
   TOUR_HELP_Z,
   messageForSend,
+  selectedTourLabel,
   tourHelpAnchor,
+  visibleChatWarnings,
   type TourHelpSnap,
 } from './tourHelp';
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
+  display?: string;
   sources?: ChatTour[];
 };
 
@@ -41,49 +44,47 @@ const useTourHelpAnchor = () => {
   return tourHelpAnchor((drawerSnap ?? null) as TourHelpSnap, narrow);
 };
 
-const ChatMessage = ({ message }: { message: Message }) => (
-  <Box
-    sx={{
-      p: 1.25,
-      borderRadius: 2,
-      bgcolor:
-        message.role === 'user' ? 'action.selected' : 'background.default',
-    }}
-  >
-    <Typography variant="subtitle2">
-      {message.role === 'user' ? 'Du' : TOUR_HELP_LABEL}
-    </Typography>
-    <Typography
-      variant="body2"
-      sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
+const ChatMessage = ({ message }: { message: Message }) => {
+  const mine = message.role === 'user';
+  return (
+    <Box
+      sx={{
+        alignSelf: mine ? 'flex-end' : 'stretch',
+        maxWidth: mine ? '92%' : '100%',
+        px: mine ? 1.25 : 0,
+        py: mine ? 0.75 : 0,
+        borderRadius: mine ? 2 : 0,
+        bgcolor: mine ? 'action.selected' : 'transparent',
+      }}
     >
-      {message.content}
-    </Typography>
-    {!!message.sources?.length && (
-      <Box sx={{ mt: 1 }}>
-        <Typography variant="caption">
-          Durchsuchte Touren · Karten-Details und Quellen prüfen:
-        </Typography>
-        {message.sources.map((tour) => (
-          <Box key={tour.href} sx={{ mt: 0.5 }}>
-            <Link href={tour.href} target="_blank" rel="noopener noreferrer">
-              {tour.name}
-            </Link>
-            <Typography variant="caption" sx={{ display: 'block' }}>
-              {[
-                tour.difficulty || 'Schwierigkeit unbekannt',
-                tour.location,
-                tour.source,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-    )}
-  </Box>
-);
+      <Typography
+        variant="body2"
+        sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
+      >
+        {message.display ?? message.content}
+      </Typography>
+      {!!message.sources?.length && (
+        <Stack spacing={0.5} sx={{ mt: 0.75 }}>
+          {message.sources.map((tour) => (
+            <Box key={tour.href}>
+              <Link href={tour.href} target="_blank" rel="noopener noreferrer">
+                {tour.name}
+              </Link>
+              <Typography variant="caption" sx={{ display: 'block' }}>
+                {[
+                  tour.difficulty ? `Grad ${tour.difficulty}` : null,
+                  tour.location,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
+      )}
+    </Box>
+  );
+};
 
 const TourHelpHint = ({
   buttonRef,
@@ -130,21 +131,28 @@ const Suggestions = ({
   disabled: boolean;
   onPick: (question: string) => void;
 }) => (
-  <Stack component="nav" aria-label="Vorschläge" spacing={0.75}>
+  <Stack
+    component="nav"
+    aria-label="Vorschläge"
+    direction="row"
+    useFlexGap
+    sx={{ flexWrap: 'wrap', gap: 0.75 }}
+  >
     {STARTERS.map((starter) => (
       <Button
         key={starter}
         type="button"
-        variant="outlined"
         size="small"
         disabled={disabled}
         onClick={() => onPick(starter)}
         sx={{
-          justifyContent: 'flex-start',
           textTransform: 'none',
-          textAlign: 'left',
-          borderRadius: 2,
-          py: 0.75,
+          fontWeight: 600,
+          borderRadius: 999,
+          px: 1.25,
+          border: 1,
+          borderColor: 'divider',
+          color: 'text.primary',
         }}
       >
         {starter}
@@ -155,6 +163,7 @@ const Suggestions = ({
 
 const useTourConversation = () => {
   const feature = useContext(FeatureContext)?.feature;
+  const place = selectedTourLabel(feature);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -175,7 +184,7 @@ const useTourConversation = () => {
     const content = messageForSend(question, feature);
     sending.current = true;
     if (preset) setInput(question);
-    setPending(content);
+    setPending(question);
     setError('');
     try {
       const response = await fetch('/api/kletterglueck/chat', {
@@ -198,10 +207,14 @@ const useTourConversation = () => {
       }
       setMessages((previous) => [
         ...previous,
-        { role: 'user', content },
+        {
+          role: 'user',
+          content,
+          display: question === content ? undefined : question,
+        },
         { role: 'assistant', content: data.text, sources: data.sources },
       ]);
-      setWarnings(data.warnings ?? []);
+      setWarnings(visibleChatWarnings(data.warnings ?? []));
       setInput('');
     } catch (failure) {
       setError(
@@ -225,6 +238,7 @@ const useTourConversation = () => {
   return {
     open,
     setOpen,
+    place,
     messages,
     input,
     setInput,
@@ -257,7 +271,7 @@ const Notice = () => {
       </Button>
       {open && (
         <Typography variant="caption" sx={{ display: 'block' }}>
-          {DATA_NOTICE}
+          {LIMITATION} {DATA_NOTICE}
         </Typography>
       )}
     </Box>
@@ -337,7 +351,7 @@ const TourHelpPanel = ({
         {showSuggestions && (
           <>
             <Typography variant="body2" color="text.secondary">
-              {INTRO}
+              {chat.place ? `Offen: ${chat.place}. ${INTRO}` : INTRO}
             </Typography>
             <Suggestions
               disabled={!!chat.pending}
@@ -349,12 +363,14 @@ const TourHelpPanel = ({
           <ChatMessage key={`${message.role}-${index}`} message={message} />
         ))}
         {chat.pending && (
-          <Box role="status">
+          <Box role="status" sx={{ alignSelf: 'flex-start' }}>
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
               {chat.pending}
             </Typography>
-            <CircularProgress size={16} sx={{ mr: 1, mt: 1 }} />{' '}
-            {TOUR_HELP_LABEL} überlegt …
+            <CircularProgress size={14} sx={{ mr: 1, mt: 0.75 }} />
+            <Typography variant="caption" component="span">
+              Suche im Katalog …
+            </Typography>
           </Box>
         )}
         {chat.warnings.map((warning) => (
@@ -370,37 +386,36 @@ const TourHelpPanel = ({
         onSubmit={submit}
         sx={{ px: 1.5, pb: 1.25, flexShrink: 0 }}
       >
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: 'block', mb: 0.75 }}
-        >
-          {LIMITATION}
-        </Typography>
         <Notice />
         <TextField
-          label="Deine Frage zu Klettersteigen"
-          placeholder="Zum Beispiel: Welche Klettersteige gibt es bei Nürnberg?"
+          placeholder="Ort, Grad oder Name"
           value={chat.input}
           onChange={(event) => chat.setInput(event.target.value)}
           fullWidth
           size="small"
           disabled={!!chat.pending}
           autoComplete="off"
-          slotProps={{ htmlInput: { maxLength: 2000 } }}
+          slotProps={{
+            htmlInput: {
+              maxLength: 2000,
+              'aria-label': 'Deine Frage zu Klettersteigen',
+            },
+          }}
         />
         <Stack
           direction="row"
           sx={{ justifyContent: 'flex-end', flexWrap: 'wrap', mt: 1 }}
         >
-          <Button
-            type="button"
-            size="small"
-            disabled={!!chat.pending}
-            onClick={chat.reset}
-          >
-            Neuer Chat
-          </Button>
+          {chat.messages.length > 0 && (
+            <Button
+              type="button"
+              size="small"
+              disabled={!!chat.pending}
+              onClick={chat.reset}
+            >
+              Neuer Chat
+            </Button>
+          )}
           <Button
             type="submit"
             size="small"

@@ -141,19 +141,27 @@ const normalize = (text: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/ß/g, 'ss');
+const gradeLetters = (value: string) =>
+  value.toUpperCase().match(/[A-F]/g) ?? [];
+
 export function searchChatTours(
   tours: ChatTour[],
   query: string,
   countryCode: string,
+  grade = '',
 ) {
   const words = normalize(query).split(/\s+/).filter(Boolean);
+  const wanted = gradeLetters(grade);
   return tours
     .filter((tour) => {
       const haystack = normalize(tour.name + ' ' + tour.location);
+      const letters = gradeLetters(tour.difficulty ?? '');
       return (
         (!countryCode ||
           tour.location.toLowerCase().endsWith(countryCode.toLowerCase())) &&
-        words.every((word) => haystack.includes(word))
+        words.every((word) => haystack.includes(word)) &&
+        (wanted.length === 0 ||
+          letters.some((letter) => wanted.includes(letter)))
       );
     })
     .slice(0, 8);

@@ -63,20 +63,17 @@ test('starts collapsed and shows suggestions only after a tap', () => {
     screen.getByRole('button', { name: 'Leichte Touren hier finden' }),
   ).toBeTruthy();
   expect(
-    screen.getByRole('button', {
-      name: 'Welche Tour passt zu meiner Erfahrung?',
-    }),
+    screen.getByRole('button', { name: 'Grad A oder B in Deutschland' }),
   ).toBeTruthy();
   expect(
-    screen.getByRole('button', {
-      name: 'Welche Klettersteige gibt es in einer Region?',
-    }),
+    screen.getByRole('button', { name: 'Klettersteige in Österreich' }),
   ).toBeTruthy();
   expect(screen.getByRole('textbox')).toBeTruthy();
-  expect(screen.getByText(LIMITATION)).toBeTruthy();
+  expect(screen.queryByText(LIMITATION)).toBeNull();
   expect(screen.queryByText(DATA_NOTICE)).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Datenhinweis' }));
-  expect(screen.getByText(DATA_NOTICE)).toBeTruthy();
+  expect(screen.getByText(LIMITATION, { exact: false })).toBeTruthy();
+  expect(screen.getByText(DATA_NOTICE, { exact: false })).toBeTruthy();
   expect(fetchMock).not.toHaveBeenCalled();
 });
 
