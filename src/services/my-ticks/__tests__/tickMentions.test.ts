@@ -1,6 +1,7 @@
 import { ClimbingTick } from '../../../types';
 import {
   buildPartnersForCopy,
+  buildTickCopies,
   buildTickCopy,
   getAlreadyLoggedMentionIds,
   isUserMentioned,
@@ -52,6 +53,12 @@ describe('buildPartnersForCopy', () => {
     );
   });
 
+  it('leaves a longer nickname with punctuation alone', () => {
+    expect(buildPartnersForCopy('@jan.foo @jan', 'jan', 'pepa')).toBe(
+      '@jan.foo @pepa',
+    );
+  });
+
   it('removes my mention when owner is unknown', () => {
     expect(buildPartnersForCopy('@jan @karel', 'jan', null)).toBe('@karel');
   });
@@ -87,5 +94,28 @@ describe('buildTickCopy', () => {
     expect(
       buildTickCopy(source, 'jan', { kind: 'fixed', style: 'TR' }).style,
     ).toBe('TR');
+  });
+});
+
+describe('buildTickCopies', () => {
+  it('creates one tick per route and day, with all tagging partners', () => {
+    const copies = buildTickCopies(
+      [
+        tick({
+          id: 1,
+          pairing: { partners: '@jan' },
+          ownerDisplayName: 'pepa',
+        }),
+        tick({
+          id: 2,
+          pairing: { partners: '@jan' },
+          ownerDisplayName: 'karel',
+        }),
+        tick({ id: 3, shortId: 'n2', ownerDisplayName: 'pepa' }),
+      ],
+      'jan',
+    );
+    expect(copies).toHaveLength(2);
+    expect(copies[0].pairing).toEqual({ partners: '@pepa @karel' });
   });
 });

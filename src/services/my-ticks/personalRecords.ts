@@ -129,14 +129,26 @@ const bestYear = (days: DayRecord[]): YearRecord | null => {
   return best;
 };
 
+/** Crag identity: OSM id when known (two crags may share a name). */
+export const cragKey = (row: FetchedClimbingTick): string | null => {
+  const name = row.cragName?.trim();
+  if (!name) return null;
+  return row.cragOsmType && row.cragOsmId
+    ? `${row.cragOsmType}/${row.cragOsmId}`
+    : `name:${name}`;
+};
+
 const cragDays = (rows: FetchedClimbingTick[]) => {
-  const map = new Map<string, Set<string>>();
+  const map = new Map<string, { name: string; days: Set<string> }>();
   for (const row of rows) {
-    const name = row.cragName?.trim();
-    if (!name) continue;
-    const days = map.get(name) ?? new Set<string>();
-    days.add(dayOf(row));
-    map.set(name, days);
+    const key = cragKey(row);
+    if (!key) continue;
+    const entry = map.get(key) ?? {
+      name: row.cragName.trim(),
+      days: new Set<string>(),
+    };
+    entry.days.add(dayOf(row));
+    map.set(key, entry);
   }
   return map;
 };
@@ -149,9 +161,9 @@ export const computePersonalRecords = (
   const crags = cragDays(sorted);
 
   let topCrag: PersonalRecords['topCrag'] = null;
-  crags.forEach((set, name) => {
-    if (!topCrag || set.size > topCrag.days) {
-      topCrag = { name, days: set.size };
+  crags.forEach(({ name, days }) => {
+    if (!topCrag || days.size > topCrag.days) {
+      topCrag = { name, days: days.size };
     }
   });
 
@@ -234,7 +246,7 @@ const dayAndCragMilestones = (sorted: FetchedClimbingTick[]): Milestone[] => {
         out.push({ kind: 'climbing_days', day, count: days.size });
       }
     }
-    const crag = row.cragName?.trim();
+    const crag = cragKey(row);
     if (crag && !crags.has(crag)) {
       crags.add(crag);
       if (CRAG_COUNT_MILESTONES.includes(crags.size)) {
@@ -242,7 +254,7 @@ const dayAndCragMilestones = (sorted: FetchedClimbingTick[]): Milestone[] => {
           kind: 'crag_count',
           day,
           count: crags.size,
-          cragName: crag,
+          cragName: row.cragName.trim(),
         });
       }
     }

@@ -159,3 +159,18 @@ export const fetchMentionedClimbingTicks = async (): Promise<
   );
   return ticks;
 };
+
+/** Public: all climbers' ticks of one route, newest first. */
+export const fetchRouteTicks = async ({
+  type,
+  id,
+}: {
+  type: OsmType;
+  id: number;
+}): Promise<MentionedClimbingTick[]> => {
+  const { ticks } = await fetchJson<{ ticks: MentionedClimbingTick[] }>(
+    `/api/climbing-ticks/route/${type}/${id}`,
+    { method: 'GET', headers: { 'Content-Type': 'application/json' } },
+  );
+  return ticks;
+};

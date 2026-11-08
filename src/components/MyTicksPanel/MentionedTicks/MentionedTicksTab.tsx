@@ -18,7 +18,7 @@ import { useSnackbar } from '../../utils/SnackbarContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
 import { EditTickButton } from '../../FeaturePanel/Climbing/EditTickButton';
 import {
-  buildTickCopy,
+  buildTickCopies,
   CopyStyleOption,
   MentionedClimbingTick,
 } from '../../../services/my-ticks/tickMentions';
@@ -53,8 +53,9 @@ const useAddMentionedTicks = () => {
     styleOption?: CopyStyleOption,
   ) => {
     try {
+      // one tick per route & day even if several partners tagged me
       const ids = await bulkAddTicks(
-        sources.map((source) => buildTickCopy(source, osmUser, styleOption)),
+        buildTickCopies(sources, osmUser, styleOption),
       );
       if (ids.length === 1) {
         showToast(
@@ -193,7 +194,7 @@ const MentionsTable = ({
                 ownerDisplayName={source?.ownerDisplayName ?? null}
                 alreadyLogged={alreadyLoggedIds.has(row.tick.id)}
                 adding={addingIds.has(row.tick.id)}
-                onAdd={() => onAdd(source)}
+                onAdd={() => source && onAdd(source)}
                 selection={
                   selecting
                     ? {
@@ -245,6 +246,7 @@ export const MentionedTicksTab = () => {
     ? selectableIds
         .filter((id) => selection.selectedIds.has(id))
         .map((id) => ownerById.get(id))
+        .filter((tick): tick is MentionedClimbingTick => !!tick)
     : [];
 
   const addOne = async (source: MentionedClimbingTick) => {

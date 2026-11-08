@@ -7,6 +7,7 @@ import {
   monthKeyFromDate,
 } from '../../../services/my-ticks/climbingStatsDateRange';
 import { sessionDateFromTimestamp } from '../../../services/my-ticks/ticksUrlFilter';
+import { cragKey } from '../../../services/my-ticks/personalRecords';
 
 // Styles grouped by how clean the send was: an ordered scale, so the charts
 // use one hue from dark (cleanest) to light.
@@ -26,16 +27,26 @@ export const isSend = (row: FetchedClimbingTick) =>
 const validDate = (row: FetchedClimbingTick) =>
   !Number.isNaN(Date.parse(row.date));
 
+const MAX_MONTHS = 600; // 50 years
+
 /** Month keys (YYYY-MM) for the selected period; "all" spans the whole history. */
 export const chartMonthKeys = (
   range: ClimbingStatsDateRange,
   allRows: FetchedClimbingTick[],
 ): string[] => {
   if (range.mode !== 'all') return getChartMonthKeys(range, allRows);
-  const dates = allRows.filter(validDate).map((row) => row.date);
+  // Ignore impossible future dates and cap the span, so one bad timestamp
+  // cannot blow the series up to thousands of months.
+  const now = new Date();
+  const dates = allRows
+    .filter(validDate)
+    .map((row) => new Date(row.date))
+    .filter((d) => d <= now);
   if (dates.length === 0) return getChartMonthKeys(range, allRows);
-  const first = new Date(dates.reduce((a, b) => (a < b ? a : b)));
-  const last = new Date(dates.reduce((a, b) => (a > b ? a : b)));
+  const last = new Date(Math.max(...dates.map((d) => d.getTime())));
+  const earliest = new Date(Math.min(...dates.map((d) => d.getTime())));
+  const limit = new Date(last.getFullYear(), last.getMonth() - MAX_MONTHS + 1);
+  const first = earliest < limit ? limit : earliest;
   const keys: string[] = [];
   const cursor = new Date(first.getFullYear(), first.getMonth(), 1);
   while (cursor <= last) {
@@ -135,16 +146,19 @@ export const topCrags = (
   rows: FetchedClimbingTick[],
   limit = 8,
 ): { name: string; days: number }[] => {
-  const days = new Map<string, Set<string>>();
+  const crags = new Map<string, { name: string; days: Set<string> }>();
   for (const row of rows) {
-    const name = row.cragName?.trim();
-    if (!name || !validDate(row)) continue;
-    const set = days.get(name) ?? new Set<string>();
-    set.add(sessionDateFromTimestamp(row.date));
-    days.set(name, set);
+    const key = cragKey(row);
+    if (!key || !validDate(row)) continue;
+    const entry = crags.get(key) ?? {
+      name: row.cragName.trim(),
+      days: new Set<string>(),
+    };
+    entry.days.add(sessionDateFromTimestamp(row.date));
+    crags.set(key, entry);
   }
-  return [...days.entries()]
-    .map(([name, set]) => ({ name, days: set.size }))
+  return [...crags.values()]
+    .map(({ name, days }) => ({ name, days: days.size }))
     .sort((a, b) => b.days - a.days || a.name.localeCompare(b.name))
     .slice(0, limit);
 };

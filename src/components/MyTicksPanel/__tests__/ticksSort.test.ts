@@ -27,6 +27,17 @@ describe('sortTicks', () => {
     expect(ids(sortTicks(rows, 'grade_desc'))).toEqual([1, 2, 3]);
   });
 
+  it('sorts projects by the route grade', () => {
+    const project = {
+      ...row(4, '2025-04-01T10:00:00Z', null),
+      grade: '9',
+    } as FetchedClimbingTick;
+    const uiaa5 = { ...row(5, '2025-04-01T10:00:00Z', null), grade: '5' };
+    expect(
+      ids(sortTicks([uiaa5 as FetchedClimbingTick, project], 'grade_desc')),
+    ).toEqual([4, 5]);
+  });
+
   it('sorts by points and name', () => {
     expect(ids(sortTicks(rows, 'points_desc'))).toEqual([2, 3, 1]);
     expect(ids(sortTicks(rows, 'name_asc'))).toEqual([1, 2, 3]);

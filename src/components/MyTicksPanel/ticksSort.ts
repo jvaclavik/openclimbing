@@ -1,4 +1,5 @@
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
+import { findGradeTableRowIndexForGradeText } from '../../services/tagging/climbing/routeGrade';
 
 export const TICKS_SORT_KEYS = [
   'date_desc',
@@ -15,8 +16,12 @@ export const DEFAULT_TICKS_SORT: TicksSortKey = 'date_desc';
 const byDateDesc = (a: FetchedClimbingTick, b: FetchedClimbingTick) =>
   b.date.localeCompare(a.date) || b.tick.id - a.tick.id;
 
+// Scoring gives projects no grade (0 points), but for sorting the route's
+// difficulty is what counts.
 const gradeOf = (row: FetchedClimbingTick) =>
-  row.tickScore?.gradeRowIndex ?? -1;
+  row.tickScore?.gradeRowIndex ??
+  (row.grade ? findGradeTableRowIndexForGradeText(row.grade) : null) ??
+  -1;
 
 const COMPARATORS: Record<
   TicksSortKey,

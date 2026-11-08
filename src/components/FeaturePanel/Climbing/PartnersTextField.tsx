@@ -140,7 +140,6 @@ export const PartnersTextField = ({
           minRows={2}
           fullWidth
           hiddenLabel
-          aria-label={label || ariaLabel}
           onChange={(e) => {
             onChange(e.target.value);
             setCursorPos(e.target.selectionStart ?? 0);
@@ -150,6 +149,10 @@ export const PartnersTextField = ({
           onKeyUp={(e) => syncCursor(e.target as HTMLTextAreaElement)}
           slotProps={{
             inputLabel: { shrink: true },
+            // name the textarea itself (the visible label is a plain span)
+            htmlInput: {
+              'aria-label': label || ariaLabel || t('tick.partners_label'),
+            },
           }}
         />
       </Box>

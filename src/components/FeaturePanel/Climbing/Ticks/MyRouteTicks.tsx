@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { Box } from '@mui/material';
 import { PanelLabel } from '../PanelLabel';
 import { AddTickButton } from './AddTickButton';
 import { DotLoader } from '../../../helpers';
@@ -78,16 +79,21 @@ const MyRouteTicksInner = () => {
         <span>{isFetching && <DotLoader />}</span>
       </PanelLabel>
 
-      <TickSessionCard columns={['name', 'style', 'points', 'more']}>
-        {ticksForRoute.map((tick) => (
-          <RouteTickRow
-            key={tick.id}
-            tick={tick}
-            routeTags={feature.tags}
-            gradeSystem={gradeSystem}
-          />
-        ))}
-      </TickSessionCard>
+      <Box sx={{ mt: 1 }}>
+        <TickSessionCard
+          columns={['name', 'style', 'points', 'more']}
+          nameLabel={t('my_ticks.route_date')}
+        >
+          {ticksForRoute.map((tick) => (
+            <RouteTickRow
+              key={tick.id}
+              tick={tick}
+              routeTags={feature.tags}
+              gradeSystem={gradeSystem}
+            />
+          ))}
+        </TickSessionCard>
+      </Box>
     </Container>
   );
 };

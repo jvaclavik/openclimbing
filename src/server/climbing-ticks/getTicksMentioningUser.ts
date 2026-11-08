@@ -12,6 +12,13 @@ const MAX_MENTIONS = 2000;
 const escapeLike = (text: string) => text.replace(/[\\%_]/g, '\\$&');
 
 /**
+ * SQL LIKE is case-insensitive only for ASCII, so for other names (Čenda vs
+ * @čenda) take every mention and let the exact JS match decide.
+ */
+const mentionPrefilter = (username: string) =>
+  /^[\x20-\x7e]*$/.test(username) ? `%@${escapeLike(username)}%` : '%@%';
+
+/**
  * Ticks of other users with `@username` in their partners text. Only ticks
  * linked to an OSM route — those can be copied to the user's own diary.
  */
@@ -31,7 +38,7 @@ export const getTicksMentioningUser = (
        ORDER BY timestamp DESC
        LIMIT ${MAX_MENTIONS * 2}`,
     )
-    .all(osmUserId, `%@${escapeLike(username)}%`);
+    .all(osmUserId, mentionPrefilter(username));
 
   const ticks = climbingTickDbsToResponseTicks(db, candidates)
     .filter((tick) => isUserMentioned(getPartnersText(tick), username))

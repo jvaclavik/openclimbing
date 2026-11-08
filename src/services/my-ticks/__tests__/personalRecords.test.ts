@@ -72,6 +72,21 @@ describe('computePersonalRecords', () => {
     expect(r.cragCount).toBe(2);
   });
 
+  it('keeps crags with the same name apart', () => {
+    const withId = (date: string, id: number) =>
+      ({
+        ...row(date, 'RP', 5, { crag: 'Velká stěna' }),
+        cragOsmType: 'relation',
+        cragOsmId: id,
+      }) as unknown as FetchedClimbingTick;
+    const r = computePersonalRecords([
+      withId('2024-05-01T10:00:00Z', 1),
+      withId('2024-05-02T10:00:00Z', 2),
+    ]);
+    expect(r.cragCount).toBe(2);
+    expect(r.topCrag).toEqual({ name: 'Velká stěna', days: 1 });
+  });
+
   it('handles empty input', () => {
     const r = computePersonalRecords([]);
     expect(r.hardestSend).toBeNull();

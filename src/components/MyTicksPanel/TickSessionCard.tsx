@@ -1,5 +1,15 @@
 import React from 'react';
-import { Box, Table, TableBody } from '@mui/material';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
+import { t } from '../../services/intl';
+import { TranslationId } from '../../services/types';
 import { tint } from '../utils/panelUi';
 
 export type TickColumn =
@@ -28,14 +38,52 @@ const COLUMN_WIDTHS: Record<Exclude<TickColumn, 'name'>, number> = {
   add: 104, // "Logged" chip + 4/12px padding
 };
 
+const COLUMN_LABELS: Record<TickColumn, TranslationId> = {
+  checkbox: 'my_ticks.select.select_row',
+  name: 'my_ticks.route_name',
+  grade: 'my_ticks.route_grade',
+  style: 'my_ticks.route_style',
+  points: 'my_ticks.route_points',
+  date: 'my_ticks.route_date',
+  more: 'my_ticks.column_actions',
+  add: 'my_ticks.column_actions',
+};
+
+/**
+ * Column headers for screen readers only — the cards show no header row,
+ * but table navigation still needs column names.
+ */
+const HiddenColumnHeaders = ({
+  columns,
+  nameLabel,
+}: {
+  columns: TickColumn[];
+  nameLabel?: string;
+}) => (
+  <TableHead style={visuallyHidden}>
+    <TableRow>
+      {columns.map((column) => (
+        <TableCell key={column} component="th" scope="col">
+          {column === 'name' && nameLabel
+            ? nameLabel
+            : t(COLUMN_LABELS[column])}
+        </TableCell>
+      ))}
+    </TableRow>
+  </TableHead>
+);
+
 /** One climbing session (or a plain list): optional header + tick rows. */
 export const TickSessionCard = ({
   header,
   columns,
+  nameLabel,
   children,
 }: {
   header?: React.ReactNode;
   columns: TickColumn[];
+  /** Screen-reader name of the first column (default: route name). */
+  nameLabel?: string;
   children: React.ReactNode;
 }) => (
   <Box
@@ -80,6 +128,7 @@ export const TickSessionCard = ({
             />
           ))}
         </colgroup>
+        <HiddenColumnHeaders columns={columns} nameLabel={nameLabel} />
         <TableBody>{children}</TableBody>
       </Table>
     </Box>

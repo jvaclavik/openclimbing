@@ -34,4 +34,15 @@ describe('getTicksMentioningUser', () => {
     ]);
     expect(ticks[0].shortId).toBe('n7');
   });
+
+  it('matches non-ASCII names regardless of case', () => {
+    const db = buildDb();
+    db.prepare(
+      `INSERT INTO climbing_ticks (id, "osmUserId", "osmType", "osmId", timestamp, style, pairing)
+       VALUES (10, 2, 'node', 7, '2025-01-02T12:00:00Z', 'RP', '{"partners":"s @čenda"}')`,
+    ).run();
+    expect(getTicksMentioningUser(db, 9, 'Čenda').map((t) => t.id)).toEqual([
+      10,
+    ]);
+  });
 });

@@ -112,7 +112,7 @@ export const ActivityCalendar = ({
           ))}
         </Box>
         <Box
-          role="img"
+          role="group"
           aria-label={t('user_profile.activity.title')}
           sx={{
             display: 'grid',
@@ -122,19 +122,43 @@ export const ActivityCalendar = ({
             gap: '2px',
           }}
         >
-          {data.weeks.flat().map((cell) => (
-            <Box
-              key={cell.day}
-              title={cell.future ? undefined : dayTitle(cell)}
-              onClick={cell.ticks > 0 ? () => onOpenDay(cell.day) : undefined}
-              sx={{
-                aspectRatio: '1',
-                borderRadius: '2px',
-                bgcolor: cell.future ? 'transparent' : color(cell.level),
-                cursor: cell.ticks > 0 ? 'pointer' : undefined,
-              }}
-            />
-          ))}
+          {data.weeks.flat().map((cell) => {
+            const cellSx = {
+              aspectRatio: '1',
+              borderRadius: '2px',
+              bgcolor: cell.future ? 'transparent' : color(cell.level),
+            };
+            // Days with ticks open the diary: real buttons, so they are
+            // reachable by keyboard and named for screen readers.
+            return cell.ticks > 0 ? (
+              <Box
+                key={cell.day}
+                component="button"
+                type="button"
+                title={dayTitle(cell)}
+                aria-label={dayTitle(cell)}
+                onClick={() => onOpenDay(cell.day)}
+                sx={(theme) => ({
+                  ...cellSx,
+                  p: 0,
+                  border: 0,
+                  minWidth: 0,
+                  cursor: 'pointer',
+                  '&:focus-visible': {
+                    outline: `2px solid ${theme.palette.text.primary}`,
+                    outlineOffset: 1,
+                  },
+                })}
+              />
+            ) : (
+              <Box
+                key={cell.day}
+                aria-hidden
+                title={cell.future ? undefined : dayTitle(cell)}
+                sx={cellSx}
+              />
+            );
+          })}
         </Box>
         <Legend />
       </Stack>

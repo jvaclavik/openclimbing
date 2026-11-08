@@ -93,24 +93,29 @@ const TimelineItem = ({
         columnGap: 1.25,
         alignItems: 'start',
         textAlign: 'left',
-        width: '100%',
-        pb: isLast ? 0.5 : 1.75,
-        borderRadius: '8px',
+        // Hover surface reaches 8px past the content on each side, so the
+        // dots stay aligned with the section title.
+        width: 'calc(100% + 16px)',
+        mx: -1,
+        px: 1,
+        py: 0.75,
+        borderRadius: '10px',
         position: 'relative',
-        // connecting line between dots
+        transition: 'background-color 120ms',
+        // connecting line between dots (dot: 24px at 6px from the top)
         '&::before': isLast
           ? undefined
           : {
               content: '""',
               position: 'absolute',
-              left: 11,
-              top: 26,
-              bottom: 2,
+              left: 19,
+              top: 34,
+              bottom: -8,
               width: 2,
               borderRadius: 1,
               backgroundColor: tint(theme, 0.08),
             },
-        '&:hover': { backgroundColor: tint(theme, 0.03) },
+        '&:hover': { backgroundColor: tint(theme, 0.04) },
       })}
     >
       <Box
@@ -192,7 +197,8 @@ export const MilestonesTimeline = ({
         ) : null
       }
     >
-      <Stack>
+      {/* gap, not Stack spacing: spacing would reset the items' negative margin */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         {visible.map((milestone, i) => (
           <TimelineItem
             key={`${milestone.kind}-${milestone.day}-${i}`}
@@ -201,7 +207,7 @@ export const MilestonesTimeline = ({
             onOpenDay={onOpenDay}
           />
         ))}
-      </Stack>
+      </Box>
     </ProfileSection>
   );
 };

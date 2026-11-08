@@ -6,20 +6,22 @@ import {
   MentionedClimbingTick,
 } from '../../../services/my-ticks/tickMentions';
 import { useTicksContext } from '../../utils/TicksContext';
-
-export const MENTIONED_TICKS_QUERY_KEY = ['climbing-ticks-mentions'];
+import { useOsmAuthContext } from '../../utils/OsmAuthContext';
 
 export const useMentionedTicks = (enabled: boolean) => {
+  const { loggedIn, osmUser } = useOsmAuthContext();
+  const active = enabled && loggedIn && !!osmUser;
+  // Per-account key and no keepPreviousData: after switching accounts the
+  // previous user's mentions must never show up (or be copied).
   const { data, error, isFetched } = useQuery<MentionedClimbingTick[]>({
-    queryKey: MENTIONED_TICKS_QUERY_KEY,
+    queryKey: ['climbing-ticks-mentions', osmUser],
     queryFn: fetchMentionedClimbingTicks,
-    enabled,
-    keepPreviousData: true,
+    enabled: active,
     staleTime: 60_000,
   });
   return {
-    mentionedTicks: data ?? [],
-    isLoading: enabled && !isFetched,
+    mentionedTicks: active ? (data ?? []) : [],
+    isLoading: active && !isFetched,
     error,
   };
 };

@@ -210,7 +210,12 @@ export const BulkEditTicksDialog = ({ ticks, onClose, onSaved }: Props) => {
                     value: clampDateInputYyyyMmDd(e.target.value, maxDay),
                   })
                 }
-                slotProps={{ htmlInput: { max: maxDay } }}
+                slotProps={{
+                  htmlInput: {
+                    max: maxDay,
+                    'aria-label': t('tick.date_label'),
+                  },
+                }}
               />
               <Button
                 variant="outlined"
@@ -255,6 +260,7 @@ export const BulkEditTicksDialog = ({ ticks, onClose, onSaved }: Props) => {
               multiline
               minRows={2}
               size="small"
+              slotProps={{ htmlInput: { 'aria-label': t('tick.note_label') } }}
             />
           </FieldToggle>
         </Stack>

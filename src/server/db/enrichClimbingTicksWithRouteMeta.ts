@@ -149,6 +149,8 @@ const cragMetaFromAncestors = (
   };
 };
 
+const ROUTE_META_CHUNK = 300;
+
 export function getRouteMetaMap(
   db: Database,
   rows: ClimbingTickDb[],
@@ -164,19 +166,26 @@ export function getRouteMetaMap(
     return new Map();
   }
   const list = [...pairs.values()];
-  const orParts = list
-    .map(() => '(r."osmType" = ? AND r."osmId" = ?)')
-    .join(' OR ');
-  const sql = `SELECT r.id, r."parentId", r."osmType", r."osmId", r.name, r."nameRaw", r."gradeTxt", r.lon, r.lat,
+  // One OR term per route: query in chunks so a long diary stays below
+  // SQLite's expression-depth limit (1000).
+  const found: FeatureRow[] = [];
+  for (let i = 0; i < list.length; i += ROUTE_META_CHUNK) {
+    const chunk = list.slice(i, i + ROUTE_META_CHUNK);
+    const orParts = chunk
+      .map(() => '(r."osmType" = ? AND r."osmId" = ?)')
+      .join(' OR ');
+    const sql = `SELECT r.id, r."parentId", r."osmType", r."osmId", r.name, r."nameRaw", r."gradeTxt", r.lon, r.lat,
     par.name AS "parName", par."nameRaw" AS "parNameRaw"
     FROM climbing_features r
     LEFT JOIN climbing_features par
       ON par."osmId" = r."parentId" AND par."osmType" = 'relation'
     WHERE ${orParts}`;
-  const stmt = db.prepare(sql);
-  const found = stmt.all(
-    ...list.flatMap((p) => [p.osmType, p.osmId]),
-  ) as FeatureRow[];
+    found.push(
+      ...(db
+        .prepare(sql)
+        .all(...chunk.flatMap((p) => [p.osmType, p.osmId])) as FeatureRow[]),
+    );
+  }
   const byId = loadClimbingFeaturesByOsmId(db);
   const map = new Map<string, RouteMeta>();
   for (const row of found) {

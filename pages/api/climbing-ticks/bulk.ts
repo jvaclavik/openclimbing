@@ -10,10 +10,11 @@ import {
 
 class HttpError extends Error {
   constructor(
-    public message: string = '',
+    message: string,
     public code: number,
   ) {
-    super();
+    super(message);
+    this.name = 'HttpError';
   }
 }
 

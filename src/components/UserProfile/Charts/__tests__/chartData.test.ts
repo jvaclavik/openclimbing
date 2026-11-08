@@ -44,6 +44,16 @@ describe('chart data', () => {
     ]);
   });
 
+  it('ignores future dates and caps the month series', () => {
+    const keys = chartMonthKeys({ mode: 'all' }, [
+      ...rows,
+      row('9999-01-01T10:00:00Z', 'RP', 5),
+      row('1900-01-01T10:00:00Z', 'RP', 5),
+    ]);
+    expect(keys.length).toBeLessThanOrEqual(600);
+    expect(keys[keys.length - 1]).toBe('2024-03');
+  });
+
   it('takes the hardest send per month, ignoring projects', () => {
     const p = gradeProgression(rows, ['2024-01', '2024-02', '2024-03']);
     expect(p.map((x) => x.gradeIndex)).toEqual([14, null, 12]);

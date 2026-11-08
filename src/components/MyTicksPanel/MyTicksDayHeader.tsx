@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import { t, tPlural } from '../../services/intl';
 import { getUrlOsmId } from '../../services/helpers';
 import { tint } from '../utils/panelUi';
+import { isProjectStyle } from '../../services/my-ticks/ticks';
+import { TickStyle } from '../FeaturePanel/Climbing/types';
 import { FetchedClimbingTick } from '../../services/my-ticks/getMyTicks';
 import { useOsmAuthContext } from '../utils/OsmAuthContext';
 import { useMapStateContext } from '../utils/MapStateContext';
@@ -15,6 +17,16 @@ import { TickPoints } from './TickPoints';
 import { DayCrag, getDayCrags } from './dayCrags';
 
 const MAX_CRAGS_IN_HEADER = 2;
+
+/** "3 přelezy", or "1 projekt" on a day with projects only. */
+const dayCountLabel = (ticks: FetchedClimbingTick[]) => {
+  const sends = ticks.filter(
+    (row) => !isProjectStyle(row.style as TickStyle | null),
+  ).length;
+  return sends > 0 || ticks.length === 0
+    ? tPlural('user_profile.unit.sends', sends)
+    : tPlural('user_profile.unit.projects', ticks.length);
+};
 
 export type DayHeaderSelection = {
   checked: boolean;
@@ -154,7 +166,7 @@ export const MyTicksDayHeader = ({
           variant="caption"
           sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
         >
-          {tPlural('user_profile.unit.sends', sessionTicks.length)}
+          {dayCountLabel(sessionTicks)}
           {' · '}
           <TickPoints
             points={points}

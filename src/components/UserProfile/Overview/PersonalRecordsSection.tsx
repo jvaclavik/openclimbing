@@ -105,32 +105,36 @@ const RecordCell = ({
       ) : null}
     </Stack>
   );
-  const cellSx = (theme) => ({
+  // Tiles like the homepage stats: inner padding keeps content off the edge
+  // of the hover surface.
+  const tileSx = (theme) => ({
     ...(fullRow ? { gridColumn: '1 / -1' } : {}),
-    py: 1.25,
-    pr: 1.5,
-    borderBottom: `1px solid ${tint(theme, 0.08)}`,
-    textAlign: 'left',
+    display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    '&:nth-child(even)': {
-      pl: 1.5,
-      borderLeft: `1px solid ${tint(theme, 0.08)}`,
-    },
+    textAlign: 'left',
+    px: 1.75,
+    py: 1.25,
+    borderRadius: '12px',
+    backgroundColor: tint(theme, 0.04),
   });
   return onClick ? (
     <ButtonBase
       onClick={onClick}
       sx={(theme) => ({
-        ...cellSx(theme),
-        borderRadius: 0,
-        '&:hover': { backgroundColor: tint(theme, 0.03) },
+        ...tileSx(theme),
+        transition: 'background-color 120ms',
+        '&:hover': { backgroundColor: tint(theme, 0.07) },
+        '&.Mui-focusVisible': {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: 2,
+        },
       })}
     >
       {content}
     </ButtonBase>
   ) : (
-    <Box sx={cellSx}>{content}</Box>
+    <Box sx={tileSx}>{content}</Box>
   );
 };
 
@@ -219,11 +223,11 @@ export const PersonalRecordsSection = ({
         ) : null}
         {cells.length > 0 ? (
           <Box
-            sx={(theme) => ({
+            sx={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              borderTop: `1px solid ${tint(theme, 0.08)}`,
-            })}
+              gap: 1,
+            }}
           >
             {cells.map((cell, i) => (
               <RecordCell

@@ -13,7 +13,8 @@ export type MentionedClimbingTick = ClimbingTick & {
 };
 
 // "@pepa," / "@pepa." / "(@pepa)" → "pepa"
-const TRAILING_PUNCTUATION = /[.,;:!?)\]}"'»“”]+$/u;
+const TRAILING_PUNCTUATION_CLASS = `[.,;:!?)\\]}"'»“”]`;
+const TRAILING_PUNCTUATION = new RegExp(`${TRAILING_PUNCTUATION_CLASS}+$`, 'u');
 
 export const normalizeMentionNick = (nick: string): string =>
   nick.replace(TRAILING_PUNCTUATION, '').toLowerCase();
@@ -45,8 +46,10 @@ export const buildPartnersForCopy = (
   const ownerAlreadyMentioned =
     !!ownerDisplayName && isUserMentioned(partnersText, ownerDisplayName);
 
+  // The mention must end here: only trailing punctuation may follow before
+  // whitespace / end, so "@jan.foo" (someone else) is left alone.
   const re = new RegExp(
-    `@${escapeRegExp(myUsername)}(?=$|[\\s.,;:!?)\\]}"'»“”])`,
+    `@${escapeRegExp(myUsername)}(?=${TRAILING_PUNCTUATION_CLASS}*(?:\\s|$))`,
     'giu',
   );
   let replaced = false;
@@ -113,3 +116,40 @@ export const buildTickCopy = (
     ),
   ),
 });
+
+/**
+ * Copies for my diary, one per route and day: when several partners tagged me
+ * on the same ascent, all of them become my partners on a single tick.
+ */
+export const buildTickCopies = (
+  sources: MentionedClimbingTick[],
+  myUsername: string,
+  styleOption: CopyStyleOption = { kind: 'original' },
+): Partial<ClimbingTick>[] => {
+  const byAscent = new Map<string, MentionedClimbingTick[]>();
+  for (const source of sources) {
+    if (!source?.shortId) continue;
+    const key = ownTickKey(source.shortId, source.timestamp);
+    byAscent.set(key, [...(byAscent.get(key) ?? []), source]);
+  }
+  return [...byAscent.values()].map(([first, ...others]) => {
+    const copy = buildTickCopy(first, myUsername, styleOption);
+    const partners = getPartnersText(copy as ClimbingTick);
+    const extraOwners = others
+      .map((o) => o.ownerDisplayName)
+      .filter(
+        (name): name is string => !!name && !isUserMentioned(partners, name),
+      )
+      .filter((name, i, all) => all.indexOf(name) === i)
+      .map((name) => `@${name}`);
+    return extraOwners.length
+      ? {
+          ...copy,
+          pairing: setPartnersOnPairing(
+            copy.pairing,
+            [partners, ...extraOwners].filter(Boolean).join(' '),
+          ),
+        }
+      : copy;
+  });
+};
