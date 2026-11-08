@@ -1,4 +1,5 @@
 import {
+  isClimbSlug,
   matchClimbSlug,
   parseClimbSlugs,
   parseViaFerrataRatings,
@@ -24,6 +25,7 @@ const html = `
   reviewed <a href="https://www.via-ferrata.de/klettersteige/reviews/9" title="1. Mai 2024 10:00">vor 2 Jahren</a>
 </li></ul>
 <div class="sabai-directory-body" itemprop="reviewBody"><p>Kurzer Satz & noch einer.</p></div>
+<div class="via-route-explorer" data-lat="49.551756" data-lng="11.525013"></div>
 `;
 
 const slugs = [
@@ -49,6 +51,8 @@ test('liest Durchschnitt und eine Bewertung', () => {
     ],
     average: 4.05,
     count: 2,
+    lat: 49.551756,
+    lng: 11.525013,
     reviews: [
       {
         title: 'Beispielstieg',
@@ -74,4 +78,18 @@ test('ordnet Namen der kompletten Sitemap zu', () => {
     'via-ferrata-piero-rossi-ex-ferrata-marmol',
   );
   expect(matchClimbSlug('Irgendwas', slugs)).toBeNull();
+  expect(
+    parseClimbSlugs(
+      '<loc>https://www.via-ferrata.de/klettersteige/topo/via-ferrata-kapetaniana-via-ferrata-%CF%83%CF%84%CE%B7%CE%BD-%CE%BA%CF%81%CE%B7%CF%84%CE%B7</loc>',
+    ),
+  ).toEqual([
+    'via-ferrata-kapetaniana-via-ferrata-%CF%83%CF%84%CE%B7%CE%BD-%CE%BA%CF%81%CE%B7%CF%84%CE%B7',
+  ]);
+  expect(
+    isClimbSlug(
+      'via-ferrata-degli-alpini-de-punta-charra-sentiero-attrezzato-brigata-alpina-taurinense',
+    ),
+  ).toBe(true);
+  expect(isClimbSlug('../etc/passwd')).toBe(false);
+  expect(isClimbSlug('%2e%2e%2fsecret')).toBe(false);
 });
