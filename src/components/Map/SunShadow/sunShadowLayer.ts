@@ -4,14 +4,12 @@ import SunCalc from 'suncalc';
 
 // NOTE: don't import from `../consts` here — that module touches `window` at
 // import time and this file is reachable from the SSR-rendered Map.tsx.
-const apiKey = process.env.NEXT_PUBLIC_API_KEY_MAPTILER;
+import { MAPTILER_DEM_MAX_ZOOM, MAPTILER_DEM_TILE_URL } from '../maptilerDem';
 
 export const SUN_SHADOW_LAYER_ID = 'osmapp-sun-shadow';
 
-// MapTiler terrain-rgb-v2 (Mapbox terrain-rgb encoding, webp, maxzoom 14).
-const DEM_TILE_URL = (z: number, x: number, y: number) =>
-  `https://api.maptiler.com/tiles/terrain-rgb-v2/${z}/${x}/${y}.webp?key=${apiKey}`;
-const DEM_MAX_ZOOM = 14;
+const DEM_TILE_URL = MAPTILER_DEM_TILE_URL;
+const DEM_MAX_ZOOM = MAPTILER_DEM_MAX_ZOOM;
 // Low DEM zoom levels are allowed so pickDemZoom can keep the tile budget at low
 // map zoom too (the relief just gets coarser); below SHADOW_MIN_ZOOM we don't
 // render at all.
