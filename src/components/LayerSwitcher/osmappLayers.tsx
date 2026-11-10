@@ -13,6 +13,7 @@ import MapsHomeWorkIcon from '@mui/icons-material/MapsHomeWork';
 import { Box } from '@mui/material';
 import { PoiIcon } from '../utils/icons/PoiIcon';
 import { PROJECT_ID } from '../../services/project';
+import { CZ_BBOX } from '../Map/Terrain3d/cuzkDem';
 
 interface Layers {
   [key: string]: Layer;
@@ -42,12 +43,7 @@ const africaBbox: Bbox = [
   40, // north
 ];
 
-const czBbox: Bbox = [
-  12.09, // west
-  48.55, // south
-  18.87, // east
-  51.06, // north
-];
+const czBbox: Bbox = CZ_BBOX;
 
 export const osmappLayers: Layers = {
   tourist: {
