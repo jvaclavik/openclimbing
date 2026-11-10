@@ -29,6 +29,24 @@ const getDistance = (point1: LonLat, point2: LonLat) => {
 const haversineSorter = (origin: LonLat) => (a, b) =>
   getDistance(origin, [a.lon, a.lat]) - getDistance(origin, [b.lon, b.lat]);
 
+// Areas contain crags and crags contain routes, so the bigger the feature, the
+// more likely it is what the user searched for. Routes are always appended last.
+const GROUP_TYPE_ORDER: Record<string, number> = {
+  area: 1,
+  crag: 2,
+  gym: 3,
+  ferrata: 4,
+};
+const UNKNOWN_GROUP_TYPE_ORDER = 5;
+const getGroupTypeOrder = (type: string) =>
+  GROUP_TYPE_ORDER[type] ?? UNKNOWN_GROUP_TYPE_ORDER;
+
+const groupSorter = (origin: LonLat) => {
+  const byDistance = haversineSorter(origin);
+  return (a, b) =>
+    getGroupTypeOrder(a.type) - getGroupTypeOrder(b.type) || byDistance(a, b);
+};
+
 const QUERY_GROUPS = `
     SELECT "type", "lon", "lat", "osmType", "osmId", COALESCE("name", "nameRaw") AS "name", "countryCode", "parentId",
       "routeCount",
@@ -116,7 +134,7 @@ export const getClimbingSearch = (
     .prepare(QUERY_ROUTES)
     .all({ lat, lon, query }) as SearchRow[];
 
-  groups.sort(haversineSorter([lon, lat])); // we search by distance_sq for performance, but we want to sort by real distance on FE
+  groups.sort(groupSorter([lon, lat])); // we search by distance_sq for performance, but we want to sort by type importance and real distance on FE
   routes.sort(haversineSorter([lon, lat]));
 
   const records = [...groups, ...routes];
