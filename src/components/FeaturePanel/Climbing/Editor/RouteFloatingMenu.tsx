@@ -35,20 +35,31 @@ import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PointType } from '../types';
 import { LineTypeButtons } from './LineTypeButtons';
 import { PointTypeButtons } from './PointTypeButtons';
-import { useRecognizeBolts } from './useRecognizeBolts';
 import { useFloatingMenuShortcuts } from './useFloatingMenuShortcuts';
+import { useRecognizeBolts } from './useRecognizeBolts';
 import { addShortcutUnderline } from './utils';
 
 const Container = styled.div<{ $isEditMode: boolean }>`
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   bottom: 4px;
   left: 0;
   right: ${({ $isEditMode }) => ($isEditMode ? 0 : 70)}px;
-  overflow: auto;
+  /* Firefox stretches an abspos box to the containing block when height is
+     auto, only bottom is set, and overflow is not visible — the type toolbar
+     then sits at the top of the photo and looks missing. fit-content keeps
+     the box at the bottom, so horizontal scrolling can stay. */
+  height: fit-content;
+  overflow-x: auto;
   padding: 0 12px 8px 12px;
-  text-align: right;
   pointer-events: none;
+`;
+
+const ToolbarRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: max-content;
+  min-width: 100%;
 `;
 
 export const RouteFloatingMenu = () => {
@@ -247,179 +258,184 @@ export const RouteFloatingMenu = () => {
       </Dialog>
 
       <Container $isEditMode={isEditMode}>
-        <ButtonGroup
-          variant="contained"
-          size="small"
-          color="primary"
-          sx={{ pointerEvents: 'all', gap: 0.5 }}
-        >
-          <>
-            {isExtendVisible && (
-              <Button
-                onClick={onContinueClimbingRouteClick}
-                startIcon={<AddLocationIcon />}
-              >
-                {getCurrentPath().length > 0
-                  ? addShortcutUnderline(t('climbingpanel.extend'), 'e')
-                  : t('climbingpanel.start')}
-              </Button>
-            )}
-            {isPointMenuLike && (
-              <>
-                <PointTypeButtons />
-                {machine.currentStateName === 'pointMenu' && (
-                  <LineTypeButtons />
-                )}
-              </>
-            )}
-
-            {isPointMenuLike && (
-              <Button
-                onClick={toggleDeletePointDialog}
-                startIcon={<DeleteIcon />}
-                sx={{
-                  '> *': {
-                    margin: 0,
-                  },
-                }}
-              />
-            )}
-
-            {isDoneVisible && (
-              <Button
-                onClick={onFinishClimbingRouteClick}
-                startIcon={<CheckIcon />}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
-              >
-                {t('climbingpanel.finish_climbing_route')}
-              </Button>
-            )}
-            {!isRoutesLayerVisible && (
-              <Tooltip title={t('climbingpanel.show_routes_layer')} arrow>
-                <IconButton
-                  color="primary"
-                  size="medium"
-                  onClick={() => {
-                    setIsRoutesLayerVisible(true);
-                  }}
+        <ToolbarRow>
+          <ButtonGroup
+            variant="contained"
+            size="small"
+            color="primary"
+            sx={{ pointerEvents: 'all', gap: 0.5 }}
+          >
+            <>
+              {isExtendVisible && (
+                <Button
+                  onClick={onContinueClimbingRouteClick}
+                  startIcon={<AddLocationIcon />}
                 >
-                  <VisibilityOffIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            {isEditMode && (
-              <>
-                <Tooltip title={t('climbingpanel.more_options')} arrow>
+                  {getCurrentPath().length > 0
+                    ? addShortcutUnderline(t('climbingpanel.extend'), 'e')
+                    : t('climbingpanel.start')}
+                </Button>
+              )}
+              {isPointMenuLike && (
+                <>
+                  <PointTypeButtons />
+                  {machine.currentStateName === 'pointMenu' && (
+                    <LineTypeButtons />
+                  )}
+                </>
+              )}
+
+              {isPointMenuLike && (
+                <Button
+                  onClick={toggleDeletePointDialog}
+                  startIcon={<DeleteIcon />}
+                  sx={{
+                    '> *': {
+                      margin: 0,
+                    },
+                  }}
+                />
+              )}
+
+              {isDoneVisible && (
+                <Button
+                  onClick={onFinishClimbingRouteClick}
+                  startIcon={<CheckIcon />}
+                  onMouseEnter={onMouseEnter}
+                  onMouseLeave={onMouseLeave}
+                >
+                  {t('climbingpanel.finish_climbing_route')}
+                </Button>
+              )}
+              {!isRoutesLayerVisible && (
+                <Tooltip title={t('climbingpanel.show_routes_layer')} arrow>
                   <IconButton
                     color="primary"
-                    size="small"
-                    onClick={(e) => setMoreMenuAnchor(e.currentTarget)}
-                    aria-label={t('climbingpanel.more_options')}
-                  >
-                    <MoreVertIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  anchorEl={moreMenuAnchor}
-                  open={Boolean(moreMenuAnchor)}
-                  onClose={closeMoreMenu}
-                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                  transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      gap: 1,
-                      px: 1,
-                      py: 0.5,
+                    size="medium"
+                    onClick={() => {
+                      setIsRoutesLayerVisible(true);
                     }}
                   >
-                    <Tooltip title={t('climbingpanel.undo')} arrow>
-                      <span>
-                        <IconButton
-                          size="small"
-                          onClick={onMenuUndo}
-                          disabled={!canUndo}
-                          aria-label={t('climbingpanel.undo')}
-                        >
-                          <UndoIcon fontSize="small" />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                    <Tooltip title={t('climbingpanel.redo')} arrow>
-                      <span>
-                        <IconButton
-                          size="small"
-                          onClick={onMenuRedo}
-                          disabled={!canRedo}
-                          aria-label={t('climbingpanel.redo')}
-                        >
-                          <RedoIcon fontSize="small" />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                  </Box>
-                  <Divider />
-                  <MenuItem
-                    onClick={onRecognizeBoltsClick}
-                    disabled={recognizeBolts.isRunning}
+                    <VisibilityOffIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {isEditMode && (
+                <>
+                  <Tooltip title={t('climbingpanel.more_options')} arrow>
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={(e) => setMoreMenuAnchor(e.currentTarget)}
+                      aria-label={t('climbingpanel.more_options')}
+                    >
+                      <MoreVertIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    anchorEl={moreMenuAnchor}
+                    open={Boolean(moreMenuAnchor)}
+                    onClose={closeMoreMenu}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    transformOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
                   >
-                    <ListItemIcon>
-                      {recognizeBolts.isRunning ? (
-                        <CircularProgress
-                          size={18}
-                          variant={
-                            recognizeBolts.progress
-                              ? 'determinate'
-                              : 'indeterminate'
-                          }
-                          value={
-                            recognizeBolts.progress &&
-                            recognizeBolts.progress.total
-                              ? (recognizeBolts.progress.done /
-                                  recognizeBolts.progress.total) *
-                                100
-                              : undefined
-                          }
-                        />
-                      ) : (
-                        <AutoAwesomeIcon fontSize="small" />
-                      )}
-                    </ListItemIcon>
-                    <ListItemText>
-                      {t('climbingpanel.recognize_bolts')}
-                    </ListItemText>
-                  </MenuItem>
-                  <MenuItem onClick={onToggleGearPlacements}>
-                    <ListItemIcon>
-                      {isPlacingProtectionPoints ? (
-                        <CheckIcon fontSize="small" color="secondary" />
-                      ) : (
-                        <RadioButtonUncheckedIcon fontSize="small" />
-                      )}
-                    </ListItemIcon>
-                    <ListItemText>
-                      {t('climbingpanel.protection_points_mode')}
-                    </ListItemText>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={onDeleteLastPointClick}
-                    disabled={!hasActivePathPoints}
-                  >
-                    <ListItemIcon>
-                      <BackspaceOutlinedIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>
-                      {t('climbingpanel.delete_last_point')}
-                    </ListItemText>
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </>
-        </ButtonGroup>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: 1,
+                        px: 1,
+                        py: 0.5,
+                      }}
+                    >
+                      <Tooltip title={t('climbingpanel.undo')} arrow>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={onMenuUndo}
+                            disabled={!canUndo}
+                            aria-label={t('climbingpanel.undo')}
+                          >
+                            <UndoIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      <Tooltip title={t('climbingpanel.redo')} arrow>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={onMenuRedo}
+                            disabled={!canRedo}
+                            aria-label={t('climbingpanel.redo')}
+                          >
+                            <RedoIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Box>
+                    <Divider />
+                    <MenuItem
+                      onClick={onRecognizeBoltsClick}
+                      disabled={recognizeBolts.isRunning}
+                    >
+                      <ListItemIcon>
+                        {recognizeBolts.isRunning ? (
+                          <CircularProgress
+                            size={18}
+                            variant={
+                              recognizeBolts.progress
+                                ? 'determinate'
+                                : 'indeterminate'
+                            }
+                            value={
+                              recognizeBolts.progress &&
+                              recognizeBolts.progress.total
+                                ? (recognizeBolts.progress.done /
+                                    recognizeBolts.progress.total) *
+                                  100
+                                : undefined
+                            }
+                          />
+                        ) : (
+                          <AutoAwesomeIcon fontSize="small" />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText>
+                        {t('climbingpanel.recognize_bolts')}
+                      </ListItemText>
+                    </MenuItem>
+                    <MenuItem onClick={onToggleGearPlacements}>
+                      <ListItemIcon>
+                        {isPlacingProtectionPoints ? (
+                          <CheckIcon fontSize="small" color="secondary" />
+                        ) : (
+                          <RadioButtonUncheckedIcon fontSize="small" />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText>
+                        {t('climbingpanel.protection_points_mode')}
+                      </ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                      onClick={onDeleteLastPointClick}
+                      disabled={!hasActivePathPoints}
+                    >
+                      <ListItemIcon>
+                        <BackspaceOutlinedIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>
+                        {t('climbingpanel.delete_last_point')}
+                      </ListItemText>
+                    </MenuItem>
+                  </Menu>
+                </>
+              )}
+            </>
+          </ButtonGroup>
+        </ToolbarRow>
       </Container>
     </>
   );
