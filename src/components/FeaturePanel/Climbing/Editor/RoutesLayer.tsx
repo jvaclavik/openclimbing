@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from '@emotion/styled';
 import { useClimbingContext } from '../contexts/ClimbingContext';
 import { ProtectionPointsLayer } from './ProtectionPointsLayer';
@@ -25,6 +24,7 @@ const Svg = styled.svg<{
   // listens for touches on the wrapper, not via the browser's default action.
   ${({ $isEditMode }) => ($isEditMode ? 'touch-action: none;' : '')}
 
+  overflow: visible;
   ${({ $hasEditableCursor }) =>
     $hasEditableCursor ? `cursor: crosshair;` : ''};
   ${({ $imageSize: { width, height } }) =>

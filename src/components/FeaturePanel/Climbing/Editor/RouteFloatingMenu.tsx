@@ -35,19 +35,24 @@ import { useClimbingContext } from '../contexts/ClimbingContext';
 import { PointType } from '../types';
 import { LineTypeButtons } from './LineTypeButtons';
 import { PointTypeButtons } from './PointTypeButtons';
-import { useRecognizeBolts } from './useRecognizeBolts';
 import { useFloatingMenuShortcuts } from './useFloatingMenuShortcuts';
+import { useRecognizeBolts } from './useRecognizeBolts';
 import { addShortcutUnderline } from './utils';
 
 const Container = styled.div<{ $isEditMode: boolean }>`
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   bottom: 4px;
   left: 0;
   right: ${({ $isEditMode }) => ($isEditMode ? 0 : 70)}px;
-  overflow: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  /* Firefox stretches an abspos box to the containing block when height is
+     auto, only bottom is set, and overflow is not visible — the type toolbar
+     then sits at the top of the photo and looks missing. */
+  height: fit-content;
   padding: 0 12px 8px 12px;
-  text-align: right;
   pointer-events: none;
 `;
 

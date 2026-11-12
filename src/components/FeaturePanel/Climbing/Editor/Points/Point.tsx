@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { useClimbingContext } from '../../contexts/ClimbingContext';
-import { useConfig } from '../../config';
+import React, { useState } from 'react';
 import { useMobileMode } from '../../../../helpers';
-import { PANNING_EXCLUDED_CLASS, usePointClickHandler } from '../utils';
+import { useConfig } from '../../config';
+import { useClimbingContext } from '../../contexts/ClimbingContext';
 import { PointType } from '../../types';
+import { PANNING_EXCLUDED_CLASS, usePointClickHandler } from '../utils';
 
 // The big invisible grab target is where a touch drag starts, so it must opt
 // out of the browser's default touch gestures. Without this the browser reads
@@ -13,6 +13,9 @@ import { PointType } from '../../types';
 // react-zoom-pan-pinch doesn't preventDefault to keep the gesture alive).
 const ClickableArea = styled.circle`
   touch-action: none;
+  /* Firefox hit-tests fill="transparent" like fill="none", so a click on the
+     grab target missed the point and the type toolbar never opened. */
+  pointer-events: all;
 `;
 
 const PointElement = styled.circle<{
@@ -23,11 +26,7 @@ const PointElement = styled.circle<{
   pointer-events: all;
   touch-action: none;
   ${({ $isHovered, $isPointSelected }) =>
-    `${
-      $isHovered || $isPointSelected
-        ? 'transform: scale(1.5);'
-        : 'transform: scale(1);'
-    }`}
+    $isHovered || $isPointSelected ? 'transform: scale(1.5);' : ''}
 `;
 
 const usePointColor = (type, isHovered) => {

@@ -1,15 +1,14 @@
 import React from 'react';
 import { useClimbingContext } from '../contexts/ClimbingContext';
+import { PointType } from '../types';
+import { getStickyThreshold } from '../utils/findCloserPoint';
+import { useShowProtectionPoints } from '../utils/useShowProtectionPoints';
+import { Anchor } from './Points/Anchor';
 import { Bolt } from './Points/Bolt';
 import { Piton } from './Points/Piton';
 import { Sling } from './Points/Sling';
-import { Anchor } from './Points/Anchor';
 import { UnfinishedPoint } from './Points/UnfinishedPoint';
-import { PointType } from '../types';
 import { ProtectionPointCenter } from './ProtectionPointCenter';
-import { getStickyThreshold } from '../utils/findCloserPoint';
-import { useMobileMode } from '../../../helpers';
-import { useShowProtectionPoints } from '../utils/useShowProtectionPoints';
 
 export const ProtectionPointsLayer = () => {
   const {
@@ -21,7 +20,6 @@ export const ProtectionPointsLayer = () => {
     protectionPointSelectedIndex,
     isPlacingProtectionPoints,
   } = useClimbingContext();
-  const isMobileMode = useMobileMode();
   const showProtectionPoints = useShowProtectionPoints();
 
   const points = getProtectionPointsForCurrentPhoto();
@@ -29,9 +27,8 @@ export const ProtectionPointsLayer = () => {
     return null;
   }
 
-  // On small screens the overlay is hidden by default (see
-  // useShowProtectionPoints). Still show it while editing or placing so
-  // recognized bolts stay visible for route snapping.
+  // Hidden only when the user turns the overlay off. Still show it while
+  // editing or placing so recognized bolts stay visible for route snapping.
   if (!showProtectionPoints && !isPlacingProtectionPoints && !isEditMode) {
     return null;
   }
@@ -53,15 +50,10 @@ export const ProtectionPointsLayer = () => {
 
   const pointerEvents = canInteract ? 'auto' : 'none';
 
-  // On small screens the gear overlay competes with the route lines, so make
-  // it more subtle in view mode. Full opacity while editing / placing.
-  const layerOpacity =
-    isMobileMode && !isPlacingProtectionPoints && !isEditMode ? 0.45 : 1;
-
   const xOffset = 15;
 
   return (
-    <g style={{ pointerEvents, opacity: layerOpacity }}>
+    <g style={{ pointerEvents }}>
       {points.map(({ x, y, type }, index) => {
         const position = getPixelPosition({ x, y, units: 'percentage' });
         const isSelected = protectionPointSelectedIndex === index;
