@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { Box, Stack } from '@mui/material';
-import React from 'react';
 
 const CharacterCountContainer = styled.div`
   position: absolute;
@@ -59,6 +58,8 @@ export const getInputTypeForKey = (key: string) => {
     case 'contact:email':
     case 'email':
       return 'email';
+    case 'climbing:bolts':
+      return 'number';
   }
 
   return 'text';

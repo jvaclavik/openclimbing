@@ -1285,6 +1285,8 @@ export default {
   'climbing_badges.family_friendly_label': 'family-friendly',
   'climbing_badges.family_friendly_description':
     'The climbing area is safe and suitable for families with children (easy access, safe terrain, space to play).',
+  'climbing_badges.bolts_label': 'Number of bolts',
+  'climbing_badges.bolts_description': 'Fixed protection, not counting the anchor.',
 
   'climbing_rock.label': 'Rock material',
   'climbing_rock.limestone': 'limestone',

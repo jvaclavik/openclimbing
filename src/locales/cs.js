@@ -1209,6 +1209,8 @@ export default {
   'climbing_badges.family_friendly_label': 'vhodné pro rodiny',
   'climbing_badges.family_friendly_description':
     'Lezecká oblast je bezpečná a vhodná pro rodiny s dětmi (snadný přístup, bezpečný terén, prostor na hraní).',
+  'climbing_badges.bolts_label': 'Počet jištění',
+  'climbing_badges.bolts_description': 'Pevné jištění (borháky), bez stanoviště.',
 
   'climbing_rock.label': 'Materiál skály',
   'climbing_rock.limestone': 'vápenec',

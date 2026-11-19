@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { t } from '../../../../../services/intl';
+import { FeatureTags } from '../../../../../services/types';
+import {
+  isClimbingCragOrArea as isClimbingCragOrAreaFn,
+  isClimbingRoute as isClimbingRouteFn,
+} from '../../../../../utils';
 import {
   getNextWikimediaCommonsIndex,
   getWikimediaCommonsKey,
   isWikimediaCommonsFileSlotKey,
 } from '../../../Climbing/utils/photo';
 import { useEditDialogContext } from '../../../helpers/EditDialogContext';
-import {
-  isClimbingCragOrArea as isClimbingCragOrAreaFn,
-  isClimbingRoute as isClimbingRouteFn,
-} from '../../../../../utils';
 import { useCurrentItem } from '../../context/EditContext';
 import { useMultiEdit } from '../../context/useMultiEdit';
+import { EditDialogUploadHost } from '../../EditDialogUploadHost';
+import { isDescriptionKey, isNameKey } from './DescriptionEditor';
 import { MajorKeysFieldList } from './MajorKeysFieldList';
 import { MajorKeysInactivePicker } from './MajorKeysInactivePicker';
-import { isDescriptionKey, isNameKey } from './DescriptionEditor';
-import { FeatureTags } from '../../../../../services/types';
-import { EditDialogUploadHost } from '../../EditDialogUploadHost';
 
 const basicMajorKeys = ['name', 'description', 'website'];
 const nonClimbingMajorKeys = ['phone', 'opening_hours'];

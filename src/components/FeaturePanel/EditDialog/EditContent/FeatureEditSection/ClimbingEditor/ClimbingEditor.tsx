@@ -1,3 +1,5 @@
+import styled from '@emotion/styled';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
   AccordionDetails,
@@ -6,22 +8,20 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { MultiValueKeyEditor } from './MultiValueKeyEditor';
-import React from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { t } from '../../../../../../services/intl';
+import { isClimbingRoute } from '../../../../../../utils';
+import { Maki } from '../../../../../utils/icons/Maki';
 import {
   useCurrentItem,
   useExpandedSections,
 } from '../../../context/EditContext';
 import { useMultiEdit } from '../../../context/useMultiEdit';
-import { Maki } from '../../../../../utils/icons/Maki';
-import styled from '@emotion/styled';
-import { ClimbingGradesEditor } from './ClimbingGradesEditor';
-import { DrawClimbingRoutesBanner } from './DrawClimbingRoutesBanner';
+import { EditSectionCard } from '../../EditSectionCard';
 import { ClimbingRockSelect } from '../ClimbingRockSelect';
 import { ClimbingStartSelect } from '../ClimbingStartSelect';
-import { EditSectionCard } from '../../EditSectionCard';
+import { ClimbingGradesEditor } from './ClimbingGradesEditor';
+import { DrawClimbingRoutesBanner } from './DrawClimbingRoutesBanner';
+import { MultiValueKeyEditor } from './MultiValueKeyEditor';
 
 const IconContainer = styled.div`
   display: flex;
@@ -32,6 +32,12 @@ const IconContainer = styled.div`
 `;
 
 const ClimbingMultiValuesInner = () => {
+  const { tags } = useCurrentItem();
+  const { isMulti, targets } = useMultiEdit();
+  const isRoute =
+    isClimbingRoute(tags) ||
+    (isMulti && targets.some((item) => isClimbingRoute(item.tags)));
+
   return (
     <Stack
       sx={{
@@ -90,7 +96,11 @@ const ClimbingMultiValuesInner = () => {
       />
       <MultiValueKeyEditor
         label={t('climbing_badges.other_tags_label')}
-        keys={['climbing:family_friendly']}
+        keys={[
+          'climbing:family_friendly',
+          ...(isRoute ? ['climbing:bolts'] : []),
+        ]}
+        numberKeys={['climbing:bolts']}
       />
     </Stack>
   );
