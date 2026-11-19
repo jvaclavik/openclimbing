@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
 import { Box, Button, Menu, MenuItem, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { t } from '../../../../../../services/intl';
-import { getLabel } from './EditorItem';
 import { useMultiEdit } from '../../../context/useMultiEdit';
+import { getLabel } from './EditorItem';
 
 export const EditorHeader: React.FC<{
   label: string;
   inactive: string[];
-}> = ({ label, inactive }) => {
+  numberKeys?: string[];
+}> = ({ label, inactive, numberKeys = [] }) => {
   const { setTag } = useMultiEdit();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const onClick = (e) => setAnchorEl(e.currentTarget);
 
   const handleAdd = (k: string) => {
-    setTag(k, 'yes');
+    setTag(k, numberKeys.includes(k) ? '' : 'yes');
     setAnchorEl(null);
   };
 

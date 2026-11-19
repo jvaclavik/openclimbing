@@ -1,6 +1,5 @@
-import { t } from '../../../../../../services/intl';
-import { TranslationId } from '../../../../../../services/types';
-import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Box,
   IconButton,
@@ -9,8 +8,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
+import React, { useState } from 'react';
+import { t } from '../../../../../../services/intl';
+import { TranslationId } from '../../../../../../services/types';
 import { useMultiEdit } from '../../../context/useMultiEdit';
 
 const getTranslationKey = (key: string) => {
@@ -71,6 +71,28 @@ const CustomValueInput = ({ k }: CustomValueInputProps) => {
         }}
       />
     </Box>
+  );
+};
+
+const NumberValueInput = ({ k }: { k: string }) => {
+  const { tags, mixed, setTag } = useMultiEdit();
+  const isMixed = Object.prototype.hasOwnProperty.call(mixed, k);
+  const value = isMixed ? '' : (tags[k] ?? '');
+
+  return (
+    <TextField
+      size="small"
+      type="number"
+      value={value}
+      autoFocus={value === '' && !isMixed}
+      placeholder={isMixed ? t('editdialog.multiple_values') : undefined}
+      onChange={(e) => setTag(k, e.target.value)}
+      sx={{
+        width: 88,
+        '& input::placeholder': { fontStyle: 'italic' },
+      }}
+      slotProps={{ htmlInput: { min: 0, step: 1 } }}
+    />
   );
 };
 
@@ -151,9 +173,10 @@ const TagLabel = ({ k }: { k: string }) => {
 type Props = {
   k: string;
   customValue: boolean;
+  numberValue?: boolean;
 };
 
-export const EditorItem = ({ k, customValue }: Props) => {
+export const EditorItem = ({ k, customValue, numberValue }: Props) => {
   const [showCustom, setShowCustom] = useState(false);
   const { removeTag } = useMultiEdit();
 
@@ -179,7 +202,9 @@ export const EditorItem = ({ k, customValue }: Props) => {
           }}
         >
           <TagLabel k={k} />
-          {customValue && showCustom && <CustomValueInput k={k} />}
+          {customValue && !numberValue && showCustom && (
+            <CustomValueInput k={k} />
+          )}
         </Box>
 
         <Box
@@ -189,9 +214,9 @@ export const EditorItem = ({ k, customValue }: Props) => {
             gap: 1,
           }}
         >
-          <ToggleTagButton k={k} />
+          {numberValue ? <NumberValueInput k={k} /> : <ToggleTagButton k={k} />}
 
-          {customValue && <EditButton onClick={toggleCustom} />}
+          {customValue && !numberValue && <EditButton onClick={toggleCustom} />}
 
           <CloseButton onClick={onRemove} />
         </Box>

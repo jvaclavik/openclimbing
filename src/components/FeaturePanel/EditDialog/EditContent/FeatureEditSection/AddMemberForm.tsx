@@ -30,14 +30,14 @@ import { useCurrentItem, useEditContext } from '../../context/EditContext';
 import { fetchFreshItem, getNewNodeItem } from '../../context/itemsHelpers';
 import { Members } from '../../context/types';
 import { findInItems } from '../../context/utils';
-import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
-import { parseOsmShortId } from './parseOsmShortId';
-import { parseTagBatch } from './parseTagBatch';
 import {
   getMemberTags,
   getTagBatchDrafts,
   toMemberDraft,
 } from './memberDrafts';
+import { NearbyClimbingAutocomplete } from './NearbyClimbingAutocomplete';
+import { parseOsmShortId } from './parseOsmShortId';
+import { parseTagBatch } from './parseTagBatch';
 import { useLinkEditItem } from './useLinkEditItem';
 
 export type Scene = null | 'single' | 'batch' | 'url';
@@ -353,6 +353,7 @@ climbing=route_bottom
 name=Tarzanweg
 ${getOsmTagFromGradeSystem(gradeSystem)}=${grade}
 climbing:length=14m
+climbing:bolts=6
 climbing:sport=yes`
     : 'name\n...';
 
