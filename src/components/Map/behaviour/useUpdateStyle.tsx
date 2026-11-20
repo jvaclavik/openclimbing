@@ -33,7 +33,11 @@ import { emptyStyle } from '../styles/emptyStyle';
 import { shortbreadShadowStyle } from '../styles/shortbreadShadowStyle';
 import { shortbreadColorfulStyle } from '../styles/shortbreadColorfulStyle';
 import { ShowToast } from '../../utils/SnackbarContext';
-import { shouldKeepTerrain3d, TERRAIN_3D } from './useToggleTerrainControl';
+import {
+  addDemStylingToStyle,
+  getTerrain3dSpec,
+  shouldKeepTerrain3d,
+} from './useToggleTerrainControl';
 
 const ofrBasicStyle = {
   ...basicStyle,
@@ -198,9 +202,12 @@ export const useUpdateStyle = createMapEffectHook(
 
     // setStyle diff clears terrain when the next style JSON omits it — keep 3D
     // across basemap switches while the camera is pitched / terrain is enabled.
-    const keepTerrain = shouldKeepTerrain3d(map) && !!style.sources?.terrain3d;
+    const terrain = getTerrain3dSpec();
+    const keepTerrain =
+      shouldKeepTerrain3d(map) && !!style.sources?.[terrain.source];
     if (keepTerrain) {
-      style.terrain = { ...TERRAIN_3D };
+      style.terrain = terrain;
+      addDemStylingToStyle(style);
     }
 
     map.setStyle(style, { diff: mapLoaded });
