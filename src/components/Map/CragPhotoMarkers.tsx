@@ -10,6 +10,7 @@ import {
 } from '../FeaturePanel/Climbing/utils/photo';
 import { convertOsmIdToMapId } from '../../services/fetchCrags';
 import { Feature, isTag } from '../../services/types';
+import { isClimbingCragLike } from '../../utils';
 import { setClimbingFeatureState } from './climbingTiles/climbingFeatureState';
 import { CLIMBING_TILES_SOURCE } from './climbingTiles/consts';
 
@@ -79,6 +80,15 @@ const getCragPhotoNames = (feature: Feature): string[] =>
     .map((def) => removeFilePrefix(def.v));
 
 /**
+ * Photos the open feature should get camera markers for. Crags are mapped as
+ * relations, ways and plain nodes (and as boulders or climbing peaks/towers
+ * without `climbing=crag`), so we accept every crag-like climbing feature —
+ * only climbing areas, gyms and routes get no markers.
+ */
+export const getPhotoMarkerNames = (feature: Feature | null): string[] =>
+  feature && isClimbingCragLike(feature.tags) ? getCragPhotoNames(feature) : [];
+
+/**
  * Renders camera markers on the main map at the GPS position each crag photo
  * was taken from, while a climbing crag is open in the feature panel. Clicking
  * a marker scrolls to and highlights that photo in the panel's image strip.
@@ -87,16 +97,12 @@ export const CragPhotoMarkers = () => {
   const { feature } = useFeatureContext();
   const { highlightedPhoto, togglePhoto } = usePhotoHighlightContext();
 
-  const isCrag = feature?.tags?.climbing === 'crag';
-
-  const photoNames = useMemo(
-    () => (isCrag && feature ? getCragPhotoNames(feature) : []),
-    [isCrag, feature],
-  );
+  const photoNames = useMemo(() => getPhotoMarkerNames(feature), [feature]);
+  const map = photoNames.length ? getGlobalMap() : null;
 
   const photoExifs = useGetPhotoExifs(photoNames);
 
-  usePhotoMarkers(isCrag ? getGlobalMap() : null, photoExifs, photoNames, {
+  usePhotoMarkers(map, photoExifs, photoNames, {
     activePhoto: highlightedPhoto,
     onPhotoClick: togglePhoto,
   });
