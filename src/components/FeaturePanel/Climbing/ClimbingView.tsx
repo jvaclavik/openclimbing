@@ -17,6 +17,7 @@ import { useMobileMode } from '../../helpers';
 import { convertHexToRgba } from '../../utils/colorUtils';
 import { useFeatureContext } from '../../utils/FeatureContext';
 import { useUserSettingsContext } from '../../utils/userSettings/UserSettingsContext';
+import { LoginToSaveBanner } from '../helpers/LoginToSaveBanner';
 import { ClimbingViewContent } from './ClimbingViewContent';
 import { CLIMBING_ROUTE_ROW_HEIGHT, getSplitPaneDefaultSize } from './config';
 import { useClimbingContext } from './contexts/ClimbingContext';
@@ -26,7 +27,6 @@ import {
 } from './DrawRoutesCoachmark';
 import { RouteFloatingMenu } from './Editor/RouteFloatingMenu';
 import { RoutesEditor } from './Editor/RoutesEditor';
-import { LoginToSaveBanner } from '../helpers/LoginToSaveBanner';
 import { splitPaneResizerStyles } from './splitPaneResizerStyles';
 import { TransformWrapper } from './TransformWrapper';
 import {
@@ -167,6 +167,7 @@ const BackgroundContainer = styled.div<{
   $imageHeight: number;
   $imageUrl: string;
 }>`
+  position: relative;
   transition: 0.3s all;
   background: #111 ${({ $imageUrl }) => `url(${$imageUrl}) no-repeat`};
   background-size: cover;
@@ -561,7 +562,6 @@ export const ClimbingView = () => {
               )}
               <BlurContainer>
                 <ClimbingLoginBanner />
-                <RouteFloatingMenu />
                 <TransformWrapper>
                   <TransformComponent
                     wrapperStyle={{ height: '100%', width: '100%' }}
@@ -581,6 +581,11 @@ export const ClimbingView = () => {
                   </TransformComponent>
                 </TransformWrapper>
               </BlurContainer>
+              {/* Outside BlurContainer: Firefox does not paint <button>
+                  backgrounds that are descendants of backdrop-filter, so the
+                  bolt-type toolbar was invisible there (the SVG kebab icon
+                  still showed). */}
+              <RouteFloatingMenu />
               {showRestorePaneFab && (
                 <RestorePaneFab $cragViewLayout={cragViewLayout}>
                   <Tooltip

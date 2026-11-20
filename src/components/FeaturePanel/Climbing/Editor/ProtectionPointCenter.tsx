@@ -1,12 +1,12 @@
-import React, { useState, type TouchEventHandler } from 'react';
 import styled from '@emotion/styled';
-import { useClimbingContext } from '../contexts/ClimbingContext';
+import React, { useState, type TouchEventHandler } from 'react';
 import { useMobileMode } from '../../../helpers';
+import { useClimbingContext } from '../contexts/ClimbingContext';
+import { PointType } from '../types';
 import {
   PANNING_EXCLUDED_CLASS,
   useProtectionPointClickHandler,
 } from './utils';
-import { PointType } from '../types';
 
 const ClickableArea = styled.circle``;
 
@@ -17,11 +17,9 @@ const PointElement = styled.circle<{
   transition: all 0.1s ease-in-out;
   touch-action: none;
   ${({ $isHovered, $isPointSelected }) =>
-    `${
-      $isHovered || $isPointSelected
-        ? 'transform: scale(1.5);'
-        : 'transform: scale(1);'
-    }`}
+    $isHovered || $isPointSelected
+      ? 'transform: scale(1.5);'
+      : 'transform: scale(1);'}
 `;
 
 const PROTECTION_POINT_YELLOW = '#ffd60a';

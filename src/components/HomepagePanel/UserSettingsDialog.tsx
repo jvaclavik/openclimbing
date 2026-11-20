@@ -9,16 +9,15 @@ import {
   Select,
   Switch,
 } from '@mui/material';
-import React from 'react';
-import { ClosePanelButton } from '../utils/ClosePanelButton';
-import { PanelLabel } from '../FeaturePanel/Climbing/PanelLabel';
-import { GradeSystemSelect } from '../FeaturePanel/Climbing/GradeSystemSelect';
-import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
-import { TickStyleSelect } from '../FeaturePanel/Climbing/Ticks/TickStyleSelect';
-import { t } from '../../services/intl';
-import { usePersistedState } from '../utils/usePersistedState';
 import { LOCAL_STORAGE_CACHE } from '../../services/fetchCache';
-import { useMobileMode, useSmallScreen } from '../helpers';
+import { t } from '../../services/intl';
+import { GradeSystemSelect } from '../FeaturePanel/Climbing/GradeSystemSelect';
+import { PanelLabel } from '../FeaturePanel/Climbing/PanelLabel';
+import { TickStyleSelect } from '../FeaturePanel/Climbing/Ticks/TickStyleSelect';
+import { useMobileMode } from '../helpers';
+import { ClosePanelButton } from '../utils/ClosePanelButton';
+import { usePersistedState } from '../utils/usePersistedState';
+import { useUserSettingsContext } from '../utils/userSettings/UserSettingsContext';
 
 type Props = {
   onClose: (event: unknown) => void;
@@ -81,9 +80,8 @@ const ShowAllClimbingOutlines = () => {
 export const UserSettingsDialog = ({ onClose, isOpened }: Props) => {
   const { setUserSetting, userSettings } = useUserSettingsContext();
   const isMobileMode = useMobileMode();
-  const isSmallScreen = useSmallScreen();
   const showProtectionPoints =
-    userSettings['climbing.showProtectionPoints'] ?? !isSmallScreen;
+    userSettings['climbing.showProtectionPoints'] ?? true;
 
   return (
     <Dialog
