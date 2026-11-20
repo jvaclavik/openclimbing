@@ -102,4 +102,29 @@ describe('tickScoring', () => {
     expect(s.gradeRowIndex).not.toBeNull();
     expect(s.points).toBe(Math.round(s.gradeBase * 1));
   });
+
+  test('AL score must be lower than AF but higher than TR', () => {
+    const grade = { 'climbing:grade:french': '6a' };
+
+    let tick = {
+      id: 1,
+      osmUserId: 1,
+      shortId: 'w1',
+      timestamp: '2020-01-01',
+      style: 'AL',
+      myGrade: null,
+      note: null,
+      pairing: null,
+    } as ClimbingTick;
+    const scoreAL = computeTickScore(grade, tick, 'french');
+
+    tick.style = 'AF';
+    const scoreAF = computeTickScore(grade, tick, 'french');
+
+    tick.style = 'TR';
+    const scoreTR = computeTickScore(grade, tick, 'french');
+
+    expect(scoreAF.points).toBeGreaterThan(scoreAL.points);
+    expect(scoreAL.points).toBeGreaterThan(scoreTR.points);
+  });
 });
