@@ -23,6 +23,8 @@ import {
   Slider,
   Stack,
   Switch,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -35,14 +37,21 @@ import { useExclusiveMapControl } from '../mapControlsRegistry';
 import { MapControlAppear } from '../MapControlAppear';
 import { useMapSourceLoading } from '../useMapSourceLoading';
 import { useMapStateContext } from '../../utils/MapStateContext';
+import { usePersistedState } from '../../utils/usePersistedState';
+import { isViewInsideBbox } from '../../LayerSwitcher/helpers';
 import {
   enableTerrain3d,
   PREVIEW_MIN_ZOOM,
   PREVIEW_PITCH,
   PREVIEW_ZOOM,
+  setTerrain3dDem,
+  setTerrain3dShading,
   setTerrain3dWanted,
+  Terrain3dDem,
+  TERRAIN_3D_SOURCES,
   turnOffTerrain,
 } from '../behaviour/useToggleTerrainControl';
+import { CZ_BBOX } from './cuzkDem';
 
 const TERRAIN_COLOR = '#00897b';
 
@@ -276,6 +285,86 @@ const ViewPad = ({
   );
 };
 
+const DEM_OPTIONS: Terrain3dDem[] = ['global', 'dmr', 'dmp'];
+
+const DEM_TOGGLE_SX = {
+  py: 0.25,
+  px: 0.5,
+  textTransform: 'none',
+  lineHeight: 1.2,
+  '&.Mui-selected, &.Mui-selected:hover': {
+    color: TERRAIN_COLOR,
+    backgroundColor: convertHexToRgba(TERRAIN_COLOR, 0.12),
+  },
+} as const;
+
+/** ČÚZK models only cover CZ – hide the choice elsewhere unless already picked. */
+const DemToggle = () => {
+  const { view } = useMapStateContext();
+  const { dem, setDem, shading, setShading } = useTerrain3dContext();
+  if (dem === 'global' && !isViewInsideBbox(view, CZ_BBOX)) return null;
+
+  return (
+    <Box sx={{ mb: 1 }}>
+      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+        {t('layerswitcher.3d_dem')}
+      </Typography>
+      <ToggleButtonGroup
+        size="small"
+        exclusive
+        fullWidth
+        value={dem}
+        onChange={(_, next: Terrain3dDem | null) => next && setDem(next)}
+        sx={{ mt: 0.25 }}
+      >
+        {DEM_OPTIONS.map((option) => (
+          <Tooltip
+            key={option}
+            title={t(`layerswitcher.3d_dem_${option}_tooltip`)}
+            arrow
+            placement="top"
+          >
+            <ToggleButton value={option} sx={DEM_TOGGLE_SX}>
+              <Stack sx={{ alignItems: 'center' }}>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                  {t(`layerswitcher.3d_dem_${option}`)}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ fontSize: '0.65rem', opacity: 0.75 }}
+                >
+                  {t(`layerswitcher.3d_dem_${option}_abbr`)}
+                </Typography>
+              </Stack>
+            </ToggleButton>
+          </Tooltip>
+        ))}
+      </ToggleButtonGroup>
+      {dem !== 'global' && (
+        <Stack
+          direction="row"
+          component="label"
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mt: 0.5,
+            cursor: 'pointer',
+          }}
+        >
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            {t('layerswitcher.3d_dem_shading')}
+          </Typography>
+          <Switch
+            size="small"
+            checked={shading}
+            onChange={(e) => setShading(e.target.checked)}
+          />
+        </Stack>
+      )}
+    </Box>
+  );
+};
+
 const TerrainControls = ({
   pitch,
   bearing,
@@ -313,6 +402,7 @@ const TerrainControls = ({
       >
         {t('layerswitcher.3d_hint')}
       </Typography>
+      <DemToggle />
       <Stack spacing={0.25}>
         <Stack
           direction="row"
@@ -404,6 +494,10 @@ const TerrainControls = ({
 type Terrain3dContextValue = {
   enabled: boolean;
   setEnabled: (v: boolean) => void;
+  dem: Terrain3dDem;
+  setDem: (dem: Terrain3dDem) => void;
+  shading: boolean;
+  setShading: (shading: boolean) => void;
 };
 
 const Terrain3dContext = createContext<Terrain3dContextValue | null>(null);
@@ -509,6 +603,12 @@ export const Terrain3dProvider = ({
 }) => {
   const { mapLoaded } = useMapStateContext();
   const [enabled, setEnabled] = useState(false);
+  const [storedDem, setDem] = usePersistedState<Terrain3dDem>(
+    'terrain3dDem',
+    'global',
+  );
+  const dem = TERRAIN_3D_SOURCES[storedDem] ? storedDem : 'global';
+  const [shading, setShading] = usePersistedState('terrain3dDemShading', true);
   const wasEnabled = useRef(false);
   const flatteningRef = useRef(false);
 
@@ -524,6 +624,12 @@ export const Terrain3dProvider = ({
       enableTerrain3dUi = null;
     };
   }, [setEnabledSafe]);
+
+  useEffect(() => {
+    const map = mapLoaded ? getGlobalMap() : undefined;
+    setTerrain3dShading(map, shading);
+    setTerrain3dDem(map, dem);
+  }, [dem, shading, mapLoaded]);
 
   useEffect(() => {
     setTerrain3dWanted(enabled);
@@ -611,8 +717,15 @@ export const Terrain3dProvider = ({
   }, [mapLoaded, setEnabledSafe]);
 
   const value = useMemo(
-    () => ({ enabled, setEnabled: setEnabledSafe }),
-    [enabled, setEnabledSafe],
+    () => ({
+      enabled,
+      setEnabled: setEnabledSafe,
+      dem,
+      setDem,
+      shading,
+      setShading,
+    }),
+    [enabled, setEnabledSafe, dem, setDem, shading, setShading],
   );
 
   return (
@@ -650,9 +763,9 @@ export const Terrain3dMapButton = () => {
   const { open, toggle, setOpen } = useExclusiveMapControl('terrain');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { enabled, setEnabled } = useTerrain3dContext();
+  const { enabled, setEnabled, dem } = useTerrain3dContext();
   const { pitch, bearing, setCamera, onDragChange } = useCamera(enabled);
-  const isLoading = useMapSourceLoading('terrain3d', enabled);
+  const isLoading = useMapSourceLoading(TERRAIN_3D_SOURCES[dem], enabled);
 
   useEffect(() => {
     if (!enabled || !pendingOpenPopover) return;
