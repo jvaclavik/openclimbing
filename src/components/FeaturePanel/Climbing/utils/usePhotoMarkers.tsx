@@ -35,8 +35,12 @@ const createMarkerElement = (
   return el;
 };
 
-// markers are too cluttered when zoomed out — only show them past this zoom
-const DEFAULT_MIN_ZOOM = 17.5;
+// markers are too cluttered when zoomed out — only show them past this zoom.
+// It has to stay below the zoom a feature opened from a link gets (17, see
+// FEATURE_ZOOM in ResponsiveFeaturePanel): a crag mapped as a single node has
+// no extent, so it always lands exactly on that zoom and its markers would
+// never show up.
+const DEFAULT_MIN_ZOOM = 16.5;
 // how long to hover a marker before its photo preview pops up
 const HOVER_DELAY_MS = 500;
 // horizontal gap (px) between markers that share the same GPS spot
@@ -47,7 +51,7 @@ type Options = {
   activePhoto?: string | null;
   /** called with the photo name (without `File:`) when a marker is clicked */
   onPhotoClick?: (photoName: string) => void;
-  /** markers are hidden at this zoom and below (default 17.5) */
+  /** markers are hidden at this zoom and below (default 16.5) */
   minZoom?: number;
 };
 
