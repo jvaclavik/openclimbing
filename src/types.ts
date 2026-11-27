@@ -16,6 +16,7 @@ export type ClimbingStatsResponse = {
   routesCount: number;
   areasCount: number;
   routesWithPhotoCount: number;
+  photosCount: number;
   countriesCount: number;
   ferratasCount: number;
   ferratasCountriesCount: number;

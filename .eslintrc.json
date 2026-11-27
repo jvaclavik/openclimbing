@@ -14,28 +14,8 @@
       }
     ],
     "react/no-unknown-property": "error",
-    "max-lines-per-function": [
-      "warn",
-      {
-        "max": 200,
-        "skipBlankLines": true,
-        "skipComments": true,
-        "IIFEs": true
-      }
-    ],
+    "max-lines-per-function": "off",
     "local-rules/max-lines-per-function-LOCAL": "warn",
     "unused-imports/no-unused-imports": "error"
-  },
-  "overrides": [
-    {
-      "files": [
-        "__tests__/**",
-        "**/*.test.{ts,tsx}",
-        "./src/components/FeaturePanel/Climbing/**"
-      ],
-      "rules": {
-        "max-lines-per-function": "off"
-      }
-    }
-  ]
+  }
 }

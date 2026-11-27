@@ -73,6 +73,9 @@ export default {
   'climbing_renderer.via_ferrata_scale': '铁索栈道难度',
   'climbing_renderer.sac_scale': 'SAC 登山难度',
   'climbing.photos': '照片',
+  'stats.photos': '张照片',
+  'stats.drawn_routes': '已绘制路线',
+  'climbingareas.stat_drawn': '已绘制',
 
   'project.osmapp.description': '一个通用的 OpenStreetMap 应用',
   'project.osmapp.serpDescription': '一个基于 OpenStreetMap 数据库的开源世界地图。支持搜索、兴趣点点击、应用内地图编辑等功能！',

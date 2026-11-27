@@ -14,6 +14,7 @@ export type ClimbingArea = {
   cragCount: number;
   routeCount: number;
   routesWithPhoto: number;
+  photosCount: number;
   lon: number;
   lat: number;
   viaFerrataScale?: string | null;
@@ -157,6 +158,82 @@ const resolveCity = (
   return null;
 };
 
+const isCommonsPhotoKey = (key: string) =>
+  /^wikimedia_commons(\d*|:(?!path).*)$/.test(key);
+
+type RelationRef = {
+  type: string;
+  osmId: number;
+  parentId: number | null;
+};
+
+type PhotoRow = RelationRef & { tags: string };
+
+// Unique Commons files of an area and of the crags and routes under it.
+// The same file is stored on every drawn route, so it is counted once.
+const photosCountByArea = (): Map<number, number> => {
+  const db = getDb();
+  const relations = db
+    .prepare<[], RelationRef>(
+      `SELECT type, "osmId" AS osmId, "parentId" AS parentId
+       FROM climbing_features WHERE "osmType" = 'relation'`,
+    )
+    .all();
+  const relationsById = new Map(relations.map((row) => [row.osmId, row]));
+
+  const areaIdOf = (parentId: number | null): number | null => {
+    let current = parentId ? relationsById.get(parentId) : undefined;
+    const visited = new Set<number>();
+    while (current && !visited.has(current.osmId)) {
+      visited.add(current.osmId);
+      if (current.type === 'area') return current.osmId;
+      current = current.parentId
+        ? relationsById.get(current.parentId)
+        : undefined;
+    }
+    return null;
+  };
+
+  const rows = db
+    .prepare<[], PhotoRow>(
+      `SELECT type, "osmId" AS osmId, "parentId" AS parentId, tags
+       FROM climbing_features
+       WHERE type IN ('area', 'crag', 'route', 'route_top')
+         AND tags LIKE '%"wikimedia_commons%'
+         AND json_valid(tags)`,
+    )
+    .all();
+
+  const filesByArea = new Map<number, Set<string>>();
+  for (const row of rows) {
+    const areaId = row.type === 'area' ? row.osmId : areaIdOf(row.parentId);
+    if (areaId == null) continue;
+
+    let tags: Record<string, unknown>;
+    try {
+      tags = JSON.parse(row.tags);
+    } catch {
+      continue;
+    }
+
+    const files = filesByArea.get(areaId) ?? new Set<string>();
+    for (const [key, value] of Object.entries(tags)) {
+      if (
+        typeof value === 'string' &&
+        value.startsWith('File:') &&
+        isCommonsPhotoKey(key)
+      ) {
+        files.add(value);
+      }
+    }
+    if (files.size) filesByArea.set(areaId, files);
+  }
+
+  return new Map(
+    [...filesByArea].map(([areaId, files]) => [areaId, files.size]),
+  );
+};
+
 const LIST_SQL: Record<ClimbingListType, string> = {
   rock: `type = 'area' AND "osmType" = 'relation'`,
   ferrata: `type = 'ferrata' AND "nameRaw" IS NOT NULL AND "nameRaw" != ''`,
@@ -181,6 +258,7 @@ export const getClimbingAreas = (
   const ferrataScales =
     type === 'ferrata' ? collectFerrataScales(rows) : undefined;
   const gymCities = type === 'gym' ? collectCities(rows) : undefined;
+  const photoCounts = type === 'rock' ? photosCountByArea() : undefined;
 
   return listRows.map((row) => ({
     osmType: row.osmType,
@@ -190,6 +268,7 @@ export const getClimbingAreas = (
     cragCount: membersLength(row.members),
     routeCount: row.routeCount ?? 0,
     routesWithPhoto: row.routesWithPhoto ?? 0,
+    photosCount: photoCounts?.get(row.osmId) ?? 0,
     lon: row.lon,
     lat: row.lat,
     viaFerrataScale: ferrataScales

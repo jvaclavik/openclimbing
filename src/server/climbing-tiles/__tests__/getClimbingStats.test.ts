@@ -17,6 +17,7 @@ type SeedRow = {
   routesWithPhoto?: number;
   hasImages?: number;
   members?: unknown[] | null;
+  tags?: Record<string, string> | null;
 };
 
 const buildDummyDb = (rows: SeedRow[]): Database => {
@@ -30,10 +31,10 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
   const insert = db.prepare(`
     INSERT INTO climbing_features
       (type, lon, lat, "osmType", "osmId", "nameRaw", "countryCode",
-       "routesWithPhoto", "hasImages", members)
+       "routesWithPhoto", "hasImages", members, tags)
     VALUES
       (@type, @lon, @lat, @osmType, @osmId, @nameRaw, @countryCode,
-       @routesWithPhoto, @hasImages, @members)
+       @routesWithPhoto, @hasImages, @members, @tags)
   `);
   for (const row of rows) {
     insert.run({
@@ -47,6 +48,7 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
       routesWithPhoto: row.routesWithPhoto ?? null,
       hasImages: row.hasImages ?? 0,
       members: row.members ? JSON.stringify(row.members) : null,
+      tags: row.tags ? JSON.stringify(row.tags) : null,
     });
   }
 
@@ -87,6 +89,24 @@ describe('getClimbingStats', () => {
         nameRaw: 'Slunecni',
         countryCode: 'cz',
         routesWithPhoto: 5,
+        tags: {
+          wikimedia_commons: 'File:Slunecni.jpg',
+          'wikimedia_commons:2': 'File:Slunecni-2.jpg',
+          'wikimedia_commons:path': '0.1,0.2|0.3,0.4',
+        },
+      },
+      {
+        type: 'route',
+        osmType: 'relation',
+        osmId: 21,
+        lon: 14,
+        lat: 50,
+        nameRaw: 'Slunecni route',
+        tags: {
+          wikimedia_commons: 'File:Slunecni.jpg',
+          'wikimedia_commons:path': '0.1,0.2|0.3,0.4',
+          wikimedia_commons3: 'File:Slunecni-3.jpg',
+        },
       },
       {
         type: 'ferrata',
@@ -168,6 +188,7 @@ describe('getClimbingStats', () => {
         lat: 48,
         nameRaw: 'Boulder Bar',
         countryCode: 'at',
+        tags: { wikimedia_commons: 'File:Gym.jpg' },
       },
     ]);
 
@@ -177,6 +198,7 @@ describe('getClimbingStats', () => {
     expect(stats.countriesCount).toBe(1);
     expect(stats.routesCount).toBe(42);
     expect(stats.routesWithPhotoCount).toBe(5);
+    expect(stats.photosCount).toBe(3);
     expect(stats.ferratasCount).toBe(2);
     expect(stats.ferratasCountriesCount).toBe(2);
     expect(stats.gymsCount).toBe(2);
