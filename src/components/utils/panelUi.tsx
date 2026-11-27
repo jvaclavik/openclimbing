@@ -147,8 +147,11 @@ const STAT_ITEMS: Record<
   rock: [
     { getValue: (stats) => stats?.areasCount, label: 'stats.areas' },
     { getValue: (stats) => stats?.routesCount, label: 'stats.routes' },
-    { getValue: (stats) => stats?.routesWithPhotoCount, label: 'stats.photos' },
-    { getValue: (stats) => stats?.countriesCount, label: 'stats.countries' },
+    { getValue: (stats) => stats?.photosCount, label: 'stats.photos' },
+    {
+      getValue: (stats) => stats?.routesWithPhotoCount,
+      label: 'stats.drawn_routes',
+    },
   ],
   ferrata: [
     { getValue: (stats) => stats?.ferratasCount, label: 'stats.ferratas' },

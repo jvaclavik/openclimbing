@@ -241,6 +241,9 @@ export default {
   'climbing_renderer.via_ferrata_scale': 'Klettersteigskala',
   'climbing_renderer.sac_scale': 'SAC-Skala',
   'climbing.photos': 'Fotos',
+  'stats.photos': 'Fotos',
+  'stats.drawn_routes': 'eingezeichnete Routen',
+  'climbingareas.stat_drawn': 'eingezeichnet',
   'project.osmapp.description': 'Eine universelle App für OpenStreetMap',
   'project.osmapp.serpDescription':
     'Eine Open-Source-Weltkarte basierend auf der OpenStreetMap-Datenbank. Verfügt über eine Suchfunktion, anklickbare Points of Interest, In-App-Kartenbearbeitungen und mehr!',

@@ -141,4 +141,8 @@ export default {
   'add_new_crag.banner_text': 'ምልክቱን ወደ ቋጥኙ ቦታ ያንቀሳቅሱ፣ መንገዶች በሚቀጥለው ደረጃ ሊጨመሩ ይችላሉ።',
   'add_new_crag.continue_button': 'ቀጥል',
   'add_new_crag.zoom_in': 'እባክዎ ቋጥኝ ለማስቀመጥ ካርታውን አቅርቡ።',
+
+  'stats.photos': 'ፎቶዎች',
+  'stats.drawn_routes': 'የተሳሉ መንገዶች',
+  'climbingareas.stat_drawn': 'የተሳሉ',
 };

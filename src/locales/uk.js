@@ -240,6 +240,9 @@ export default {
   'climbing_renderer.via_ferrata_scale': 'шкала via ferrata',
   'climbing_renderer.sac_scale': 'шкала SAC',
   'climbing.photos': 'Фото',
+  'stats.photos': 'фото',
+  'stats.drawn_routes': 'намальованих маршрутів',
+  'climbingareas.stat_drawn': 'намальовані',
   'project.osmapp.description': 'Універсальний застосунок для OpenStreetMap',
   'project.osmapp.serpDescription':
     'Карта світу з відкритим кодом на основі бази даних OpenStreetMap. Має пошук, інтерактивні точки інтересу, редагування карти в застосунку та багато іншого!',

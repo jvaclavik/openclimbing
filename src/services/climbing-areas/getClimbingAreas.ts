@@ -26,7 +26,7 @@ const getFromApi = async (
   listType: ClimbingListType,
 ): Promise<ClimbingArea[]> =>
   fetchJson<ClimbingArea[]>(
-    `${CLIMBING_TILES_HOST}api/climbing-tiles/areas?type=${listType}`,
+    `${CLIMBING_TILES_HOST}api/climbing-tiles/areas?type=${listType}&v=2`,
   );
 
 export const getClimbingAreas = async (

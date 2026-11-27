@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import Router, { useRouter } from 'next/router';
+import styled from '@emotion/styled';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
   AccordionDetails,
@@ -14,16 +14,36 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Link from 'next/link';
+import Router, { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
+import type { ClimbingListType } from '../../services/climbing-areas/climbingListTypes';
 import {
   ClimbingArea,
   getClimbingAreas,
 } from '../../services/climbing-areas/getClimbingAreas';
-import type { ClimbingListType } from '../../services/climbing-areas/climbingListTypes';
+import { getClimbingGallery } from '../../services/climbing-areas/getClimbingGallery';
+import { getCountryFlag, getCountryName } from '../../services/getCountryFlag';
 import { intl, t } from '../../services/intl';
-import { ClimbingListTypeTabs } from './ClimbingListTypeTabs';
+import { Feature, TranslationId } from '../../services/types';
+import { PhotoCoverageRing } from '../FeaturePanel/Climbing/PhotoCoverageRing';
+import { useMobileMode } from '../helpers';
+import { ClosePanelButton } from '../utils/ClosePanelButton';
+import { useFeatureContext } from '../utils/FeatureContext';
+import { Bbox, useMapStateContext } from '../utils/MapStateContext';
+import { MobilePageDrawer } from '../utils/MobilePageDrawer';
+import {
+  PanelContent,
+  PanelScrollbars,
+  PanelSidePadding,
+} from '../utils/PanelHelpers';
+import { formatCount, tint } from '../utils/panelUi';
+import {
+  CommonsProgressiveImage,
+  ProgressiveImageWrapper,
+} from '../utils/ProgressiveImage';
+import { ViaFerrataScaleChip } from '../utils/ViaFerrataScaleChip';
 import { ClimbingAreasFilter } from './ClimbingAreasFilter';
 import {
   ClimbingAreasSort,
@@ -31,28 +51,8 @@ import {
   POI_SORT_OPTIONS,
   ROCK_SORT_OPTIONS,
 } from './ClimbingAreasSort';
+import { ClimbingListTypeTabs } from './ClimbingListTypeTabs';
 import { useClimbingListFilterSync } from './useClimbingListFilterSync';
-import { ClosePanelButton } from '../utils/ClosePanelButton';
-import { MobilePageDrawer } from '../utils/MobilePageDrawer';
-import {
-  PanelContent,
-  PanelScrollbars,
-  PanelSidePadding,
-} from '../utils/PanelHelpers';
-import { Feature, TranslationId } from '../../services/types';
-import { getCountryFlag, getCountryName } from '../../services/getCountryFlag';
-import { PhotoCoverageRing } from '../FeaturePanel/Climbing/PhotoCoverageRing';
-import { useFeatureContext } from '../utils/FeatureContext';
-import { useMobileMode } from '../helpers';
-import { Bbox, useMapStateContext } from '../utils/MapStateContext';
-import { getClimbingGallery } from '../../services/climbing-areas/getClimbingGallery';
-import {
-  CommonsProgressiveImage,
-  ProgressiveImageWrapper,
-} from '../utils/ProgressiveImage';
-import { tint } from '../utils/panelUi';
-import { ViaFerrataScaleChip } from '../utils/ViaFerrataScaleChip';
-import styled from '@emotion/styled';
 
 type ClimbingAreasPanelProps = {
   items?: ClimbingArea[] | null;
@@ -116,6 +116,7 @@ type CountryGroup = {
   cragCount: number;
   routeCount: number;
   routesWithPhoto: number;
+  photosCount: number;
 };
 
 type SortableItem = {
@@ -189,6 +190,7 @@ const groupByCountry = (
     cragCount: list.reduce((sum, area) => sum + area.cragCount, 0),
     routeCount: list.reduce((sum, area) => sum + area.routeCount, 0),
     routesWithPhoto: list.reduce((sum, area) => sum + area.routesWithPhoto, 0),
+    photosCount: list.reduce((sum, area) => sum + (area.photosCount ?? 0), 0),
   }));
 
   return groups.sort(comparator);
@@ -222,6 +224,57 @@ const useAreaPhotos = () => {
   );
 };
 
+const ROCK_STAT_COLUMNS: {
+  label: TranslationId;
+  get: (group: CountryGroup) => number;
+}[] = [
+  { label: 'climbingareas.stat_areas', get: (group) => group.areas.length },
+  { label: 'climbingareas.stat_crags', get: (group) => group.cragCount },
+  { label: 'stats.routes', get: (group) => group.routeCount },
+  { label: 'stats.photos', get: (group) => group.photosCount },
+  { label: 'climbingareas.stat_drawn', get: (group) => group.routesWithPhoto },
+];
+
+const CountryKpis = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 8px -10px 0;
+  padding: 7px 0;
+  border-radius: 10px;
+  background: ${({ theme }) => tint(theme, 0.045)};
+`;
+
+const CountryKpi = styled.div`
+  min-width: 0;
+  padding: 0 8px;
+
+  &:first-of-type {
+    padding-left: 10px;
+  }
+
+  & + & {
+    border-left: 1px solid ${({ theme }) => tint(theme, 0.12)};
+  }
+`;
+
+const CountryKpiValue = styled.div`
+  font-family: ${({ theme }) => theme.typography.h1.fontFamily};
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: ${({ theme }) => theme.palette.text.primary};
+`;
+
+const CountryKpiLabel = styled.div`
+  margin-top: 1px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 10.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+`;
+
 const AreaThumb = ({ photo, name }: { photo?: string; name: string }) => (
   <Thumb>
     {photo && (
@@ -241,7 +294,7 @@ const CountryAccordion = ({
   backTarget: string;
   listType: ClimbingListType;
 }) => {
-  const { countryCode, name: countryName, areas, cragCount } = group;
+  const { countryCode, name: countryName, areas } = group;
   const { setPreview } = useFeatureContext();
   const mobileMode = useMobileMode();
   const photos = useAreaPhotos();
@@ -257,63 +310,115 @@ const CountryAccordion = ({
       defaultExpanded={defaultExpanded}
       disableGutters
       slotProps={{ transition: { timeout: 120 } }}
+      sx={{
+        mb: 1.5,
+        '&:last-of-type': { mb: 0 },
+        '&::before': { display: 'none' },
+      }}
     >
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            gap: 1,
-          }}
-        >
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        sx={{
+          position: 'relative',
+          px: 2,
+          '& .MuiAccordionSummary-content, & .MuiAccordionSummary-content.Mui-expanded':
+            {
+              my: 1.25,
+              mr: 0,
+              minWidth: 0,
+            },
+          ...(isRock && {
+            '& .MuiAccordionSummary-expandIconWrapper': {
+              position: 'absolute',
+              top: 10,
+              right: 8,
+            },
+          }),
+        }}
+      >
+        {isRock ? (
+          <Box sx={{ width: '100%', minWidth: 0 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minWidth: 0,
+                pr: 3.5,
+              }}
+            >
+              <span style={{ fontSize: '1.35em', lineHeight: 1 }}>
+                {getCountryFlag(countryCode) || '🏳️'}
+              </span>
+              <Typography
+                noWrap
+                sx={{
+                  fontWeight: 700,
+                  fontSize: 15,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {countryName}
+              </Typography>
+            </Box>
+            <CountryKpis>
+              {ROCK_STAT_COLUMNS.map((column, index) =>
+                column.get(group) > 0 ? (
+                  <CountryKpi
+                    key={column.label}
+                    style={{ gridColumn: index + 1 }}
+                  >
+                    <CountryKpiValue>
+                      {formatCount(column.get(group))}
+                    </CountryKpiValue>
+                    <CountryKpiLabel>{t(column.label)}</CountryKpiLabel>
+                  </CountryKpi>
+                ) : null,
+              )}
+            </CountryKpis>
+          </Box>
+        ) : (
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
               gap: 1,
+              width: '100%',
               minWidth: 0,
             }}
           >
-            <span style={{ fontSize: '1.3em' }}>
-              {getCountryFlag(countryCode) || '🏳️'}
-            </span>
-            <Typography
-              noWrap
+            <Box
               sx={{
-                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minWidth: 0,
               }}
             >
-              {countryName}
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              textAlign: 'right',
-              flexShrink: 0,
-            }}
-          >
+              <span style={{ fontSize: '1.3em', lineHeight: 1.15 }}>
+                {getCountryFlag(countryCode) || '🏳️'}
+              </span>
+              <Typography
+                noWrap
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                {countryName}
+              </Typography>
+            </Box>
             <Typography
               variant="body2"
               sx={{
+                flexShrink: 0,
                 fontWeight: 600,
               }}
             >
-              {t(copy.count, { count: areas.length })}
+              {t(copy.count, { count: formatCount(areas.length) })}
             </Typography>
-            {isRock && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
-                {t('climbingareas.crags_count', { count: cragCount })}
-              </Typography>
-            )}
           </Box>
-        </Box>
+        )}
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0 }}>
         <Table size="small">

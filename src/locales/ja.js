@@ -299,4 +299,8 @@ OsmAPP マップおよびその他のアプリケーションは、月に 1 回�
   'add_new_crag.banner_text': 'マーカーを岩場の場所に移動してください。ルートは次のステップで追加できます。',
   'add_new_crag.continue_button': '続ける',
   'add_new_crag.zoom_in': '岩場を追加するには、ズームインしてください。',
+
+  'stats.photos': '写真',
+  'stats.drawn_routes': '描かれたルート',
+  'climbingareas.stat_drawn': '描画',
 };

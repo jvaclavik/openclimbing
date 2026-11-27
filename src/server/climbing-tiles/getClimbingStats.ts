@@ -23,6 +23,27 @@ type NamedPoiRow = {
 
 const NAMED = `"nameRaw" IS NOT NULL AND "nameRaw" != ''`;
 
+// Distinct Commons files on areas, crags and routes. The same file is repeated
+// on every route drawn on it, so occurrences must not be summed.
+const getPhotosCount = (): number => {
+  const row = getDb()
+    .prepare<[], { photosCount: number }>(
+      `SELECT COUNT(DISTINCT je.value) AS photosCount
+       FROM (
+         SELECT tags FROM climbing_features
+         WHERE type IN ('area', 'crag', 'route', 'route_top')
+           AND tags LIKE '%"wikimedia_commons%'
+           AND json_valid(tags)
+       ) cf, json_each(cf.tags) je
+       WHERE je.key LIKE 'wikimedia_commons%'
+         AND je.key NOT LIKE '%:path%'
+         AND je.value LIKE 'File:%'`,
+    )
+    .get();
+
+  return row?.photosCount ?? 0;
+};
+
 const getListablePoiAggregate = (type: 'ferrata' | 'gym') => {
   const rows = getDb()
     .prepare<[string], NamedPoiRow>(
@@ -106,5 +127,6 @@ export const getClimbingStats = (): ClimbingStatsResponse => {
     groupsWithNameCount: groups_with_name_count,
     routesCount: routes_count,
     ...getFeatureAggregate(),
+    photosCount: getPhotosCount(),
   };
 };

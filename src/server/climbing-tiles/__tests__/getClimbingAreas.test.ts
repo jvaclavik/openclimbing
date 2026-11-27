@@ -17,6 +17,7 @@ type SeedRow = {
   tags?: Record<string, string> | null;
   countryCode?: string | null;
   routeCount?: number;
+  parentId?: number | null;
 };
 
 const AREA: SeedRow = {
@@ -112,6 +113,43 @@ const GYM_RELATION: SeedRow = {
   members: [{ type: 'way', ref: 21 }],
   countryCode: 'at',
 };
+const AREA_CRAG: SeedRow = {
+  type: 'crag',
+  osmType: 'relation',
+  osmId: 50,
+  lon: 14,
+  lat: 50,
+  nameRaw: 'Sektor',
+  parentId: 1,
+  tags: {
+    wikimedia_commons: 'File:A.jpg',
+    'wikimedia_commons:2': 'File:B.jpg',
+    'wikimedia_commons:path': '0.1,0.2|0.3,0.4',
+  },
+};
+const AREA_ROUTE: SeedRow = {
+  type: 'route',
+  osmType: 'relation',
+  osmId: 51,
+  lon: 14,
+  lat: 50,
+  nameRaw: 'Cesta',
+  parentId: 50,
+  tags: {
+    wikimedia_commons: 'File:A.jpg',
+    'wikimedia_commons:2': 'File:C.jpg',
+  },
+};
+const ORPHAN_ROUTE: SeedRow = {
+  type: 'route',
+  osmType: 'way',
+  osmId: 52,
+  lon: 14,
+  lat: 50,
+  nameRaw: 'Mimo oblast',
+  parentId: 999,
+  tags: { wikimedia_commons: 'File:Nope.jpg' },
+};
 const GYM_RELATION_WAY: SeedRow = {
   type: 'gym',
   osmType: 'way',
@@ -133,9 +171,9 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
 
   const insert = db.prepare(`
     INSERT INTO climbing_features
-      (type, lon, lat, "osmType", "osmId", "nameRaw", members, tags, "countryCode", "routeCount")
+      (type, lon, lat, "osmType", "osmId", "nameRaw", members, tags, "countryCode", "routeCount", "parentId")
     VALUES
-      (@type, @lon, @lat, @osmType, @osmId, @nameRaw, @members, @tags, @countryCode, @routeCount)
+      (@type, @lon, @lat, @osmType, @osmId, @nameRaw, @members, @tags, @countryCode, @routeCount, @parentId)
   `);
   for (const r of rows) {
     insert.run({
@@ -151,6 +189,7 @@ const buildDummyDb = (rows: SeedRow[]): Database => {
       tags: r.tags ? JSON.stringify(r.tags) : null,
       countryCode: r.countryCode ?? null,
       routeCount: r.routeCount ?? null,
+      parentId: r.parentId ?? null,
     });
   }
   return db;
@@ -160,6 +199,9 @@ describe('getClimbingAreas', () => {
   beforeEach(() => {
     mockDb = buildDummyDb([
       AREA,
+      AREA_CRAG,
+      AREA_ROUTE,
+      ORPHAN_ROUTE,
       FERRATA,
       FERRATA_RELATION,
       FERRATA_RELATION_WAY,
@@ -184,6 +226,7 @@ describe('getClimbingAreas', () => {
         name: 'Adrspach',
         cragCount: 2,
         routeCount: 12,
+        photosCount: 3,
       }),
     ]);
   });
